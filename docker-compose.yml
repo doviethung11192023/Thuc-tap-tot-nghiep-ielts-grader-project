@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006/v1/traces
+      # - SUPABASE_URL=...
+      # - SUPABASE_KEY=...
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - phoenix
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"   # Web UI + OTLP HTTP
+      - "4317:4317"   # OTLP gRPC
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+
+volumes:
+  phoenix_data:
+    driver: local

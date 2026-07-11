@@ -1,0 +1,29 @@
+# ==========================================
+# CẤU HÌNH GITIGNORE CHO TOÀN BỘ PROJECT ROOT
+# ==========================================
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs and Editors (VSCode, IntelliJ, etc)
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-workspace
+*.sublime-project
+.history/
+
+# General Logs
+logs/
+*.log

@@ -1,0 +1,66 @@
+# ==========================================
+# GITIGNORE CHO BACKEND (FASTAPI + AI)
+# ==========================================
+
+# Môi trường ảo (Virtual Environments)
+venv/
+.venv/
+env/
+.env_dir/
+ENV/
+env.bak/
+venv.bak/
+
+# Biến môi trường & API Keys (BẢO MẬT TUYỆT ĐỐI)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+
+# Cache & Files được tối ưu hóa (Byte-compiled)
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Data & AI Models (LangChain, LangGraph, OpenInference)
+*.sqlite3
+*.db
+models/
+datasets/
+data/
+chroma_db/
+vector_store/
+*.pkl
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# Testing & Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Distribution / Packaging
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+*.egg-info/
+.installed.cfg
+*.egg
