@@ -1,0 +1,252 @@
+{
+    "system_role": "IELTS_Task2_FewShot_Library",
+    "version": "3.0",
+    "source_dataset": "ielts_writing_dataset.csv",
+    "fields_used": [
+        "Task_Type",
+        "Question",
+        "Essay",
+        "Overall"
+    ],
+    "purpose": "Calibration examples for AI scoring. Each example is taken directly from the dataset with only the fields available: task_type, question, essay, overall_band. Scoring rationale is inferred from observable textual features. Use these examples to anchor scoring decisions and prevent grade inflation or deflation.",
+    "usage_note": "Match the student essay against the nearest band example before assigning a score. Pay attention to the distinguishing_features list — these are the observable signals that justify the band, not invented sub-scores.",
+    "band_scale": {
+        "min": 4.0,
+        "max": 9.0,
+        "step": 0.5,
+        "note": "IELTS Task 2 Overall band reflects holistic assessment across Task Response, Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy."
+    },
+    "examples": [
+        {
+            "band": 4.0,
+            "task_type": 2,
+            "question": "Write about the following topic. Some people believe that it is good to share as much information as possible in scientific research, business and the academic world. Others believe that some information is too important or too valuable to be shared freely. Discuss both these views and give your own opinion.",
+            "essay": "The modern technology enable the spread of the information around the world, which contribute vast benefits in variaty fields, professional aspect included. However, the scepticles hold a persisimistic view about this, claiming that if this information will fall in wrong hands, it would be catastrophic. In my opinion, sharing of information is very beneficial, as long as it's monitored.\nAlthough sharing information comes with its perks, there is certain type of information that should not be shared with the general public for the safety and security of the public. For example, medical information should only be shared within the medical circles. If anyone comes across to the medical information about other people it can be used in a manner to harm people. So, it's better to not share such information.\nThere is a certain type of information, specially in field like science which should be shared. If scientist start hiding information and don't share it with others, the scientific process will not be able to move forward. Scientist should share information and be transparent about their research, so other scientists can build on this research. This way science can move forward and bring benefits to the world.\nTo conclude with, in all professional fields, information should be shared with caution. Information that can jeopardize public safety and security should not be shared. However, information which is less sensitive should be shared among professional circles so as to bring about benefits.",
+            "distinguishing_features": [
+                "Addresses the task but with limited development; position stated but under-supported",
+                "Vocabulary errors throughout: 'scepticles', 'persisimistic', 'variaty' — frequent spelling mistakes",
+                "Grammar: subject-verb agreement errors ('technology enable', 'scientist start hiding'), basic clause structures",
+                "Coherence: ideas grouped by paragraph but transitions are formulaic ('However', 'To conclude with')",
+                "Paragraphing present but body paragraphs lack depth — single example per point",
+                "Overall impression: communicates basic ideas but errors impede communication at multiple points"
+            ],
+            "scoring_rationale": "Band 4 essays attempt the task but show frequent and distracting errors in vocabulary and grammar. The message is partially conveyed but the reader must work to understand. Limited range of structures and vocabulary throughout."
+        },
+        {
+            "band": 4.5,
+            "task_type": 2,
+            "question": "Write about the following topic. To meet the growing need for food to support an increasing population, a country should try to produce all the food it needs and import as little food as possible. To what extent do you agree or disagree?",
+            "essay": "Nowadays, populations are growing all over the world, and increasing the source of food is becoming more important and also being challenging nowadays. One of the most important matters nowadays is eating, and most of the countries are focusing on establishing agriculture programs to increase food production. I believe that a country should not focus on only produce the food and should import food as well, as it is a combination of both that can solve the issues.\nFirstly, a country should try to produce food by themselves as much as possible as it would support both the farmers and local communities, in sense that it would provide much needed income for the farmers and also create more jobs within the community. Furthermore, food production takes time and investing in local production can provide long term solutions such as more job opportunities, more stable prices, and more food security as the country would not have to worry about other countries restricting their exports.\nNevertheless, importing food from other countries is also necessary to fulfil the demand of the growing population. Some countries may not have the resources to produce all the needed food domestically, or they may not be best suited to grow certain crops because of difference in climate, soil and other factors.\nIn conclusion, I believe that both producing and importing food is equally important. Countries need to import food items that are hard to produce due to climate and geography, and produce what they can to ensure a good economy, food security, and enough food to feed their people.",
+            "distinguishing_features": [
+                "Task addressed adequately but position is not fully consistent — hedged throughout",
+                "Repetition of 'nowadays' in the introduction signals limited lexical range",
+                "Grammar: 'should not focus on only produce' (missing infinitive structure); 'it would support both the farmers' (minor article issue)",
+                "Coherence: ideas logically ordered but connectors are basic ('Firstly', 'Nevertheless', 'In conclusion')",
+                "Paragraphing: 4 paragraphs present with some development, but examples are vague and generic",
+                "Overall: readable but lacks the precision and range of vocabulary/grammar to score above 5"
+            ],
+            "scoring_rationale": "Band 4.5 essays communicate adequately at sentence level but show consistent limitations in lexical and grammatical range. Ideas are present but underdeveloped, and errors are frequent enough to reduce clarity."
+        },
+        {
+            "band": 5.0,
+            "task_type": 2,
+            "question": "The best way to teach children to cooperate is through team sports at school. To what extent do you agree or disagree?",
+            "essay": "There's an opinion around the ideal way to encourage and teach youngesters how to develop cooperetion skills and that is through team sports at educational facilities. I completly agree with that opinion as i believe that team sport activities are the best way to teach children cooperetion.\nTeam sports are one of the best activities for people to communicate and cooperate with each other. For one thing, members in a team sport need to commuincate and talk with each other to win a game. For example, in football, players need to tell each other their plans and their opinions in how to score and defend goals. This is one of the best examples of the importance of communication in team sports.\nFurthermore, in team sports activities, people also need to cooperate with each other. In team sport like football, players need to cooperate with each other to have a teamwork. In football, every players in the team need to cooperate with each other in their field to score goals and defend. This shows the importance of cooperation in team sports.\nIn conclusion, i strongly believe that the best way to teach youngesters and children in cooperating is through team sport activities in schools and educational facilities.",
+            "distinguishing_features": [
+                "Fully agrees with the statement but lacks counter-argument consideration",
+                "Spelling errors: 'youngesters', 'cooperetion', 'completly', 'commuincate' — consistent pattern",
+                "Grammar: 'every players in the team need' (subject-verb agreement); lowercase 'i'",
+                "Significant repetition: 'football' and 'cooperate' appear excessively; paragraphs 2 and 3 largely repeat the same idea",
+                "Coherence: basic paragraph structure but paragraph 3 barely extends paragraph 2",
+                "Vocabulary: limited range — same words recycled throughout; no academic vocabulary"
+            ],
+            "scoring_rationale": "Band 5 essays address the task but with noticeable repetition and limited development. Vocabulary and grammatical errors are frequent. There is an attempt at structure but ideas are recycled rather than developed."
+        },
+        {
+            "band": 5.5,
+            "task_type": 2,
+            "question": "Rich countries often give money to poorer countries, but it does not solve poverty. Therefore, developed countries should give other types of help to the poor countries rather than financial aid. To what extent do you agree or disagree?",
+            "essay": "Human beings are facing many challenges nowadays. Poverty is always an critical topic among countries, especially the poverty in developing countries. Developed countries frequently offer financial support to poor countries but the poverty still exist. Experts are arguing that developed countries should consider other solutions to help solve the poverty issue. I believe this is a much better direction compare to money support only.\nMoney is essential to many factors like food, contruction and hospital. With money provided by developed countries, govenment can improve the inforstructure, supporting poor family with food, building more houses for the poor people, builing more schools to support children's education, which is critical for people to get out of poverty.\nBut money cannot solve everything. The poverty caused by many reasons like lacking of resource and experienced governor. None of them could be solved by simply offering money to the goverment. Besides, money could cause a bad habit to the governor, they may reply on the financial support too much. If the financial support ended someday, which could happen anytime in the current circurmestance, it will cause big trouble again.\nIn conclusion, I understand the desire to provide immediate financial support to poor countries because people are facing critical needs but I think it is better to support them with non-monetary help. This way it can create a more long-lasting impact on the society. Developed countries should provide technicians, machinery, or other forms of assistance instead, which might be more beneficial in the long run.",
+            "distinguishing_features": [
+                "Position partially clear but wavers — partly agrees, partly concedes money is needed",
+                "Spelling errors: 'contruction', 'govenment', 'inforstructure', 'builing', 'goverment', 'circurmestance', 'reply' (should be 'rely')",
+                "Grammar: 'an critical' (article error), 'the poverty still exist' (missing -s), 'The poverty caused by' (missing verb form)",
+                "Coherence: 4-paragraph structure present; logical progression but transitions underdeveloped",
+                "Vocabulary: some good words ('long-lasting', 'non-monetary') but weakened by spelling errors",
+                "Development: ideas introduced but supporting examples are vague"
+            ],
+            "scoring_rationale": "Band 5.5 essays show reasonable task coverage and some attempt at argument development, but are held back by frequent spelling and grammar errors. A clear position exists but is not sustained with precision. Vocabulary range is limited."
+        },
+        {
+            "band": 6.0,
+            "task_type": 2,
+            "question": "Some countries achieve international sports by building specialised facilities to train top athletes, instead of providing sports facilities that everyone can use. Do you think this is positive or negative development?",
+            "essay": "It is often argued that some countries invist in devolping highly specialised training centers to train its top athletes to achieve international sports, instead of facilitate and provide public training facilities. In this essay, I will discuss and make argument whether this could be a positive or negative development.\nOn one hand, building specialised facilities to train professional athletes could be a very positive development. Building specialised facilities would allow professional athletes to train in the best conditions which is not possible otherwise. These centers could be equipped with the latest technology, which is deemed necessary to train athletes who may compete in the world stage. For example, WADA, the world anti-doping agency, requires certain testing equipments in the training facilities of athletes who compete internationally.\nOn the other hand, these specialised facilities could prevent ordinary people from enjoying sports, which may be considered a negative development. This could be a problem especially in countries which are poor and developing. These countries do not have many sports facilities. Instead of spending money on public training grounds, they are spending it on a few top athletes, which is not fair for the general public.\nIn conclusion, I believe that the development of specialised training facilities is a mixed development. Rich countries have a responsibility to provide good public facilities and can still invest in specialised training centers for top athletes. But, poorer countries should prioritise public sports facilities.",
+            "distinguishing_features": [
+                "Task addressed with a clear discussion of both sides and a final position",
+                "Some spelling errors: 'invist', 'devolping' — fewer than Band 5 range but still present",
+                "Grammar: 'to facilitate and provide' (parallel structure partially correct); 'testing equipments' (uncountable noun error)",
+                "Coherence: clear 4-paragraph structure with topic sentences; logical progression",
+                "Vocabulary: 'deemed necessary', 'world stage', 'prioritise' — some good word choices",
+                "WADA example is specific and relevant — adds credibility to argument",
+                "Conclusion introduces a new distinction (rich vs poor countries) not fully developed in body"
+            ],
+            "scoring_rationale": "Band 6 essays present a clear response to the task with relevant ideas and some development. Vocabulary shows range but errors remain. Coherence is adequate with logical paragraphing. Grammar includes both accurate and inaccurate structures."
+        },
+        {
+            "band": 6.5,
+            "task_type": 2,
+            "question": "Rich countries often give money to poorer countries, but it does not solve poverty. Therefore, developed countries should give other types of help to the poor countries rather than financial aid. To what extent do you agree or disagree?",
+            "essay": "Poverty represents a worldwide crisis. It is the ugliest epidemic in a region, which could infect countries in the most debilitating ways. To tackle this issue, rich countries need to help those in need and give a hand when possible. I agree that there are several ways of aiding poor countries other than financial aid, like providing countries in need with engineers, workers, and soldiers who would build infrastructure. Building universities, hospitals, and roadways. By having a solid infrastructure, poor countries would be able to monetise their profits and build a stronger and more profitable economy which would help them in the long term. Once unprivilged countries find their niche, the major hurdle would be passed and would definitely pave the way for much brighter future. However, I do disagree that financial aid does not solve poverty, it does if used properly and efficiently. The most determining factor if financial aid would be the way to go, is by identifying what type of poor countries' representative are dealing with. Some countries will have a responsible leader and some will not, with that being said, implementing a strategy, to distinguish responsible leaders from others, would tailor the type of aid rich countries could use. An example, A clear report and constant observation would be applied to track the progress and how this type of aid is being monetized. In summary, types of aid varies from country to another, and tailoring the type of aid is of paramount importance to solve this problem that had huge toll on poor countries.",
+            "distinguishing_features": [
+                "Clear position stated in introduction with a nuanced partial agreement — shows critical thinking",
+                "Vocabulary: 'debilitating', 'monetise', 'paramount importance', 'pave the way' — varied and mostly accurate",
+                "Grammar: 'Building universities, hospitals, and roadways' — minor sentence fragment; generally controlled",
+                "Coherence: essay is single paragraph in body — lacks clear paragraph separation, which limits the CC score",
+                "Ideas are developed with reasoning but the structure is dense and hard to follow",
+                "Good example of 'distinguishing responsible leaders' adds specificity"
+            ],
+            "scoring_rationale": "Band 6.5 essays show good vocabulary range and clear ideas but structural issues (e.g., missing paragraph breaks, minor fragments) prevent a higher score. The argument is relevant and mostly well-developed, but coherence suffers from layout choices."
+        },
+        {
+            "band": 7.0,
+            "task_type": 2,
+            "question": "Nowadays, not enough students choose science subjects in university in many countries. What are the reasons for this problem? What are the effects on society?",
+            "essay": "It is a serious problem that there is an inadequate number of students who tend to select science as their major subject in universities in many countries. In my view, students may think that studying science is too challenging, and the effects on society could be catastrophic.\nTo begin with, one reason why students do not choose science subjects is that they think these subjects are more demanding than other subjects, such as arts or business. Another reason is that science graduates do not always earn high salaries, especially in countries where scientific research is not well-funded. Therefore, students may opt for more financially rewarding courses.\nAs for the effects, if fewer people study science, there will be a shortage of qualified professionals, such as doctors, engineers, and researchers. This could lead to slower technological progress and weaker healthcare systems. Furthermore, problems like climate change, which require scientific expertise to address, could worsen if society lacks enough scientists.\nIn conclusion, the decline in students choosing science is mainly due to its perceived difficulty and limited financial incentives. If this trend continues, society could suffer from a lack of innovation and the inability to tackle critical global challenges. Governments should therefore incentivise science education to reverse this trend.",
+            "distinguishing_features": [
+                "Directly addresses all parts of the question (reasons + effects) with a clear position",
+                "Vocabulary: 'inadequate', 'demanding', 'financially rewarding', 'incentivise' — academic and varied",
+                "Grammar: well-controlled throughout; uses conditionals ('if fewer people study...'), modals ('could lead'), and passives ('is not well-funded')",
+                "Coherence: logical 4-paragraph structure; each paragraph has a clear focus",
+                "Development: both reasons and effects paragraphs include concrete examples (doctors, engineers, climate change)",
+                "Conclusion: extends to a recommendation — shows beyond-the-question thinking"
+            ],
+            "scoring_rationale": "Band 7 essays clearly address all aspects of the task with relevant, well-developed ideas. Vocabulary is varied and mostly precise. Grammar is generally well-controlled. Coherence is clear with effective paragraphing and logical progression."
+        },
+        {
+            "band": 7.5,
+            "task_type": 2,
+            "question": "The best way to teach children to cooperate is through team sports at school. To what extent do you agree or disagree?",
+            "essay": "The ability to associate at school has been a great concern. Owing to this, some assume that the optimal way to boost children's collaborative spirit is through school team sports. In my opinion, teaming up in school sports would be problematic, and therefore, should be implemented in certain occasions, with certain individuals.\nInitially, participating in team sports would put a tremendous risk in injuries. Inevitably, physical group activities require high-speed movements, resulting in harsh collisions. Students then may lose their interest in those activities, or hesitate to attend in order to avoid any kind of damage to their body.\nAnother point to consider is that joining team sports can effortlessly breed serious competition among teammates. Therefore, at that time, the objective of cultivating cooperation would be replaced by the desire for accolades in children's mind. This consequently spells trouble for the hostile environment as the feeling of inadequacy and low sellf-esteem in students are growing.\nFinally, the best solution would be offering team sports as an optional project for students. To illustrate, a school football match can open more opportunities for those into soccer and accept to play in unity. In this case, participants may have a chance to immerse themselves in a joint effort after being thoroughly disseminated about the rules. As a result, they are still able to enjoy the game while working in a joint project.\nIn conclusion, boosting children association by teamsports may not be feasible for all of them, but operating more joint projects for those with passion and fair play is a much better approach.",
+            "distinguishing_features": [
+                "Clear position (partial disagreement) maintained throughout with a nuanced recommendation",
+                "Vocabulary: 'collaborative spirit', 'cultivating cooperation', 'accolades', 'inadequacy', 'immerse themselves' — wide range, mostly precise",
+                "Grammar: complex sentences used effectively; 'resulting in harsh collisions' (participle clause); one typo 'sellf-esteem' does not significantly impede",
+                "Coherence: well-organised with clear topic sentences and cohesive devices ('Initially', 'Another point', 'Finally')",
+                "Ideas are original — injury risk and competition replacing cooperation are non-obvious arguments",
+                "Minor issue: 'thoroughly disseminated about the rules' — slightly unnatural collocation"
+            ],
+            "scoring_rationale": "Band 7.5 essays show sophisticated ideas, wide vocabulary, and well-controlled grammar. Minor errors (typos, occasional collocational inaccuracy) prevent a Band 8. Coherence is strong with effective paragraph organisation and cohesive devices."
+        },
+        {
+            "band": 8.0,
+            "task_type": 2,
+            "question": "The best way to teach children to cooperate is through team sports at school. To what extent do you agree or disagree?",
+            "essay": "These days it is firmly believed that the most efficient method to teach children in schools how to work together is through team sports. This essay disagrees with the statement since some young students might not enjoy playing sports and because team sports can raise competitiveness amongst children, hence having a negative impact on their friendly relationships.\nFirst of all, although it is vital for a children to play sports and keep fit, not everyone is keen on football, rugby and volleyball. Instead, some young students prefer spending their leisure time on other activities such as joining a chorus group or teathre lessons. These activities can encourage cooperation and make children get along with each other, as well. On the other hand, forcing children to play something they doesn't feel comfortable in can make them withdraw from the team game, which would make them feel excluded.\nIn addition, teams sports do not always promote cooperation among players. In some cases, inequities or particularly ambitious behaviours can lead to violent competitiveness, instead. It is generally thought that sport is an extremely selective environment, in fact you need to exercise daily in order to keep fit. If obese children took part in those team sports as well, they could feel isolated because they do not own the perfect body to perform well.\nIn conclusion, although team sports are a great method to teach children how to get along with each other, there are various activities which can encourage cooperation among children, as well. Therefore, it is considerably significant for a school to embrace diversity and make children play with what they really like, instead of forcing them to do something they feel they don't belong.",
+            "distinguishing_features": [
+                "Clear thesis in introduction with two reasons stated — roadmapping",
+                "Vocabulary: 'competitiveness amongst', 'inequities', 'selective environment', 'embrace diversity' — sophisticated and varied",
+                "Grammar: 'a children' (article error), 'they doesn't feel' (agreement error), 'teathre' (typo) — minor errors that do not impede understanding",
+                "Coherence: logical progression; effective use of 'First of all', 'In addition', conclusion echoes introduction",
+                "Development: chorus/theatre example is specific and effective; obese children example is original",
+                "The errors present are minor and occasional — band 8 range means near-error-free with occasional slips"
+            ],
+            "scoring_rationale": "Band 8 essays show fluent, well-organised writing with sophisticated vocabulary and complex grammar used accurately. Minor errors occur but do not impede communication. Ideas are fully developed with specific examples. The reader is rarely impeded."
+        },
+        {
+            "band": 8.5,
+            "task_type": 2,
+            "question": "Nowadays, not enough students choose science subjects in university in many countries. What are the reasons for this problem? What are the effects on society?",
+            "essay": "There is currently a material issue that while the majority of students are eager to learn business or art in university, there are only a few students who want to study science, leading to numerous negative effects on community. With respect to this matter, there are also a wide variety of factors that influence the decision of students to not study science subjects.\nIt is undeniable that there are many reasons why undergraduates avoid studying science. A classic example of this is that science is extremely difficult to understand. In order to fully comprehend a particular scientific phenomenon, students have to learn complex theories that cause the phenomena. Therefore, they tend to choose other subjects that are easier to understand. Another common reason is a small amount of salary for working in scientific fields. When student choose subjects to study at university, they tend to enroll in an area that they could make a lot of money from having that knowledge. Since science career does not offer high remuneration, student possibly prefer to study other subjects such as business which offers higher salary instead.\nIt is true that there are many negative consequences on society of having less undergraduates studying science. One clear impact of this is the decreasing in innovation. This is because scientific comprehension is a mandatory requirement for creating an innovation. Hence, having only a few people who understand science will inevitably hold the creation of modern innovation. Furthermore, the current environmental crisis, such as an increase in global temperature, would perhaps reach a point of no return. Since the crisis relates to environment which is one of scientific aspects, having a small number of attention from students would lead to less social pressure to address this crisis properly.\nIn conclusion, it is the fact that science is complicated and people who have scientific knowledge can make less money than those who are expertise in other areas, resulting in less popularity in learning about science for university students. Moreover, with the rise in this problem, this trend possibly suspends the creation of new innovation and deteriorate the current environmental issues, which are two most crucial matters for society.",
+            "distinguishing_features": [
+                "Fully addresses both parts of the task (reasons + effects) with organised body paragraphs",
+                "Vocabulary: 'remuneration', 'mandatory requirement', 'point of no return', 'comprehension', 'deteriorate' — high-level academic register",
+                "Grammar: 'When student choose' (missing -s), 'who are expertise' (wrong word form) — very occasional errors",
+                "Coherence: clear macrostructure; 'It is undeniable', 'It is true that' — effective topic sentence patterns",
+                "Ideas: 'point of no return' for environmental crisis is a compelling argument showing extended thinking",
+                "Conclusion effectively synthesises both causes and effects"
+            ],
+            "scoring_rationale": "Band 8.5 essays are near-fluent with sophisticated vocabulary used accurately, complex grammar controlled across the essay, and ideas that are fully developed and cohesively organised. Very minor errors present but the overall quality is high and communication is clear throughout."
+        },
+        {
+            "band": 9.0,
+            "task_type": 2,
+            "question": "Some countries achieve international sports by building specialised facilities to train top athletes, instead of providing sports facilities that everyone can use. Do you think this is positive or negative development? Discuss both views and give your opinion.",
+            "essay": "International sports events require the most well-trained athletes for each country, in order to achieve this goal countries make an effort to build infrastructure designed to train top athletes. Although this policy can indeed make fewer sports facilities for ordinary people, investing in the best athletes is vital to develop competitive sports performances in each country.\nOn the one hand, building specific infrastructure for the best athletes is crucial in order to get better results at international sports events such as The Olympics or the World Cup. The importance of getting better results is that it creates awareness of the importance of sports in society and motivates more people to do a sport. In this way, investing in these developments can help countries to develop an integral sport policy that can benefit everyone.\nOn the other hand, one can argue that a negative effect could be that less infrastructure is built for the rest of the people. However, people who practice a sport in their daily life do not necessarily need some facilities to do sports. For example, people often use public spaces to do sports such as running or doing yoga at the nearest park to their home. So, for people who is not top athletes there could be some alternatives for sports facility that is not the case for training top athletes.\nTo sum up, I strongly believe countries should invest in specialised infrastructure for their best athletes because in the long term is going to generate more motivation to do sports, to invest in sports at schools and therefore to build more sports infrastructure for everyone.",
+            "distinguishing_features": [
+                "Clear position in introduction; consistent throughout the essay",
+                "Vocabulary: 'integral sport policy', 'specialised infrastructure', 'generate motivation' — natural, high-register collocations",
+                "Grammar: minimal errors; 'for people who is not top athletes' — one minor agreement error but does not impede",
+                "Coherence: logically structured; each paragraph has a topic sentence; conclusion revisits thesis without mere repetition",
+                "Argument: the counter-argument about public spaces is addressed and refuted logically — shows critical thinking",
+                "Tone: academic without being stilted; reads naturally and fluently"
+            ],
+            "scoring_rationale": "Band 9 essays are fully developed, fluent, and accurate. Ideas are presented logically and persuasively. Vocabulary is natural and precise. Grammar is error-free or near-error-free. Coherence is seamless. The reader is never impeded and the argument is fully convincing."
+        }
+    ],
+    "boundary_pairs": [
+        {
+            "description": "Band 5 vs Band 6: Same topic, different development quality",
+            "lower_band": 5.0,
+            "higher_band": 6.0,
+            "key_differentiator": "Band 6 introduces a specific external example (WADA) and maintains clearer topic sentences. Band 5 repeats the same idea across paragraphs with spelling errors. The jump from 5 to 6 requires: (1) reduction in repetition, (2) at least one specific supporting example, (3) fewer spelling errors, (4) clearer paragraph focus."
+        },
+        {
+            "description": "Band 6 vs Band 7: Organisation and vocabulary precision",
+            "lower_band": 6.0,
+            "higher_band": 7.0,
+            "key_differentiator": "Band 7 uses a wider range of complex sentence structures with fewer errors. Vocabulary is more precise and academic ('inadequate', 'incentivise'). Band 6 may have correct ideas but less precise language and occasional grammar confusion. The jump from 6 to 7 requires: (1) consistent paragraph organisation with clear topic sentences, (2) academic vocabulary used accurately, (3) complex grammar attempted and mostly correct."
+        },
+        {
+            "description": "Band 7 vs Band 8: Error frequency and sophistication",
+            "lower_band": 7.0,
+            "higher_band": 8.0,
+            "key_differentiator": "Band 8 essays use sophisticated vocabulary and complex grammar with only very occasional minor errors. The argument is compelling with original examples. Band 7 may have noticeable errors in grammar or collocations that slightly impede. The jump from 7 to 8 requires: (1) near-error-free grammar, (2) vocabulary used with precision and natural collocation, (3) ideas that go beyond the obvious, (4) fluid transitions between ideas."
+        },
+        {
+            "description": "Band 8 vs Band 9: Fluency and argument quality",
+            "lower_band": 8.0,
+            "higher_band": 9.0,
+            "key_differentiator": "Band 9 essays read as natural, expert-level academic writing. No errors impede communication. Arguments are logically airtight with effective counter-argument handling. Band 8 may have minor but noticeable grammatical slips. The jump from 8 to 9 requires: (1) essentially error-free writing, (2) sophisticated cohesive devices used naturally, (3) argument that anticipates and refutes counter-positions, (4) vocabulary that is both precise and varied without feeling forced."
+        }
+    ],
+    "scoring_anchors": {
+        "note": "These are observable text signals mapped to band ranges. Use them as quick reference during scoring.",
+        "band_4_to_4_5": {
+            "grammar": "Frequent subject-verb agreement errors; missing articles; basic clause structures only",
+            "vocabulary": "Many spelling mistakes; word choice errors that change intended meaning; very limited range",
+            "coherence": "Ideas present but poorly sequenced; repetition of the same point; paragraphing inconsistent",
+            "task": "Attempts the task but misses parts of the question or gives irrelevant content"
+        },
+        "band_5_to_5_5": {
+            "grammar": "Errors in complex sentences; simple sentences mostly correct; tense inconsistencies",
+            "vocabulary": "Spelling errors present; limited range of words; same vocabulary recycled",
+            "coherence": "Basic paragraph structure; connectors used but mechanically; ideas not fully developed",
+            "task": "Addresses the task but with limited depth; may not address all parts"
+        },
+        "band_6_to_6_5": {
+            "grammar": "Mix of accurate and inaccurate structures; attempts complex sentences; errors do not impede",
+            "vocabulary": "Some less common words used; occasional collocation errors; spelling mostly correct",
+            "coherence": "Clear organisation; logical sequencing; cohesive devices used but occasionally overused",
+            "task": "All parts of the task addressed; ideas supported with some relevant examples"
+        },
+        "band_7_to_7_5": {
+            "grammar": "Generally well-controlled; complex structures used correctly; minor errors only",
+            "vocabulary": "Varied and mostly precise; some idiomatic usage; collocations mostly natural",
+            "coherence": "Logical structure throughout; effective use of a variety of cohesive devices",
+            "task": "Task fully addressed; position clear and consistent; ideas well-developed"
+        },
+        "band_8_to_8_5": {
+            "grammar": "Highly accurate; wide range of complex structures; errors rare and minor",
+            "vocabulary": "Sophisticated and natural; precise collocations; academic register maintained",
+            "coherence": "Seamless flow; cohesive devices invisible (natural); each paragraph builds on the last",
+            "task": "Insightful response; argument is compelling; counter-arguments addressed"
+        },
+        "band_9": {
+            "grammar": "Error-free or with only the most trivial slips; full command of all structures",
+            "vocabulary": "Fully natural; wide range; no forced or awkward choices; register perfect",
+            "coherence": "Effortless to read; no need for re-reading; logical argument is self-evident",
+            "task": "Fully addresses all requirements; position argued convincingly with sophistication"
+        }
+    }
+}
