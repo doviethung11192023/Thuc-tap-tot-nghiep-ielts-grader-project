@@ -1,22 +1,23 @@
 "use client";
 
-import React, { use } from 'react';
+import React, { use, useState, useCallback } from 'react';
 import { StudentPageLayout } from '@/components/layout/StudentPageLayout';
-import { EvaluationPanel } from '@/components/workspace/EvaluationPanel';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { EssayHighlighter, HighlightLegend } from '@/components/workspace/EssayHighlighter';
+import { ScoreSidebar, CriterionTab } from '@/components/workspace/ScoreSidebar';
+import { DUMMY_RESULT, InlineAnnotation } from '@/components/workspace/dummy_data';
 
 export default function ResultsPage({ params }: { params: Promise<{ essayId: string }> }) {
   const { essayId } = use(params);
-  const essayText = `The internet has undeniably revolutionized the way we communicate, bringing people closer together across vast distances. However, I agree that its widespread use has also had a detrimental impact on face-to-face social interaction.
+  
+  const [activeCriterion, setActiveCriterion] = useState<CriterionTab>("OVERALL");
+  const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
 
-On the one hand, the internet facilitates instant communication. Platforms like Facebook and WhatsApp allow us to stay in touch with family and friends regardless of geographical barriers. This is particularly beneficial for those living abroad or traveling.
-
-On the other hand, much peoples spend excessive amounts of time online, which can lead to isolation. Instead of engaging in real-world conversations, individuals often prefer scrolling through social media feeds. This constant digital engagement can create a false sense of connection while eroding genuine relationships.
-
-Furthermore, the quality of social interaction has suffered. Face-to-face communication involves non-verbal cues such as body language and tone of voice, which are often lost in text-based messages. This can lead to misunderstandings and a lack of empathy.
-
-In conclusion, while the internet offers unprecedented connectivity, it also poses a significant threat to traditional social interaction. It is crucial to find a balance between our online and offline lives to maintain healthy relationships.`;
+  const handleAnnotationClick = useCallback((ann: InlineAnnotation) => {
+    setActiveCriterion(ann.category);
+    setActiveAnnotationId(ann.id);
+  }, []);
 
   return (
     <StudentPageLayout>
@@ -32,26 +33,31 @@ In conclusion, while the internet offers unprecedented connectivity, it also pos
         </div>
 
         <div className="flex-1 flex overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-sm relative">
-          <div className="flex-1 p-8 overflow-y-auto">
-            <h2 className="text-lg font-bold text-zinc-800 mb-6 border-b border-zinc-100 pb-4">Nội dung bài làm</h2>
-            <div className="prose max-w-none text-zinc-700 leading-relaxed text-lg">
-              {essayText.split('\n\n').map((paragraph, index) => {
-                if (index === 2) {
-                  return (
-                    <p key={index} className="mb-4">
-                      On the other hand, <span className="bg-red-100 text-red-800 px-1 rounded line-through decoration-red-500">much peoples</span>{' '}
-                      <span className="text-green-600 font-medium">many people</span> spend excessive amounts of time online, which can lead to isolation. Instead of engaging in real-world conversations, individuals often prefer scrolling through social media feeds. This constant digital engagement can create a false sense of connection while eroding genuine relationships.
-                    </p>
-                  );
-                }
-                return <p key={index} className="mb-4">{paragraph}</p>;
-              })}
+          
+          {/* Trái: Phần bài làm */}
+          <div className="flex-1 flex flex-col relative overflow-hidden bg-white z-10">
+            <div className="px-6 py-3 border-b border-zinc-100 shrink-0 bg-zinc-50/50">
+              <HighlightLegend />
+            </div>
+            <div className="flex-1 px-10 py-8 overflow-y-auto">
+              <EssayHighlighter
+                content={DUMMY_RESULT.content}
+                annotations={DUMMY_RESULT.inline_annotations}
+                onAnnotationClick={handleAnnotationClick}
+                activeAnnotationId={activeAnnotationId}
+                activeCategoryFilter={activeCriterion === "OVERALL" ? null : activeCriterion}
+              />
             </div>
           </div>
           
-          {/* Reuse the EvaluationPanel but make it static (isOpen=true) */}
-          <div className="border-l border-zinc-200">
-            <EvaluationPanel isOpen={true} onClose={() => {}} />
+          {/* Phải: Score Sidebar */}
+          <div className="w-[400px] shrink-0 border-l border-zinc-200 bg-white flex flex-col z-20">
+            <ScoreSidebar
+              result={DUMMY_RESULT}
+              activeCriterion={activeCriterion}
+              setActiveCriterion={setActiveCriterion}
+              activeAnnotationId={activeAnnotationId}
+            />
           </div>
         </div>
       </div>

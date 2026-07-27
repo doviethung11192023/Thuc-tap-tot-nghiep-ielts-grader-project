@@ -7,7 +7,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
       {/* Top Navigation */}
       <header className="bg-[#932120] text-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="bg-white p-1.5 rounded-md">
@@ -30,7 +30,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 flex max-w-7xl w-full mx-auto sm:px-6 lg:px-8">
+      <div className="flex-1 flex w-full mx-auto sm:px-6 lg:px-8">
         {/* Sidebar */}
         <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200">
           <nav className="space-y-2">
