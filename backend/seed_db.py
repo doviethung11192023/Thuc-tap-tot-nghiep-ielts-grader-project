@@ -98,42 +98,59 @@ def seed_database():
             "lexical_resource_score": 6.5,
             "grammar_accuracy_score": 5.5,
             "overall_band": 6.0,
-            "tr_feedback": "You answered the prompt but could elaborate more on the negative effects.",
-            "cc_feedback": "The paragraphs are logically organized, but transition words are missing.",
-            "lr_feedback": "Good vocabulary, but some words are used repetitively.",
-            "gra_feedback": "Several grammatical errors found in complex sentence structures.",
-            "overall_feedback": "A decent attempt, but needs more vocabulary variety and grammatical accuracy.",
-            "improvement_suggestions": "Try to use more advanced conjunctions and practice verb tenses.",
-            "raw_ai_response": {"raw_score": 6.0, "agent_version": "v1.0"}
+            "overall_upgraded_essay": "Technology has brought many benefits to our lives. However, it also leads to social isolation as individuals spend excessive time on their devices rather than engaging in face-to-face interactions...",
+            "criteria_analysis": {
+                "task_response": {
+                    "strengths": ["You answered the prompt"],
+                    "areas_to_improve": ["Could elaborate more on the negative effects"]
+                },
+                "coherence_cohesion": {
+                    "strengths": ["The paragraphs are logically organized"],
+                    "areas_to_improve": ["Transition words are missing"]
+                },
+                "lexical_resource": {
+                    "strengths": ["Good vocabulary"],
+                    "areas_to_improve": ["Some words are used repetitively"]
+                },
+                "grammar_accuracy": {
+                    "strengths": [],
+                    "areas_to_improve": ["Several grammatical errors found in complex sentence structures"]
+                }
+            },
+            "raw_ai_response": {"raw_score": 6.0, "agent_version": "v2.0"}
         }
         supabase.table("evaluation_results").insert(eval_data).execute()
         print("✅ Tạo thành công Kết quả chấm điểm (Evaluation Results) cho Essay 1")
 
-        # 5. Tạo Grammar Errors cho Essay 1
-        grammar_errors = [
+        # 5. Tạo Essay Annotations cho Essay 1
+        essay_annotations = [
             {
-                "evaluation_id": eval1_id,
-                "error_type": "subject_verb_agreement",
+                "essay_id": essay1_id,
+                "type": "error",
+                "category": "GRA",
+                "title": "Subject-Verb Agreement",
                 "original_text": "Technology have brought",
                 "corrected_text": "Technology has brought",
                 "explanation": "'Technology' is an uncountable noun and requires a singular verb.",
+                "recommendation": "Review rules for uncountable nouns.",
                 "position_start": 0,
-                "position_end": 21,
-                "severity": "major"
+                "position_end": 21
             },
             {
-                "evaluation_id": eval1_id,
-                "error_type": "article",
+                "essay_id": essay1_id,
+                "type": "upgrade",
+                "category": "LR",
+                "title": "Better Lexical Choice",
                 "original_text": "on their phones",
-                "corrected_text": "on mobile phones",
+                "corrected_text": "on mobile devices",
                 "explanation": "Better lexical choice for academic writing.",
+                "recommendation": "Use formal synonyms.",
                 "position_start": 102,
-                "position_end": 117,
-                "severity": "minor"
+                "position_end": 117
             }
         ]
-        supabase.table("grammar_errors").insert(grammar_errors).execute()
-        print("✅ Tạo thành công 2 Lỗi ngữ pháp mẫu (Grammar Errors)")
+        supabase.table("essay_annotations").insert(essay_annotations).execute()
+        print("✅ Tạo thành công 2 Chú thích bài viết (Essay Annotations)")
 
         # 6. Tạo User Progress
         progress_data = {

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class EssayCreate(BaseModel):
@@ -21,14 +21,17 @@ class EssayCreate(BaseModel):
             raise ValueError('task_type must be task1 or task2')
         return v
 
-class GrammarError(BaseModel):
-    error_type: str
+class EssayAnnotation(BaseModel):
+    id: str
+    type: str
+    category: str
+    title: str
     original_text: str
-    corrected_text: str
+    corrected_text: Optional[str] = None
     explanation: str
+    recommendation: Optional[str] = None
     position_start: int
     position_end: int
-    severity: str
 
 class EvaluationResultDetail(BaseModel):
     overall_band: float
@@ -36,12 +39,8 @@ class EvaluationResultDetail(BaseModel):
     coherence_cohesion_score: float
     lexical_resource_score: float
     grammar_accuracy_score: float
-    overall_feedback: str
-    tr_feedback: str
-    cc_feedback: str
-    lr_feedback: str
-    gra_feedback: str
-    improvement_suggestions: str
+    overall_upgraded_essay: Optional[str] = None
+    criteria_analysis: Dict[str, Any]
     is_score_overridden: bool
 
 class EssayDetail(BaseModel):
@@ -54,5 +53,5 @@ class EssayDetail(BaseModel):
 class EvaluationResponse(BaseModel):
     essay: EssayDetail
     result: Optional[EvaluationResultDetail] = None
-    grammar_errors: Optional[List[GrammarError]] = None
+    inline_annotations: Optional[List[EssayAnnotation]] = None
     trace_info: Optional[dict] = None

@@ -66,15 +66,15 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
     eval_res = supabase.table("evaluation_results").select("*").eq("essay_id", essay_id).execute()
     result_data = eval_res.data[0] if eval_res.data else None
     
-    grammar_data = None
-    if result_data:
-        grammar_res = supabase.table("grammar_errors").select("*").eq("evaluation_id", result_data["id"]).execute()
-        grammar_data = grammar_res.data
+    annotations_data = None
+    if essay_data:
+        annotations_res = supabase.table("essay_annotations").select("*").eq("essay_id", essay_id).execute()
+        annotations_data = annotations_res.data
         
     return EvaluationResponse(
         essay=essay_data,
         result=result_data,
-        grammar_errors=grammar_data,
+        inline_annotations=annotations_data,
         trace_info={"phoenix_trace_url": "http://phoenix.local"} if current_user.role == "admin" else None
     )
 

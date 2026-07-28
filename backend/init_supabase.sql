@@ -7,7 +7,8 @@ CREATE TYPE user_role AS ENUM ('student', 'admin');
 CREATE TYPE task_type AS ENUM ('task1', 'task2');
 CREATE TYPE topic_difficulty AS ENUM ('easy', 'medium', 'hard');
 CREATE TYPE essay_status AS ENUM ('pending', 'evaluating', 'completed', 'failed', 'rejected');
-CREATE TYPE error_severity AS ENUM ('minor', 'major', 'critical');
+CREATE TYPE annotation_type AS ENUM ('error', 'upgrade', 'logic_issue', 'strength');
+CREATE TYPE annotation_category AS ENUM ('TR', 'CC', 'LR', 'GRA');
 CREATE TYPE log_status AS ENUM ('started', 'success', 'failed', 'retried');
 
 -- 2. TABLES
@@ -55,33 +56,32 @@ CREATE TABLE public.essays (
 CREATE TABLE public.evaluation_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     essay_id UUID REFERENCES public.essays(id) UNIQUE NOT NULL,
+    overall_band FLOAT CHECK (overall_band >= 0 AND overall_band <= 9),
     task_response_score FLOAT CHECK (task_response_score >= 0 AND task_response_score <= 9),
     coherence_cohesion_score FLOAT CHECK (coherence_cohesion_score >= 0 AND coherence_cohesion_score <= 9),
     lexical_resource_score FLOAT CHECK (lexical_resource_score >= 0 AND lexical_resource_score <= 9),
     grammar_accuracy_score FLOAT CHECK (grammar_accuracy_score >= 0 AND grammar_accuracy_score <= 9),
-    overall_band FLOAT CHECK (overall_band >= 0 AND overall_band <= 9),
+    overall_upgraded_essay TEXT,
+    criteria_analysis JSONB NOT NULL,
     is_score_overridden BOOLEAN DEFAULT false,
-    tr_feedback TEXT NOT NULL,
-    cc_feedback TEXT NOT NULL,
-    lr_feedback TEXT NOT NULL,
-    gra_feedback TEXT NOT NULL,
-    overall_feedback TEXT NOT NULL,
-    improvement_suggestions TEXT NOT NULL,
     raw_ai_response JSONB NOT NULL,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Grammar Errors Table
-CREATE TABLE public.grammar_errors (
+-- Essay Annotations Table
+CREATE TABLE public.essay_annotations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    evaluation_id UUID REFERENCES public.evaluation_results(id) ON DELETE CASCADE,
-    error_type VARCHAR(50) NOT NULL,
+    essay_id UUID REFERENCES public.essays(id) ON DELETE CASCADE,
+    type annotation_type NOT NULL,
+    category annotation_category NOT NULL,
+    title VARCHAR(255) NOT NULL,
     original_text TEXT NOT NULL,
-    corrected_text TEXT NOT NULL,
+    corrected_text TEXT,
     explanation TEXT NOT NULL,
+    recommendation TEXT,
     position_start INTEGER NOT NULL,
     position_end INTEGER NOT NULL,
-    severity error_severity DEFAULT 'major'
+    created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Evaluation Logs Table (Hybrid Tracing)

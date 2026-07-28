@@ -37,31 +37,58 @@ async def evaluate_essay_task(ctx, essay_id: str):
         "lexical_resource_score": 7.0,
         "grammar_accuracy_score": 6.5,
         "overall_band": 7.0,
-        "tr_feedback": "Task response is good and well addressed.",
-        "cc_feedback": "Paragraphs are logically structured.",
-        "lr_feedback": "Good use of academic vocabulary.",
-        "gra_feedback": "Minor grammatical errors.",
-        "overall_feedback": "A solid band 7.0 essay.",
-        "improvement_suggestions": "Try to vary your sentence structures more.",
+        "overall_upgraded_essay": "This is a simulated band 8.0 version of the essay...",
+        "criteria_analysis": {
+            "task_response": {
+                "strengths": ["Good understanding of the prompt"],
+                "areas_to_improve": ["More examples needed"]
+            },
+            "coherence_cohesion": {
+                "strengths": ["Logical flow"],
+                "areas_to_improve": ["Transition words"]
+            },
+            "lexical_resource": {
+                "strengths": ["Good vocabulary"],
+                "areas_to_improve": ["Spelling errors"]
+            },
+            "grammar_accuracy": {
+                "strengths": ["Good sentence structures"],
+                "areas_to_improve": ["Article usage"]
+            }
+        },
         "raw_ai_response": {"status": "success", "simulated": True}
     }
     
     supabase.table("evaluation_results").insert(eval_data).execute()
     
-    # 4. Lưu lỗi ngữ pháp giả lập
-    grammar_errors = [
+    # 4. Lưu chú thích bài viết giả lập
+    essay_annotations = [
         {
-            "evaluation_id": eval_id,
-            "error_type": "article",
+            "essay_id": essay_id,
+            "type": "error",
+            "category": "GRA",
+            "title": "Uncountable Noun",
             "original_text": "a information",
             "corrected_text": "information",
             "explanation": "Information is uncountable.",
+            "recommendation": "Review uncountable nouns like advice, information, news.",
             "position_start": 50,
-            "position_end": 63,
-            "severity": "minor"
+            "position_end": 63
+        },
+        {
+            "essay_id": essay_id,
+            "type": "upgrade",
+            "category": "LR",
+            "title": "Better Vocabulary",
+            "original_text": "bad",
+            "corrected_text": "detrimental",
+            "explanation": "Use 'detrimental' for a more academic tone.",
+            "recommendation": "Learn more formal synonyms for common adjectives.",
+            "position_start": 80,
+            "position_end": 83
         }
     ]
-    supabase.table("grammar_errors").insert(grammar_errors).execute()
+    supabase.table("essay_annotations").insert(essay_annotations).execute()
     
     # 5. Ghi log xử lý
     supabase.table("evaluation_logs").insert({
