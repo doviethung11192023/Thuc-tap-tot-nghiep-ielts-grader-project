@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import type { InlineAnnotation } from "./dummy_data";
+import type { InlineAnnotation } from "@/types";
 
 interface EssayHighlighterProps {
   content: string;

@@ -44,7 +44,7 @@ async def create_topic(topic: TopicCreate, current_user: User = Depends(require_
         except Exception:
             pass
 
-    topic_data = topic.dict()
+    topic_data = topic.model_dump()
     topic_data["created_by"] = current_user.id
     
     try:
@@ -58,7 +58,7 @@ async def create_topic(topic: TopicCreate, current_user: User = Depends(require_
 
 @router.put("/{topic_id}")
 async def update_topic(topic_id: str, topic: TopicUpdate, current_user: User = Depends(require_admin)):
-    update_data = {k: v for k, v in topic.dict().items() if v is not None}
+    update_data = {k: v for k, v in topic.model_dump().items() if v is not None}
     if not update_data:
         return {"meta": {"code": 200, "message": "Nothing to update"}}
     

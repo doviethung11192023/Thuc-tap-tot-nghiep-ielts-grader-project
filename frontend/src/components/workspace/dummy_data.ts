@@ -1,47 +1,5 @@
-export interface CriteriaFeedback {
-  strengths: string[];
-  areas_to_improve: string[];
-}
+import { GradingResult } from "@/types";
 
-export interface CriteriaScore {
-  sub_criteria: Record<string, string>;
-  feedback: CriteriaFeedback;
-}
-
-export interface InlineAnnotation {
-  id: string;
-  type: "error" | "upgrade" | "logic_issue" | "strength";
-  category: "TR" | "CC" | "LR" | "GRA";
-  position_start: number;
-  position_end: number;
-  original_text: string;
-  corrected_text: string | null;
-  title?: string;
-  explanation: string;
-  recommendation?: string;
-}
-
-export interface GradingResult {
-  essay_id: string;
-  status: string;
-  content: string;
-  word_count: number;
-  overall_upgraded_essay: string;
-  scores: {
-    overall_band: number;
-    task_response: number;
-    coherence_cohesion: number;
-    lexical_resource: number;
-    grammatical_range_and_accuracy: number;
-  };
-  criteria_analysis: {
-    task_response: CriteriaScore;
-    coherence_cohesion: CriteriaScore;
-    lexical_resource: CriteriaScore;
-    grammatical_range_and_accuracy: CriteriaScore;
-  };
-  inline_annotations: InlineAnnotation[];
-}
 
 export const DUMMY_RESULT: GradingResult = {
   essay_id: "essay_369",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { InlineAnnotation, CriteriaScore, GradingResult } from "./dummy_data";
+import { InlineAnnotation, CriteriaDetail, GradingResult } from "@/types";
 import { AlertCircle, Sparkles, TrendingUp, ChevronRight, CheckCircle2, BookOpen, Quote } from "lucide-react";
 
 export type CriterionTab = "OVERALL" | "TR" | "CC" | "LR" | "GRA";
@@ -33,7 +33,7 @@ export function ScoreSidebar({ result, activeCriterion, setActiveCriterion, acti
     { id: "GRA", label: "GRA", tooltip: "Grammar & Accuracy" },
   ];
 
-  const getCriteriaData = (tab: CriterionTab): CriteriaScore | null => {
+  const getCriteriaData = (tab: CriterionTab): CriteriaDetail | null => {
     if (tab === "TR") return result.criteria_analysis.task_response;
     if (tab === "CC") return result.criteria_analysis.coherence_cohesion;
     if (tab === "LR") return result.criteria_analysis.lexical_resource;
@@ -143,7 +143,7 @@ function CriterionDetailTab({
   activeAnnotationId, 
   criterionName 
 }: { 
-  criteriaData: CriteriaScore, 
+  criteriaData: CriteriaDetail, 
   criteriaBand: number,
   annotations: InlineAnnotation[], 
   activeAnnotationId: string | null, 

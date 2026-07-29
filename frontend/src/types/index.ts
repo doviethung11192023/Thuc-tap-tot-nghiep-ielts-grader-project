@@ -48,33 +48,64 @@ export interface Essay {
   evaluated_at: string | null;
 }
 
-// ---------- Grammar Errors ----------
-export type ErrorSeverity = "minor" | "major" | "critical";
-
-export interface GrammarError {
-  error_type: string;
-  original_text: string;
-  corrected_text: string;
-  explanation: string;
-  position_start: number;
-  position_end: number;
-  severity: ErrorSeverity;
+// ---------- Criteria & Annotations ----------
+export interface CriteriaDetail {
+  sub_criteria?: Record<string, string>;
+  feedback: {
+    strengths: string[];
+    areas_to_improve: string[];
+  };
 }
 
-// ---------- Evaluation Results (Kết quả chấm điểm) ----------
-export interface EvaluationResult {
+export interface CriteriaAnalysis {
+  task_response: CriteriaDetail;
+  coherence_cohesion: CriteriaDetail;
+  lexical_resource: CriteriaDetail;
+  grammar_accuracy: CriteriaDetail;
+}
+
+export interface InlineAnnotation {
+  id: string;
+  type: 'error' | 'upgrade' | 'logic_issue' | 'strength';
+  category: 'TR' | 'CC' | 'LR' | 'GRA';
+  title?: string;
+  original_text: string;
+  corrected_text: string | null;
+  explanation: string;
+  recommendation?: string | null;
+  position_start: number;
+  position_end: number;
+}
+
+// ---------- Evaluation Results (Kết quả chấm điểm từ API) ----------
+export interface EvaluationResultDetail {
   overall_band: number;
   task_response_score: number;
   coherence_cohesion_score: number;
   lexical_resource_score: number;
   grammar_accuracy_score: number;
-  overall_feedback: string;
-  tr_feedback: string;
-  cc_feedback: string;
-  lr_feedback: string;
-  gra_feedback: string;
-  improvement_suggestions: string;
+  overall_upgraded_essay: string | null;
+  criteria_analysis: CriteriaAnalysis;
   is_score_overridden: boolean;
+}
+
+// ---------- Frontend UI Types ----------
+// Dùng nội bộ cho các component UI sau khi đã map từ API data
+export interface GradingResult {
+  essay_id: string;
+  status: string;
+  content: string;
+  word_count: number;
+  overall_upgraded_essay: string;
+  scores: {
+    overall_band: number;
+    task_response: number;
+    coherence_cohesion: number;
+    lexical_resource: number;
+    grammatical_range_and_accuracy: number;
+  };
+  criteria_analysis: CriteriaAnalysis;
+  inline_annotations: InlineAnnotation[];
 }
 
 // ---------- API Response Shapes ----------
@@ -93,8 +124,8 @@ export interface EssayResultsResponse {
   meta: { code: number; message: string };
   data: {
     essay: Pick<Essay, "id" | "content" | "word_count" | "status" | "evaluated_at">;
-    result: EvaluationResult;
-    grammar_errors: GrammarError[];
+    result: EvaluationResultDetail | null;
+    inline_annotations: InlineAnnotation[] | null;
     trace_info?: { phoenix_trace_url: string }; // Chỉ Admin thấy
   };
 }

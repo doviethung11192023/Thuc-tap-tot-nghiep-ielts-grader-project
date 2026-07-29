@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EssayHighlighter, HighlightLegend } from '@/components/workspace/EssayHighlighter';
 import { ScoreSidebar, CriterionTab } from '@/components/workspace/ScoreSidebar';
-import { DUMMY_RESULT, InlineAnnotation } from '@/components/workspace/dummy_data';
+import { DUMMY_RESULT } from '@/components/workspace/dummy_data';
+import { InlineAnnotation } from '@/types';
 
 export default function ResultsPage({ params }: { params: Promise<{ essayId: string }> }) {
   const { essayId } = use(params);

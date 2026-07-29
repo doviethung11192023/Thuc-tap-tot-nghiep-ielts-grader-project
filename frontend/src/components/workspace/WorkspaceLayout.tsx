@@ -5,7 +5,8 @@ import { Header } from "./Header";
 import { QuestionPanel } from "./QuestionPanel";
 import { WritingCanvas } from "./WritingCanvas";
 import { EssayHighlighter, HighlightLegend } from "./EssayHighlighter";
-import { DUMMY_RESULT, GradingResult, InlineAnnotation, CriteriaScore } from "./dummy_data";
+import { DUMMY_RESULT } from "./dummy_data";
+import { GradingResult, InlineAnnotation, CriteriaDetail } from "@/types";
 import {
   BookOpen, RefreshCw
 } from "lucide-react";

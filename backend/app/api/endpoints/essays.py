@@ -63,6 +63,9 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
         
     essay_data = essay_res.data[0]
     
+    if essay_data["user_id"] != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this essay")
+    
     eval_res = supabase.table("evaluation_results").select("*").eq("essay_id", essay_id).execute()
     result_data = eval_res.data[0] if eval_res.data else None
     
@@ -80,7 +83,7 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
 
 @router.get("")
 async def list_essays(page: int = 1, limit: int = 10, status_filter: str = None, current_user: User = Depends(get_current_user)):
-    query = supabase.table("essays").select("*", count="exact").eq("user_id", current_user.id)
+    query = supabase.table("essays").select("*, topics(title)", count="exact").eq("user_id", current_user.id)
     if status_filter:
         query = query.eq("status", status_filter)
         
@@ -88,10 +91,19 @@ async def list_essays(page: int = 1, limit: int = 10, status_filter: str = None,
     query = query.range(offset, offset + limit - 1)
     res = query.execute()
     
+    items = []
+    for item in res.data:
+        topic_title = item.get("topics", {}).get("title") if item.get("topics") else "Free Writing"
+        item["topic_title"] = topic_title
+        item["essay_id"] = item["id"]
+        if "topics" in item:
+            del item["topics"]
+        items.append(item)
+    
     return {
         "meta": {"code": 200, "message": "Success"},
         "data": {
-            "items": res.data,
+            "items": items,
             "total": res.count if hasattr(res, 'count') else len(res.data),
             "page": page
         }

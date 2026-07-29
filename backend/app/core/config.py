@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_URL: str = "redis://localhost:6379"
+    SUPABASE_JWT_SECRET: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
