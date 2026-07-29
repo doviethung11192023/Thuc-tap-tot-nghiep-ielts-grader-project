@@ -20,6 +20,7 @@ export function WritingCanvas({ onSubmit }: WritingCanvasProps) {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsRunning(false);
       // Auto submit when time is up
       if (text.trim().length > 0) {

@@ -1,54 +1,155 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Header } from "./Header";
 import { QuestionPanel } from "./QuestionPanel";
 import { WritingCanvas } from "./WritingCanvas";
 import { EssayHighlighter, HighlightLegend } from "./EssayHighlighter";
 import { DUMMY_RESULT } from "./dummy_data";
-import { GradingResult, InlineAnnotation, CriteriaDetail } from "@/types";
-import {
-  BookOpen, RefreshCw
-} from "lucide-react";
+import { GradingResult, InlineAnnotation } from "@/types";
+import { BookOpen, RefreshCw } from "lucide-react";
 import { ScoreSidebar, CriterionTab } from "./ScoreSidebar";
+import { submitEssay, getEssayResults } from "@/services/essays";
+import { useRealtimeEssayStatus } from "@/hooks/useRealtimeEssayStatus";
+import toast from "react-hot-toast";
 
 type WorkspaceState = "writing" | "grading" | "results";
-
-async function simulateGrading(essayText: string): Promise<GradingResult> {
-  await new Promise((r) => setTimeout(r, 2000));
-  return {
-    ...DUMMY_RESULT,
-    content: essayText, 
-    word_count: essayText.trim().split(/\s+/).length,
-  };
-}
 
 export function WorkspaceLayout() {
   const [state, setState] = useState<WorkspaceState>("writing");
   const [result, setResult] = useState<GradingResult | null>(null);
   const [submittedText, setSubmittedText] = useState("");
+  
+  // Custom Topic / System Topic state
+  const [topicId, setTopicId] = useState<string | null>(null);
+  const [taskType, setTaskType] = useState<"task1" | "task2">("task2");
+
   const [activeCriterion, setActiveCriterion] = useState<CriterionTab>("OVERALL");
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
 
+  // Hook realtime tracking status
+  const [essayId, setEssayId] = useState<string | null>(null);
+  const { status, isError } = useRealtimeEssayStatus(essayId);
+
   const handleSubmit = useCallback(async (essayText: string) => {
-    if (!essayText.trim()) return;
-    setSubmittedText(essayText);
-    setState("grading");
-    try {
-      const data = await simulateGrading(essayText);
-      setResult(data);
-      setState("results");
-    } catch {
-      setState("writing");
-      alert("Lỗi.");
+    const text = essayText.trim();
+    if (!text) return;
+    
+    // 0. Frontend Validation
+    const wordCount = text.split(/\s+/).length;
+    if (wordCount < 50) {
+      toast.error("Bài viết quá ngắn. Yêu cầu tối thiểu 50 từ.");
+      return;
     }
-  }, []);
+    if (wordCount > 1000) {
+      toast.error("Bài viết quá dài. Vui lòng giới hạn dưới 1000 từ.");
+      return;
+    }
+
+    setSubmittedText(text);
+    setState("grading");
+    setResult(null);
+    setEssayId(null);
+    
+    try {
+      // 1. Submit essay to backend
+      const data = await submitEssay({
+        content: text,
+        topic_id: topicId,
+        task_type: taskType
+      });
+      
+      // 2. Save essayId to start realtime tracking
+      setEssayId(data.essay_id);
+    } catch (err) {
+      console.error(err);
+      let errorMsg = "Lỗi khi nộp bài. Vui lòng thử lại.";
+      
+      // Parse Axios/FastAPI 422 Validation Error safely
+      interface ErrorWithResponse {
+        response?: {
+          status?: number;
+          data?: {
+            detail?: Array<{ msg: string }>;
+            message?: string;
+          };
+        };
+      }
+      
+      const axiosError = err as ErrorWithResponse;
+      if (axiosError?.response?.status === 422 && Array.isArray(axiosError.response.data?.detail)) {
+        errorMsg = axiosError.response.data.detail.map((d) => d.msg).join(", ");
+        // Translate English error from Pydantic to Vietnamese for better UX
+        if (errorMsg.includes("Minimum requirement is 50 words")) {
+          errorMsg = "Bài viết quá ngắn. Yêu cầu tối thiểu 50 từ.";
+        }
+      } else if (axiosError?.response?.data?.message) {
+        errorMsg = axiosError.response.data.message;
+      }
+      
+      toast.error(errorMsg);
+      setState("writing");
+    }
+  }, [topicId, taskType]);
+
+  // Listen to realtime status changes
+  useEffect(() => {
+    if (state !== "grading" || !essayId) return;
+
+    if (status === "failed" || status === "rejected") {
+      toast.error("Quá trình chấm bài thất bại.");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setState("writing");
+      setEssayId(null);
+    } else if (status === "completed") {
+      const fetchResults = async () => {
+        try {
+          const resData = await getEssayResults(essayId);
+          
+          if (!resData.result) {
+            toast.error("Bài viết chưa được chấm xong hoặc có lỗi dữ liệu.");
+            setState("writing");
+            return;
+          }
+
+          const gradingResult: GradingResult = {
+            essay_id: resData.essay.id,
+            status: resData.essay.status,
+            content: resData.essay.content,
+            word_count: resData.essay.word_count,
+            overall_upgraded_essay: resData.result.overall_upgraded_essay || "Không có bài nâng cấp.",
+            scores: {
+              overall_band: resData.result.overall_band,
+              task_response: resData.result.task_response_score,
+              coherence_cohesion: resData.result.coherence_cohesion_score,
+              lexical_resource: resData.result.lexical_resource_score,
+              grammatical_range_and_accuracy: resData.result.grammar_accuracy_score,
+            },
+            criteria_analysis: resData.result.criteria_analysis,
+            inline_annotations: resData.inline_annotations || [],
+          };
+
+          setResult(gradingResult);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setState("results");
+        } catch (err) {
+          console.error(err);
+          toast.error("Không lấy được kết quả chấm.");
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setState("writing");
+        }
+      };
+      
+      fetchResults();
+    }
+  }, [status, state, essayId, submittedText]);
 
   const handleRetry = useCallback(() => {
     setState("writing");
     setResult(null);
     setSubmittedText("");
     setActiveAnnotationId(null);
+    setEssayId(null);
   }, []);
 
   const handleAnnotationClick = useCallback((ann: InlineAnnotation) => {
@@ -60,7 +161,10 @@ export function WorkspaceLayout() {
     <div className="h-screen w-full flex flex-col bg-zinc-50 overflow-hidden font-sans">
       <Header />
       <div className="flex-1 flex overflow-hidden relative">
-        <QuestionPanel />
+        <QuestionPanel 
+          onTopicChange={setTopicId} 
+          onTaskTypeChange={setTaskType} 
+        />
 
         {/* Center Panel */}
         <div className="flex-1 relative overflow-hidden flex flex-col bg-white shadow-[0_0_40px_rgba(0,0,0,0.05)] z-10">
@@ -134,6 +238,3 @@ function GradingLoader() {
     </div>
   );
 }
-
-// ────────────────────────────────────────────────────────────
-// SCORE SIDEBAR HAS BEEN MOVED TO ScoreSidebar.tsx

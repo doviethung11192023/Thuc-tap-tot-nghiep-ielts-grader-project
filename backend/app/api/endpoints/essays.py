@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from app.schemas.essay import EssayCreate, EvaluationResponse, EssayDetail
 from app.core.security import get_current_user, User
 from app.db.supabase import supabase
+from app.worker.tasks import evaluate_essay_task
 import uuid
 from datetime import datetime
 
 router = APIRouter()
 
 @router.post("/evaluate", status_code=status.HTTP_202_ACCEPTED)
-async def submit_essay(request: Request, essay: EssayCreate, current_user: User = Depends(get_current_user)):
+async def submit_essay(request: Request, essay: EssayCreate, background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user)):
     word_count = len(essay.content.split())
     
     # Auto-create mock user in DB if not exists (for testing with mock auth)
@@ -37,10 +38,12 @@ async def submit_essay(request: Request, essay: EssayCreate, current_user: User 
         response = supabase.table("essays").insert(essay_data).execute()
         essay_id = response.data[0]["id"]
         
-        # Enqueue background task
-        job = await request.app.state.redis.enqueue_job("evaluate_essay_task", essay_id)
-        if job:
-            supabase.table("essays").update({"task_id": job.job_id}).eq("id", essay_id).execute()
+        # Enqueue background task via FastAPI (Phase 1.5 - Mock Worker)
+        # Bỏ qua Redis/ARQ ở giai đoạn này để dễ dàng test UI không cần chạy worker riêng
+        job_id = str(uuid.uuid4())
+        background_tasks.add_task(evaluate_essay_task, None, essay_id)
+        
+        supabase.table("essays").update({"task_id": job_id}).eq("id", essay_id).execute()
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -50,12 +53,12 @@ async def submit_essay(request: Request, essay: EssayCreate, current_user: User 
         "data": {
             "essay_id": essay_id,
             "status": "pending",
-            "task_id": job.job_id if 'job' in locals() and job else None,
+            "task_id": job_id,
             "word_count": word_count
         }
     }
 
-@router.get("/{essay_id}/results", response_model=EvaluationResponse)
+@router.get("/{essay_id}/results")
 async def get_evaluation_results(essay_id: str, current_user: User = Depends(get_current_user)):
     essay_res = supabase.table("essays").select("*").eq("id", essay_id).execute()
     if not essay_res.data:
@@ -74,12 +77,15 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
         annotations_res = supabase.table("essay_annotations").select("*").eq("essay_id", essay_id).execute()
         annotations_data = annotations_res.data
         
-    return EvaluationResponse(
-        essay=essay_data,
-        result=result_data,
-        inline_annotations=annotations_data,
-        trace_info={"phoenix_trace_url": "http://phoenix.local"} if current_user.role == "admin" else None
-    )
+    return {
+        "meta": {"code": 200, "message": "Success"},
+        "data": EvaluationResponse(
+            essay=essay_data,
+            result=result_data,
+            inline_annotations=annotations_data,
+            trace_info={"phoenix_trace_url": "http://phoenix.local"} if current_user.role == "admin" else None
+        ).dict()
+    }
 
 @router.get("")
 async def list_essays(page: int = 1, limit: int = 10, status_filter: str = None, current_user: User = Depends(get_current_user)):

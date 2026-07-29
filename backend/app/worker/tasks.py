@@ -40,20 +40,44 @@ async def evaluate_essay_task(ctx, essay_id: str):
         "overall_upgraded_essay": "This is a simulated band 8.0 version of the essay...",
         "criteria_analysis": {
             "task_response": {
-                "strengths": ["Good understanding of the prompt"],
-                "areas_to_improve": ["More examples needed"]
+                "sub_criteria": {
+                    "addressing_the_prompt": "You addressed all parts of the prompt well.",
+                    "position": "A clear position is presented throughout."
+                },
+                "feedback": {
+                    "strengths": ["Good understanding of the prompt"],
+                    "areas_to_improve": ["More examples needed"]
+                }
             },
             "coherence_cohesion": {
-                "strengths": ["Logical flow"],
-                "areas_to_improve": ["Transition words"]
+                "sub_criteria": {
+                    "logical_organization": "Ideas are logically organized.",
+                    "cohesive_devices": "Good use of basic cohesive devices."
+                },
+                "feedback": {
+                    "strengths": ["Logical flow"],
+                    "areas_to_improve": ["Transition words"]
+                }
             },
             "lexical_resource": {
-                "strengths": ["Good vocabulary"],
-                "areas_to_improve": ["Spelling errors"]
+                "sub_criteria": {
+                    "vocabulary_range": "Adequate range of vocabulary.",
+                    "spelling": "Some minor spelling errors."
+                },
+                "feedback": {
+                    "strengths": ["Good vocabulary"],
+                    "areas_to_improve": ["Spelling errors"]
+                }
             },
             "grammar_accuracy": {
-                "strengths": ["Good sentence structures"],
-                "areas_to_improve": ["Article usage"]
+                "sub_criteria": {
+                    "sentence_structures": "Good mix of simple and complex sentences.",
+                    "error_free_sentences": "Many sentences are error-free."
+                },
+                "feedback": {
+                    "strengths": ["Good sentence structures"],
+                    "areas_to_improve": ["Article usage"]
+                }
             }
         },
         "raw_ai_response": {"status": "success", "simulated": True}

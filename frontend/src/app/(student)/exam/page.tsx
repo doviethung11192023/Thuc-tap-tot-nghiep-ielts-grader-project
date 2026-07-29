@@ -1,5 +1,10 @@
 import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
+import Providers from "@/components/Providers";
 
 export default function ExamPage() {
-  return <WorkspaceLayout />;
+  return (
+    <Providers>
+      <WorkspaceLayout />
+    </Providers>
+  );
 }
