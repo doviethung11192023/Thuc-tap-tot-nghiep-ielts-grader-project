@@ -76,7 +76,7 @@ export default function HistoryPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 font-bold">
-                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4 text-center w-16">STT</th>
                   <th className="px-6 py-4">Đề bài</th>
                   <th className="px-6 py-4">Ngày nộp</th>
                   <th className="px-6 py-4 text-center">Trạng thái</th>
@@ -108,10 +108,10 @@ export default function HistoryPage() {
                     </td>
                   </tr>
                 )}
-                {!loading && history.map((item) => (
+                {!loading && history.map((item, index) => (
                   <tr key={item.essay_id} className="hover:bg-zinc-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-zinc-500">
-                      {item.essay_id.split('-')[0].toUpperCase()}
+                    <td className="px-6 py-4 text-center font-mono text-sm font-medium text-zinc-500">
+                      #{(page - 1) * limit + index + 1}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-zinc-900 line-clamp-1" title={item.topic_title}>
