@@ -5,11 +5,11 @@ import { Header } from "./Header";
 import { QuestionPanel } from "./QuestionPanel";
 import { WritingCanvas } from "./WritingCanvas";
 import { EssayHighlighter, HighlightLegend } from "./EssayHighlighter";
-import { DUMMY_RESULT } from "./dummy_data";
+import { getEssayResults, submitEssay } from "@/services/essays";
+import { mapApiResultToGradingResult } from "@/lib/adapters";
 import { GradingResult, InlineAnnotation } from "@/types";
 import { BookOpen, RefreshCw } from "lucide-react";
 import { ScoreSidebar, CriterionTab } from "./ScoreSidebar";
-import { submitEssay, getEssayResults } from "@/services/essays";
 import { useRealtimeEssayStatus } from "@/hooks/useRealtimeEssayStatus";
 import toast from "react-hot-toast";
 
@@ -112,30 +112,13 @@ export function WorkspaceLayout() {
             return;
           }
 
-          const gradingResult: GradingResult = {
-            essay_id: resData.essay.id,
-            status: resData.essay.status,
-            content: resData.essay.content,
-            word_count: resData.essay.word_count,
-            overall_upgraded_essay: resData.result.overall_upgraded_essay || "Không có bài nâng cấp.",
-            scores: {
-              overall_band: resData.result.overall_band,
-              task_response: resData.result.task_response_score,
-              coherence_cohesion: resData.result.coherence_cohesion_score,
-              lexical_resource: resData.result.lexical_resource_score,
-              grammatical_range_and_accuracy: resData.result.grammar_accuracy_score,
-            },
-            criteria_analysis: resData.result.criteria_analysis,
-            inline_annotations: resData.inline_annotations || [],
-          };
+          const gradingResult = mapApiResultToGradingResult(resData);
 
           setResult(gradingResult);
-          // eslint-disable-next-line react-hooks/set-state-in-effect
           setState("results");
         } catch (err) {
           console.error(err);
           toast.error("Không lấy được kết quả chấm.");
-          // eslint-disable-next-line react-hooks/set-state-in-effect
           setState("writing");
         }
       };

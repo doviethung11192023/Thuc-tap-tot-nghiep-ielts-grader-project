@@ -88,10 +88,10 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
     }
 
 @router.get("")
-async def list_essays(page: int = 1, limit: int = 10, status_filter: str = None, current_user: User = Depends(get_current_user)):
-    query = supabase.table("essays").select("*, topics(title)", count="exact").eq("user_id", current_user.id)
-    if status_filter:
-        query = query.eq("status", status_filter)
+async def list_essays(page: int = 1, limit: int = 10, status: str = None, current_user: User = Depends(get_current_user)):
+    query = supabase.table("essays").select("*, topics(title), evaluation_results(overall_band)", count="exact").eq("user_id", current_user.id).order("submitted_at", desc=True)
+    if status:
+        query = query.eq("status", status)
         
     offset = (page - 1) * limit
     query = query.range(offset, offset + limit - 1)
@@ -101,9 +101,22 @@ async def list_essays(page: int = 1, limit: int = 10, status_filter: str = None,
     for item in res.data:
         topic_title = item.get("topics", {}).get("title") if item.get("topics") else "Free Writing"
         item["topic_title"] = topic_title
+        
+        eval_res = item.get("evaluation_results")
+        if isinstance(eval_res, list) and len(eval_res) > 0:
+            item["overall_band"] = eval_res[0].get("overall_band")
+        elif isinstance(eval_res, dict):
+            item["overall_band"] = eval_res.get("overall_band")
+        else:
+            item["overall_band"] = None
+            
         item["essay_id"] = item["id"]
+        
         if "topics" in item:
             del item["topics"]
+        if "evaluation_results" in item:
+            del item["evaluation_results"]
+            
         items.append(item)
     
     return {
