@@ -13,6 +13,16 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  async function fetchUserProfile(userId: string) {
+    const { data } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    setUser(data);
+    setLoading(false);
+  }
+
   useEffect(() => {
     // Lấy session hiện tại khi trang load
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,17 +51,6 @@ export function useAuth() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  async function fetchUserProfile(userId: string) {
-    const { data } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-    setUser(data);
-    setLoading(false);
-  }
-
   async function signOut() {
     await supabase.auth.signOut();
     localStorage.removeItem("supabase_access_token");

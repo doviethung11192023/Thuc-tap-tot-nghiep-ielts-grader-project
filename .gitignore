@@ -27,3 +27,8 @@ desktop.ini
 # General Logs
 logs/
 *.log
+
+.agent/
+.agents/
+.claude/
+.gemini/

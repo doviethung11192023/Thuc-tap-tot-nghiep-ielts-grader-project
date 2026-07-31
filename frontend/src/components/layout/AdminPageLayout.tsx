@@ -36,6 +36,13 @@ export function AdminPageLayout({ children }: { children: React.ReactNode }) {
             <Activity className="w-5 h-5 text-red-200 group-hover:text-white transition-colors" />
             <span className="font-medium text-sm">Hệ thống Logs</span>
           </Link>
+          
+          <div className="my-4 border-t border-white/10 pt-4">
+            <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white text-[#932120] hover:bg-zinc-100 transition-colors shadow-sm group">
+              <BookOpen className="w-5 h-5 text-[#932120]" />
+              <span className="font-bold text-sm">Trải nghiệm Học viên</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="p-4 border-t border-white/10">

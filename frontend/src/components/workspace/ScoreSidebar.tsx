@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { InlineAnnotation, CriteriaScore, GradingResult } from "./dummy_data";
+import { InlineAnnotation, CriteriaDetail, GradingResult } from "@/types";
 import { AlertCircle, Sparkles, TrendingUp, ChevronRight, CheckCircle2, BookOpen, Quote } from "lucide-react";
 
 export type CriterionTab = "OVERALL" | "TR" | "CC" | "LR" | "GRA";
@@ -33,11 +33,11 @@ export function ScoreSidebar({ result, activeCriterion, setActiveCriterion, acti
     { id: "GRA", label: "GRA", tooltip: "Grammar & Accuracy" },
   ];
 
-  const getCriteriaData = (tab: CriterionTab): CriteriaScore | null => {
+  const getCriteriaData = (tab: CriterionTab): CriteriaDetail | null => {
     if (tab === "TR") return result.criteria_analysis.task_response;
     if (tab === "CC") return result.criteria_analysis.coherence_cohesion;
     if (tab === "LR") return result.criteria_analysis.lexical_resource;
-    if (tab === "GRA") return result.criteria_analysis.grammatical_range_and_accuracy;
+    if (tab === "GRA") return result.criteria_analysis.grammar_accuracy;
     return null;
   };
 
@@ -143,7 +143,7 @@ function CriterionDetailTab({
   activeAnnotationId, 
   criterionName 
 }: { 
-  criteriaData: CriteriaScore, 
+  criteriaData: CriteriaDetail, 
   criteriaBand: number,
   annotations: InlineAnnotation[], 
   activeAnnotationId: string | null, 
@@ -168,12 +168,15 @@ function CriterionDetailTab({
       <div>
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-3">Đánh giá tiêu chí</h3>
         <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100 shadow-sm">
-          {Object.entries(criteriaData.sub_criteria).map(([name, evaluation]) => (
+          {Object.entries(criteriaData.sub_criteria || {}).map(([name, evaluation]) => (
             <div key={name} className="p-4 hover:bg-zinc-50 transition-colors">
               <span className="text-xs font-bold text-zinc-700 capitalize block mb-1">{name.replace(/_/g, ' ')}</span>
               <span className="text-sm text-zinc-600 leading-relaxed">{evaluation}</span>
             </div>
           ))}
+          {(!criteriaData.sub_criteria || Object.keys(criteriaData.sub_criteria).length === 0) && (
+            <div className="p-4 text-sm text-zinc-500 italic">Chưa có phân tích chi tiết.</div>
+          )}
         </div>
       </div>
 
@@ -182,14 +185,14 @@ function CriterionDetailTab({
         <div className="bg-green-50/50 border border-green-100 p-4 rounded-xl">
           <h4 className="text-xs font-bold uppercase tracking-wider text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Ưu điểm</h4>
           <ul className="list-disc pl-4 space-y-1 text-sm text-green-900">
-            {criteriaData.feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+            {((criteriaData.feedback?.strengths as string[] | undefined) || ((criteriaData as unknown as Record<string, unknown>).strengths as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
           </ul>
         </div>
         
         <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl">
           <h4 className="text-xs font-bold uppercase tracking-wider text-red-800 mb-2 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Cần cải thiện</h4>
           <ul className="list-disc pl-4 space-y-1 text-sm text-red-900">
-            {criteriaData.feedback.areas_to_improve.map((s, i) => <li key={i}>{s}</li>)}
+            {((criteriaData.feedback?.areas_to_improve as string[] | undefined) || ((criteriaData as unknown as Record<string, unknown>).areas_to_improve as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
           </ul>
         </div>
       </div>
