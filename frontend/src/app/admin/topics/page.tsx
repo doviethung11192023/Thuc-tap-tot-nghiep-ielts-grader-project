@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AdminPageLayout } from '@/components/layout/AdminPageLayout';
 import { Search, Plus, Edit2, Trash2, X, Loader2 } from 'lucide-react';
 import { getTopics, createTopic, updateTopic, deleteTopic } from '@/services/topics';
 import type { Topic, TaskType, Difficulty } from '@/types';
@@ -137,7 +136,7 @@ export default function AdminTopicsPage() {
   );
 
   return (
-    <AdminPageLayout>
+    <>
       <div className="space-y-6 relative">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -379,7 +378,7 @@ export default function AdminTopicsPage() {
         </div>
       )}
 
-    </AdminPageLayout>
+    </>
   );
 }
 

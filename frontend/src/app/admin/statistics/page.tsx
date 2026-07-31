@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { AdminPageLayout } from '@/components/layout/AdminPageLayout';
 import { Activity, AlertTriangle, Users, FileText, Clock, ArrowUpRight, ArrowDownRight, Bot, Loader2 } from 'lucide-react';
 import { getSystemStatistics, getEvaluationLogs } from '@/services/users';
 import toast from 'react-hot-toast';
@@ -58,17 +57,14 @@ export default function AdminStatisticsPage() {
 
   if (isLoading) {
     return (
-      <AdminPageLayout>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
-        </div>
-      </AdminPageLayout>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+      </div>
     );
   }
 
   return (
-    <AdminPageLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900">AI System Health & Metrics</h1>
@@ -201,6 +197,5 @@ export default function AdminStatisticsPage() {
         </div>
 
       </div>
-    </AdminPageLayout>
   );
 }

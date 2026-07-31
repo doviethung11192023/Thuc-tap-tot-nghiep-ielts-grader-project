@@ -8,12 +8,14 @@ import uuid
 router = APIRouter()
 
 @router.get("")
-async def list_topics(page: int = 1, limit: int = 10, task_type: str = None, difficulty: str = None, current_user: User = Depends(get_current_user)):
+async def list_topics(page: int = 1, limit: int = 10, task_type: str = None, difficulty: str = None, category: str = None, current_user: User = Depends(get_current_user)):
     query = supabase.table("topics").select("*", count="exact").eq("is_active", True)
     if task_type:
         query = query.eq("task_type", task_type)
     if difficulty:
         query = query.eq("difficulty", difficulty)
+    if category:
+        query = query.eq("category", category)
         
     offset = (page - 1) * limit
     query = query.range(offset, offset + limit - 1)

@@ -3,15 +3,39 @@ import { Timer, Play, Pause, Send, Type } from 'lucide-react';
 
 interface WritingCanvasProps {
   onSubmit: (essayText: string) => void;
+  topicId?: string | null;
+  onUnsavedChanges?: (hasChanges: boolean) => void;
 }
 
-export function WritingCanvas({ onSubmit }: WritingCanvasProps) {
+export function WritingCanvas({ onSubmit, topicId, onUnsavedChanges }: WritingCanvasProps) {
   const [activeTab, setActiveTab] = useState<'timed' | 'paste'>('timed');
   const [text, setText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(40 * 60); // 40 minutes in seconds
 
   const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  
+  // Local storage key based on topicId
+  const draftKey = `draft_essay_${topicId || 'custom'}`;
+
+  // Load draft on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(draftKey);
+    if (savedDraft) {
+      setText(savedDraft);
+    }
+  }, [draftKey]);
+
+  // Save draft and notify parent on text change
+  useEffect(() => {
+    if (text.trim().length > 0) {
+      localStorage.setItem(draftKey, text);
+      onUnsavedChanges?.(true);
+    } else {
+      localStorage.removeItem(draftKey);
+      onUnsavedChanges?.(false);
+    }
+  }, [text, draftKey, onUnsavedChanges]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -24,11 +48,13 @@ export function WritingCanvas({ onSubmit }: WritingCanvasProps) {
       setIsRunning(false);
       // Auto submit when time is up
       if (text.trim().length > 0) {
+        localStorage.removeItem(draftKey);
+        onUnsavedChanges?.(false);
         onSubmit(text);
       }
     }
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft, onSubmit, text]);
+  }, [isRunning, timeLeft, onSubmit, text, draftKey, onUnsavedChanges]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -91,7 +117,11 @@ export function WritingCanvas({ onSubmit }: WritingCanvasProps) {
 
           {/* Submit Button */}
           <button
-            onClick={() => onSubmit(text)}
+            onClick={() => {
+              localStorage.removeItem(draftKey);
+              onUnsavedChanges?.(false);
+              onSubmit(text);
+            }}
             disabled={wordCount === 0}
             className="flex items-center gap-2 bg-[#932120] text-white px-5 py-2 rounded-full text-sm font-bold shadow-sm hover:bg-[#7a1a19] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

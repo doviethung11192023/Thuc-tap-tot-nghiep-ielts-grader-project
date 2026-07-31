@@ -185,14 +185,14 @@ function CriterionDetailTab({
         <div className="bg-green-50/50 border border-green-100 p-4 rounded-xl">
           <h4 className="text-xs font-bold uppercase tracking-wider text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Ưu điểm</h4>
           <ul className="list-disc pl-4 space-y-1 text-sm text-green-900">
-            {((criteriaData.feedback?.strengths as string[] | undefined) || ((criteriaData as Record<string, unknown>).strengths as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
+            {((criteriaData.feedback?.strengths as string[] | undefined) || ((criteriaData as unknown as Record<string, unknown>).strengths as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
           </ul>
         </div>
         
         <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl">
           <h4 className="text-xs font-bold uppercase tracking-wider text-red-800 mb-2 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Cần cải thiện</h4>
           <ul className="list-disc pl-4 space-y-1 text-sm text-red-900">
-            {((criteriaData.feedback?.areas_to_improve as string[] | undefined) || ((criteriaData as Record<string, unknown>).areas_to_improve as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
+            {((criteriaData.feedback?.areas_to_improve as string[] | undefined) || ((criteriaData as unknown as Record<string, unknown>).areas_to_improve as string[] | undefined) || []).map((s: string, i: number) => <li key={i}>{s}</li>)}
           </ul>
         </div>
       </div>

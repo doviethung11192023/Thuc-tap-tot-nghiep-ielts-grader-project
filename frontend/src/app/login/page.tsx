@@ -10,8 +10,17 @@ import toast from 'react-hot-toast';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  React.useEffect(() => {
+    const rememberedEmail = localStorage.getItem('remembered_email');
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +39,43 @@ export default function LoginPage() {
 
       if (data.session) {
         localStorage.setItem("supabase_access_token", data.session.access_token);
+        
+        if (rememberMe) {
+          localStorage.setItem('remembered_email', email);
+        } else {
+          localStorage.removeItem('remembered_email');
+        }
+
+        // Handle pending registration if exists
+        const pendingName = localStorage.getItem('pending_user_name');
+        if (pendingName) {
+          try {
+            await supabase.from('users').insert({
+              id: data.session.user.id,
+              email: data.session.user.email || email,
+              full_name: pendingName,
+              role: 'student'
+            });
+            localStorage.removeItem('pending_user_name');
+            localStorage.removeItem('pending_user_email');
+          } catch (e) {
+            console.error("Failed to insert pending user:", e);
+          }
+        }
+
         toast.success('Đăng nhập thành công!');
-        router.push('/dashboard');
+        
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', data.session.user.id)
+          .single();
+          
+        if (userData?.role === 'admin') {
+          router.push('/admin/statistics');
+        } else {
+          router.push('/history');
+        }
       }
     } catch (err) {
       console.error(err);
@@ -104,6 +148,8 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-[#932120] focus:ring-[#932120] border-zinc-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-900">
@@ -112,9 +158,9 @@ export default function LoginPage() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-[#932120] hover:text-[#7a1a19]">
+                <Link href="/forgot-password" className="font-medium text-[#932120] hover:text-[#7a1a19]">
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 

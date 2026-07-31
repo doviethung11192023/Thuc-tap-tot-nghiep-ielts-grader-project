@@ -1,7 +1,6 @@
 "use client";
 
 import React, { use, useState, useCallback, useEffect } from 'react';
-import { StudentPageLayout } from '@/components/layout/StudentPageLayout';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { EssayHighlighter, HighlightLegend } from '@/components/workspace/EssayHighlighter';
@@ -42,8 +41,7 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
   }, []);
 
   return (
-    <StudentPageLayout>
-      <div className="h-[calc(100vh-8rem)] flex flex-col">
+    <div className="h-[calc(100vh-8rem)] flex flex-col">
         <div className="mb-4 flex items-center gap-4">
           <Link href="/dashboard" className="p-2 bg-white border border-zinc-200 rounded-full hover:bg-zinc-50 text-zinc-600 transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -106,6 +104,5 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
           )}
         </div>
       </div>
-    </StudentPageLayout>
   );
 }

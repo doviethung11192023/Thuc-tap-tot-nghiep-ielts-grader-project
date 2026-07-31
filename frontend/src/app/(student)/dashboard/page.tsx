@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { StudentPageLayout } from '@/components/layout/StudentPageLayout';
 import { TrendingUp, Clock, Target, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getEssayHistory } from '@/services/essays';
@@ -36,17 +35,14 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <StudentPageLayout>
-        <div className="flex justify-center items-center h-[60vh]">
-          <Loader2 className="w-10 h-10 animate-spin text-[#932120]" />
-        </div>
-      </StudentPageLayout>
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#932120]" />
+      </div>
     );
   }
 
   return (
-    <StudentPageLayout>
-      <div className="space-y-8">
+    <div className="space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900">Dashboard</h1>
@@ -119,7 +115,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </StudentPageLayout>
   );
 }
 

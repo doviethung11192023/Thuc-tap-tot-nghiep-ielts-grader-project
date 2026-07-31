@@ -1,10 +1,16 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { BookOpen, LayoutDashboard, Library, User, LogOut } from 'lucide-react';
+import { AuthGuard } from '@/components/guards/AuthGuard';
+import { useAuth } from '@/hooks/useAuth';
 
 export function StudentPageLayout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
+    <AuthGuard>
+      <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
       {/* Top Navigation */}
       <header className="bg-[#932120] text-white shadow-md sticky top-0 z-50">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,6 +40,14 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
         {/* Sidebar */}
         <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200">
           <nav className="space-y-2">
+            {user?.role === 'admin' && (
+              <div className="mb-6">
+                <Link href="/admin/statistics" className="flex items-center gap-3 px-4 py-3 text-[#932120] bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors font-bold shadow-sm">
+                  <LayoutDashboard className="w-5 h-5" />
+                  Về trang Quản trị
+                </Link>
+              </div>
+            )}
             <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
               <LayoutDashboard className="w-5 h-5 text-zinc-400" />
               Dashboard
@@ -64,6 +78,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

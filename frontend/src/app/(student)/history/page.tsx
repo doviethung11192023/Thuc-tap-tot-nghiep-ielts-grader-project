@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { StudentPageLayout } from '@/components/layout/StudentPageLayout';
 import { Search, Filter, ArrowRight, Loader2, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { getEssayHistory } from '@/services/essays';
@@ -38,8 +37,7 @@ export default function HistoryPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <StudentPageLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900">Lịch sử làm bài</h1>
@@ -177,6 +175,5 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
-    </StudentPageLayout>
   );
 }

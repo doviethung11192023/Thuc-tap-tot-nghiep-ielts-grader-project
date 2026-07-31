@@ -8,14 +8,17 @@ import { EssayHighlighter, HighlightLegend } from "./EssayHighlighter";
 import { getEssayResults, submitEssay } from "@/services/essays";
 import { mapApiResultToGradingResult } from "@/lib/adapters";
 import { GradingResult, InlineAnnotation } from "@/types";
-import { BookOpen, RefreshCw } from "lucide-react";
+import { BookOpen, RefreshCw, AlertTriangle, Save, Trash2, X } from "lucide-react";
 import { ScoreSidebar, CriterionTab } from "./ScoreSidebar";
 import { useRealtimeEssayStatus } from "@/hooks/useRealtimeEssayStatus";
 import toast from "react-hot-toast";
+import { AuthGuard } from '@/components/guards/AuthGuard';
+import { useRouter } from "next/navigation";
 
 type WorkspaceState = "writing" | "grading" | "results";
 
 export function WorkspaceLayout() {
+  const router = useRouter();
   const [state, setState] = useState<WorkspaceState>("writing");
   const [result, setResult] = useState<GradingResult | null>(null);
   const [submittedText, setSubmittedText] = useState("");
@@ -23,6 +26,10 @@ export function WorkspaceLayout() {
   // Custom Topic / System Topic state
   const [topicId, setTopicId] = useState<string | null>(null);
   const [taskType, setTaskType] = useState<"task1" | "task2">("task2");
+
+  // Exit & Draft state
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const [activeCriterion, setActiveCriterion] = useState<CriterionTab>("OVERALL");
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
@@ -140,9 +147,45 @@ export function WorkspaceLayout() {
     setActiveAnnotationId(ann.id);
   }, []);
 
+  // Handle hard navigation (F5, close tab)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if ((state === "writing" && hasUnsavedChanges) || state === "grading") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [state, hasUnsavedChanges]);
+
+  // Handle soft navigation (Exit button)
+  const handleExitClick = () => {
+    if (state === "writing" && hasUnsavedChanges) {
+      setShowExitModal(true);
+    } else if (state === "grading") {
+      setShowExitModal(true);
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
+  const confirmExit = (action: "discard" | "save" | "wait") => {
+    if (action === "discard") {
+      localStorage.removeItem(`draft_essay_${topicId || 'custom'}`);
+      router.push("/dashboard");
+    } else if (action === "save") {
+      // Auto-save already handles saving, just route
+      router.push("/dashboard");
+    } else if (action === "wait") {
+      setShowExitModal(false);
+    }
+  };
+
   return (
-    <div className="h-screen w-full flex flex-col bg-zinc-50 overflow-hidden font-sans">
-      <Header />
+    <AuthGuard>
+      <div className="h-screen w-full flex flex-col bg-zinc-50 overflow-hidden font-sans">
+        <Header onExitClick={handleExitClick} />
       <div className="flex-1 flex overflow-hidden relative">
         <QuestionPanel 
           onTopicChange={setTopicId} 
@@ -153,7 +196,11 @@ export function WorkspaceLayout() {
         <div className="flex-1 relative overflow-hidden flex flex-col bg-white shadow-[0_0_40px_rgba(0,0,0,0.05)] z-10">
           {state === "writing" && (
             <div className="absolute inset-0 z-10 bg-white">
-              <WritingCanvas onSubmit={handleSubmit} />
+              <WritingCanvas 
+                onSubmit={handleSubmit} 
+                topicId={topicId}
+                onUnsavedChanges={setHasUnsavedChanges}
+              />
             </div>
           )}
           {state === "grading" && (
@@ -203,7 +250,59 @@ export function WorkspaceLayout() {
           )}
         </div>
       </div>
-    </div>
+
+      {/* EXIT MODAL */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-[450px] shadow-2xl p-6 relative animate-in fade-in zoom-in duration-200">
+            <button onClick={() => setShowExitModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-zinc-900">
+                  {state === "grading" ? "AI Đang Chấm Điểm" : "Xác Nhận Thoát"}
+                </h3>
+                <p className="text-sm text-zinc-500 mt-1">
+                  {state === "grading" 
+                    ? "Bài của bạn đã được lưu và AI đang phân tích. Nếu thoát bây giờ, bạn có thể xem lại kết quả sau trong Lịch Sử."
+                    : "Bạn có bài viết đang làm dở. Thời gian thi sẽ không được bảo lưu nếu bạn thoát."}
+                </p>
+              </div>
+            </div>
+            
+            {state === "grading" ? (
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setShowExitModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors">
+                  Tiếp tục chờ
+                </button>
+                <button onClick={() => router.push("/dashboard")} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#932120] hover:bg-[#7a1a19] transition-colors shadow-md">
+                  Về trang chủ
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <button onClick={() => confirmExit("save")} className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] transition-colors shadow-md">
+                  <Save className="w-4 h-4" /> Lưu bản nháp & Thoát
+                </button>
+                <button onClick={() => confirmExit("discard")} className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
+                  <Trash2 className="w-4 h-4" /> Xóa bản nháp & Thoát
+                </button>
+                <button onClick={() => setShowExitModal(false)} className="w-full px-5 py-3 rounded-xl text-sm font-semibold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors mt-2">
+                  Hủy, ở lại làm bài
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      </div>
+    </AuthGuard>
   );
 }
 
