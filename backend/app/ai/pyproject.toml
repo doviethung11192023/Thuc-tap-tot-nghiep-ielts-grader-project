@@ -1,0 +1,35 @@
+[project]
+name = "ielts-tutor"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    # ── Core pipeline ──────────────────────────────────────
+    "openai>=1.55.0",
+    "google-generativeai>=0.8.3",
+    "python-dotenv>=1.0.0",
+    # ── NLP tools ──────────────────────────────────────────
+    "language-tool-python==3.4.0",
+    "nltk>=3.9.1",
+    "spacy>=3.7.0",
+    # ── Data / evaluation ──────────────────────────────────
+    "pandas>=2.0.0",
+    "numpy>=1.26.0",
+    "tqdm>=4.67.0",
+    "openpyxl>=3.1.5",
+    "langfuse>=4.14.0",
+    "pydantic-settings>=2.14.2",
+    # ── API server + tunnel ────────────────────────────────
+    "fastapi>=0.115.0",
+    "uvicorn>=0.32.0",
+    "pyngrok>=7.2.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["handler*", "schemas*", "settings*", "utils*", "services*"]

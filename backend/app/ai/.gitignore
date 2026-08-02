@@ -1,0 +1,13 @@
+.env
+__pycache__
+.pytest_cache
+.venv
+data
+
+# Test/debug outputs
+test_final_output.json
+4_llms_feedback.json
+raw_llm.json
+result.html
+test_visualization.html
+*.ipynb
