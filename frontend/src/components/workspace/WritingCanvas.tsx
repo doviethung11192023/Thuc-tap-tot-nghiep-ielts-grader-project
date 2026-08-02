@@ -26,15 +26,18 @@ export function WritingCanvas({ onSubmit, topicId, onUnsavedChanges }: WritingCa
     }
   }, [draftKey]);
 
-  // Save draft and notify parent on text change
+  // Save draft and notify parent on text change (Debounced)
   useEffect(() => {
-    if (text.trim().length > 0) {
-      localStorage.setItem(draftKey, text);
-      onUnsavedChanges?.(true);
-    } else {
-      localStorage.removeItem(draftKey);
-      onUnsavedChanges?.(false);
-    }
+    const timer = setTimeout(() => {
+      if (text.trim().length > 0) {
+        localStorage.setItem(draftKey, text);
+        onUnsavedChanges?.(true);
+      } else {
+        localStorage.removeItem(draftKey);
+        onUnsavedChanges?.(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [text, draftKey, onUnsavedChanges]);
 
   useEffect(() => {

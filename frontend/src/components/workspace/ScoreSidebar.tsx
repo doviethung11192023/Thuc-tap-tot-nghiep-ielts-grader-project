@@ -9,9 +9,11 @@ interface ScoreSidebarProps {
   activeCriterion: CriterionTab;
   setActiveCriterion: (tab: CriterionTab) => void;
   activeAnnotationId: string | null;
+  setActiveAnnotationId?: (id: string | null) => void;
+  activeTypes?: string[];
 }
 
-export function ScoreSidebar({ result, activeCriterion, setActiveCriterion, activeAnnotationId }: ScoreSidebarProps) {
+export const ScoreSidebar = React.memo(function ScoreSidebar({ result, activeCriterion, setActiveCriterion, activeAnnotationId, activeTypes = ['error', 'logic_issue', 'upgrade', 'strength'] }: ScoreSidebarProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,7 +75,11 @@ export function ScoreSidebar({ result, activeCriterion, setActiveCriterion, acti
           <CriterionDetailTab 
             criteriaData={getCriteriaData(activeCriterion)!} 
             criteriaBand={getCriteriaBand(activeCriterion)}
-            annotations={result.inline_annotations.filter(a => a.category === activeCriterion)}
+            annotations={result.inline_annotations.filter(a => {
+              if (a.category !== activeCriterion) return false;
+              if (!activeTypes.includes(a.type)) return false;
+              return true;
+            })}
             activeAnnotationId={activeAnnotationId}
             criterionName={tabs.find(t => t.id === activeCriterion)?.tooltip || ""}
           />
@@ -81,7 +87,7 @@ export function ScoreSidebar({ result, activeCriterion, setActiveCriterion, acti
       </div>
     </div>
   );
-}
+});
 
 // ────────────────────────────────────────────────────────────
 // TAB: OVERALL
@@ -236,7 +242,7 @@ function AnnotationCard({ annotation, isActive }: { annotation: InlineAnnotation
         </span>
       </div>
       
-      {annotation.original_text && (
+      {annotation.type !== 'strength' && annotation.original_text && (
         <div className="mb-3 flex items-center gap-2 flex-wrap text-sm">
           <span className={`line-through font-medium bg-white/60 px-1 rounded ${textCls}`}>{annotation.original_text}</span>
           {annotation.corrected_text && (

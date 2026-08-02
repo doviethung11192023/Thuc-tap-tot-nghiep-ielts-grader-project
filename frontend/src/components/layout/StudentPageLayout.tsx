@@ -5,9 +5,17 @@ import Link from 'next/link';
 import { BookOpen, LayoutDashboard, Library, User, LogOut } from 'lucide-react';
 import { AuthGuard } from '@/components/guards/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { useGradingNotifications } from '@/hooks/useGradingNotifications';
+import { usePathname } from 'next/navigation';
 
 export function StudentPageLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const pathname = usePathname();
+  useGradingNotifications();
+
+  const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
@@ -28,6 +36,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium hidden md:block">Student Portal</span>
+              <NotificationBell />
               <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-white/40 transition-colors">
                 <User className="w-4 h-4" />
               </div>
@@ -48,20 +57,20 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
             )}
-            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
-              <LayoutDashboard className="w-5 h-5 text-zinc-400" />
+            <Link href="/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/dashboard') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <LayoutDashboard className={`w-5 h-5 ${isActive('/dashboard') ? 'text-red-200' : 'text-zinc-400'}`} />
               Dashboard
             </Link>
-            <Link href="/topics" className="flex items-center gap-3 px-4 py-3 text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
-              <Library className="w-5 h-5 text-zinc-400" />
+            <Link href="/topics" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/topics') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <Library className={`w-5 h-5 ${isActive('/topics') ? 'text-red-200' : 'text-zinc-400'}`} />
               Ngân hàng đề thi
             </Link>
-            <Link href="/history" className="flex items-center gap-3 px-4 py-3 text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
-              <BookOpen className="w-5 h-5 text-zinc-400" />
+            <Link href="/history" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/history') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <BookOpen className={`w-5 h-5 ${isActive('/history') ? 'text-red-200' : 'text-zinc-400'}`} />
               Lịch sử làm bài
             </Link>
-            <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
-              <User className="w-5 h-5 text-zinc-400" />
+            <Link href="/profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <User className={`w-5 h-5 ${isActive('/profile') ? 'text-red-200' : 'text-zinc-400'}`} />
               Hồ sơ cá nhân
             </Link>
           </nav>

@@ -26,7 +26,12 @@ export default function ResetPasswordPage() {
       });
 
       if (error) {
-        toast.error('Cập nhật mật khẩu thất bại: ' + error.message);
+        if (error.message.toLowerCase().includes('session') || error.message.toLowerCase().includes('token')) {
+          toast.error('Phiên bản khôi phục không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu lại.');
+          router.push('/forgot-password');
+        } else {
+          toast.error('Cập nhật mật khẩu thất bại: ' + error.message);
+        }
       } else {
         toast.success('Cập nhật mật khẩu thành công!');
         router.push('/login');

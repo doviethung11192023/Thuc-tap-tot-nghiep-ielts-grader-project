@@ -5,6 +5,7 @@ from app.db.supabase import supabase
 from app.worker.tasks import evaluate_essay_task
 import uuid
 from datetime import datetime
+import json
 
 router = APIRouter()
 
@@ -48,6 +49,11 @@ async def submit_essay(request: Request, essay: EssayCreate, background_tasks: B
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
+    # Invalidate cache
+    keys = await request.app.state.redis.keys(f"essays:list:{current_user.id}:*")
+    if keys:
+        await request.app.state.redis.delete(*keys)
+        
     return {
         "meta": {"code": 202, "message": "Essay submitted successfully and is being evaluated."},
         "data": {
@@ -88,7 +94,13 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
     }
 
 @router.get("")
-async def list_essays(page: int = 1, limit: int = 10, status: str = None, current_user: User = Depends(get_current_user)):
+async def list_essays(request: Request, page: int = 1, limit: int = 10, status: str = None, current_user: User = Depends(get_current_user)):
+    redis = request.app.state.redis
+    cache_key = f"essays:list:{current_user.id}:{page}:{limit}:{status}"
+    cached = await redis.get(cache_key)
+    if cached:
+        return json.loads(cached)
+
     query = supabase.table("essays").select("*, topics(title), evaluation_results(overall_band)", count="exact").eq("user_id", current_user.id).order("submitted_at", desc=True)
     if status:
         query = query.eq("status", status)
@@ -119,7 +131,7 @@ async def list_essays(page: int = 1, limit: int = 10, status: str = None, curren
             
         items.append(item)
     
-    return {
+    result = {
         "meta": {"code": 200, "message": "Success"},
         "data": {
             "items": items,
@@ -127,3 +139,5 @@ async def list_essays(page: int = 1, limit: int = 10, status: str = None, curren
             "page": page
         }
     }
+    await redis.setex(cache_key, 60, json.dumps(result))
+    return result

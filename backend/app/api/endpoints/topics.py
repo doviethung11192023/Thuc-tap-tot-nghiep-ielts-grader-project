@@ -1,14 +1,21 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
 from typing import Optional
 from app.schemas.topic import TopicCreate, TopicUpdate, TopicResponse
 from app.core.security import require_admin, get_current_user, User
 from app.db.supabase import supabase
 import uuid
+import json
 
 router = APIRouter()
 
 @router.get("")
-async def list_topics(page: int = 1, limit: int = 10, task_type: str = None, difficulty: str = None, category: str = None, current_user: User = Depends(get_current_user)):
+async def list_topics(request: Request, page: int = 1, limit: int = 10, task_type: str = None, difficulty: str = None, category: str = None, current_user: User = Depends(get_current_user)):
+    redis = request.app.state.redis
+    cache_key = f"topics:list:{page}:{limit}:{task_type}:{difficulty}:{category}"
+    cached = await redis.get(cache_key)
+    if cached:
+        return json.loads(cached)
+
     query = supabase.table("topics").select("*", count="exact").eq("is_active", True)
     if task_type:
         query = query.eq("task_type", task_type)
@@ -21,7 +28,7 @@ async def list_topics(page: int = 1, limit: int = 10, task_type: str = None, dif
     query = query.range(offset, offset + limit - 1)
     res = query.execute()
     
-    return {
+    result = {
         "meta": {"code": 200, "message": "Success"},
         "data": {
             "items": res.data,
@@ -30,9 +37,11 @@ async def list_topics(page: int = 1, limit: int = 10, task_type: str = None, dif
             "limit": limit
         }
     }
+    await redis.setex(cache_key, 300, json.dumps(result))
+    return result
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-async def create_topic(topic: TopicCreate, current_user: User = Depends(require_admin)):
+async def create_topic(request: Request, topic: TopicCreate, current_user: User = Depends(require_admin)):
     # Auto-create mock user in DB if not exists
     user_res = supabase.table("users").select("id").eq("id", current_user.id).execute()
     if not user_res.data:
@@ -51,6 +60,11 @@ async def create_topic(topic: TopicCreate, current_user: User = Depends(require_
     
     try:
         res = supabase.table("topics").insert(topic_data).execute()
+        # Invalidate cache
+        keys = await request.app.state.redis.keys("topics:list:*")
+        if keys:
+            await request.app.state.redis.delete(*keys)
+
         return {
             "meta": {"code": 201, "message": "Topic created successfully"},
             "data": {"topic_id": res.data[0]["id"]}
@@ -59,7 +73,7 @@ async def create_topic(topic: TopicCreate, current_user: User = Depends(require_
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{topic_id}")
-async def update_topic(topic_id: str, topic: TopicUpdate, current_user: User = Depends(require_admin)):
+async def update_topic(request: Request, topic_id: str, topic: TopicUpdate, current_user: User = Depends(require_admin)):
     update_data = {k: v for k, v in topic.model_dump().items() if v is not None}
     if not update_data:
         return {"meta": {"code": 200, "message": "Nothing to update"}}
@@ -68,9 +82,19 @@ async def update_topic(topic_id: str, topic: TopicUpdate, current_user: User = D
     if not res.data:
         raise HTTPException(status_code=404, detail="Topic not found")
         
+    # Invalidate cache
+    keys = await request.app.state.redis.keys("topics:list:*")
+    if keys:
+        await request.app.state.redis.delete(*keys)
+
     return {"meta": {"code": 200, "message": "Topic updated successfully"}}
 
 @router.delete("/{topic_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_topic(topic_id: str, current_user: User = Depends(require_admin)):
+async def delete_topic(request: Request, topic_id: str, current_user: User = Depends(require_admin)):
     supabase.table("topics").update({"is_active": False}).eq("id", topic_id).execute()
+    
+    # Invalidate cache
+    keys = await request.app.state.redis.keys("topics:list:*")
+    if keys:
+        await request.app.state.redis.delete(*keys)
     return

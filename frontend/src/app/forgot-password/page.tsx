@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +21,14 @@ export default function ForgotPasswordPage() {
       });
 
       if (error) {
-        toast.error('Gửi email khôi phục thất bại: ' + error.message);
+        if (error.message.toLowerCase().includes('rate limit') || error.status === 429) {
+          toast.error('Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau 1 tiếng.');
+        } else {
+          toast.error('Gửi email khôi phục thất bại: ' + error.message);
+        }
       } else {
         toast.success('Email khôi phục mật khẩu đã được gửi!');
+        setIsSuccess(true);
       }
     } catch (err) {
       console.error(err);
@@ -31,6 +37,25 @@ export default function ForgotPasswordPage() {
       setLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-zinc-100 text-center">
+            <MailCheck className="w-16 h-16 text-[#932120] mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-zinc-900 mb-2">Đã gửi email khôi phục!</h2>
+            <p className="text-zinc-600 mb-6">
+              Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến <strong>{email}</strong>. Vui lòng kiểm tra hộp thư đến hoặc thư mục Spam.
+            </p>
+            <Link href="/login" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#932120] transition-all">
+              Trở về trang Đăng nhập
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">

@@ -14,6 +14,7 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
   
   const [activeCriterion, setActiveCriterion] = useState<CriterionTab>("OVERALL");
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [activeTypes, setActiveTypes] = useState<string[]>(['error', 'logic_issue', 'upgrade', 'strength']);
   const [result, setResult] = useState<GradingResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +79,10 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
               {/* Trái: Phần bài làm */}
               <div className="flex-1 flex flex-col relative overflow-hidden bg-white z-10">
                 <div className="px-6 py-3 border-b border-zinc-100 shrink-0 bg-zinc-50/50">
-                  <HighlightLegend />
+                  <HighlightLegend 
+                    activeTypes={activeTypes}
+                    onTypesChange={setActiveTypes}
+                  />
                 </div>
                 <div className="flex-1 px-10 py-8 overflow-y-auto">
                   <EssayHighlighter
@@ -87,6 +91,7 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
                     onAnnotationClick={handleAnnotationClick}
                     activeAnnotationId={activeAnnotationId}
                     activeCategoryFilter={activeCriterion === "OVERALL" ? null : activeCriterion}
+                    activeTypes={activeTypes}
                   />
                 </div>
               </div>
@@ -98,6 +103,8 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
                   activeCriterion={activeCriterion}
                   setActiveCriterion={setActiveCriterion}
                   activeAnnotationId={activeAnnotationId}
+                  setActiveAnnotationId={setActiveAnnotationId}
+                  activeTypes={activeTypes}
                 />
               </div>
             </>

@@ -1,8 +1,14 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { BookOpen, Users, Library, Activity, BarChart, LogOut } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export function AdminPageLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
+
   return (
     <div className="min-h-screen bg-zinc-100 font-sans flex">
       {/* Red Sidebar */}
@@ -20,20 +26,20 @@ export function AdminPageLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          <Link href="/admin/statistics" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 hover:text-white transition-colors group">
-            <BarChart className="w-5 h-5 text-red-200 group-hover:text-white transition-colors" />
+          <Link href="/admin/statistics" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${isActive('/admin/statistics') ? 'bg-white/20 text-white font-bold shadow-sm' : 'hover:bg-white/10 hover:text-white text-red-100'}`}>
+            <BarChart className={`w-5 h-5 transition-colors ${isActive('/admin/statistics') ? 'text-white' : 'text-red-200 group-hover:text-white'}`} />
             <span className="font-medium text-sm">Thống kê</span>
           </Link>
-          <Link href="/admin/topics" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 hover:text-white transition-colors group">
-            <Library className="w-5 h-5 text-red-200 group-hover:text-white transition-colors" />
+          <Link href="/admin/topics" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${isActive('/admin/topics') ? 'bg-white/20 text-white font-bold shadow-sm' : 'hover:bg-white/10 hover:text-white text-red-100'}`}>
+            <Library className={`w-5 h-5 transition-colors ${isActive('/admin/topics') ? 'text-white' : 'text-red-200 group-hover:text-white'}`} />
             <span className="font-medium text-sm">Quản lý Đề thi</span>
           </Link>
-          <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 hover:text-white transition-colors group">
-            <Users className="w-5 h-5 text-red-200 group-hover:text-white transition-colors" />
+          <Link href="/admin/users" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${isActive('/admin/users') ? 'bg-white/20 text-white font-bold shadow-sm' : 'hover:bg-white/10 hover:text-white text-red-100'}`}>
+            <Users className={`w-5 h-5 transition-colors ${isActive('/admin/users') ? 'text-white' : 'text-red-200 group-hover:text-white'}`} />
             <span className="font-medium text-sm">Quản lý Học viên</span>
           </Link>
-          <Link href="/admin/logs" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 hover:text-white transition-colors group">
-            <Activity className="w-5 h-5 text-red-200 group-hover:text-white transition-colors" />
+          <Link href="/admin/logs" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${isActive('/admin/logs') ? 'bg-white/20 text-white font-bold shadow-sm' : 'hover:bg-white/10 hover:text-white text-red-100'}`}>
+            <Activity className={`w-5 h-5 transition-colors ${isActive('/admin/logs') ? 'text-white' : 'text-red-200 group-hover:text-white'}`} />
             <span className="font-medium text-sm">Hệ thống Logs</span>
           </Link>
           

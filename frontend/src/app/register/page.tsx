@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -11,6 +12,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +26,40 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        toast.error('Đăng ký thất bại: ' + error.message);
+        if (error.message.toLowerCase().includes('rate limit') || error.status === 429) {
+          toast.error('Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau 1 tiếng.');
+        } else if (error.message.toLowerCase().includes('invalid') || error.status === 400) {
+          toast.error('Email không hợp lệ. Vui lòng sử dụng email thật (VD: @gmail.com).');
+        } else {
+          toast.error('Đăng ký thất bại: ' + error.message);
+        }
         return;
       }
 
       if (data.user) {
-        // RLS will block inserting into public.users if the user hasn't verified their email (no session).
-        // Instead of inserting here, we save the name to localStorage and insert it upon first successful login.
         localStorage.setItem('pending_user_name', name);
         localStorage.setItem('pending_user_email', email);
         
-        toast.success('Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác thực.');
+        if (data.session) {
+          // Auto login if email confirmation is disabled
+          toast.success('Đăng ký thành công!');
+          try {
+            await supabase.from('users').insert({
+              id: data.session.user.id,
+              email: data.session.user.email || email,
+              full_name: name,
+              role: 'student'
+            });
+            localStorage.removeItem('pending_user_name');
+            localStorage.removeItem('pending_user_email');
+          } catch (err) {
+            console.error(err);
+          }
+          router.push('/history');
+        } else {
+          // Show check email screen
+          setIsSuccess(true);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -42,6 +68,25 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-zinc-100 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-zinc-900 mb-2">Đăng ký thành công!</h2>
+            <p className="text-zinc-600 mb-6">
+              Chúng tôi đã gửi một email xác thực đến <strong>{email}</strong>. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam) và click vào link xác thực để kích hoạt tài khoản.
+            </p>
+            <Link href="/login" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#932120] transition-all">
+              Trở về trang Đăng nhập
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">

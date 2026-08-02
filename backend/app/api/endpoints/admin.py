@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from app.schemas.admin import UserStatusUpdate
 from app.core.security import require_admin, User
 from app.db.supabase import supabase
 from datetime import datetime
 import uuid
+import json
 
 router = APIRouter()
 
@@ -30,7 +31,13 @@ async def update_user_status(user_id: str, status_update: UserStatusUpdate, curr
     return {"meta": {"code": 200, "message": "User status updated successfully"}}
 
 @router.get("/statistics")
-async def get_statistics(current_user: User = Depends(require_admin)):
+async def get_statistics(request: Request, current_user: User = Depends(require_admin)):
+    redis = request.app.state.redis
+    cache_key = "admin:statistics"
+    cached = await redis.get(cache_key)
+    if cached:
+        return json.loads(cached)
+
     users_count = supabase.table("users").select("*", count="exact").limit(1).execute()
     essays_count = supabase.table("essays").select("*", count="exact").limit(1).execute()
     
@@ -58,7 +65,7 @@ async def get_statistics(current_user: User = Depends(require_admin)):
             "count": day_count.count if hasattr(day_count, 'count') and day_count.count is not None else 0
         })
     
-    return {
+    result = {
         "meta": {"code": 200},
         "data": {
             "total_users": users_count.count if hasattr(users_count, 'count') else 0,
@@ -69,6 +76,9 @@ async def get_statistics(current_user: User = Depends(require_admin)):
             "submissions_trend": trend_data
         }
     }
+    
+    await redis.setex(cache_key, 300, json.dumps(result))
+    return result
 
 @router.get("/evaluations/logs")
 async def get_eval_logs(page: int = 1, limit: int = 10, current_user: User = Depends(require_admin)):

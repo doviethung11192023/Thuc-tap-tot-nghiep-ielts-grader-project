@@ -44,7 +44,7 @@ export function useRealtimeEssayStatus(essayId: string | null) {
         } catch (err) {
           console.error("Polling error:", err);
         }
-      }, 5000);
+      }, 10000);
     };
 
     const stopPolling = () => {

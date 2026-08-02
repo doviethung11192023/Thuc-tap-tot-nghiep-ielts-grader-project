@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import type { InlineAnnotation } from "@/types";
 
 interface EssayHighlighterProps {
@@ -9,6 +9,7 @@ interface EssayHighlighterProps {
   onAnnotationClick?: (annotation: InlineAnnotation) => void;
   activeAnnotationId?: string | null;
   activeCategoryFilter?: string | null;
+  activeTypes?: string[];
 }
 
 // ────────────────────────────────────────────────────────────
@@ -16,17 +17,32 @@ interface EssayHighlighterProps {
 // ────────────────────────────────────────────────────────────
 interface Chunk {
   text: string;
-  annotation: InlineAnnotation | null;
+  annotations: InlineAnnotation[];
   start: number;
   end: number;
 }
 
 function buildChunks(content: string, annotations: InlineAnnotation[]): Chunk[] {
   if (!annotations.length) {
-    return [{ text: content, annotation: null, start: 0, end: content.length }];
+    return [{ text: content, annotations: [], start: 0, end: content.length }];
   }
 
-  // Handle overlaps: Prioritize smaller ranges (more specific), then by type priority
+  // 1. Collect all unique boundaries
+  const boundaries = new Set<number>();
+  boundaries.add(0);
+  boundaries.add(content.length);
+
+  for (const a of annotations) {
+    if (a.position_start >= 0 && a.position_end <= content.length && a.position_start < a.position_end) {
+      boundaries.add(a.position_start);
+      boundaries.add(a.position_end);
+    }
+  }
+
+  const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
+  const chunks: Chunk[] = [];
+
+  // Priority for sorting when multiple annotations overlap
   const PRIORITY: Record<InlineAnnotation["type"], number> = {
     error: 4,
     logic_issue: 3,
@@ -34,52 +50,31 @@ function buildChunks(content: string, annotations: InlineAnnotation[]): Chunk[] 
     strength: 1,
   };
 
-  const sorted = [...annotations]
-    .filter((a) => a.position_start >= 0 && a.position_end <= content.length && a.position_start < a.position_end)
-    .sort((a, b) => {
-      if (a.position_start !== b.position_start) return a.position_start - b.position_start;
+  // 2. Build chunks between adjacent boundaries
+  for (let i = 0; i < sortedBoundaries.length - 1; i++) {
+    const start = sortedBoundaries[i];
+    const end = sortedBoundaries[i + 1];
+
+    if (start === end) continue;
+
+    // Find all annotations that cover this exact chunk
+    const activeAnns = annotations.filter(
+      (a) => a.position_start <= start && a.position_end >= end
+    );
+
+    // Sort activeAnns so the highest priority (or smaller range) is first
+    activeAnns.sort((a, b) => {
       const lenA = a.position_end - a.position_start;
-      const lenB = a.position_end - a.position_start;
+      const lenB = b.position_end - b.position_start;
       if (lenA !== lenB) return lenA - lenB; // Smaller range wins
       return PRIORITY[b.type] - PRIORITY[a.type];
     });
 
-  const merged: InlineAnnotation[] = [];
-  let cursor = 0;
-  for (const a of sorted) {
-    if (a.position_start >= cursor) {
-      merged.push(a);
-      cursor = a.position_end;
-    }
-  }
-
-  const chunks: Chunk[] = [];
-  let pos = 0;
-
-  for (const a of merged) {
-    if (pos < a.position_start) {
-      chunks.push({
-        text: content.slice(pos, a.position_start),
-        annotation: null,
-        start: pos,
-        end: a.position_start,
-      });
-    }
     chunks.push({
-      text: content.slice(a.position_start, a.position_end),
-      annotation: a,
-      start: a.position_start,
-      end: a.position_end,
-    });
-    pos = a.position_end;
-  }
-
-  if (pos < content.length) {
-    chunks.push({
-      text: content.slice(pos),
-      annotation: null,
-      start: pos,
-      end: content.length,
+      text: content.slice(start, end),
+      annotations: activeAnns,
+      start,
+      end,
     });
   }
 
@@ -89,33 +84,43 @@ function buildChunks(content: string, annotations: InlineAnnotation[]): Chunk[] 
 // ────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ────────────────────────────────────────────────────────────
-export function EssayHighlighter({
+export const EssayHighlighter = React.memo(function EssayHighlighter({
   content,
   annotations,
   onAnnotationClick,
   activeAnnotationId,
   activeCategoryFilter,
+  activeTypes = ['error', 'logic_issue', 'upgrade', 'strength'],
 }: EssayHighlighterProps) {
-  const filteredAnnotations = activeCategoryFilter
-    ? annotations.filter((a) => a.category === activeCategoryFilter)
-    : annotations;
+  const filteredAnnotations = annotations.filter((a) => {
+    if (activeCategoryFilter && a.category !== activeCategoryFilter) return false;
+    if (!activeTypes.includes(a.type)) return false;
+    return true;
+  });
 
-  const chunks = buildChunks(content, filteredAnnotations);
+  const chunks = useMemo(
+    () => buildChunks(content, filteredAnnotations),
+    [content, filteredAnnotations]
+  );
 
   return (
     <div className="relative">
       <p className="text-zinc-800 text-[15px] leading-[1.9] whitespace-pre-wrap font-sans">
         {chunks.map((chunk, i) => {
-          if (!chunk.annotation) {
+          if (chunk.annotations.length === 0) {
             return <span key={i}>{chunk.text}</span>;
           }
 
-          const ann = chunk.annotation;
-          const isActive = activeAnnotationId === ann.id;
+          // Check if ANY annotation in this chunk is currently active in the sidebar
+          const activeAnn = chunk.annotations.find((a) => a.id === activeAnnotationId);
+          const isAnyActive = !!activeAnn;
+
+          // Primary annotation for styling (if an overlapping one is active, use it; otherwise use the highest priority one)
+          const primaryAnn = activeAnn || chunk.annotations[0];
 
           // 4 Tones Design
           let styleClass = "";
-          switch (ann.type) {
+          switch (primaryAnn.type) {
             case "error":
               styleClass = "bg-red-100 text-red-900 border-b-2 border-red-200";
               break;
@@ -133,13 +138,14 @@ export function EssayHighlighter({
           return (
             <span
               key={i}
-              onClick={() => onAnnotationClick?.(ann)}
+              onClick={() => onAnnotationClick?.(primaryAnn)}
               className={[
                 "cursor-pointer rounded-sm transition-all duration-200 px-0.5",
                 styleClass,
-                isActive ? "ring-2 ring-offset-2 ring-zinc-400 shadow-sm brightness-95" : "hover:brightness-95",
+                isAnyActive ? "ring-2 ring-offset-2 ring-zinc-400 shadow-sm brightness-95" : "hover:brightness-95",
+                chunk.annotations.length > 1 && !isAnyActive ? "border-b-[3px]" : "" // Visual hint for multiple overlaps
               ].join(" ")}
-              title={ann.title || "Nhấn để xem chi tiết"}
+              title={chunk.annotations.map(a => `[${a.type.toUpperCase()}] ${a.title || 'Nhận xét'}`).join('\n──────────\n')}
             >
               {chunk.text}
             </span>
@@ -148,30 +154,67 @@ export function EssayHighlighter({
       </p>
     </div>
   );
-}
+});
 
 // ────────────────────────────────────────────────────────────
 // LEGEND
 // ────────────────────────────────────────────────────────────
-export function HighlightLegend() {
+export const HighlightLegend = React.memo(function HighlightLegend({
+  activeTypes = ['error', 'logic_issue', 'upgrade', 'strength'],
+  onTypesChange
+}: {
+  activeTypes?: string[];
+  onTypesChange?: (types: string[]) => void;
+}) {
   const items = [
-    { bg: "bg-red-100", border: "border-red-400", text: "text-red-700", label: "Lỗi cần sửa" },
-    { bg: "bg-orange-100", border: "border-orange-400", text: "text-orange-800", label: "Lập luận / Logic" },
-    { bg: "bg-purple-50 border-dotted", border: "border-purple-500", text: "text-purple-700", label: "Nâng cấp từ vựng" },
-    { bg: "bg-green-100", border: "border-green-400", text: "text-green-800", label: "Điểm sáng" },
+    { type: "error", bg: "bg-red-100", border: "border-red-400", text: "text-red-700", label: "Lỗi cần sửa" },
+    { type: "logic_issue", bg: "bg-orange-100", border: "border-orange-400", text: "text-orange-800", label: "Lập luận / Logic" },
+    { type: "upgrade", bg: "bg-purple-50 border-dotted", border: "border-purple-500", text: "text-purple-700", label: "Nâng cấp từ vựng" },
+    { type: "strength", bg: "bg-green-100", border: "border-green-400", text: "text-green-800", label: "Điểm sáng" },
   ];
 
+  const handleToggle = (type: string) => {
+    if (!onTypesChange) return;
+    if (activeTypes.includes(type)) {
+      onTypesChange(activeTypes.filter(t => t !== type));
+    } else {
+      onTypesChange([...activeTypes, type]);
+    }
+  };
+
+  const isAllActive = activeTypes.length === items.length;
+  const toggleAll = () => {
+    if (!onTypesChange) return;
+    if (isAllActive) {
+      onTypesChange([]); // Deselect all
+    } else {
+      onTypesChange(items.map(i => i.type)); // Select all
+    }
+  };
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {items.map((item) => (
-        <span
-          key={item.label}
-          className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${item.bg} ${item.border} ${item.text}`}
-        >
-          <span className={`w-2 h-2 rounded-full ${item.bg} border ${item.border}`} />
-          {item.label}
-        </span>
-      ))}
+    <div className="flex flex-wrap gap-2 items-center">
+      <button
+        onClick={toggleAll}
+        className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all duration-200 ${isAllActive ? "bg-zinc-800 text-white border-zinc-800" : "bg-white text-zinc-500 border-zinc-300 hover:bg-zinc-100"} `}
+      >
+        Tất cả
+      </button>
+      <div className="w-[1px] h-4 bg-zinc-300 mx-1"></div>
+
+      {items.map((item) => {
+        const isActive = activeTypes.includes(item.type);
+        return (
+          <button
+            key={item.label}
+            onClick={() => handleToggle(item.type)}
+            className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-all duration-200 hover:brightness-95 ${item.bg} ${item.border} ${item.text} ${!isActive ? "opacity-40 grayscale" : ""}`}
+          >
+            <span className={`w-2 h-2 rounded-full ${item.bg} border ${item.border}`} />
+            {item.label}
+          </button>
+        );
+      })}
     </div>
   );
-}
+});

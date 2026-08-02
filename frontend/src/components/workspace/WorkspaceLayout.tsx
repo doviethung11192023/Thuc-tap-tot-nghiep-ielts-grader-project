@@ -4,16 +4,21 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Header } from "./Header";
 import { QuestionPanel } from "./QuestionPanel";
 import { WritingCanvas } from "./WritingCanvas";
-import { EssayHighlighter, HighlightLegend } from "./EssayHighlighter";
 import { getEssayResults, submitEssay } from "@/services/essays";
 import { mapApiResultToGradingResult } from "@/lib/adapters";
 import { GradingResult, InlineAnnotation } from "@/types";
 import { BookOpen, RefreshCw, AlertTriangle, Save, Trash2, X } from "lucide-react";
-import { ScoreSidebar, CriterionTab } from "./ScoreSidebar";
+import type { CriterionTab } from "./ScoreSidebar";
 import { useRealtimeEssayStatus } from "@/hooks/useRealtimeEssayStatus";
 import toast from "react-hot-toast";
 import { AuthGuard } from '@/components/guards/AuthGuard';
+import { useNotificationStore } from '@/stores/notification-store';
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const EssayHighlighter = dynamic(() => import("./EssayHighlighter").then(mod => mod.EssayHighlighter), { ssr: false });
+const HighlightLegend = dynamic(() => import("./EssayHighlighter").then(mod => mod.HighlightLegend), { ssr: false });
+const ScoreSidebar = dynamic(() => import("./ScoreSidebar").then(mod => mod.ScoreSidebar), { ssr: false });
 
 type WorkspaceState = "writing" | "grading" | "results";
 
@@ -33,6 +38,7 @@ export function WorkspaceLayout() {
 
   const [activeCriterion, setActiveCriterion] = useState<CriterionTab>("OVERALL");
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [activeTypes, setActiveTypes] = useState<string[]>(['error', 'logic_issue', 'upgrade', 'strength']);
 
   // Hook realtime tracking status
   const [essayId, setEssayId] = useState<string | null>(null);
@@ -68,6 +74,13 @@ export function WorkspaceLayout() {
       
       // 2. Save essayId to start realtime tracking
       setEssayId(data.essay_id);
+      
+      // 3. Add pending notification
+      useNotificationStore.getState().addNotification({
+        essay_id: data.essay_id,
+        message: "Bài viết đang được AI phân tích...",
+        type: 'grading_pending'
+      });
     } catch (err) {
       console.error(err);
       let errorMsg = "Lỗi khi nộp bài. Vui lòng thử lại.";
@@ -150,7 +163,8 @@ export function WorkspaceLayout() {
   // Handle hard navigation (F5, close tab)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if ((state === "writing" && hasUnsavedChanges) || state === "grading") {
+      // Allow user to leave during grading state
+      if (state === "writing" && hasUnsavedChanges) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -160,7 +174,7 @@ export function WorkspaceLayout() {
   }, [state, hasUnsavedChanges]);
 
   // Handle soft navigation (Exit button)
-  const handleExitClick = () => {
+  const handleExitClick = useCallback(() => {
     if (state === "writing" && hasUnsavedChanges) {
       setShowExitModal(true);
     } else if (state === "grading") {
@@ -168,9 +182,9 @@ export function WorkspaceLayout() {
     } else {
       router.push("/dashboard");
     }
-  };
+  }, [state, hasUnsavedChanges, router]);
 
-  const confirmExit = (action: "discard" | "save" | "wait") => {
+  const confirmExit = useCallback((action: "discard" | "save" | "wait") => {
     if (action === "discard") {
       localStorage.removeItem(`draft_essay_${topicId || 'custom'}`);
       router.push("/dashboard");
@@ -180,7 +194,7 @@ export function WorkspaceLayout() {
     } else if (action === "wait") {
       setShowExitModal(false);
     }
-  };
+  }, [topicId, router]);
 
   return (
     <AuthGuard>
@@ -223,7 +237,10 @@ export function WorkspaceLayout() {
                 </div>
               </div>
               <div className="px-6 py-3 border-b border-zinc-100 shrink-0 bg-zinc-50/50">
-                <HighlightLegend />
+                <HighlightLegend 
+                  activeTypes={activeTypes}
+                  onTypesChange={setActiveTypes}
+                />
               </div>
               <div className="flex-1 px-10 py-8 overflow-y-auto">
                 <EssayHighlighter
@@ -232,6 +249,7 @@ export function WorkspaceLayout() {
                   onAnnotationClick={handleAnnotationClick}
                   activeAnnotationId={activeAnnotationId}
                   activeCategoryFilter={activeCriterion === "OVERALL" ? null : activeCriterion}
+                  activeTypes={activeTypes}
                 />
               </div>
             </div>
@@ -246,6 +264,8 @@ export function WorkspaceLayout() {
               activeCriterion={activeCriterion}
               setActiveCriterion={setActiveCriterion}
               activeAnnotationId={activeAnnotationId}
+              setActiveAnnotationId={setActiveAnnotationId}
+              activeTypes={activeTypes}
             />
           )}
         </div>
@@ -309,14 +329,25 @@ export function WorkspaceLayout() {
 // ────────────────────────────────────────────────────────────
 // LOADER
 function GradingLoader() {
+  const router = useRouter();
+  
   return (
-    <div className="flex flex-col items-center gap-6 text-center px-8">
+    <div className="flex flex-col items-center gap-6 text-center px-8 max-w-md">
       <div className="relative w-20 h-20">
         <div className="absolute inset-0 rounded-full border-4 border-zinc-100" />
         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#932120] animate-spin" />
         <BookOpen className="absolute inset-0 m-auto w-7 h-7 text-[#932120]" />
       </div>
-      <h3 className="text-lg font-bold">AI đang phân tích...</h3>
+      <div>
+        <h3 className="text-lg font-bold text-zinc-900 mb-2">AI đang phân tích...</h3>
+        <p className="text-sm text-zinc-500 mb-6">Bạn có thể rời khỏi trang này. Chúng tôi sẽ thông báo khi có kết quả.</p>
+        <button 
+          onClick={() => router.push('/history')}
+          className="px-6 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold rounded-xl transition-colors"
+        >
+          ← Về trang chủ
+        </button>
+      </div>
     </div>
   );
 }
