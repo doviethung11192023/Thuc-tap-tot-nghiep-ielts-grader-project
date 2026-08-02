@@ -76,24 +76,6 @@ def _to_finding(m: language_tool_python.Match) -> GrammarFinding:
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def check(processed: ProcessedEssay) -> list[GrammarFinding]:
-    """
-    Run LanguageTool on ``processed.essay_raw`` and return a filtered list
-    of grammar and spelling findings.
-
-    Rules in ``DISABLED_GRAMMAR_RULES`` (settings/config.py) are excluded
-    before returning, eliminating formatting false-positives.
-
-    Parameters
-    ----------
-    processed : ProcessedEssay
-        Output of the pre-processing stage.
-
-    Returns
-    -------
-    list[GrammarFinding]
-        Findings sorted by char offset (ascending).
-        Empty list if no issues are detected.
-    """
     matches = _get_tool().check(processed.essay_raw)
     return [
         _to_finding(m)

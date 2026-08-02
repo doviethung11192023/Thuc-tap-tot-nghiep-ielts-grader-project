@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment secrets
+.env
+
+# Test/debug outputs (không cần thiết trên server)
+test_final_output.json
+4_llms_feedback.json
+raw_llm.json
+result.html
+test_visualization.html
+*.ipynb
+
+# Data files lớn (không cần thiết cho API)
+data/
+
+# Dev tools
+.pytest_cache/
+.ruff_cache/

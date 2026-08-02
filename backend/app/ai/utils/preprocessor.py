@@ -122,7 +122,6 @@ def preprocess(essay_input: EssayInput) -> ProcessedEssay:
         sentences=sents,
         paragraphs=paras,
         word_count=len(_WORD_RE.findall(raw)),
-        target_band=essay_input.target_band,
     )
 
 def test_preprocess(title:str, essay:str, target_band:float) -> ProcessedEssay:
@@ -146,5 +145,4 @@ def test_preprocess(title:str, essay:str, target_band:float) -> ProcessedEssay:
         sentences=sents,
         paragraphs=paras,
         word_count=len(_WORD_RE.findall(raw)),
-        target_band=target_band,
     )

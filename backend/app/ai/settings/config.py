@@ -1,28 +1,52 @@
-"""
-Central configuration for the IELTS Writing Tutor pipeline.
-All paths are resolved relative to this file's parent directory (project root).
-"""
-
+import json
+import os
 from pathlib import Path
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# ── Project Root ──────────────────────────────────────────────────────────────
+# ── Project Paths ─────────────────────────────────────────────────────────────
+
 ROOT = Path(__file__).resolve().parent.parent
 
-# ── Data Directories ─────────────────────────────────────────────────────────
-DATA_DIR              = ROOT / "data"
-COLLOCATION_DB_PATH   = DATA_DIR / "collocation_db" / "ielts_collocations.json"
-LINKING_DEVICES_PATH  = DATA_DIR / "linking_devices.json"
-TOPIC_TAXONOMY_PATH   = DATA_DIR / "topic_taxonomy.json"
-SAMPLE_ESSAYS_DIR     = DATA_DIR / "sample_essays"
-VOCAB_LISTS_DIR       = DATA_DIR / "vocab_lists"
+DATA_DIR = ROOT / "data"
+TITLES_DB_PATH = DATA_DIR / "titles_db.json"
+CRITERIA_PROMPT_DIR = ROOT / "prompt" / "criteria"
 
-# ── Prompt / Rubric ───────────────────────────────────────────────────────────
-PROMPT_DIR            = ROOT / "prompt"
-BAND_DESCRIPTORS_PATH = PROMPT_DIR / "ielts_writing_band_description.md"
-CRITERIA_PROMPT_DIR   = PROMPT_DIR / "criteria"   # ta.md / cc.md / lr.md / gra.md
+# ── Application Settings ──────────────────────────────────────────────────────
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables or .env."""
 
-# ── Retrieval ─────────────────────────────────────────────────────────────────
-MIN_TOPIC_CONFIDENCE  = 0.25   # keyword-overlap score below this → fallback lookup
+    # Langfuse
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_base_url: str = "https://cloud.langfuse.com"
+
+    # langfuse_prompt_label: str = "production"
+    langfuse_cache_ttl_seconds: int = 60
+
+    # LLM providers
+    # openai_api_key: str = ""
+    gemini_api_key: str = ""
+    qwen_api_key: str = "sk-ws-H.XYRDXI.6bQP.MEYCIQD99e75cksk_UtP1C3AmHljAXR9XR31AVpmVeWiitIB2gIhAIrVt6k6mHwe4VG8F7-oymKh8VtYT3rQC3uQB6jPD0-y"
+    # deepseek_api_key: str = ""
+    groq_api_key: str = ""
+
+    # Default LLM
+    default_llm_model: str = "qwen3.7-flash"
+    default_base_url: str = "https://llm-fows0glugodstlel.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+    default_llm_temperature: float = 0.0
+    default_llm_max_tokens: int = 2_000
+
+    model_config = SettingsConfigDict(
+        env_file=ROOT / ".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
 
 # ── Grammar Checker (D1) ──────────────────────────────────────────────────────
 # LanguageTool rule IDs to suppress — formatting/style rules that generate
@@ -39,14 +63,11 @@ DISABLED_GRAMMAR_RULES: frozenset[str] = frozenset({
     "UNLIKELY_OPENING_PUNCTUATION",
 })
 
-# ── Pipeline Defaults ─────────────────────────────────────────────────────────
-DEFAULT_TARGET_BAND   = None   # resolved post-scoring as current_band + 0.5
-
-# ── Dependency Parser (D2) ────────────────────────────────────────────────────
+# ── IELTS Linking Words (For D2 Dependency Parser) ────────────────────────────
 IELTS_LINKING_WORDS: dict[str, list[str]] = {
-    "Addition": ["furthermore", "moreover", "in addition", "additionally", "also", "and", "not only", "but also"],
-    "Contrast": ["however", "on the other hand", "in contrast", "nevertheless", "although", "even though", "despite", "in spite of", "but", "while", "whereas"],
-    "Result": ["therefore", "consequently", "as a result", "thus", "hence", "so"],
-    "Example": ["for example", "for instance", "such as", "namely", "to illustrate"],
-    "Conclusion": ["in conclusion", "to conclude", "to sum up", "all in all", "overall"]
+    "Addition": ["and", "also", "furthermore", "moreover", "in addition", "additionally", "besides"],
+    "Contrast": ["but", "however", "although", "even though", "on the other hand", "nevertheless", "yet", "in contrast", "while", "whereas"],
+    "Result": ["so", "therefore", "thus", "as a result", "consequently", "hence", "for this reason"],
+    "Example": ["for example", "for instance", "such as", "to illustrate", "namely"],
+    "Conclusion": ["in conclusion", "to sum up", "overall", "all in all", "to conclude", "in summary"]
 }

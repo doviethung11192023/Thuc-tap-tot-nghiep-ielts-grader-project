@@ -83,7 +83,6 @@ class ProcessedEssay:
     sentences: list[Sentence]
     paragraphs: list[Paragraph]
     word_count: int
-    target_band: float | None = field(default=None)
 
 
 # ── GrammarFinding ───────────────────────────────────────────────────────────────────
@@ -98,7 +97,7 @@ class GrammarFinding:
     Attributes
     ----------
     span        : (char_start, char_end) — half-open interval into essay_raw.
-    error_type  : ``"GRAMMAR"`` | ``"SPELLING"`` | ``"STYLE"``.
+    error_type  : ``"GRAMMAR"`` | ``"SPELLING"``.
                   Phase 5 uses this to route findings to the correct criterion
                   prompt: GRAMMAR → GRA, SPELLING → LR, STYLE → discarded.
     rule_id     : LanguageTool rule identifier (e.g. ``"MORFOLOGIK_RULE_EN_US"``
@@ -109,7 +108,7 @@ class GrammarFinding:
     sentence    : Full sentence containing the error.
     """
     span: tuple[int, int]
-    error_type: str          # "GRAMMAR" | "SPELLING" | "STYLE"
+    error_type: str          # "GRAMMAR" | "SPELLING"
     rule_id: str
     message: str
     suggestions: list[str]
@@ -119,30 +118,30 @@ class GrammarFinding:
 
 # ── D2: Dependency Parser ────────────────────────────────────────────────────────
 
-@dataclass
-class ParsedSentence:
-    """
-    Sentence complexity classification for GRA criterion.
-    """
-    index: int               # Matches ProcessedEssay.sentences[i].index
-    text: str
-    sentence_type: str       # "simple", "compound", "complex", "compound-complex"
+# @dataclass
+# class ParsedSentence:
+#     """
+#     Sentence complexity classification for GRA criterion.
+#     """
+#     index: int               # Matches ProcessedEssay.sentences[i].index
+#     text: str
+#     sentence_type: str       # "simple", "compound", "complex", "compound-complex"
 
 
-@dataclass
-class LinkingDevice:
-    """
-    IELTS transition word/phrase detected in the essay for CC criterion.
-    """
-    text: str
-    category: str            # "Addition", "Contrast", "Result", "Example", "Conclusion"
-    span: tuple[int, int]    # Char offsets relative to essay_raw
+# @dataclass
+# class LinkingDevice:
+#     """
+#     IELTS transition word/phrase detected in the essay for CC criterion.
+#     """
+#     text: str
+#     category: str            # "Addition", "Contrast", "Result", "Example", "Conclusion"
+#     span: tuple[int, int]    # Char offsets relative to essay_raw
 
 
-@dataclass
-class DependencyParseResult:
-    sentences: list[ParsedSentence]
-    linking_devices: list[LinkingDevice]
+# @dataclass
+# class DependencyParseResult:
+#     sentences: list[ParsedSentence]
+#     linking_devices: list[LinkingDevice]
 
 
 # ── D3: Lexical Stats Engine ───────────────────────────────────────────────────
@@ -170,32 +169,33 @@ class LexicalStatsResult:
 
 # ── D4: Vocabulary Profiler ───────────────────────────────────────────────────
 
-@dataclass
-class CefrWord:
-    word: str
-    level: str               # "B1", "B2", "C1", "C2"
-    span: tuple[int, int]
+# @dataclass
+# class CefrWord:
+#     word: str
+#     level: str               # "B1", "B2", "C1", "C2"
+#     span: tuple[int, int]
 
 
-@dataclass
-class CollocationHit:
-    phrase: str
-    span: tuple[int, int]
+# @dataclass
+# class CollocationHit:
+#     phrase: str
+#     span: tuple[int, int]
 
 
-@dataclass
-class PolysemousWord:
-    word: str
-    synset_count: int
-    span: tuple[int, int]
+# @dataclass
+# class PolysemousWord:
+#     word: str
+#     synset_count: int
+#     span: tuple[int, int]
+#     sentence: str = ""  # sentence containing this word, for LLM context
 
 
-@dataclass
-class VocabProfileResult:
-    """
-    CEFR vocabulary distribution and collocation tracking for LR.
-    """
-    cefr_words: list[CefrWord]
-    collocations: list[CollocationHit]
-    polysemous_words: list[PolysemousWord]
+# @dataclass
+# class VocabProfileResult:
+#     """
+#     CEFR vocabulary distribution and collocation tracking for LR.
+#     """
+#     cefr_words: list[CefrWord]
+#     collocations: list[CollocationHit]
+#     polysemous_words: list[PolysemousWord]
 

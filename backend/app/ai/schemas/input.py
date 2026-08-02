@@ -1,13 +1,13 @@
 """
 Input schema for the IELTS Writing Tutor pipeline.
 
-Validation (word count, task-type detection, language check) is handled
-by the frontend — this layer only provides typed data models.
-Language is always English.
+Only two fields: the prompt title and the student essay.
+All other metadata (word_count, task_type, scores, ...) are derived
+by downstream tools and agents — not passed in by the caller.
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -17,12 +17,9 @@ class EssayInput:
 
     Fields
     ------
-    title       : The IELTS Task 2 prompt text.
-    essay       : Full student essay, plain text.
-                  Paragraph breaks are preserved via ``\\n\\n``.
-    target_band : Desired band for rewrite suggestions.
-                  If omitted, it is resolved post-scoring as current_band + 0.5.
+    title : The IELTS Task 2 prompt text.
+    essay : Full student essay, plain text.
+            Paragraph breaks are preserved via ``\\n\\n``.
     """
     title: str
     essay: str
-    target_band: float | None = field(default=None)

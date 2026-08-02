@@ -17,7 +17,6 @@ On the other hand, other people disagree with this statement for many reasons. T
 Group discussions help in getting a grasp of the conversational skills that he/she possesses.For example,in sales and marketing jobs conversational skills play a major role.  
 
 All in all, when all the specific reasons and relevant examples are considered and evaluated,  I strongly  agree with the idea supporting this statement because its benefits outweigh its drawbacks.""",
-    "target_band": 7.0
 }
 
 GOOD_TEST_CASE = {
@@ -30,7 +29,6 @@ There are two primary reasons why the increase in consumer goods manufacturing p
 To tackle these consequences, several measures can be implemented. The first solution is to encourage companies to adopt sustainable sourcing practices to ensure responsible extraction of resources and minimize habitat destruction. For instance, enterprises can prioritize the use of recycled materials and promote sustainable forestry practices, such as tree replanting initiatives. Furthermore, investing in research and development of alternative materials with lower environmental impacts, such as biodegradable plastics, and renewable energy technologies can help reduce the reliance on scarce resources. The second solution involves governments offering incentives, such as providing tax deductions and implementing regulations, to encourage industries to transition to renewable energy sources, improve energy efficiency in manufacturing processes, and adopt greener approaches.
 
 In conclusion, various measures can be taken to address the environmental issues caused by the growth of consumer goods manufacturing. To achieve better results in environmental protection in the future, companies need to be fully aware of the negative impacts and adopt appropriate sustainable practices, with oversight and support from governments. By implementing these measures, we can work towards a more sustainable future and mitigate the detrimental effects of consumer production on the natural environment.""",
-    "target_band": 9.0
 }
 # ── Divider helpers ───────────────────────────────────────────────────────────
 
@@ -50,7 +48,7 @@ def _stub(name: str):
 
 _header("Pre-processing")
 
-processed = test_preprocess(**GOOD_TEST_CASE)
+processed = test_preprocess(**BAD_TEST_CASE)
 
 _section("Stats")
 print(f"  word_count  : {processed.word_count}")
@@ -70,7 +68,7 @@ for p in processed.paragraphs:
 
 _header("D1 — Grammar / Spell Checker")
 
-from handler.grammar_checker import check as grammar_check
+from handlers.grammar_checker import check as grammar_check
 
 findings = grammar_check(processed)
 
@@ -106,7 +104,7 @@ else:
 # ── D2 — Dependency Parser ────────────────────────────────────────────────────
 
 _header("D2 — Dependency Parser")
-from handler.dependency_parser import check as dep_check
+from handlers.dependency_parser import check as dep_check
 dep_result = dep_check(processed)
 
 _section("Sentence types")
@@ -124,7 +122,7 @@ else:
 # ── D3 — Lexical Stats Engine ─────────────────────────────────────────────────
 
 _header("D3 — Lexical Stats Engine")
-from handler.lexical_stats import compute as lexical_compute
+from handlers.lexical_stats import compute as lexical_compute
 stats = lexical_compute(processed)
 print(f"  type_token_ratio  : {stats.type_token_ratio:.3f}")
 print(f"  lexical_density   : {stats.lexical_density:.3f}")
@@ -137,7 +135,7 @@ for r in stats.repeated_words:
 # ── D4 — Collocation & Vocabulary Profiler ────────────────────────────────────
 
 _header("D4 — Collocation & Vocabulary Profiler")
-from handler.collocation_lookup import check as vocab_check
+from handlers.collocation_lookup import check as vocab_check
 vocab_profile = vocab_check(processed)
 
 _section("CEFR Advanced Words (B1-C2)")
