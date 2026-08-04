@@ -67,25 +67,66 @@ async def evaluate_essay_task(ctx, essay_id: str):
     supabase.table("essays").update({"status": "evaluating"}).eq("id", essay_id).execute()
     print(f"🔧 [Worker] Đã cập nhật trạng thái -> EVALUATING")
 
-    # 2. Đọc kết quả thực từ AI (JSON file)
-    print(f"🧠 [AI Engine] Đang nạp kết quả từ file JSON...")
-    await asyncio.sleep(2) # Giả lập delay một chút cho UI giống thực tế
-    
-    import json
-    json_path = r"C:\Users\Admin\Downloads\test_final_output (2).json"
-    try:
-        with open(json_path, "r", encoding="utf-8") as f:
-            ai_response = json.load(f)
-    except Exception as e:
-        print(f"❌ [Worker] Lỗi đọc file JSON: {e}")
+    # 2. Lấy nội dung gốc của học viên và thông tin đề bài
+    essay_res = supabase.table("essays").select("content, topic_id").eq("id", essay_id).execute()
+    if not essay_res.data:
+        print(f"❌ [Worker] Không tìm thấy bài viết {essay_id}")
         supabase.table("essays").update({"status": "failed"}).eq("id", essay_id).execute()
-        return {"status": "failed", "error": str(e)}
+        return {"status": "failed", "error": "Essay not found"}
         
-    # Lấy nội dung gốc của học viên để tự động gán lại
-    essay_res = supabase.table("essays").select("content").eq("id", essay_id).execute()
-    student_content = essay_res.data[0].get("content", "") if essay_res.data else ""
+    student_content = essay_res.data[0].get("content", "")
+    topic_id = essay_res.data[0].get("topic_id")
+    
+    topic_title = ""
+    if topic_id:
+        topic_res = supabase.table("topics").select("title").eq("id", topic_id).execute()
+        if topic_res.data:
+            topic_title = topic_res.data[0].get("title", "")
 
-    # 3. Lưu kết quả chấm điểm vào Database
+    # 3. Gọi API đến AI Engine thật với cơ chế Retry
+    print(f"🧠 [AI Engine] Đang gọi API chấm điểm...")
+    import httpx
+    import asyncio
+    from app.core.config import settings
+    
+    url = settings.AI_ENGINE_URL
+    payload = {
+        "title": topic_title,
+        "essay": student_content
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+    }
+    
+    max_retries = 3
+    ai_response = None
+    
+    for attempt in range(max_retries):
+        try:
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                response = await client.post(url, json=payload, headers=headers)
+            
+            if response.status_code == 200:
+                ai_response = response.json()
+                break  # Thành công, thoát vòng lặp retry
+            else:
+                error_msg = f"HTTP {response.status_code}: {response.text}"
+                if attempt < max_retries - 1:
+                    print(f"⚠️ [Worker] AI API lỗi ({error_msg}), thử lại lần {attempt + 1}...")
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    raise Exception(error_msg)
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"⚠️ [Worker] Lỗi kết nối AI API ({str(e)}), thử lại lần {attempt + 1}...")
+                await asyncio.sleep(2 ** attempt)
+            else:
+                print(f"❌ [Worker] Lỗi gọi AI API sau {max_retries} lần thử: {e}")
+                supabase.table("essays").update({"status": "failed"}).eq("id", essay_id).execute()
+                return {"status": "failed", "error": str(e)}
+
+    # 4. Lưu kết quả chấm điểm vào Database
     eval_id = str(uuid.uuid4())
     
     # Map criteria_analysis to match frontend expectation (grammar_accuracy instead of grammatical_range_and_accuracy)
@@ -112,7 +153,7 @@ async def evaluate_essay_task(ctx, essay_id: str):
     
     supabase.table("evaluation_results").insert(eval_data).execute()
     
-    # 4. Lưu chú thích bài viết (Inline Annotations)
+    # 5. Lưu chú thích bài viết (Inline Annotations)
     essay_annotations = []
     for ann in ai_response.get("inline_annotations", []):
         raw_start = ann.get("position_start", 0)
@@ -138,7 +179,7 @@ async def evaluate_essay_task(ctx, essay_id: str):
     if essay_annotations:
         supabase.table("essay_annotations").insert(essay_annotations).execute()
     
-    # 5. Ghi log xử lý
+    # 6. Ghi log xử lý
     supabase.table("evaluation_logs").insert({
         "essay_id": essay_id,
         "agent_name": "aggregator",
@@ -146,7 +187,7 @@ async def evaluate_essay_task(ctx, essay_id: str):
         "phoenix_trace_id": str(uuid.uuid4())[:8]
     }).execute()
 
-    # 6. Chuyển trạng thái sang COMPLETED
+    # 7. Chuyển trạng thái sang COMPLETED
     supabase.table("essays").update({
         "status": "completed", 
         "evaluated_at": datetime.now(timezone.utc).isoformat()
