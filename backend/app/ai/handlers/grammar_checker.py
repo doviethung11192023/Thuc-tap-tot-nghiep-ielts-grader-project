@@ -1,26 +1,3 @@
-"""
-D1 — Grammar/Spell Checker using language-tool-python (local).
-
-Pipeline position (runs in parallel with D2, D3, D4, Retrieval):
-    ProcessedEssay
-        └─► check(processed) → list[GrammarFinding]
-
-Design notes
-------------
-- LanguageTool is initialised once as a module-level singleton.
-  Creating ``LanguageTool("en-US")`` starts a Java server process which
-  takes ~3–5 s on first call. Subsequent calls reuse the running server.
-
-- Only rules NOT in ``DISABLED_GRAMMAR_RULES`` (settings/config.py) are
-  returned. The disable-list removes formatting/style false-positives that
-  are irrelevant to IELTS scoring.
-
-- ``error_type`` routing (used by Phase 5 / Prompt Builder):
-    SPELLING → LR criterion prompt
-    GRAMMAR  → GRA criterion prompt
-    STYLE    → discarded (not injected into any LLM prompt)
-"""
-
 from __future__ import annotations
 
 import language_tool_python

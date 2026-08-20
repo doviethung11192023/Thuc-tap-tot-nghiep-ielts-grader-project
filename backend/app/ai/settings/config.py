@@ -27,13 +27,13 @@ class Settings(BaseSettings):
     # LLM providers
     # openai_api_key: str = ""
     gemini_api_key: str = ""
-    qwen_api_key: str = "sk-ws-H.XYRDXI.6bQP.MEYCIQD99e75cksk_UtP1C3AmHljAXR9XR31AVpmVeWiitIB2gIhAIrVt6k6mHwe4VG8F7-oymKh8VtYT3rQC3uQB6jPD0-y"
+    qwen_api_key: str = ""
     # deepseek_api_key: str = ""
     groq_api_key: str = ""
 
     # Default LLM
-    default_llm_model: str = "qwen3.7-flash"
-    default_base_url: str = "https://llm-fows0glugodstlel.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+    default_llm_model: str = "qwen-flash"
+    default_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     default_llm_temperature: float = 0.0
     default_llm_max_tokens: int = 2_000
 

@@ -115,35 +115,6 @@ class GrammarFinding:
     context: str
     sentence: str
 
-
-# ── D2: Dependency Parser ────────────────────────────────────────────────────────
-
-# @dataclass
-# class ParsedSentence:
-#     """
-#     Sentence complexity classification for GRA criterion.
-#     """
-#     index: int               # Matches ProcessedEssay.sentences[i].index
-#     text: str
-#     sentence_type: str       # "simple", "compound", "complex", "compound-complex"
-
-
-# @dataclass
-# class LinkingDevice:
-#     """
-#     IELTS transition word/phrase detected in the essay for CC criterion.
-#     """
-#     text: str
-#     category: str            # "Addition", "Contrast", "Result", "Example", "Conclusion"
-#     span: tuple[int, int]    # Char offsets relative to essay_raw
-
-
-# @dataclass
-# class DependencyParseResult:
-#     sentences: list[ParsedSentence]
-#     linking_devices: list[LinkingDevice]
-
-
 # ── D3: Lexical Stats Engine ───────────────────────────────────────────────────
 
 @dataclass
@@ -165,37 +136,4 @@ class LexicalStatsResult:
     lexical_density: float
     avg_sentence_length: float
     repeated_words: list[RepeatedWord]
-
-
-# ── D4: Vocabulary Profiler ───────────────────────────────────────────────────
-
-# @dataclass
-# class CefrWord:
-#     word: str
-#     level: str               # "B1", "B2", "C1", "C2"
-#     span: tuple[int, int]
-
-
-# @dataclass
-# class CollocationHit:
-#     phrase: str
-#     span: tuple[int, int]
-
-
-# @dataclass
-# class PolysemousWord:
-#     word: str
-#     synset_count: int
-#     span: tuple[int, int]
-#     sentence: str = ""  # sentence containing this word, for LLM context
-
-
-# @dataclass
-# class VocabProfileResult:
-#     """
-#     CEFR vocabulary distribution and collocation tracking for LR.
-#     """
-#     cefr_words: list[CefrWord]
-#     collocations: list[CollocationHit]
-#     polysemous_words: list[PolysemousWord]
 

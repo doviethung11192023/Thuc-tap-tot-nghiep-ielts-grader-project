@@ -1,17 +1,3 @@
-"""
-D3 — Lexical Stats Engine using spacy.
-
-Pipeline position (runs in parallel with D1, D2, D4, Retrieval):
-    ProcessedEssay
-        └─► compute(processed) → LexicalStatsResult
-
-Responsibilities:
-1. Type-Token Ratio (TTR) — ratio of unique words (lemmas) to total words.
-2. Lexical Density — ratio of content words to total words.
-3. Average Sentence Length — total words / number of sentences.
-4. Repeated Words — tracks content words repeated 3+ times.
-"""
-
 from __future__ import annotations
 from collections import defaultdict
 import spacy
