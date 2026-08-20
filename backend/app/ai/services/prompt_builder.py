@@ -12,7 +12,7 @@ from services.langfuse.prompt_manager import PromptManager, CompiledPrompt
 from utils.essay_formatter import format_annotated_essay, format_indexed_essay
 
 
-@dataclass(frozen=True)
+@dataclass
 class CriterionPrompts:
     ta: CompiledPrompt
     cc: CompiledPrompt
