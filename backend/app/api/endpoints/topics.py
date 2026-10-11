@@ -42,18 +42,7 @@ async def list_topics(request: Request, page: int = 1, limit: int = 10, task_typ
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_topic(request: Request, topic: TopicCreate, current_user: User = Depends(require_admin)):
-    # Auto-create mock user in DB if not exists
-    user_res = supabase.table("users").select("id").eq("id", current_user.id).execute()
-    if not user_res.data:
-        try:
-            supabase.table("users").insert({
-                "id": current_user.id,
-                "email": f"{current_user.id}@test.com",
-                "full_name": "Admin User",
-                "role": "admin"
-            }).execute()
-        except Exception:
-            pass
+
 
     topic_data = topic.model_dump()
     topic_data["created_by"] = current_user.id

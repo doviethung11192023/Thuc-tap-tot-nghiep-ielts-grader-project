@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Camera, Award, BookOpen, Clock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { updateProfile } from '@/services/users';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -96,16 +97,11 @@ export default function ProfilePage() {
     
     setIsUpdatingName(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ full_name: newName.trim() })
-        .eq('id', user.id);
-
-      if (error) throw error;
+      await updateProfile({ full_name: newName.trim() });
       toast.success('Cập nhật tên thành công!');
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || 'Có lỗi xảy ra khi cập nhật tên');
+      toast.error(err.response?.data?.detail || err.message || 'Có lỗi xảy ra khi cập nhật tên');
     } finally {
       setIsUpdatingName(false);
     }

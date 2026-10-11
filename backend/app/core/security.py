@@ -30,14 +30,15 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
         
-        # Check user in DB
         res = supabase.table("users").select("*").eq("id", user_id).execute()
         if res.data:
             u = res.data[0]
             return User(id=u["id"], role=u["role"], is_active=u["is_active"])
         else:
-            # Fallback if user is authenticated in Supabase but not yet synced to our public.users table
-            return User(id=user_id, role="student")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User profile not found in database. Account may not be fully initialized."
+            )
             
     except Exception as e:
         raise HTTPException(

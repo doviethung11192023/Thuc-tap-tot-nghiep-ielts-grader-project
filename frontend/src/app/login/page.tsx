@@ -46,23 +46,6 @@ export default function LoginPage() {
           localStorage.removeItem('remembered_email');
         }
 
-        // Handle pending registration if exists
-        const pendingName = localStorage.getItem('pending_user_name');
-        if (pendingName) {
-          try {
-            await supabase.from('users').insert({
-              id: data.session.user.id,
-              email: data.session.user.email || email,
-              full_name: pendingName,
-              role: 'student'
-            });
-            localStorage.removeItem('pending_user_name');
-            localStorage.removeItem('pending_user_email');
-          } catch (e) {
-            console.error("Failed to insert pending user:", e);
-          }
-        }
-
         toast.success('Đăng nhập thành công!');
         
         const { data: userData, error: userError } = await supabase

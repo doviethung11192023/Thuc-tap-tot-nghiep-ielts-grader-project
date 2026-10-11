@@ -1,4 +1,5 @@
 import axios from "axios";
+import { supabase } from "@/lib/supabase";
 
 // Tất cả API call đều đi qua instance này
 // baseURL trỏ đến FastAPI backend
@@ -10,12 +11,20 @@ const apiClient = axios.create({
 });
 
 // Interceptor: Tự động gắn JWT token vào mọi request
-// (Token lấy từ Supabase session)
-apiClient.interceptors.request.use((config) => {
+// (Lấy token trực tiếp từ Supabase session để đảm bảo luôn cập nhật khi token refresh)
+apiClient.interceptors.request.use(async (config) => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("supabase_access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || localStorage.getItem("supabase_access_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      const token = localStorage.getItem("supabase_access_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
   }
   return config;
