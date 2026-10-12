@@ -33,10 +33,22 @@ apiClient.interceptors.request.use(async (config) => {
 // Interceptor: Xử lý lỗi toàn cục
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // Token hết hạn → redirect về login
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        const path = window.location.pathname;
+        // Chỉ redirect nếu không ở các trang auth công khai và phiên Supabase đã thực sự mất
+        if (path !== "/login" && path !== "/register" && !path.startsWith("/auth")) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (!data?.session) {
+              window.location.href = "/login";
+            }
+          } catch {
+            window.location.href = "/login";
+          }
+        }
+      }
     }
     return Promise.reject(error);
   }

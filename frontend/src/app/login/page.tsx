@@ -56,9 +56,12 @@ export default function LoginPage() {
           
         if (userData?.role === 'admin') {
           router.push('/admin/statistics');
+        } else if (userData?.role === 'expert') {
+          router.push('/expert/profile');
         } else {
           router.push('/history');
         }
+
       }
     } catch (err) {
       console.error(err);

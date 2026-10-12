@@ -13,22 +13,54 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function fetchUserProfile(userId: string) {
-    const { data } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-    setUser(data);
-    setLoading(false);
+  async function fetchUserProfile(userId: string, authUser?: any) {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (data) {
+        setUser(data);
+      } else if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
+          role: authUser.app_metadata?.role || "student",
+          is_active: true,
+          created_at: authUser.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as User);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.error("fetchUserProfile error:", err);
+      if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
+          role: authUser.app_metadata?.role || "student",
+          is_active: true,
+          created_at: authUser.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as User);
+      } else {
+        setUser(null);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     // Lấy session hiện tại khi trang load
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        // Lấy thông tin user từ bảng public.users (không phải auth.users)
-        fetchUserProfile(session.user.id);
+        // Lấy thông tin user từ bảng public.users (kèm fallback authUser)
+        fetchUserProfile(session.user.id, session.user);
         // Lưu token để axios interceptor dùng
         localStorage.setItem("supabase_access_token", session.access_token);
       } else {
@@ -40,11 +72,12 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
-          fetchUserProfile(session.user.id);
+          fetchUserProfile(session.user.id, session.user);
           localStorage.setItem("supabase_access_token", session.access_token);
         } else {
           setUser(null);
           localStorage.removeItem("supabase_access_token");
+          setLoading(false);
         }
       }
     );
