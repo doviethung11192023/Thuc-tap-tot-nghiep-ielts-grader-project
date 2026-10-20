@@ -9,7 +9,8 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_URL: str = "redis://localhost:6379"
     SUPABASE_JWT_SECRET: str
-    AI_ENGINE_URL: str = "https://fc55-118-69-53-88.ngrok-free.app/grade"
+    AI_ENGINE_URL: str = "http://localhost:8001/grade"
+    # AI_ENGINE_URL: str = "https://dd03-2405-4802-80bc-cca0-6c28-e1b1-6417-dd23.ngrok-free.app/grade"
 
     # Cloudflare R2 Storage (S3-compatible)
     R2_ACCOUNT_ID: str = ""
