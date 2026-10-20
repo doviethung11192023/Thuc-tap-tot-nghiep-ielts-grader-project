@@ -15,6 +15,15 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
   useGradingNotifications();
 
   const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
+  
+  // --- [MÃ MỚI BỞI AGENT] ---
+  const isWorkspace = 
+    pathname?.includes('/test-practice/reading/') || 
+    pathname?.includes('/test-practice/listening/') || 
+    pathname?.includes('/test-practice/writing/') || 
+    pathname?.includes('/test-practice/speaking/') ||
+    pathname?.startsWith('/results/');
+  // ---------------------------
 
   return (
     <AuthGuard>
@@ -45,9 +54,16 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 flex w-full mx-auto sm:px-6 lg:px-8">
+      <div className={`flex-1 flex w-full mx-auto ${isWorkspace ? 'p-1.5 sm:p-2 overflow-hidden' : 'sm:px-6 lg:px-8'}`}>
         {/* Sidebar */}
+        {/* --- [MÃ GỐC BỊ THAY THẾ] ---
         <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200">
+        --------------------------- */}
+        {/* --- [MÃ MỚI BỞI AGENT] --- */}
+        {!isWorkspace && (
+          <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200 shrink-0">
+        {/* --------------------------- */}
+
           <nav className="space-y-2">
             {user?.role === 'admin' && (
               <div className="mb-6">
@@ -61,6 +77,16 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
               <LayoutDashboard className={`w-5 h-5 ${isActive('/dashboard') ? 'text-red-200' : 'text-zinc-400'}`} />
               Dashboard
             </Link>
+            {/* --- [MÃ MỚI BỞI AGENT: Thêm link cho 2 trang mới] --- */}
+            <Link href="/learning-profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/learning-profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <LayoutDashboard className={`w-5 h-5 ${isActive('/learning-profile') ? 'text-red-200' : 'text-zinc-400'}`} />
+              Learning Profile
+            </Link>
+            <Link href="/test-practice" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/test-practice') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+              <Library className={`w-5 h-5 ${isActive('/test-practice') ? 'text-red-200' : 'text-zinc-400'}`} />
+              Test Practice
+            </Link>
+            {/* --------------------------- */}
             <Link href="/topics" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/topics') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
               <Library className={`w-5 h-5 ${isActive('/topics') ? 'text-red-200' : 'text-zinc-400'}`} />
               Ngân hàng đề thi
@@ -81,9 +107,17 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </aside>
+        )}
+        {/* --- [MÃ MỚI BỞI AGENT: Đóng ngoặc điều kiện aside] --- */}
+        {/* --------------------------- */}
 
         {/* Main Content */}
+        {/* --- [MÃ GỐC BỊ THAY THẾ] ---
         <main className="flex-1 py-8 px-4 sm:px-0 md:pl-8">
+        --------------------------- */}
+        {/* --- [MÃ MỚI BỞI AGENT] --- */}
+        <main className={`flex-1 flex flex-col ${isWorkspace ? 'p-0 w-full max-w-full overflow-hidden' : 'py-8 px-4 sm:px-0 md:pl-8'}`}>
+        {/* --------------------------- */}
           {children}
         </main>
       </div>

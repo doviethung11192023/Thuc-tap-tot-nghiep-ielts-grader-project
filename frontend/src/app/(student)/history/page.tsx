@@ -61,10 +61,10 @@ export default function HistoryPage() {
               className="p-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-[#932120] bg-white text-zinc-700"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="completed">Đã chấm (Completed)</option>
-              <option value="pending">Chờ chấm (Pending)</option>
-              <option value="evaluating">Đang chấm (Evaluating)</option>
-              <option value="failed">Lỗi (Failed)</option>
+              <option value="completed">Đã chấm điểm</option>
+              <option value="pending">Chờ chấm điểm</option>
+              <option value="evaluating">Đang chấm điểm</option>
+              <option value="failed">Lỗi xử lý</option>
             </select>
           </div>
         </div>
@@ -137,7 +137,10 @@ export default function HistoryPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <Link href={`/results/${item.essay_id}`}>
+                      <Link 
+                        href={`/test-practice/writing/${item.essay_id}/summary`}
+                        title="Xem kết quả tóm tắt và chi tiết"
+                      >
                         <button className="p-1.5 text-zinc-400 hover:text-[#932120] rounded-md hover:bg-red-50 transition-colors inline-flex justify-center items-center">
                           <ArrowRight className="w-4 h-4" />
                         </button>
@@ -153,7 +156,7 @@ export default function HistoryPage() {
           {!loading && totalPages > 1 && (
             <div className="border-t border-zinc-200 px-6 py-4 flex items-center justify-between bg-zinc-50">
               <span className="text-sm text-zinc-500">
-                Hiển thị trang {page} / {totalPages} (Tổng cộng {total} bài)
+                Hiển thị trang {page} / {totalPages} • Tổng cộng {total} bài
               </span>
               <div className="flex gap-2">
                 <button

@@ -9,7 +9,13 @@ export function useGradingNotifications() {
   const { handleGradingResult } = useNotificationStore();
 
   useEffect(() => {
-    if (!user?.id) return;
+    // --- [MÃ GỐC BỊ THAY THẾ] ---
+    // if (!user?.id) return;
+    // ---------------------------
+    // --- [MÃ MỚI BỞI AGENT] ---
+    // Nếu là user giả lập (DEMO_MODE) hoặc chưa đăng nhập thì không subscribe supabase realtime để tránh lỗi.
+    if (!user?.id || user.id === "demo-user-id") return;
+    // ---------------------------
 
     // We use a unique channel name to avoid collisions
     const channelName = `grading-notifications-${user.id}`;
