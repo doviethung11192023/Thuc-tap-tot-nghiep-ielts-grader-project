@@ -33,6 +33,13 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
 
   const initials = (user?.full_name || user?.email || 'U').substring(0, 2).toUpperCase();
 
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/login');
+  };
+
+  const initials = (user?.full_name || user?.email || 'U').substring(0, 2).toUpperCase();
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
