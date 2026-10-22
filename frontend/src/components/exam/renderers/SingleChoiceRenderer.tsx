@@ -20,12 +20,9 @@ export const SingleChoiceRenderer: React.FC<BaseRendererProps> = ({
   return (
     <div className="space-y-6">
       {group.questions.map((q) => {
-        const questionOptions = q.options_pool && q.options_pool.length > 0 
-          ? q.options_pool 
-          : defaultOptions;
-        const answer = (userAnswers[q.question_number] as string) || '';
-        const isCorrect = q.correct_answers?.some(a => a.trim().toLowerCase() === answer.trim().toLowerCase());
-        const hasAnswered = answer.trim() !== '';
+        const answer = userAnswers[q.question_number] as string;
+        const isCorrect = q.correct_answers?.includes(answer);
+        const hasAnswered = answer !== undefined && answer !== '';
 
         let containerClass = "p-4 rounded-lg border transition-colors";
         if (mode === 'review') {
@@ -51,19 +48,15 @@ export const SingleChoiceRenderer: React.FC<BaseRendererProps> = ({
                 {q.question_number}
               </span>
               <div className="flex-1">
-                {q.prompt && <p className="mb-3 text-zinc-800 font-medium">{q.prompt}</p>}
+                {q.prompt && <p className="mb-3 text-zinc-800">{q.prompt}</p>}
                 
                 <div className="space-y-2">
-                  {questionOptions.map(opt => {
-                    const isSelected = answer.trim().toLowerCase() === opt.key.trim().toLowerCase() || 
-                                       answer.trim().toLowerCase() === opt.text.trim().toLowerCase();
+                  {defaultOptions.map(opt => {
+                    const isSelected = answer === opt.key;
                     
                     let radioClass = "flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors ";
                     if (mode === 'review') {
-                      const isCorrectOption = q.correct_answers?.some(a => 
-                        a.trim().toLowerCase() === opt.key.trim().toLowerCase() || 
-                        a.trim().toLowerCase() === opt.text.trim().toLowerCase()
-                      );
+                      const isCorrectOption = q.correct_answers?.includes(opt.key);
                       if (isCorrectOption) {
                         radioClass += "border-green-500 bg-green-50 text-green-800 font-medium";
                       } else if (isSelected && !isCorrect) {
@@ -95,7 +88,7 @@ export const SingleChoiceRenderer: React.FC<BaseRendererProps> = ({
                   })}
                 </div>
 
-                {mode === 'review' && !isCorrect && q.correct_answers && q.correct_answers.length > 0 && (
+                {mode === 'review' && !isCorrect && q.correct_answers && (
                   <div className="mt-3 text-sm font-medium text-green-700 bg-green-50 px-3 py-2 rounded-md border border-green-200 inline-block">
                     Đáp án đúng: {q.correct_answers.join(' / ')}
                   </div>

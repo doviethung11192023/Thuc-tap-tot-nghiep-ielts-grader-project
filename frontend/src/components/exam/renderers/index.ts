@@ -18,7 +18,6 @@ export const QUESTION_RENDERER_REGISTRY: Record<string, React.FC<any>> = {
   yes_no_not_given: SingleChoiceRenderer,
   mcq_single: SingleChoiceRenderer,
   single_choice: SingleChoiceRenderer,
-  multiple_choice: SingleChoiceRenderer,
 
   // Nhóm Ghép nối
   matching_headings: MatchingDropdownRenderer,

@@ -28,11 +28,7 @@ export const ReviewEvidenceAccordion: React.FC<{
           "{evidenceQuote}"
         </div>
       )}
-      {explanation && (
-        <div className="text-zinc-800 whitespace-pre-wrap leading-relaxed font-sans mt-2">
-          {explanation}
-        </div>
-      )}
+      {explanation && <div className="text-zinc-800">{explanation}</div>}
     </div>
   );
 };

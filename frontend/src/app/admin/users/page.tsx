@@ -1,167 +1,138 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, UserCheck, UserX, Loader2 } from 'lucide-react';
-import { getAdminUsers, updateUserStatus } from '@/services/users';
-import { useAuth } from '@/hooks/useAuth';
-import toast from 'react-hot-toast';
-import { User } from '@/types';
+import React, { useState, useEffect, useCallback } from "react";
+import { Search, ShieldCheck, UserPlus } from "lucide-react";
+import { getAdminUsers, updateUserStatus, resendUserInvite } from "@/services/users";
+import { useAuth } from "@/hooks/useAuth";
+import toast from "react-hot-toast";
+import { User } from "@/types";
+import { UserTable } from "@/components/admin/UserTable";
+import { UserPagination } from "@/components/admin/UserPagination";
+import { UserCreateModal } from "@/components/admin/UserCreateModal";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalRole, setModalRole] = useState<"admin" | "expert">("expert");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getAdminUsers({ search, limit: 100 });
+      const params: any = { page, limit: pageSize };
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+      if (selectedRole !== "all") params.role = selectedRole;
+      const data = await getAdminUsers(params);
       setUsers(data.items || []);
       setTotal(data.total || 0);
     } catch (error: any) {
-      toast.error('Không thể tải danh sách người dùng');
+      toast.error(error.response?.status === 403 ? "403 Forbidden: Cần quyền Admin" : "Không thể tải người dùng");
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [page, pageSize, debouncedSearch, selectedRole]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleToggleStatus = async (targetUser: User) => {
     if (currentUser?.id === targetUser.id) {
-      toast.error('Không thể tự khóa tài khoản của chính mình!');
+      toast.error("Không thể tự khóa tài khoản của chính mình!");
       return;
     }
-
     try {
       const newStatus = !targetUser.is_active;
       await updateUserStatus(targetUser.id, { is_active: newStatus });
-      toast.success(`Đã ${newStatus ? 'mở khóa' : 'khóa'} tài khoản thành công`);
-      // Update local state
-      setUsers(users.map(u => u.id === targetUser.id ? { ...u, is_active: newStatus } : u));
+      toast.success(`Đã ${newStatus ? "mở khóa" : "khóa"} tài khoản thành công`);
+      setUsers((prev) => prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: newStatus } : u)));
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Lỗi khi cập nhật trạng thái');
+      toast.error(error.response?.data?.detail || "Lỗi khi cập nhật trạng thái");
     }
   };
 
-  const activeCount = users.filter(u => u.is_active).length;
-  const bannedCount = users.filter(u => !u.is_active).length;
+  const handleResendInvite = async (targetUser: User) => {
+    setResendingId(targetUser.id);
+    try {
+      await resendUserInvite(targetUser.id);
+      toast.success(`Đã gửi lại thư mời kích hoạt tới ${targetUser.email}!`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Không thể gửi lại thư mời kích hoạt");
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const handleOpenModal = (role: "admin" | "expert") => {
+    setModalRole(role);
+    setIsModalOpen(true);
+  };
+
+  const activeCount = users.filter((u) => u.is_active).length;
+  const bannedCount = users.filter((u) => !u.is_active).length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Quản lý Học viên</h1>
-        <p className="text-sm text-zinc-500 mt-1">Danh sách người dùng và trạng thái tài khoản</p>
+    <div className="space-y-6 sm:space-y-8 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">Quản lý Tài khoản & Phân quyền</h1>
+          <p className="text-sm sm:text-base text-zinc-500 mt-1">Danh sách người dùng, quản trị khóa và cấp quyền Quản trị viên / Chuyên gia</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => handleOpenModal("admin")} className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-black text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors border border-zinc-800">
+            <ShieldCheck className="w-4 h-4 text-amber-400" /> Tạo tài khoản Admin
+          </button>
+          <button onClick={() => handleOpenModal("expert")} className="inline-flex items-center gap-2 bg-[#932120] hover:bg-[#7a1a19] text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors">
+            <UserPlus className="w-4 h-4" /> Tạo tài khoản Expert
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/50">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input 
-              type="text" 
-              placeholder="Tìm kiếm email, tên..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  fetchUsers();
-                }
-              }}
-              className="pl-9 pr-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-[#932120] focus:ring-1 focus:ring-[#932120] w-64 bg-white"
-            />
-          </div>
-          <div className="flex gap-2">
-            <span className="text-sm font-medium text-zinc-500 bg-zinc-100 px-3 py-1.5 rounded-md">
-              Active: {activeCount}
-            </span>
-            <span className="text-sm font-medium text-red-500 bg-red-50 px-3 py-1.5 rounded-md">
-              Banned: {bannedCount}
-            </span>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto min-h-[300px]">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-zinc-50 border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 font-bold">
-                  <th className="px-6 py-4">Người dùng</th>
-                  <th className="px-6 py-4">Vai trò</th>
-                  <th className="px-6 py-4">Ngày tham gia</th>
-                  <th className="px-6 py-4 text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-500 text-sm">
-                      Không tìm thấy người dùng nào
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr key={user.id} className="hover:bg-zinc-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600">
-                            {(user.full_name || 'U').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-zinc-900">{user.full_name || 'No Name'}</div>
-                            <div className="text-xs text-zinc-500">{user.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-zinc-600 capitalize">
-                        {user.role}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-zinc-600">
-                        {new Date(user.created_at).toLocaleDateString('vi-VN')}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
-                          user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {user.is_active ? 'Active' : 'Banned'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {currentUser?.id === user.id ? (
-                            <span className="text-xs text-zinc-400 italic">Me</span>
-                          ) : (
-                            <button 
-                              onClick={() => handleToggleStatus(user)}
-                              className={`p-1.5 rounded-md transition-colors ${
-                                user.is_active 
-                                  ? 'text-red-600 hover:bg-red-50' 
-                                  : 'text-green-600 hover:bg-green-50'
-                              }`} 
-                              title={user.is_active ? "Ban" : "Unban"}
-                            >
-                              {user.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
+      <div className="flex border-b border-zinc-200 gap-4 sm:gap-8 text-sm sm:text-base font-bold overflow-x-auto">
+        {[
+          { id: "all", label: "Tất cả" },
+          { id: "student", label: "Học viên (Student)" },
+          { id: "expert", label: "Chuyên gia (Expert)" },
+          { id: "admin", label: "Quản trị viên (Admin)" },
+        ].map((tab) => (
+          <button key={tab.id} onClick={() => { setSelectedRole(tab.id); setPage(1); }} className={`pb-3 border-b-2 transition-colors whitespace-nowrap ${selectedRole === tab.id ? "border-[#932120] text-[#932120]" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}>
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      <div className="bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden w-full">
+        <div className="p-4 sm:p-5 border-b border-zinc-200 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-zinc-50/50">
+          <div className="relative w-full md:max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input type="text" placeholder="Tìm kiếm email, họ tên..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl text-sm text-zinc-900 bg-white placeholder:text-zinc-400 font-medium focus:outline-none focus:border-[#932120] focus:ring-1 focus:ring-[#932120] w-full" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs sm:text-sm font-semibold text-zinc-700 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg">Tổng: {total}</span>
+            <span className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">Hoạt động: {activeCount}</span>
+            <span className="text-xs sm:text-sm font-semibold text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">Bị khóa: {bannedCount}</span>
+          </div>
+        </div>
+
+        <UserTable users={users} loading={loading} currentUserId={currentUser?.id} resendingId={resendingId} onToggleStatus={handleToggleStatus} onResendInvite={handleResendInvite} />
+        <UserPagination page={page} pageSize={pageSize} total={total} loading={loading} onPageChange={setPage} onPageSizeChange={(newSize) => { setPageSize(newSize); setPage(1); }} />
+      </div>
+
+      <UserCreateModal isOpen={isModalOpen} initialRole={modalRole} onClose={() => setIsModalOpen(false)} onSuccess={() => { setIsModalOpen(false); fetchUsers(); }} />
     </div>
   );
 }

@@ -4,7 +4,7 @@
 // ============================================================
 
 // ---------- Auth & User ----------
-export type UserRole = "student" | "admin";
+export type UserRole = "student" | "expert" | "admin";
 
 export interface User {
   id: string;
@@ -13,9 +13,35 @@ export interface User {
   role: UserRole;
   avatar_url: string | null;
   is_active: boolean;
+  is_activated?: boolean;
+  voice_consent_at?: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export interface LearnerGoal {
+  user_id: string;
+  target_overall: number | null;
+  target_listening: number | null;
+  target_reading: number | null;
+  target_writing: number | null;
+  target_speaking: number | null;
+  test_date: string | null;
+  updated_at?: string | null;
+}
+
+export interface ExpertProfile {
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  is_available: boolean;
+  max_active_reviews: number;
+  bio: string | null;
+  active_reviews_count: number;
+  created_at: string | null;
+}
+
 
 // ---------- Topics (Đề thi) ----------
 export type TaskType = "task1" | "task2";

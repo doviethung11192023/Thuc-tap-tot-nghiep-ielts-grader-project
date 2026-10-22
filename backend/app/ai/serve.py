@@ -198,7 +198,7 @@ def start_ngrok(port: int) -> str | None:
 
 
 if __name__ == "__main__":
-    PORT = int(os.getenv("PORT", 8000))
+    PORT = int(os.getenv("PORT", 8001))
 
     logger.info("=" * 60)
     logger.info("  🎓 IELTS Grader API — Starting up")

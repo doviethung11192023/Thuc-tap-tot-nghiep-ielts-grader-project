@@ -9,51 +9,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   onSelectEvidence
 }) => {
   if (!group.template) {
-    return (
-      <div className="space-y-3">
-        {group.questions.map((q) => {
-          const answer = (userAnswers[q.question_number] as string) || '';
-          const isCorrect = q.correct_answers?.some(a => a.toLowerCase().trim() === answer.toLowerCase().trim());
-          let inputClass = "px-3 py-2 border rounded-lg outline-none font-medium text-sm transition-all ";
-          if (mode === 'review') {
-            inputClass += isCorrect 
-              ? "border-green-500 bg-green-50 text-green-700" 
-              : "border-red-500 bg-red-50 text-red-700";
-          } else {
-            inputClass += "border-zinc-300 focus:border-[#932120] focus:ring-1 focus:ring-[#932120] bg-white";
-          }
-
-          return (
-            <div key={q.question_number} className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="font-semibold w-7 h-7 shrink-0 bg-white border border-zinc-200 flex items-center justify-center rounded-full text-xs text-zinc-700 font-mono shadow-2xs">
-                  {q.question_number}
-                </span>
-                {q.prompt && <span className="text-sm font-medium text-zinc-800">{q.prompt}</span>}
-                <input
-                  type="text"
-                  placeholder="Nhập câu trả lời..."
-                  value={answer}
-                  onChange={(e) => mode === 'exam' && onAnswerChange?.(q.question_number, e.target.value)}
-                  disabled={mode === 'review'}
-                  className={inputClass + " flex-1 min-w-[180px] max-w-sm"}
-                />
-              </div>
-              {mode === 'review' && !isCorrect && q.correct_answers && q.correct_answers.length > 0 && (
-                <div className="text-xs font-semibold text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 inline-block ml-10">
-                  Đáp án đúng: {q.correct_answers.join(' / ')}
-                </div>
-              )}
-              {mode === 'review' && (
-                <div className="ml-10">
-                  <ReviewEvidenceAccordion explanation={q.explanation} evidenceQuote={q.evidence_quote} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+    return <div className="text-red-500">Error: Missing template for InlineFillBlank.</div>;
   }
 
   // Parse template to replace {{X}} with input fields

@@ -13,18 +13,7 @@ router = APIRouter()
 async def submit_essay(request: Request, essay: EssayCreate, background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user)):
     word_count = len(essay.content.split())
     
-    # Auto-create mock user in DB if not exists (for testing with mock auth)
-    user_res = supabase.table("users").select("id").eq("id", current_user.id).execute()
-    if not user_res.data:
-        try:
-            supabase.table("users").insert({
-                "id": current_user.id,
-                "email": f"{current_user.id}@test.com",
-                "full_name": "Test User",
-                "role": current_user.role
-            }).execute()
-        except Exception as e:
-            pass # Ignore if already inserted or UUID issue
+
             
     essay_data = {
         "user_id": current_user.id,
@@ -76,7 +65,7 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
     essay_data = essay_res.data[0]
     
     if essay_data["user_id"] != current_user.id and current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this essay")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Essay not found")
     
     eval_res = supabase.table("evaluation_results").select("*").eq("essay_id", essay_id).execute()
     result_data = eval_res.data[0] if eval_res.data else None

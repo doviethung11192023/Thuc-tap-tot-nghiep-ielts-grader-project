@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from app.db.supabase import supabase
+from supabase import create_client
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -12,7 +13,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     Password: Mật khẩu bạn đã đăng ký trên Supabase.
     """
     try:
-        res = supabase.auth.sign_in_with_password({
+        # Sử dụng instance riêng biệt để tránh ghi đè quyền service_role của backend singleton
+        auth_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+        res = auth_client.auth.sign_in_with_password({
             "email": form_data.username,
             "password": form_data.password
         })
