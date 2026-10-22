@@ -27,6 +27,7 @@ desktop.ini
 # General Logs
 logs/
 *.log
+!backend/app/ai/logs/
 
 .agent/
 .agents/

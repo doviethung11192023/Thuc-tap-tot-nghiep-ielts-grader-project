@@ -23,6 +23,11 @@ export default function RegisterPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
       });
 
       if (error) {
@@ -37,24 +42,9 @@ export default function RegisterPage() {
       }
 
       if (data.user) {
-        localStorage.setItem('pending_user_name', name);
-        localStorage.setItem('pending_user_email', email);
-        
         if (data.session) {
           // Auto login if email confirmation is disabled
           toast.success('Đăng ký thành công!');
-          try {
-            await supabase.from('users').insert({
-              id: data.session.user.id,
-              email: data.session.user.email || email,
-              full_name: name,
-              role: 'student'
-            });
-            localStorage.removeItem('pending_user_name');
-            localStorage.removeItem('pending_user_email');
-          } catch (err) {
-            console.error(err);
-          }
           router.push('/history');
         } else {
           // Show check email screen

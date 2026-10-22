@@ -7,11 +7,12 @@ import { AuthGuard } from '@/components/guards/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useGradingNotifications } from '@/hooks/useGradingNotifications';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export function StudentPageLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   useGradingNotifications();
 
   const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
@@ -24,6 +25,13 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
     pathname?.includes('/test-practice/speaking/') ||
     pathname?.startsWith('/results/');
   // ---------------------------
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/login');
+  };
+
+  const initials = (user?.full_name || user?.email || 'U').substring(0, 2).toUpperCase();
 
   return (
     <AuthGuard>
@@ -46,9 +54,13 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium hidden md:block">Student Portal</span>
               <NotificationBell />
-              <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-white/40 transition-colors">
-                <User className="w-4 h-4" />
-              </div>
+              <Link 
+                href="/profile"
+                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-xs font-bold text-white border border-white/30 transition-colors"
+                title={user?.full_name || user?.email || 'Hồ sơ cá nhân'}
+              >
+                {initials}
+              </Link>
             </div>
           </div>
         </div>
@@ -70,6 +82,14 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/admin/statistics" className="flex items-center gap-3 px-4 py-3 text-[#932120] bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors font-bold shadow-sm">
                   <LayoutDashboard className="w-5 h-5" />
                   Về trang Quản trị
+                </Link>
+              </div>
+            )}
+            {user?.role === 'expert' && (
+              <div className="mb-6">
+                <Link href="/expert/profile" className="flex items-center gap-3 px-4 py-3 text-purple-800 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors font-bold shadow-sm">
+                  <BookOpen className="w-5 h-5 text-purple-700" />
+                  Cổng Chuyên gia
                 </Link>
               </div>
             )}
@@ -101,10 +121,13 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </nav>
           <div className="mt-8 pt-8 border-t border-zinc-200">
-            <Link href="/login" className="flex items-center gap-3 px-4 py-3 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium text-left"
+            >
               <LogOut className="w-5 h-5" />
               Đăng xuất
-            </Link>
+            </button>
           </div>
         </aside>
         )}

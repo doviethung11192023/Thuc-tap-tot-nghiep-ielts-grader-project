@@ -8,10 +8,7 @@ from arq.connections import RedisSettings
 load_dotenv()
 
 # Setup supabase inside worker
-from supabase import create_client, Client
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key)
+from app.db.supabase import supabase
 
 import re
 
@@ -151,9 +148,16 @@ async def evaluate_essay_task(ctx, essay_id: str):
         "raw_ai_response": ai_response
     }
     
-    supabase.table("evaluation_results").insert(eval_data).execute()
+    # Use upsert to prevent unique constraint violation on re-evaluations
+    supabase.table("evaluation_results").upsert(eval_data, on_conflict="essay_id").execute()
     
     # 5. Lưu chú thích bài viết (Inline Annotations)
+    # Xóa annotations cũ nếu có (trường hợp chấm lại)
+    try:
+        supabase.table("essay_annotations").delete().eq("essay_id", essay_id).execute()
+    except Exception:
+        pass
+
     essay_annotations = []
     for ann in ai_response.get("inline_annotations", []):
         raw_start = ann.get("position_start", 0)

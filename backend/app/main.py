@@ -5,11 +5,19 @@ from arq import create_pool
 from arq.connections import RedisSettings
 from app.core.config import settings
 
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Setup ARQ Redis Pool
     app.state.redis = await create_pool(RedisSettings.from_dsn(settings.REDIS_URL))
-    print("✅ Cấu hình thành công ARQ Redis Pool!")
+    print("[ARQ] Cau hinh thanh cong ARQ Redis Pool!")
     yield
     # Teardown
     await app.state.redis.close()
