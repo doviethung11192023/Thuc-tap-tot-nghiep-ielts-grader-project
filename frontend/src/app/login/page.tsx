@@ -14,16 +14,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   
-  // --- [MÃ MỚI BỞI AGENT] ---
-  // Mục đích: Tự động redirect về trang trong nếu đã đăng nhập hoặc đang dùng Demo Mode
-  const { user } = require('@/hooks/useAuth').useAuth();
-
-  React.useEffect(() => {
-    if (user) {
-      router.push('/learning-profile');
-    }
-  }, [user, router]);
-  // ---------------------------
 
   React.useEffect(() => {
     const rememberedEmail = localStorage.getItem('remembered_email');
