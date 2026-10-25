@@ -44,11 +44,8 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
               <div className="bg-white p-1.5 rounded-md">
                 <BookOpen className="w-6 h-6 text-[#932120]" />
               </div>
-              <span className="font-bold text-lg tracking-wider hidden sm:block">
-                HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG
-              </span>
-              <span className="font-bold text-lg tracking-wider sm:hidden">
-                PTIT
+              <span className="font-bold text-lg tracking-wider">
+                MoonLab
               </span>
             </div>
             <div className="flex items-center gap-4">

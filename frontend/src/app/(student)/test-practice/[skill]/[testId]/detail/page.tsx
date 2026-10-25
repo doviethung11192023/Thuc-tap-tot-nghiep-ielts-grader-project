@@ -4,11 +4,9 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { WritingResultsView } from '@/components/exam/WritingResultsView';
 import { SpeakingResultsView } from '@/components/exam/SpeakingResultsView';
-import { ReadingResultsView } from '@/components/exam/ReadingResultsView';
-import { ListeningResultsView } from '@/components/exam/ListeningResultsView';
+import { CleanReadingDetailView } from '@/components/exam/clean/CleanReadingDetailView';
+import { CleanListeningDetailView } from '@/components/exam/clean/CleanListeningDetailView';
 import { mockWritingExamDataset } from '@/mocks/exam-writing';
-import { mockReadingFullTest } from '@/mocks/exam-reading';
-import { mockListeningFullTest } from '@/mocks/exam-listening';
 
 export default function SkillDetailedResultPage() {
   const params = useParams();
@@ -40,21 +38,15 @@ export default function SkillDetailedResultPage() {
 
   if (skill === 'listening') {
     return (
-      <ListeningResultsView
-        testData={mockListeningFullTest}
-        userAnswers={{}}
-        mode="practice"
+      <CleanListeningDetailView
         onRetake={handleRetake}
       />
     );
   }
 
-  // Default: Reading
+  // Reading: Sử dụng dữ liệu thật từ clean-dataset (3 Passages, 40 câu hỏi, lời giải 4 bước)
   return (
-    <ReadingResultsView
-      testData={mockReadingFullTest}
-      userAnswers={{}}
-      mode="practice"
+    <CleanReadingDetailView
       onRetake={handleRetake}
     />
   );

@@ -5,6 +5,8 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { WritingSummaryResult } from '@/components/exam/summary/WritingSummaryResult';
 import { SpeakingSummaryResult } from '@/components/exam/summary/SpeakingSummaryResult';
+import { cleanReadingTest1Data } from '@/mocks/clean-dataset/reading-test-1-clean';
+import { cleanListeningTest1Data } from '@/mocks/clean-dataset/listening-test-1-clean';
 import { 
   CheckCircle2, 
   Sparkles, 
@@ -14,7 +16,10 @@ import {
   ArrowRight,
   Clock,
   BookOpen,
-  Headphones
+  Headphones,
+  BarChart3,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
 
 export default function SkillSummaryResultPage() {
@@ -45,15 +50,26 @@ export default function SkillSummaryResultPage() {
     );
   }
 
-  // Màn hình tóm tắt cho Reading & Listening (Đồng bộ chuẩn 3 tầng)
+  // =========================================================================
+  // DỮ LIỆU THẬT CHO READING & LISTENING TEST 1 TỪ BỘ CLEAN DATASET
+  // =========================================================================
   const isReading = skill === 'reading';
+  const cleanData = isReading ? cleanReadingTest1Data : cleanListeningTest1Data;
+
   const skillTitle = isReading ? 'Reading' : 'Listening';
-  const bandScore = isReading ? 6.5 : 6.0;
-  const correctCount = isReading ? 26 : 24;
+  const bandScore = cleanData.overall_band;
+  const correctCount = cleanData.correct_count;
+  const totalQuestions = cleanData.total_questions;
+  const timeSpent = cleanData.time_spent;
+  const submittedAt = cleanData.submitted_at;
+  const taskFormats = cleanData.task_formats_result;
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 py-4 px-3 sm:px-6">
+      {/* Banner Thẻ Điểm Chuẩn Đỏ PTIT #932120 */}
       <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 sm:p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-red-50/60 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 text-center md:text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
@@ -64,7 +80,7 @@ export default function SkillSummaryResultPage() {
               Kết Quả Bài Thi {skillTitle}
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 font-medium">
-              Đề thi Cambridge IELTS 18 • Thời gian làm bài: {isReading ? '52 phút' : '28 phút'}
+              {cleanData.title} • Nộp bài lúc {submittedAt} • Thời gian làm bài: {timeSpent}
             </p>
           </div>
 
@@ -77,7 +93,7 @@ export default function SkillSummaryResultPage() {
             </span>
             <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              {correctCount}/40 câu đúng
+              {correctCount}/{totalQuestions} câu đúng
             </span>
           </div>
         </div>
@@ -89,12 +105,60 @@ export default function SkillSummaryResultPage() {
           </div>
           <div className="bg-red-50/70 p-3.5 rounded-2xl border border-red-200 text-red-800">
             <span className="text-xs font-bold block">Số câu sai</span>
-            <span className="text-2xl font-black block mt-0.5">{40 - correctCount}</span>
+            <span className="text-2xl font-black block mt-0.5">{totalQuestions - correctCount}</span>
           </div>
           <div className="bg-zinc-50 p-3.5 rounded-2xl border border-zinc-200 text-zinc-700">
             <span className="text-xs font-bold block">Độ chính xác</span>
-            <span className="text-2xl font-black block mt-0.5">{((correctCount / 40) * 100).toFixed(0)}%</span>
+            <span className="text-2xl font-black block mt-0.5">{((correctCount / totalQuestions) * 100).toFixed(0)}%</span>
           </div>
+        </div>
+      </div>
+
+      {/* Bảng Phân Tích Chi Tiết Từng Dạng Bài Thật (Task Formats Breakdown) */}
+      <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-blue-600" />
+            <h2 className="text-base font-bold text-zinc-900">
+              Hiệu suất làm bài theo từng dạng câu hỏi
+            </h2>
+          </div>
+          <span className="text-xs text-zinc-500 font-medium">
+            Dữ liệu trích xuất từ bài làm học viên
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {taskFormats.map((tf, tfIdx) => {
+            const rate = tf.correct_rate ?? tf.percentage ?? 0;
+            const isGood = rate >= 50;
+            const correctAns = tf.correct_answers ?? tf.correct ?? 0;
+            const totalQ = tf.total_questions ?? tf.total ?? 0;
+            return (
+              <div 
+                key={tf.code || tfIdx}
+                className="bg-zinc-50/80 p-3.5 rounded-2xl border border-zinc-200/80 flex flex-col justify-between space-y-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-xs font-bold text-zinc-800 line-clamp-1">
+                    {tf.name}
+                  </span>
+                  <span className={`text-[11px] font-black px-2 py-0.5 rounded-md shrink-0 ${
+                    isGood ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {correctAns}/{totalQ} ({rate}%)
+                  </span>
+                </div>
+
+                <div className="w-full bg-zinc-200 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${isGood ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                    style={{ width: `${rate}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -123,7 +187,7 @@ export default function SkillSummaryResultPage() {
           className="w-full sm:w-auto h-10 px-6 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-95"
         >
           <FileSearch className="w-4 h-4" />
-          <span>Xem Lời Giải & Phân Tích Chi Tiết</span>
+          <span>Xem Lời Giải & Phân Tích Chi Tiết 4 Bước</span>
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

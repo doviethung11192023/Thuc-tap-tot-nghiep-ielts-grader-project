@@ -15,10 +15,8 @@ export default function ReadingWorkspacePage() {
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3'];
 
-  // Nếu là đề test-1 hoặc actual-test-reading-2024 thì dùng dữ liệu sạch chuẩn hóa
-  const activeTestData = (testId === 'test-1' || testId === 'actual-test-reading-2024') 
-    ? cleanReadingTest1Data 
-    : mockReadingFullTest;
+  // Dùng mockReadingFullTest cho không gian làm bài thi tương tác
+  const activeTestData = mockReadingFullTest;
 
   const handleSubmit = (answers: Record<number, string | string[]>) => {
     router.push(`/test-practice/reading/${testId}/summary`);

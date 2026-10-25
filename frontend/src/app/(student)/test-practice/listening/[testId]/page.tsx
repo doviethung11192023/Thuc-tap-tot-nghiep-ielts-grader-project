@@ -14,10 +14,8 @@ export default function ListeningWorkspacePage() {
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
 
-  // Nạp dữ liệu clean cho test-1 hoặc actual-test-listening-2024
-  const activeTestData = (testId === 'test-1' || testId === 'actual-test-listening-2024')
-    ? cleanListeningTest1Data
-    : mockListeningFullTest;
+  // Dùng mockListeningFullTest cho không gian làm bài thi tương tác
+  const activeTestData = mockListeningFullTest;
 
   const handleSubmit = (answers: Record<number, string | string[]>) => {
     router.push(`/test-practice/listening/${testId}/summary`);

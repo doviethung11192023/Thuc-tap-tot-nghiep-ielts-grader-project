@@ -20,7 +20,7 @@ export function Header({ onExitClick }: HeaderProps) {
           <BookOpen className="w-6 h-6 text-[#932120]" />
         </div>
         <span className="font-bold text-lg tracking-wider hidden sm:block">
-          HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG
+          MoonLab
         </span>
       </div>
       <div className="flex items-center gap-4">

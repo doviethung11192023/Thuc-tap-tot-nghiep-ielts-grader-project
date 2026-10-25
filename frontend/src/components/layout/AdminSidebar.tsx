@@ -55,7 +55,7 @@ export function AdminSidebar({
           {!isCollapsed && (
             <div className="truncate">
               <div className="font-extrabold text-white tracking-wider text-base leading-tight truncate">
-                PTIT IELTS
+                MoonLab IELTS
               </div>
               <div className="text-[10px] text-red-200 uppercase tracking-widest font-bold mt-0.5">
                 Admin Portal

@@ -1,1155 +1,82 @@
-import { ReadingTestData } from '@/types/exam';
+// Dữ liệu Đề Bài & Lời Giải Chi Tiết Thật từ de_bai_clean và dap_an_loi_giai_clean
+// Nguồn: 445_Recent_Actual_Test / test_25863_Test_1 / reading
 
-export const cleanReadingTest1Data: ReadingTestData = {
-  "test_id": "test-1",
-  "title": "Recent Actual Test - Academic Reading Test 1",
-  "passages": [
-    {
-      "passage": {
-        "id": "p1",
-        "title": "READING PASSAGE 1: Dealing with Different Sleep Patterns",
-        "content": "Dealing with Different Sleep Patterns\nSleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s. In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.\nWithin sleep, two states are recognized – non rapid eye movement (NREM) and rapid eye movement (REM). These alternate cyclically through the night with a cycle time of 90 minutes (50 ~ 60 minutes in the newborn). NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and stages 3 and 4 which are considered deep sleep with high arousal threshold.\nREM is ontogenetically primitive with EEG (electroencephalo-graph) activity closer to wake state, intermittent bursts of REMs and muscle atonia interrupted by phasic burst producing asynchronous twitching. The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and patients act out their dream, often resulting in injury.\nREM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's. Dream content –pleasant or unpleasant –will be remembered on waking from REM sleep but there is often little or no memory of the preceding mental activity on arousals from NREM sleep, even when associated with complex behaviors and autonomic disturbance as occurs in night terrors or sleep walking.\nIn the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset. Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to intense vivid often frightening dreams, similar to that experienced by patients with narcolepsy.\nThe NREM/REM sleep states are interrupted by brief arousals and transient awakenings. The frequency of the arousals may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.\nA basic rest/activity cycle originates in fetal life. The newborn sleeps an equal amount during the day and night, the sleep/wake cycle organized around three to four hourly feeds. By the second month favoring of sleep towards night time occurs and by six months the baby will have about 12 hours of sleep at night in addition to a couple of daytime naps.\nIn general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently, but the difference disappears by the second year. Persistent night awakenings in infants and toddlers usually reflect the child’s inability to self-soothe back to sleep without parental attention and will respond to a well supported behavioral programme.\nThe establishment of a consolidated night sleep pattern in children reflects brain maturation and may be disrupted in children with developmental problems. Even in this group success is possible by persisting with behavioral work, though many paediatricians prescribe melatonin for these children with some success. But as the long-term safety of melatonin remains unknown it should be used as a last resort.\nThere are now good studies looking at short term use of melatonin in sleep wake cycle disorders such as delayed sleep phase syndrome. Its use as a hypnotic should be discouraged, especially in the developing child as there is uncertainty on other cycles, such as menstrual.\nIn addition to the NREM/REM cycles, there is a circadian sleep/wake cycle entrained by intrinsic rhythms –melatonin and body temperature and extrinsic factors –light and social cues such as mealtimes, work times.\nThe pineal hormone melatonin plays a role in entraining the sleep/wake cycle to the light/dark cycle. Melatonin secretion is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin. Blind people may lose this entrainment and develop a free running sleep/wake cycle with progressive advancement of sleep onset time.\nPolymorphism of the circadian clock gene has now been identified with the population divided between morning types (larks) and evening types (owls). Those predisposed to later sleep onset time are susceptible to developing delayed sleep phase syndrome especially during adolescence when sleep requirement increases and there is a tendency towards later time for sleeping and waking.\nIn delayed sleep phase syndrome, sleep onset is delayed to the early hours of the morning with consequent difficulty in waking in time for school/work. Once established, advancing sleep onset time is difficult and requires treatment with appropriately timed melatonin or bright light therapy, or chronotherapy –advancing sleep onset progressively forwards until the desired sleep time is reached.\nIn contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening. Shift workers often struggle to cope with shift patterns as they grow older due to difficulty in re-adjusting their circadian clock. In general, morning bright light exposure is a more powerful synchronizer of the circadian rhythm than melatonin.",
-        "paragraphs": [
-          {
-            "id": "210342_1",
-            "text": "Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s. In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject."
-          },
-          {
-            "id": "210342_2",
-            "text": "Within sleep, two states are recognized – non rapid eye movement (NREM) and rapid eye movement (REM). These alternate cyclically through the night with a cycle time of 90 minutes (50 ~ 60 minutes in the newborn). NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and stages 3 and 4 which are considered deep sleep with high arousal threshold."
-          },
-          {
-            "id": "210342_3",
-            "text": "REM is ontogenetically primitive with EEG (electroencephalo-graph) activity closer to wake state, intermittent bursts of REMs and muscle atonia interrupted by phasic burst producing asynchronous twitching. The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and patients act out their dream, often resulting in injury."
-          },
-          {
-            "id": "210342_4",
-            "text": "REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's. Dream content –pleasant or unpleasant –will be remembered on waking from REM sleep but there is often little or no memory of the preceding mental activity on arousals from NREM sleep, even when associated with complex behaviors and autonomic disturbance as occurs in night terrors or sleep walking."
-          },
-          {
-            "id": "210342_5",
-            "text": "In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset. Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to intense vivid often frightening dreams, similar to that experienced by patients with narcolepsy."
-          },
-          {
-            "id": "210342_6",
-            "text": "The NREM/REM sleep states are interrupted by brief arousals and transient awakenings. The frequency of the arousals may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy."
-          },
-          {
-            "id": "210342_7",
-            "text": "A basic rest/activity cycle originates in fetal life. The newborn sleeps an equal amount during the day and night, the sleep/wake cycle organized around three to four hourly feeds. By the second month favoring of sleep towards night time occurs and by six months the baby will have about 12 hours of sleep at night in addition to a couple of daytime naps."
-          },
-          {
-            "id": "210342_8",
-            "text": "In general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently, but the difference disappears by the second year. Persistent night awakenings in infants and toddlers usually reflect the child’s inability to self-soothe back to sleep without parental attention and will respond to a well supported behavioral programme."
-          },
-          {
-            "id": "210342_9",
-            "text": "The establishment of a consolidated night sleep pattern in children reflects brain maturation and may be disrupted in children with developmental problems. Even in this group success is possible by persisting with behavioral work, though many paediatricians prescribe melatonin for these children with some success. But as the long-term safety of melatonin remains unknown it should be used as a last resort."
-          },
-          {
-            "id": "210342_10",
-            "text": "There are now good studies looking at short term use of melatonin in sleep wake cycle disorders such as delayed sleep phase syndrome. Its use as a hypnotic should be discouraged, especially in the developing child as there is uncertainty on other cycles, such as menstrual."
-          },
-          {
-            "id": "210342_11",
-            "text": "In addition to the NREM/REM cycles, there is a circadian sleep/wake cycle entrained by intrinsic rhythms –melatonin and body temperature and extrinsic factors –light and social cues such as mealtimes, work times."
-          },
-          {
-            "id": "210342_12",
-            "text": "The pineal hormone melatonin plays a role in entraining the sleep/wake cycle to the light/dark cycle. Melatonin secretion is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin. Blind people may lose this entrainment and develop a free running sleep/wake cycle with progressive advancement of sleep onset time."
-          },
-          {
-            "id": "210342_13",
-            "text": "Polymorphism of the circadian clock gene has now been identified with the population divided between morning types (larks) and evening types (owls). Those predisposed to later sleep onset time are susceptible to developing delayed sleep phase syndrome especially during adolescence when sleep requirement increases and there is a tendency towards later time for sleeping and waking."
-          },
-          {
-            "id": "210342_14",
-            "text": "In delayed sleep phase syndrome, sleep onset is delayed to the early hours of the morning with consequent difficulty in waking in time for school/work. Once established, advancing sleep onset time is difficult and requires treatment with appropriately timed melatonin or bright light therapy, or chronotherapy –advancing sleep onset progressively forwards until the desired sleep time is reached."
-          },
-          {
-            "id": "210342_15",
-            "text": "In contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening. Shift workers often struggle to cope with shift patterns as they grow older due to difficulty in re-adjusting their circadian clock. In general, morning bright light exposure is a more powerful synchronizer of the circadian rhythm than melatonin."
-          }
-        ]
-      },
-      "question_groups": [
-        {
-          "group_id": "g1_p1",
-          "question_type": "true_false_not_given",
-          "instruction": "Choose\nTRUE               if the statement is true\nFALSE              if the statement is false\nNOT GIVEN    if the information is not given in the passage.",
-          "options_pool": [
-            {
-              "key": "True",
-              "text": "True"
-            },
-            {
-              "key": "False",
-              "text": "False"
-            },
-            {
-              "key": "Not Given",
-              "text": "Not Given"
-            }
-          ],
-          "questions": [
-            {
-              "question_number": 1,
-              "prompt": "Growth interest in sleeping disorder studies caused a growth in the number of centers for researching sleep medicines.",
-              "correct_answers": [
-                "True"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to cause-and-effect relationships and numbers._\n**Statement:**\n> Growth **interest in sleeping disorder studies** **caused a growth** in the number of centers for researching sleep medicines.\n**Keywords:**\n- interest in sleeping disorder studies\n- caused a growth\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 1, the section describing the development of sleep medicine in the UK. The passage explains that in the last decade a number of centers have sprouted, often led by chest physicians and ENT surgeons with an interest in obstructive sleep apnoea._\nLocated in **Paragraph 1**:\n> \"**In the last decade a number of centers have sprouted**, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons **with an interest in obstructive sleep apnoea**, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same ideas about interest, growth, and centers._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| interest in sleeping disorder studies | \"with an interest in obstructive sleep apnoea\" | **✅** — The passage mentions physicians and surgeons \"with an interest in obstructive sleep apnoea\", which is a type of sleeping disorder. |\n| caused a growth | \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\" | **✅** — The passage says \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\", showing that interest led to growth. |\n→ *All keywords match the passage, which confirms that interest in sleep disorders led to more centers being established.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage confirms that \"a number of centers have sprouted\" in the last decade, led by physicians \"with an interest in obstructive sleep apnoea\", which directly supports the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 2,
-              "prompt": "People are often injured when dreaming aggressive scenes or sleepwalking.",
-              "correct_answers": [
-                "Not Given"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'often' and multiple conditions joined by 'or'._\n**Statement:**\n> People are **often injured** when **dreaming aggressive scenes** or **sleepwalking**.\n**Keywords:**\n- often injured\n- dreaming aggressive scenes\n- sleepwalking\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 3, the section about REM sleep and dreams. The passage explains that in REM behavior disorder, violent dream content can lead to patients acting out their dreams, often resulting in injury._\nLocated in **Paragraph 3**:\n> \"The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when **dreams content becomes violent** and patients act out their dream, **often resulting in injury**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions injury from violent dreams but does not say anything about sleepwalking causing injury._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| often injured | \"often resulting in injury\" | **✅** — The passage uses the same phrase \"often resulting in injury\" when describing REM behavior disorder. |\n| dreaming aggressive scenes | \"dreams content becomes violent\" | **⚠️** — The passage says \"dreams content becomes violent\", which matches the idea of aggressive scenes, but only in the context of REM behavior disorder. |\n| sleepwalking | _(not in passage)_ | **⚠️** — The passage does not mention whether sleepwalking causes injury; it only discusses injury from acting out violent dreams. |\n→ *The passage confirms injury from violent dreams but does not provide information about injury from sleepwalking.*\n### Step 4 — Decide the answer\n_The passage confirms injury from violent dreams but does not mention sleepwalking in this context, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that \"often resulting in injury\" occurs when patients act out violent dreams in REM behavior disorder, but it does not say whether sleepwalking causes injury.\n⚠️ *The passage mentions sleepwalking in a different context but does not link it to injury, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 3,
-              "prompt": "Parkinsons is scientifically proved to be the only result of REM disorders.",
-              "correct_answers": [
-                "Not Given"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially limiting words like 'only' and 'scientifically proved'._\n**Statement:**\n> **Parkinsons** is **scientifically proved** to be **the only result** of **REM disorders**.\n**Keywords:**\n- Parkinsons\n- scientifically proved\n- the only result\n- REM disorders\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 4, the section about REM behavior disorder. The passage says that REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's._\nLocated in **Paragraph 4**:\n> \"**REM behavior disorder** can be a precursor of neurodegenerative disease **including Parkinson's**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions Parkinson's but does not say it is the only result or that this is scientifically proved._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| scientifically proved | _(not in passage)_ | **⚠️** — The passage does not mention scientific proof; it simply states that REM behavior disorder can be a precursor. |\n| the only result | \"including Parkinson's\" | **⚠️** — The passage says \"including Parkinson's\", which suggests there are other diseases, not that Parkinson's is the only result. |\n| REM disorders | \"REM behavior disorder\" | **✅** — The passage uses the exact term \"REM behavior disorder\" when discussing this condition. |\n→ *The passage mentions Parkinson's as one possible result but does not confirm it is the only result or that this is scientifically proved.*\n### Step 4 — Decide the answer\n_The passage does not provide information about scientific proof or whether Parkinson's is the only result, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that REM behavior disorder can be a precursor of neurodegenerative disease \"including Parkinson's\", but it does not say whether Parkinson's is the only result or whether this is scientifically proved.\n⚠️ *The word 'including' suggests there are other diseases, but the passage does not explicitly state whether Parkinson's is the only result, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 4,
-              "prompt": "REM sleep counts for less proportion of total sleep time for grownups than newborns.",
-              "correct_answers": [
-                "True"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to comparisons between two groups and percentages._\n**Statement:**\n> **REM sleep** counts for **less proportion** of total sleep time for **grownups** than **newborns**.\n**Keywords:**\n- REM sleep\n- less proportion\n- grownups\n- newborns\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep across different ages. The passage explains that in newborns, 50 percent of total sleep time is REM sleep, progressively shrinking to 25 percent in adults._\nLocated in **Paragraph 5**:\n> \"**In the newborn**, **50 percent of total sleep time** is occupied by **REM sleep**, **progressively shrinking to 25 percent in the adult**, the first block of REM sleep occurring about 90 minutes after sleep onset.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage provides specific percentages showing that adults have a smaller proportion of REM sleep than newborns._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| less proportion | \"progressively shrinking to 25 percent in the adult\" | **✅** — The passage says REM sleep is \"progressively shrinking to 25 percent in the adult\", which means a smaller proportion. |\n| grownups | \"25 percent in the adult\" | **✅** — The passage refers to \"25 percent in the adult\", which is another way of saying grownups. |\n| newborns | \"In the newborn\" | **✅** — The passage uses the phrase \"In the newborn\" when describing the 50 percent figure. |\n→ *All keywords match the passage, which confirms that adults have a smaller proportion of REM sleep compared to newborns.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, confirming that adults have less REM sleep than newborns, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult\", which directly confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 5,
-              "prompt": "Frightening dreams are considered irrelevant to alcohol and drugs.",
-              "correct_answers": [
-                "False"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'irrelevant' that indicate no connection._\n**Statement:**\n> **Frightening dreams** are considered **irrelevant** to **alcohol and drugs**.\n**Keywords:**\n- Frightening dreams\n- irrelevant\n- alcohol and drugs\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep and substances. The passage explains that abrupt withdrawal of alcohol and drugs can increase REM sleep, leading to intense vivid often frightening dreams._\nLocated in **Paragraph 5**:\n> \"**Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs** **can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to** **intense vivid often frightening dreams**, similar to that experienced by patients with narcolepsy.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage shows a clear connection between alcohol, drugs, and frightening dreams, which contradicts the claim that they are irrelevant._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Frightening dreams | \"intense vivid often frightening dreams\" | **❌** — The passage mentions \"intense vivid often frightening dreams\", which matches the idea of frightening dreams. |\n| irrelevant | \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" | **❌** — The passage says withdrawal of alcohol and drugs \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" frightening dreams, showing they are relevant, not irrelevant. |\n| alcohol and drugs | \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" | **❌** — The passage states \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to frightening dreams, showing a direct connection. |\n→ *The passage shows a clear connection between alcohol, drugs, and frightening dreams, which directly contradicts the claim that they are irrelevant.*\n### Step 4 — Decide the answer\n_The passage shows that alcohol and drugs are connected to frightening dreams, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to \"intense vivid often frightening dreams\", which contradicts the claim that they are irrelevant.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 6,
-              "prompt": "According to the author, babies would sleep more at night from the second month of their births.",
-              "correct_answers": [
-                "True"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to time markers and comparisons._\n**Statement:**\n> According to the author, **babies** would **sleep more at night** **from the second month** of their births.\n**Keywords:**\n- babies\n- sleep more at night\n- from the second month\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 7, the section about infant sleep patterns. The passage explains that by the second month, favoring of sleep towards night time occurs._\nLocated in **Paragraph 7**:\n> \"**By the second month** **favoring of sleep towards night time** occurs and by six months **the baby** will have about 12 hours of sleep at night in addition to a couple of daytime naps.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same idea about babies sleeping more at night from the second month._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| babies | \"the baby\" | **✅** — The passage refers to \"the baby\", which is the same as babies in general. |\n| sleep more at night | \"favoring of sleep towards night time\" | **✅** — The passage says \"favoring of sleep towards night time\" occurs, which means sleeping more at night. |\n| from the second month | \"By the second month\" | **✅** — The passage uses the exact phrase \"By the second month\" when describing this change. |\n→ *All keywords match the passage, which confirms that babies sleep more at night from the second month.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"By the second month favoring of sleep towards night time occurs\", which directly supports the statement that babies sleep more at night from the second month.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 7,
-              "prompt": "During the night, children born prematurely wake as frequently as breast fed babies.",
-              "correct_answers": [
-                "False"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially comparisons like 'as frequently as'._\n**Statement:**\n> During the night, **children born prematurely** **wake** **as frequently as** **breast fed babies**.\n**Keywords:**\n- children born prematurely\n- wake\n- as frequently as\n- breast fed babies\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 8, the section about premature and breast-fed babies. The passage explains that children born prematurely tend to be awake more at night in the first year and breast-fed babies wake more frequently._\nLocated in **Paragraph 8**:\n> \"In general, **children born prematurely** **have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently**, but the difference disappears by the second year.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage describes different waking patterns for the two groups, not the same frequency._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| wake | \"awake more at night\" | **❌** — The passage says premature children \"awake more at night\", which is different from waking frequently like breast-fed babies. |\n| as frequently as | \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\" | **❌** — The passage states \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns, not the same frequency. |\n| breast fed babies | \"breast-fed babies wake more frequently\" | **❌** — The passage mentions \"breast-fed babies wake more frequently\", which describes a different pattern from premature babies. |\n→ *The passage describes different waking patterns for premature and breast-fed babies, which contradicts the claim that they wake as frequently.*\n### Step 4 — Decide the answer\n_The passage shows that the two groups have different waking patterns, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns rather than the same frequency.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 8,
-              "prompt": "Children require more deep sleep and less disruption during their sleep in the first half of the night.",
-              "correct_answers": [
-                "Not Given"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for specific groups like 'children' and time references like 'first half of the night'._\n**Statement:**\n> **Children** **require more** **deep sleep** and less **disruption** during their sleep in the **first half of the night**.\n**Keywords:**\n- Children\n- require more\n- deep sleep\n- disruption\n- first half of the night\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, which discusses arousals during sleep, and paragraph 2, which defines deep sleep. The passage mentions deep sleep stages and arousals but does not specifically discuss children's requirements._\nLocated in **Paragraph 6**:\n> \"The frequency of the **arousals** may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.\"\nLocated in **Paragraph 2**:\n> \"NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and **stages 3 and 4 which are considered deep sleep** with high arousal threshold.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage does not mention whether children require more deep sleep or less disruption in the first half of the night._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Children | _(not in passage)_ | **⚠️** — The passage does not mention children's specific sleep requirements or whether they need more or less of any sleep stage. |\n| require more | _(not in passage)_ | **⚠️** — The passage does not say anything about whether children require more deep sleep than other age groups. |\n| deep sleep | \"stages 3 and 4 which are considered deep sleep\" | **✅** — The passage defines \"stages 3 and 4 which are considered deep sleep\" but does not link this to children's needs. |\n| disruption | \"arousals\" | **⚠️** — The passage mentions \"arousals\", which are a type of disruption, but does not link this to children specifically. |\n| first half of the night | _(not in passage)_ | **⚠️** — The passage does not mention the first half of the night or any specific timing for children's sleep requirements. |\n→ *The passage mentions deep sleep and arousals but does not provide information about children's specific requirements or timing.*\n### Step 4 — Decide the answer\n_The passage does not provide information about children's specific sleep requirements or timing, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage defines \"stages 3 and 4 which are considered deep sleep\" and mentions \"arousals\", but it does not say whether children require more deep sleep or less disruption in the first half of the night.\n⚠️ *The passage discusses deep sleep and arousals in general terms but does not link these to children's specific needs or the timing during the night, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
-              "options_pool": [
-                {
-                  "key": "True",
-                  "text": "True"
-                },
-                {
-                  "key": "False",
-                  "text": "False"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "group_id": "g2_p1",
-          "question_type": "sentence_completion",
-          "instruction": "NB   There are more words than spaces so you will not use them all.",
-          "template": "Researchers had laid their eyes on using medicines in sleep-wake cycle disorders. The NREM/REM cycles affect sleep along with human {{9}}  and outside factors. Melatonin plays a determinant role in {{10}}  the sleep wake cycle to the day-night cycle. Scientists found that melatonin is high within {{11}}  environment, with an exception of {{12}}  subjects who may build up a free cycle. Circadian clock genes are {{13}}  between “morning people” and “night people”. It is difficult for people with delayed sleep phase syndrome to wake in time. Conversely, {{14}}  are more susceptible to sleep early in the evening.",
-          "options_pool": null,
-          "questions": [
-            {
-              "question_number": 9,
-              "correct_answers": [
-                "A"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 11*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The **NREM/REM cycles affect sleep** **along with human** ______'\nℹ️ *'human [noun phrase]' — the blank follows 'human' and pairs with 'outside factors', so the answer is a noun phrase naming internal biological factors.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 11**:\n> \"In addition to the NREM/REM cycles, there is a **circadian sleep/wake cycle** entrained by intrinsic rhythms –melatonin and body temperature and **extrinsic factors** –light and social cues such as mealtimes, work times.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| NREM/REM cycles affect sleep | \"circadian sleep/wake cycle\" | **✅** — The passage says \"circadian sleep/wake cycle\" works alongside the NREM/REM cycles, showing they both affect sleep. |\n| outside factors | \"extrinsic factors\" | **✅** — The passage mentions \"extrinsic factors\", which means the same as outside factors. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — rhythms\n**Eliminated options:**\n- ❌ **B** — About darkness, not about internal biological patterns that affect sleep.\n- ❌ **C** — An adjective describing variation, not a noun naming internal factors.\n- ❌ **D** — An adjective describing sameness, not a noun naming internal factors.\n- ❌ **E** — About speed of movement, not about biological cycles that regulate sleep.\n- ❌ **F** — An adjective describing light intensity, not a noun naming internal factors.\n- ❌ **G** — Too general — the blank needs a specific internal factor, not the body itself.\n- ❌ **H** — A group of people, not an internal biological factor affecting sleep.\n- ❌ **I** — A verb describing synchronization, not a noun naming internal factors.\n- ❌ **J** — An external factor, not an internal human factor.\n- ❌ **K** — A group of people, not an internal biological factor.\n- ❌ **L** — An adjective describing vision loss, not a noun naming internal factors.\n- ❌ **M** — An adjective describing body processes, not a noun naming specific internal factors.\n- ❌ **N** — Singular form, but the blank needs a plural to match the context.\n- ❌ **O** — An adjective describing age, not a noun naming internal factors.\n- ❌ **P** — About vision ability, not about internal biological patterns that regulate sleep."
-            },
-            {
-              "question_number": 10,
-              "correct_answers": [
-                "I"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Melatonin plays a determinant role in** ______ **the sleep wake cycle to the day-night cycle**.'\nℹ️ *'in [verb]' — the blank follows the preposition 'in' and takes an object 'the sleep wake cycle', so the answer is a verb form (gerund) describing the action melatonin performs.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"The pineal hormone **melatonin** plays a role in entraining **the sleep/wake cycle to the light/dark cycle**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| the sleep wake cycle to the day-night cycle | \"the sleep/wake cycle to the light/dark cycle\" | **✅** — The passage says \"the sleep/wake cycle to the light/dark cycle\", which means the same as the sleep wake cycle to the day-night cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: I** — entraining\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not a verb describing melatonin's action.\n- ❌ **B** — A noun about darkness, not a verb describing synchronization.\n- ❌ **C** — An adjective describing variation, not a verb describing an action.\n- ❌ **D** — An adjective describing sameness, not a verb describing an action.\n- ❌ **E** — A noun about speed, not a verb describing synchronization.\n- ❌ **F** — An adjective describing light, not a verb describing an action.\n- ❌ **G** — A noun naming a physical structure, not a verb describing an action.\n- ❌ **H** — A noun phrase naming people, not a verb describing an action.\n- ❌ **J** — A noun about light, not a verb describing synchronization.\n- ❌ **K** — A noun naming people, not a verb describing an action.\n- ❌ **L** — An adjective describing vision loss, not a verb describing an action.\n- ❌ **M** — An adjective describing body processes, not a verb describing an action.\n- ❌ **N** — A noun naming a sequence, not a verb describing an action.\n- ❌ **O** — An adjective describing age, not a verb describing an action.\n- ❌ **P** — A noun about vision, not a verb describing synchronization."
-            },
-            {
-              "question_number": 11,
-              "correct_answers": [
-                "B"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'Scientists found that **melatonin is high within** ______ **environment**'\nℹ️ *'within [noun] environment' — the blank is an adjective or noun modifying 'environment', describing the lighting condition where melatonin is high.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"**Melatonin secretion** is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| melatonin | \"Melatonin secretion\" | **✅** — The passage says \"Melatonin secretion is high in darkness\", showing where the missing word is found. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: B** — shadow\n**Eliminated options:**\n- ❌ **A** — About biological patterns, not about a lighting condition or environment.\n- ❌ **C** — Describes variation, not a specific lighting condition where melatonin is high.\n- ❌ **D** — Describes sameness, not a lighting condition where melatonin is high.\n- ❌ **E** — About speed, not about a lighting condition or environment.\n- ❌ **F** — Describes a light environment, but melatonin is high in darkness, not brightness.\n- ❌ **G** — About physical structure, not about a lighting condition or environment.\n- ❌ **H** — A group of people, not a lighting condition or environment.\n- ❌ **I** — A verb describing synchronization, not a noun or adjective describing environment.\n- ❌ **J** — Melatonin is low in daylight, not high, so this contradicts the context.\n- ❌ **K** — A group of people, not a lighting condition or environment.\n- ❌ **L** — Describes vision loss, not a lighting condition or environment.\n- ❌ **M** — Describes body processes, not a lighting condition or environment.\n- ❌ **N** — About a sequence, not a lighting condition or environment.\n- ❌ **O** — Describes age, not a lighting condition or environment.\n- ❌ **P** — About vision ability, not a lighting condition or environment."
-            },
-            {
-              "question_number": 12,
-              "correct_answers": [
-                "L"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'with an **exception of** ______ **subjects who may build up a free cycle**'\nℹ️ *'exception of [adjective] subjects' — the blank is an adjective describing which type of subjects are the exception.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"Blind people **may lose this entrainment** and develop a **free running sleep/wake cycle** with progressive advancement of sleep onset time.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| exception | \"may lose this entrainment\" | **✅** — The passage says \"may lose this entrainment\", which explains why these subjects are an exception. |\n| free cycle | \"free running sleep/wake cycle\" | **✅** — The passage mentions \"free running sleep/wake cycle\", which matches the summary's free cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: L** — blind\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing subjects.\n- ❌ **B** — A noun about darkness, not an adjective describing subjects.\n- ❌ **C** — Too vague — the blank needs a specific characteristic, not just 'not the same'.\n- ❌ **D** — Describes sameness, but the context is about an exception group with a specific characteristic.\n- ❌ **E** — A noun about speed, not an adjective describing subjects.\n- ❌ **F** — Describes light intensity, not a characteristic of subjects who lose entrainment.\n- ❌ **G** — A noun naming physical structure, not an adjective describing subjects.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing subjects who lose light entrainment.\n- ❌ **I** — A verb describing synchronization, not an adjective describing subjects.\n- ❌ **J** — A noun about light, not an adjective describing subjects.\n- ❌ **K** — A noun naming older people, not an adjective describing vision-impaired subjects.\n- ❌ **M** — Too general — the blank needs a specific characteristic related to vision loss.\n- ❌ **N** — A noun naming a sequence, not an adjective describing subjects.\n- ❌ **O** — Describes age, but the context is about subjects who lose light-based entrainment.\n- ❌ **P** — A noun about vision ability, not an adjective describing subjects."
-            },
-            {
-              "question_number": 13,
-              "correct_answers": [
-                "C"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 13*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Circadian clock genes are** ______ between \"morning people\" and \"night people\".'\nℹ️ *'genes are [adjective]' — the blank follows the linking verb 'are' and describes the relationship between genes in morning versus night people, so the answer is an adjective.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 13**:\n> \"**Polymorphism of the circadian clock gene** has now been identified with the population divided between morning types (larks) and evening types (owls).\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Circadian clock genes | \"Polymorphism of the circadian clock gene\" | **✅** — The passage mentions \"Polymorphism of the circadian clock gene\", which refers to ______ in the genes. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: C** — different\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing variation between groups.\n- ❌ **B** — A noun about darkness, not an adjective describing variation.\n- ❌ **D** — Means the same, but the passage says the population is divided, implying variation.\n- ❌ **E** — A noun about speed, not an adjective describing variation between groups.\n- ❌ **F** — Describes light intensity, not variation between groups.\n- ❌ **G** — A noun naming physical structure, not an adjective describing variation.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing variation.\n- ❌ **I** — A verb describing synchronization, not an adjective describing variation.\n- ❌ **J** — A noun about light, not an adjective describing variation between groups.\n- ❌ **K** — A noun naming older people, not an adjective describing variation.\n- ❌ **L** — Describes vision loss, not variation between morning and night people.\n- ❌ **M** — Describes body processes generally, not the specific variation between groups.\n- ❌ **N** — A noun naming a sequence, not an adjective describing variation.\n- ❌ **O** — Describes age, not variation between morning and night people.\n- ❌ **P** — A noun about vision, not an adjective describing variation between groups."
-            },
-            {
-              "question_number": 14,
-              "correct_answers": [
-                "K"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 15*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Conversely**, ______ **are more susceptible to sleep early in the evening**.'\nℹ️ *'[noun phrase] are more susceptible' — the blank is the subject of the sentence, so the answer is a noun phrase naming a group of people.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 15**:\n> \"In contrast **the elderly** who are **more susceptible to perturbation in their sleep/wake schedule** can develop advanced sleep phase syndrome with **sleep onset occurring early in the evening**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| more susceptible to sleep | \"more susceptible to perturbation in their sleep/wake schedule\" | **✅** — The passage says \"more susceptible to perturbation in their sleep/wake schedule\", which relates to ______ being susceptible to sleep issues. |\n| elders | \"the elderly\" | **✅** — The passage uses \"the elderly\", which means the same as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: K** — elders\n**Eliminated options:**\n- ❌ **A** — Names biological patterns, not a group of people who sleep early.\n- ❌ **B** — A noun about darkness, not a group of people.\n- ❌ **C** — An adjective describing variation, not a noun phrase naming people.\n- ❌ **D** — An adjective describing sameness, not a noun phrase naming people.\n- ❌ **E** — A noun about speed, not a group of people.\n- ❌ **F** — An adjective describing light, not a noun phrase naming people.\n- ❌ **G** — A noun naming physical structure, not a group of people.\n- ❌ **H** — Names workers with irregular schedules, not the age group susceptible to early evening sleep.\n- ❌ **I** — A verb describing synchronization, not a noun phrase naming people.\n- ❌ **J** — A noun about light, not a group of people.\n- ❌ **L** — An adjective describing vision loss, not a noun phrase naming an age group.\n- ❌ **M** — An adjective describing body processes, not a noun phrase naming people.\n- ❌ **N** — A noun naming a sequence, not a group of people.\n- ❌ **O** — An adjective describing age, but the passage says older people sleep early, not younger.\n- ❌ **P** — A noun about vision, not a group of people."
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "passage": {
-        "id": "p2",
-        "title": "READING PASSAGE 2: From Novices to Experts",
-        "content": "From Novices to Experts\nExpertise is commitment coupled with creativity. Specifically, it is the commitment of time, energy, and resources to a relatively narrow field of study and the creative energy necessary to generate new knowledge in that field. It takes a considerable amount of time and regular exposure to a large number of cases to become an expert.\nAn individual enters a field of study as a novice. The novice needs to learn the guiding principles and rules –the heuristics and constraints –of a given task in order to perform that task. Concurrently, the novice needs to be exposed to specific cases, or instances, that test the boundaries of such heuristics. Generally, a novice will find a mentor to guide her through the process of acquiring new knowledge. A fairly simple example would be someone learning to play chess. The novice chess player seeks a mentor to teach her the object of the game, the number of spaces, the names of the pieces, the function of each piece, how each piece is moved, and the necessary conditions for winning or losing the game.\nIn time, and with much practice, the novice begins to recognize patterns of behavior within cases and, thus, becomes a journeyman. With more practice and exposure to increasingly complex cases, the journeyman finds patterns not only within cases but also between cases. More importantly, the journeyman learns that these patterns often repeat themselves over time. The journeyman still maintains regular contact with a mentor to solve specific problems and learn more complex strategies. Returning to the example of the chess player, the individual begins to learn patterns of opening moves, offensive and defensive game-playing strategies, and patterns of victory and defeat.\nWhen a journeyman starts to make and test hypotheses about future behavior based on past experiences, she begins the next transition. Once she creatively generates knowledge, rather than simply matching superficial patterns, she becomes an expert. At this point, she is confident in her knowledge and no longer needs a mentor as a guide –she becomes responsible for her own knowledge.\nIn the chess example, once a journeyman begins competing against experts, makes predictions based on patterns, and tests those predictions against actual behavior, she is generating new knowledge and a deeper understanding of the game. She is creating her own cases rather than relying on the cases of others.\nThe chess example is a rather short description of an apprenticeship model. Apprenticeship may seem like a restrictive 18th century mode of education, but it is still a standard method of training for many complex tasks. Academic doctoral programs are based on an apprenticeship model, as are fields like law, music, engineering, and medicine. Graduate students enter fields of study, find mentors, and begin the long process of becoming independent experts and generating new knowledge in their respective domains.\nTo some, playing chess may appear rather trivial when compared, for example, with making medical diagnoses, but both are highly complex tasks. Chess has a well-defined set of heuristics, whereas medical diagnoses seem more open ended and variable. In both instances, however, there are tens, if not hundreds, of thousands of potential patterns. A research study discovered that chess masters had spent between 10,000 and 20,000 hours, or more than ten years, studying and playing chess. On average, a chess master stores 50,000 different chess patterns in long-term memory.\nSimilarly, a diagnostic radiologist spends eight years in full time medical training – four years of medical school and four years of residency –before she is qualified to take a national board exam and begin independent practice. According to a 1988 study, the average diagnostic radiology resident sees forty cases per day, or around 12,000 cases per year. At the end of a residency, a diagnostic radiologist has stored, on average, 48,000 cases in long-term memory.\nPsychologists and cognitive scientists agree that the time it takes to become an expert depends on the complexity of the task and the number of cases, or patterns, to which an individual is exposed. The more complex the task, the longer it takes to build expertise, or, more accurately, the longer it takes to experience and store a large number of cases or patterns.\nExperts are individuals with specialized knowledge suited to perform the specific tasks for which they are trained, but that expertise does not necessarily transfer to other domains. A master chess player cannot apply chess expertise in a game of poker –although both chess and poker are games, a chess master who has never played poker is a novice poker player. Similarly, a biochemist is not qualified to perform neurosurgery, even though both biochemists and neurosurgeons study human physiology. In other words, the more complex a task is, the more specialized and exclusive is the knowledge required to perform that task.\nAn expert perceives meaningful patterns in her domain better than non-experts. Where a novice perceives random or disconnected data points, an expert connects regular patterns within and between cases. This ability to identify patterns is not an innate perceptual skill; rather it reflects the organization of knowledge after exposure to and experience with thousands of cases.\nExperts have a deeper understanding of their domains than novices do, and utilize higher-order principles to solve problems. A novice, for example, might group objects together by color or size, whereas an expert would group the same objects according to their function or utility. Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices.  Experts recognize variables that have the largest influence on a particular problem and focus their attention on those variables.\nExperts have better domain-specific short-term and long-term memory than novices do. Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving. Interestingly, experts go about solving problems differently than novices. Experts spend more time thinking about a problem to fully understand it at the beginning of a task than do novices, who immediately seek to find a solution. Experts use their knowledge of previous cases as context for creating mental models to solve given problems.\nBetter at self-monitoring than novices, experts are more aware of instances where they have committed errors or failed to understand a problem. Experts check their solutions more often than novices and recognize when they are missing information necessary for solving a problem. Experts are aware of the limits of their domain knowledge and apply their domain’s heuristics to solve problems that fall outside of their experience base.",
-        "paragraphs": [
-          {
-            "id": "210344_1",
-            "text": "Expertise is commitment coupled with creativity. Specifically, it is the commitment of time, energy, and resources to a relatively narrow field of study and the creative energy necessary to generate new knowledge in that field. It takes a considerable amount of time and regular exposure to a large number of cases to become an expert."
-          },
-          {
-            "id": "210344_2",
-            "text": "An individual enters a field of study as a novice. The novice needs to learn the guiding principles and rules –the heuristics and constraints –of a given task in order to perform that task. Concurrently, the novice needs to be exposed to specific cases, or instances, that test the boundaries of such heuristics. Generally, a novice will find a mentor to guide her through the process of acquiring new knowledge. A fairly simple example would be someone learning to play chess. The novice chess player seeks a mentor to teach her the object of the game, the number of spaces, the names of the pieces, the function of each piece, how each piece is moved, and the necessary conditions for winning or losing the game."
-          },
-          {
-            "id": "210344_3",
-            "text": "In time, and with much practice, the novice begins to recognize patterns of behavior within cases and, thus, becomes a journeyman. With more practice and exposure to increasingly complex cases, the journeyman finds patterns not only within cases but also between cases. More importantly, the journeyman learns that these patterns often repeat themselves over time. The journeyman still maintains regular contact with a mentor to solve specific problems and learn more complex strategies. Returning to the example of the chess player, the individual begins to learn patterns of opening moves, offensive and defensive game-playing strategies, and patterns of victory and defeat."
-          },
-          {
-            "id": "210344_4",
-            "text": "When a journeyman starts to make and test hypotheses about future behavior based on past experiences, she begins the next transition. Once she creatively generates knowledge, rather than simply matching superficial patterns, she becomes an expert. At this point, she is confident in her knowledge and no longer needs a mentor as a guide –she becomes responsible for her own knowledge."
-          },
-          {
-            "id": "210344_5",
-            "text": "In the chess example, once a journeyman begins competing against experts, makes predictions based on patterns, and tests those predictions against actual behavior, she is generating new knowledge and a deeper understanding of the game. She is creating her own cases rather than relying on the cases of others."
-          },
-          {
-            "id": "210344_6",
-            "text": "The chess example is a rather short description of an apprenticeship model. Apprenticeship may seem like a restrictive 18th century mode of education, but it is still a standard method of training for many complex tasks. Academic doctoral programs are based on an apprenticeship model, as are fields like law, music, engineering, and medicine. Graduate students enter fields of study, find mentors, and begin the long process of becoming independent experts and generating new knowledge in their respective domains."
-          },
-          {
-            "id": "210344_7",
-            "text": "To some, playing chess may appear rather trivial when compared, for example, with making medical diagnoses, but both are highly complex tasks. Chess has a well-defined set of heuristics, whereas medical diagnoses seem more open ended and variable. In both instances, however, there are tens, if not hundreds, of thousands of potential patterns. A research study discovered that chess masters had spent between 10,000 and 20,000 hours, or more than ten years, studying and playing chess. On average, a chess master stores 50,000 different chess patterns in long-term memory."
-          },
-          {
-            "id": "210344_8",
-            "text": "Similarly, a diagnostic radiologist spends eight years in full time medical training – four years of medical school and four years of residency –before she is qualified to take a national board exam and begin independent practice. According to a 1988 study, the average diagnostic radiology resident sees forty cases per day, or around 12,000 cases per year. At the end of a residency, a diagnostic radiologist has stored, on average, 48,000 cases in long-term memory."
-          },
-          {
-            "id": "210344_9",
-            "text": "Psychologists and cognitive scientists agree that the time it takes to become an expert depends on the complexity of the task and the number of cases, or patterns, to which an individual is exposed. The more complex the task, the longer it takes to build expertise, or, more accurately, the longer it takes to experience and store a large number of cases or patterns."
-          },
-          {
-            "id": "210344_10",
-            "text": "Experts are individuals with specialized knowledge suited to perform the specific tasks for which they are trained, but that expertise does not necessarily transfer to other domains. A master chess player cannot apply chess expertise in a game of poker –although both chess and poker are games, a chess master who has never played poker is a novice poker player. Similarly, a biochemist is not qualified to perform neurosurgery, even though both biochemists and neurosurgeons study human physiology. In other words, the more complex a task is, the more specialized and exclusive is the knowledge required to perform that task."
-          },
-          {
-            "id": "210344_11",
-            "text": "An expert perceives meaningful patterns in her domain better than non-experts. Where a novice perceives random or disconnected data points, an expert connects regular patterns within and between cases. This ability to identify patterns is not an innate perceptual skill; rather it reflects the organization of knowledge after exposure to and experience with thousands of cases."
-          },
-          {
-            "id": "210344_12",
-            "text": "Experts have a deeper understanding of their domains than novices do, and utilize higher-order principles to solve problems. A novice, for example, might group objects together by color or size, whereas an expert would group the same objects according to their function or utility. Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices. Experts recognize variables that have the largest influence on a particular problem and focus their attention on those variables."
-          },
-          {
-            "id": "210344_13",
-            "text": "Experts have better domain-specific short-term and long-term memory than novices do. Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving. Interestingly, experts go about solving problems differently than novices. Experts spend more time thinking about a problem to fully understand it at the beginning of a task than do novices, who immediately seek to find a solution. Experts use their knowledge of previous cases as context for creating mental models to solve given problems."
-          },
-          {
-            "id": "210344_14",
-            "text": "Better at self-monitoring than novices, experts are more aware of instances where they have committed errors or failed to understand a problem. Experts check their solutions more often than novices and recognize when they are missing information necessary for solving a problem. Experts are aware of the limits of their domain knowledge and apply their domain’s heuristics to solve problems that fall outside of their experience base."
-          }
-        ]
-      },
-      "question_groups": [
-        {
-          "group_id": "g1_p2",
-          "question_type": "yes_no_not_given",
-          "instruction": "Choose\nYES                  if the statement agrees with the writer\nNO                   if the statement contradicts with the writer\nNOT GIVEN    if there is no information about this in the passage.",
-          "options_pool": [
-            {
-              "key": "Yes",
-              "text": "Yes"
-            },
-            {
-              "key": "No",
-              "text": "No"
-            },
-            {
-              "key": "Not Given",
-              "text": "Not Given"
-            }
-          ],
-          "questions": [
-            {
-              "question_number": 15,
-              "prompt": "Both freshmen and journeymen need the help of a mentor to solve specific problems.",
-              "correct_answers": [
-                "Yes"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Both **freshmen** and **journeymen** need the **help of a mentor to solve specific problems**.\n**Keywords:**\n- freshmen\n- journeymen\n- help of a mentor to solve specific problems\n### Step 2 — Locate evidence in the passage\n_Look in paragraphs 2 and 3, the sections about novices and journeymen learning their craft. The passage explains that novices find mentors to guide them through acquiring new knowledge, and journeymen maintain regular contact with mentors to solve specific problems and learn more complex strategies._\nLocated in **Paragraph 2**:\n> \"Generally, a **novice** will **find a mentor** to guide her through the process of acquiring new knowledge.\"\nLocated in **Paragraph 3**:\n> \"The **journeyman** still **maintains regular contact with a mentor to solve specific problems** and learn more complex strategies.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words for the same roles and describes the same kind of support for both groups._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| freshmen | \"novice\" | **✅** — The passage uses \"novice\" to refer to beginners in a field of study. |\n| journeymen | \"journeyman\" | **✅** — The passage uses the exact term \"journeyman\" for the next stage after novice. |\n| help of a mentor to solve specific problems | \"maintains regular contact with a mentor to solve specific problems\" | **✅** — The passage states the journeyman \"maintains regular contact with a mentor to solve specific problems\", confirming this part of the claim. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming both novices and journeymen need mentor support.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage clearly states that \"a novice will find a mentor to guide her through the process of acquiring new knowledge\" and that the journeyman still maintains regular contact with a mentor to solve specific problems, which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 16,
-              "prompt": "Novices take more time to deal with a large number of cases than experts.",
-              "correct_answers": [
-                "Not Given"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Novices take more time** to **deal with a large number of cases** than experts.\n**Keywords:**\n- Novices take more time\n- deal with a large number of cases\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices perform tasks differently. The passage mentions that experts perform tasks faster than novices and commit fewer errors._\nLocated in **Paragraph 13**:\n> \"Moreover, **experts perform tasks in their domains faster than novices** and commit fewer errors while problem solving.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts work faster, but does not say anything about dealing with a large number of cases specifically._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Novices take more time | \"experts perform tasks in their domains faster than novices\" | **⚠️** — The passage says \"experts perform tasks in their domains faster than novices\", which means novices are slower, but this is about tasks in general. |\n| deal with a large number of cases | _(not in passage)_ | **⚠️** — The passage does not mention anything about dealing with a large number of cases when comparing speed. |\n→ *The passage confirms novices are slower at tasks but does not specify whether this applies to handling a large number of cases.*\n### Step 4 — Decide the answer\n_One key detail is missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — Although the passage states that \"experts perform tasks in their domains faster than novices\", it does not specifically address whether novices take more time to deal with a large number of cases.\n⚠️ *The passage mentions speed differences between experts and novices, but this does not automatically mean the statement about handling many cases is true.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 17,
-              "prompt": "The apprenticeship model is always used to analyze the behavior of experts and novices.",
-              "correct_answers": [
-                "Not Given"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> The **apprenticeship model** is **always used** to **analyze the behavior** of experts and novices.\n**Keywords:**\n- apprenticeship model\n- always used\n- analyze the behavior\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, the section about the apprenticeship model. The passage describes the chess example as an apprenticeship model and mentions it is still used for training in many complex tasks._\nLocated in **Paragraph 6**:\n> \"The chess example is a rather short description of an **apprenticeship model**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions the apprenticeship model but does not say anything about whether it is always used or used for analysis purposes._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| always used | _(not in passage)_ | **⚠️** — The passage does not mention whether the model is always used or only sometimes used. |\n| analyze the behavior | _(not in passage)_ | **⚠️** — The passage does not say anything about using the model to analyze behavior. |\n→ *The passage mentions the apprenticeship model but does not specify whether it is always used or used for analyzing behavior.*\n### Step 4 — Decide the answer\n_Key details about frequency and purpose are missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage mentions the \"apprenticeship model\" as a training method but does not state whether it is always used or whether it is used to analyze the behavior of experts and novices.\n⚠️ *The passage discusses the apprenticeship model in detail, but this does not mean it is always used for the specific purpose mentioned in the statement.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 18,
-              "prompt": "A chess master is certainly qualified to play poker well.",
-              "correct_answers": [
-                "No"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> A **chess master** is certainly **qualified to play poker well**.\n**Keywords:**\n- chess master\n- qualified to play poker well\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 10, the section about whether expertise transfers to other domains. The passage explains that a master chess player cannot apply chess expertise in poker and would be a novice poker player._\nLocated in **Paragraph 10**:\n> \"A master chess player **cannot apply chess expertise in a game of poker** –although both chess and poker are games, a **chess master** who has never played poker is a **novice poker player**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage directly contradicts the claim by stating chess masters cannot apply their expertise to poker._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| qualified to play poker well | \"cannot apply chess expertise in a game of poker\" | **❌** — The passage says a chess master \"cannot apply chess expertise in a game of poker\", which directly contradicts being qualified to play well. |\n→ *The passage directly contradicts the statement by saying chess masters cannot apply their expertise to poker and would be novices.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement, so the answer is NO._\n✅ **Answer: B. No** — The passage explicitly states that a master chess player cannot apply chess expertise in a game of poker and that \"a chess master who has never played poker is a novice poker player\", which contradicts the claim.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 19,
-              "prompt": "Experts and novices comprehend the meaning of data and weigh variables in different ways.",
-              "correct_answers": [
-                "Yes"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Experts** and **novices** **comprehend the meaning of data** and **weigh variables in different ways**.\n**Keywords:**\n- Experts\n- novices\n- comprehend the meaning of data\n- weigh variables in different ways\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 12, the section about how experts understand their domains better than novices. The passage explains that experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices._\nLocated in **Paragraph 12**:\n> \"**Experts** **comprehend the meaning of data** and **weigh variables with different criteria** within their domains better than **novices**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses nearly identical wording and confirms experts and novices approach data and variables differently._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| weigh variables in different ways | \"weigh variables with different criteria\" | **✅** — The passage says experts \"weigh variables with different criteria\", which means the same as weighing variables in different ways. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming experts and novices handle data and variables differently.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage directly states that \"Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices\", which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 20,
-              "prompt": "Experts generally have better memories than novices do.",
-              "correct_answers": [
-                "No"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Experts **generally have better memories** than novices do.\n**Keywords:**\n- generally have better memories\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about expert memory compared to novices. The passage explains that experts have better domain-specific short-term and long-term memory than novices do._\nLocated in **Paragraph 13**:\n> \"**Experts have better domain-specific short-term and long-term memory than novices do**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage says experts have better memory, but only in their specific domain, not generally._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| generally have better memories | \"Experts have better domain-specific short-term and long-term memory than novices do\" | **❌** — The passage says \"Experts have better domain-specific short-term and long-term memory than novices do\", but the word generally suggests all types of memory, not just in their domain. |\n→ *The passage confirms experts have better memory but only in their specific domain, not generally across all areas.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the limiting word, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts have better domain-specific short-term and long-term memory than novices do\", which contradicts the claim that experts generally have better memories, because the advantage is limited to their domain.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            },
-            {
-              "question_number": 21,
-              "prompt": "Interestingly, experts take more time to solve problems than novices who immediately seek to find a solution.",
-              "correct_answers": [
-                "No"
-              ],
-              "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Interestingly, **experts take more time** to **solve problems** than **novices who immediately seek to find a solution**.\n**Keywords:**\n- experts take more time\n- solve problems\n- novices who immediately seek to find a solution\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices approach problem solving differently. The passage explains that experts spend more time thinking about a problem at the beginning of a task to fully understand it, while novices immediately seek to find a solution._\nLocated in **Paragraph 13**:\n> \"**Experts spend more time thinking about a problem** to fully understand it **at the beginning of a task** than do **novices, who immediately seek to find a solution**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts take more time, but only at the beginning to understand the problem, not to solve it overall._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| experts take more time | \"Experts spend more time thinking about a problem\" | **✅** — The passage says \"Experts spend more time thinking about a problem\", which matches the idea of taking more time. |\n| solve problems | \"at the beginning of a task\" | **❌** — The passage says this happens \"at the beginning of a task\", not when solving the problem overall, which creates a conflict with the statement. |\n→ *The passage confirms experts take more time but only at the beginning to understand the problem, not to solve it, which contradicts the statement.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the timing detail, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts spend more time thinking about a problem to fully understand it at the beginning of a task\", not to solve the entire problem, which contradicts the claim that experts take more time to solve problems.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
-              "options_pool": [
-                {
-                  "key": "Yes",
-                  "text": "Yes"
-                },
-                {
-                  "key": "No",
-                  "text": "No"
-                },
-                {
-                  "key": "Not Given",
-                  "text": "Not Given"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "group_id": "g2_p2",
-          "question_type": "sentence_completion",
-          "instruction": "NB   There are more words than spaces so you will not use them all.",
-          "template": "The {{22}}  is not only a mode of education, but a standard method of training. On this basis, {{23}}  have been developed. Graduates seek their  {{24}}  in respective fields and begin the long process of becoming experts.",
-          "options_pool": null,
-          "questions": [
-            {
-              "question_number": 22,
-              "correct_answers": [
-                "E"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The ______ is not only a **mode of education**, but a **standard method of training**.'\nℹ️ *'The [noun phrase]' — the blank is the subject of the sentence, so the answer is a noun phrase naming what serves as both a mode of education and a training method.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Apprenticeship** may seem like a restrictive 18th century **mode of education**, but it is still a **standard method of training** for many complex tasks.\"\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: E** — apprenticeship\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not a mode of education or training method.\n- ❌ **B** — Chess is an example used in the passage, not an educational mode or training method.\n- ❌ **C** — A description is a way of explaining something, not a mode of education or training method.\n- ❌ **D** — Laws are mentioned as a field of study, not as a mode of education or training method.\n- ❌ **F** — New knowledge is what experts generate, not a mode of education or training method.\n- ❌ **G** — Doctoral programs are based on the apprenticeship model, not the model itself.\n- ❌ **H** — Complex tasks are what the training method is used for, not the method itself."
-            },
-            {
-              "question_number": 23,
-              "correct_answers": [
-                "G"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**On this basis**, ______ **have been developed**.'\nℹ️ *'[plural noun phrase] have been developed' — the blank is the subject of a passive verb phrase, so the answer is a plural noun phrase naming what has been created based on the apprenticeship model.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Academic doctoral programs** are **based on an apprenticeship model**, as are fields like law, music, engineering, and medicine.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| have been developed | \"based on an apprenticeship model\" | **✅** — The passage says ______ \"are based on an apprenticeship model\", which carries the same idea as developed from it. |\n| doctoral programs | \"Academic doctoral programs\" | **✅** — The passage mentions \"Academic doctoral programs\" as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: G** — doctoral programs\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not something developed based on apprenticeship.\n- ❌ **B** — Chess is an example used in the passage, not something developed based on apprenticeship.\n- ❌ **C** — A description is singular and refers to an explanation, not something developed based on apprenticeship.\n- ❌ **D** — Laws are mentioned as a field of study, not as programs developed based on apprenticeship.\n- ❌ **E** — Apprenticeship is the basis itself, not what has been developed from it.\n- ❌ **F** — New knowledge is what experts generate, not programs developed based on apprenticeship.\n- ❌ **H** — Complex tasks are what the training method is used for, not programs developed from it."
-            },
-            {
-              "question_number": 24,
-              "correct_answers": [
-                "A"
-              ],
-              "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Graduates seek their** ______ **in respective fields** and begin the **long process of becoming experts**.'\nℹ️ *'their [noun phrase]' — 'their' refers to graduates, so the blank is a noun phrase naming what graduates seek in their fields.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Graduate students** enter fields of study, **find mentors**, and begin the **long process of becoming independent experts** and generating new knowledge in their **respective domains**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Graduates | \"Graduate students\" | **✅** — The passage uses \"Graduate students\" to refer to the same group as the summary's term. |\n| respective fields | \"respective domains\" | **✅** — The passage uses \"respective domains\" to mean the same as the summary's phrase. |\n| long process of becoming experts | \"long process of becoming independent experts\" | **✅** — The passage uses the identical phrase \"long process of becoming independent experts\". |\n| mentors | \"find mentors\" | **✅** — The passage states that graduate students \"find mentors\", which matches the summary's idea of seeking ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — mentors\n**Eliminated options:**\n- ❌ **B** — Chess is an example used in the passage, not something graduates seek in their fields.\n- ❌ **C** — A description is an explanation, not something graduates seek in their fields.\n- ❌ **D** — Laws are mentioned as a field of study, not what graduates seek within their fields.\n- ❌ **E** — Apprenticeship is the overall model, not what graduates seek within their fields.\n- ❌ **F** — New knowledge is what experts generate, not what graduates seek when entering fields.\n- ❌ **G** — Doctoral programs are what graduates enter, not what they seek within their fields.\n- ❌ **H** — Complex tasks are what the training method is used for, not what graduates seek."
-            }
-          ]
-        },
-        {
-          "group_id": "g3_p2",
-          "question_type": "sentence_completion",
-          "instruction": "From a novice chess player to an expert",
-          "template": "A novice\nLearns\n• The object of the game\n• The number of spaces\n• The name and function of each piece\n• How each piece is moved\n• The necessary conditions to win or close\nA {{25}}\nLearns\n• Patterns of opening moves\n• {{26}}   game-playing strategies\n• Pattern of victory and defeat\nAn expert\n• Makes predictions based on patterns\n• Tests those predictions against actual behavior\n• Generates new knowledge\n• Create {{27}}",
-          "options_pool": null,
-          "questions": [
-            {
-              "question_number": 25,
-              "correct_answers": [
-                "journeyman"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> A ............\nLocated in **Paragraph 3**:\n> \"**In time, and with much practice**, the novice begins to recognize patterns of behavior within cases and, thus, **becomes a** journeyman.\"\n> \"Returning to the example of the chess player, the individual begins to learn **patterns of opening moves**, offensive and defensive game-playing strategies, and **patterns of victory and defeat**.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"In time, and with much practice\" | **✅** — The passage says \"In time, and with much practice\" the novice begins to recognize patterns — this describes the learning process. |\n| Pattern of victory and defeat | \"patterns of victory and defeat\" | **✅** — The passage mentions \"patterns of victory and defeat\" — an exact match. |\n→ *Paragraph 3 describes the transition from novice to the next stage and lists what is learned at that stage.*\n### Step 4 — Write and check the answer\n_Copy the word straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'journeyman' is copied exactly from the passage.\n- ✅ Word count: 1 word.\n- ✅ Grammar: '**A journeyman**' fits the surrounding text.\n✅ **Answer: journeyman** — The passage explains that with practice the novice \"becomes a journeyman\" and then lists the patterns learned, including opening moves and victory/defeat patterns, which matches the note structure.\nℹ️ *Word-form note: 'journeyman' is singular — do not write 'journeymen' or 'a journeyman'.*"
-            },
-            {
-              "question_number": 26,
-              "correct_answers": [
-                "offensive and defensive"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • ............   game-playing strategies\nLocated in **Paragraph 3**:\n> \"Returning to the example of the chess player, **the individual begins to learn** patterns of opening moves, offensive and defensive **game-playing strategies**, and patterns of victory and defeat.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"the individual begins to learn\" | **✅** — The passage says \"the individual begins to learn\" — this describes the learning process at this stage. |\n→ *Paragraph 3 lists the types of strategies learned at the journeyman stage, including ______.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'offensive and defensive' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• offensive and defensive   game-playing strategies**' fits the surrounding text.\n✅ **Answer: offensive and defensive** — The passage describes what the chess player learns at the journeyman stage, listing \"offensive and defensive game-playing strategies\" alongside opening moves and victory patterns.\nℹ️ *Word-form note: 'offensive and defensive' are two adjectives — copy both words exactly as they appear.*"
-            },
-            {
-              "question_number": 27,
-              "correct_answers": [
-                "her own cases"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'An expert'*\n→ *Search area: Paragraph 5*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • Create ............\nLocated in **Paragraph 5**:\n> \"**She is creating** her own cases rather than relying on the cases of others.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Create | \"She is creating\" | **✅** — The passage says \"She is creating\" — this matches the verb in the note. |\n→ *Paragraph 5 explains what the expert creates rather than relying on others.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'her own cases' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• Create her own cases**' fits the surrounding text.\n✅ **Answer: her own cases** — The passage explains that the expert \"is creating her own cases rather than relying on the cases of others\", which completes the final bullet point about what experts create.\nℹ️ *Word-form note: 'her own cases' is three words — copy all three exactly as they appear.*"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "passage": {
-        "id": "p3",
-        "title": "READING PASSAGE 3: MASS PRODUCTION",
-        "content": "MASS PRODUCTION\nA\nDespite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. Various mass production techniques had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece. The British were most likely the first modern economy to adapt water-powered, then steam-powered, machinery to industrial production methods, most notably in the textiles industry. Yet it is generally agreed that modern mass production techniques came into widespread use through the innovation of an assortment of Americans who substantially improved the ancient techniques. Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s.\nB\nIn the late 18th century, French General Jean-Baptiste Vaquette de Gribeauval, promoted standardized weapons, which became known as the Systeme Gribeauval after it was issued as a royal order in 1765. (Its focus at the time was artillery more than muskets or handguns.) The crucial step toward interchangeability in metal parts was taken by Simeon North, working only a few miles from Eli Terry. North created one of the world‘s first true milling machines to do metal shaping that previously was done by hand with a file. Diana Muir believes that North‘s milling machine was online around 1816. While Whitney was certainly an innovator of the American System, others maintain that Whitney‘s parts were not truly interchangeable and that credit should more appropriately go to John Hall, the New England gunsmith who built Muskets with flintlock for the United States government at the Harper‘s Ferry armory. Flintlock, as it was implied, meant people used it to trigger the gun. Hall, born in Maine in 1769, built many of the machine tools needed for precision manufacturing and instituted a system that employed accurate gauges for measuring every aspect and piece of work his factory produced. Consequently, he achieved a much higher level of interchangeability and precision than did Whitney.\nC\nStill others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade. In Britain, and somewhat simultaneously with Whitney, the Frenchman Marc Isambard Brunei adapted steam-driven machinery and assembly-line techniques to the production of 130,000 pulleys for the marine industry in just one year. Brunei‘s achievements were made possible by the design and manufacture of several machine tools by the noted British inventor, Henry Maudslay.\nD\nMaudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper. It is generally conceded that the British machine tool industry was far more advanced than that of the Americans in these early stages of mass production development. Simultaneous with Whitney‘s innovations in the United States were those of Oliver Evans, whose many inventions in the flour milling process led to an automated mill that could be run by a single miller.\nE\nSamuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms. Colt and Root wished to advance the machining of parts so that even the most minute of tasks could be performed with the precision that they believed only machines could achieve. In these endeavors, Colt and Root were largely successful.\nF\nEli Terry also adapted mass production methods to clockmaking in the early 1800s, and George Eastman made innovations to assembly-line techniques in the manufacture and the developing of photographic film later in the century. Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods. Henry Ford had his workers standing in one place while parts were brought by on conveyor belts, and the car itself moved past the workers on another conveyor belt. Bodies were built on one line and the chassis and drivetrain were built on another. When both were essentially complete, the body was lowered onto the chassis for final assembly. Around the same time, production of guns also entered the assembly line.\nG\nDespite the fact that he was not the first, Ford can certainly be viewed as the most successful of these early innovators due to one simple fact – Ford envisioned and fostered mass consumption as a corollary to mass production. Ford‘s techniques lessened the time needed to build a Model T from about twelve and a half hours to an hour and a half; the price was reduced as well–from $850 for the first Model T in 1908, to only $290 in 1927 after assembly-line techniques were introduced in 1913. The automobile was no longer a luxury for the rich, the Model T fast became a necessity for nearly everyone. Indeed, Ford sold almost half of all of the automobiles bought worldwide from 1908 to 1927–the years of Model T production. Apart from this, people showed different views over whether guns should be involved in mass production. The expense opposition to ammunition was the first one to trigger the debate. Other equipment involved in war or preparation for war was also against. Let alone all these required a lot of workforce to accomplish.\nH\nAssembly-line techniques also required that the manual skills necessary to build a product be altered. Previous to mass production techniques, as seen in the early manufacture of firearms, each workman was responsible for the complete manufacture and assembly of all of the component parts needed to build any single product. Mass production and parts interchangeability demanded that all parts be identical and the individual worker no longer be allowed the luxury of building a complete product based on his personal skills and inclinations. Machines came to dictate the production process, and each part–once created individually by hand–was now duplicated by a machine process that was merely guided by human control. The craft tradition, dominant in human endeavor for centuries, was abandoned in favor of a process that created parts by machine. Furthermore, assembly of these machine-made parts was divided into a series of small repetitive steps that required much less skill than traditional craftsmanship. Consequently, modern mass production techniques, while certainly increasing the efficiency of the manufacturing process and bringing industrial products within the reach of virtually all of humanity, apart from manufacturing ballpoint pens, making of gun is also part of it. But safety is also a factor to consider. People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.",
-        "paragraphs": [
-          {
-            "id": "210346_1",
-            "text": "Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. Various mass production techniques had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece. The British were most likely the first modern economy to adapt water-powered, then steam-powered, machinery to industrial production methods, most notably in the textiles industry. Yet it is generally agreed that modern mass production techniques came into widespread use through the innovation of an assortment of Americans who substantially improved the ancient techniques. Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s."
-          },
-          {
-            "id": "210346_2",
-            "text": "In the late 18th century, French General Jean-Baptiste Vaquette de Gribeauval, promoted standardized weapons, which became known as the Systeme Gribeauval after it was issued as a royal order in 1765. (Its focus at the time was artillery more than muskets or handguns.) The crucial step toward interchangeability in metal parts was taken by Simeon North, working only a few miles from Eli Terry. North created one of the world‘s first true milling machines to do metal shaping that previously was done by hand with a file. Diana Muir believes that North‘s milling machine was online around 1816. While Whitney was certainly an innovator of the American System, others maintain that Whitney‘s parts were not truly interchangeable and that credit should more appropriately go to John Hall, the New England gunsmith who built Muskets with flintlock for the United States government at the Harper‘s Ferry armory. Flintlock, as it was implied, meant people used it to trigger the gun. Hall, born in Maine in 1769, built many of the machine tools needed for precision manufacturing and instituted a system that employed accurate gauges for measuring every aspect and piece of work his factory produced. Consequently, he achieved a much higher level of interchangeability and precision than did Whitney."
-          },
-          {
-            "id": "210346_3",
-            "text": "Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade. In Britain, and somewhat simultaneously with Whitney, the Frenchman Marc Isambard Brunei adapted steam-driven machinery and assembly-line techniques to the production of 130,000 pulleys for the marine industry in just one year. Brunei‘s achievements were made possible by the design and manufacture of several machine tools by the noted British inventor, Henry Maudslay."
-          },
-          {
-            "id": "210346_4",
-            "text": "Maudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper. It is generally conceded that the British machine tool industry was far more advanced than that of the Americans in these early stages of mass production development. Simultaneous with Whitney‘s innovations in the United States were those of Oliver Evans, whose many inventions in the flour milling process led to an automated mill that could be run by a single miller."
-          },
-          {
-            "id": "210346_5",
-            "text": "Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms. Colt and Root wished to advance the machining of parts so that even the most minute of tasks could be performed with the precision that they believed only machines could achieve. In these endeavors, Colt and Root were largely successful."
-          },
-          {
-            "id": "210346_6",
-            "text": "Eli Terry also adapted mass production methods to clockmaking in the early 1800s, and George Eastman made innovations to assembly-line techniques in the manufacture and the developing of photographic film later in the century. Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods. Henry Ford had his workers standing in one place while parts were brought by on conveyor belts, and the car itself moved past the workers on another conveyor belt. Bodies were built on one line and the chassis and drivetrain were built on another. When both were essentially complete, the body was lowered onto the chassis for final assembly. Around the same time, production of guns also entered the assembly line."
-          },
-          {
-            "id": "210346_7",
-            "text": "Despite the fact that he was not the first, Ford can certainly be viewed as the most successful of these early innovators due to one simple fact – Ford envisioned and fostered mass consumption as a corollary to mass production. Ford‘s techniques lessened the time needed to build a Model T from about twelve and a half hours to an hour and a half; the price was reduced as well–from $850 for the first Model T in 1908, to only $290 in 1927 after assembly-line techniques were introduced in 1913. The automobile was no longer a luxury for the rich, the Model T fast became a necessity for nearly everyone. Indeed, Ford sold almost half of all of the automobiles bought worldwide from 1908 to 1927–the years of Model T production. Apart from this, people showed different views over whether guns should be involved in mass production. The expense opposition to ammunition was the first one to trigger the debate. Other equipment involved in war or preparation for war was also against. Let alone all these required a lot of workforce to accomplish."
-          },
-          {
-            "id": "210346_8",
-            "text": "Assembly-line techniques also required that the manual skills necessary to build a product be altered. Previous to mass production techniques, as seen in the early manufacture of firearms, each workman was responsible for the complete manufacture and assembly of all of the component parts needed to build any single product. Mass production and parts interchangeability demanded that all parts be identical and the individual worker no longer be allowed the luxury of building a complete product based on his personal skills and inclinations. Machines came to dictate the production process, and each part–once created individually by hand–was now duplicated by a machine process that was merely guided by human control. The craft tradition, dominant in human endeavor for centuries, was abandoned in favor of a process that created parts by machine. Furthermore, assembly of these machine-made parts was divided into a series of small repetitive steps that required much less skill than traditional craftsmanship. Consequently, modern mass production techniques, while certainly increasing the efficiency of the manufacturing process and bringing industrial products within the reach of virtually all of humanity, apart from manufacturing ballpoint pens, making of gun is also part of it. But safety is also a factor to consider. People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production."
-          }
-        ]
-      },
-      "question_groups": [
-        {
-          "group_id": "g1_p3",
-          "question_type": "matching_headings",
-          "instruction": "Answer the questions.",
-          "options_pool": [
-            {
-              "key": "i. The appearance of precision machine tools",
-              "text": "i. The appearance of precision machine tools"
-            },
-            {
-              "key": "ii. Different techniques applied to mass production",
-              "text": "ii. Different techniques applied to mass production"
-            },
-            {
-              "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-              "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-            },
-            {
-              "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-              "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-            },
-            {
-              "key": "v. Successful elements for imposing restrictions on the production of guns",
-              "text": "v. Successful elements for imposing restrictions on the production of guns"
-            },
-            {
-              "key": "vi. Controversy on the permission of guns production",
-              "text": "vi. Controversy on the permission of guns production"
-            },
-            {
-              "key": "vii. The use of mass production to manufacture guns",
-              "text": "vii. The use of mass production to manufacture guns"
-            },
-            {
-              "key": "viii. The significant role of interchangeable parts",
-              "text": "viii. The significant role of interchangeable parts"
-            }
-          ],
-          "questions": [
-            {
-              "question_number": 28,
-              "correct_answers": [
-                "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph C**:\n> \"Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade.\"\n→ *Main idea: Some historians argue that a French gunsmith, not Whitney, deserves credit for inventing true interchangeable parts.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| disagreement | \"Still others maintain\" | **✅** — The phrase \"Still others maintain\" signals an alternative viewpoint, matching the idea of disagreement over who deserves credit. |\n| first person who invented | \"the credit for these modern innovations should go to\" | **✅** — The passage states \"the credit for these modern innovations should go to\" a different person, matching the concept of identifying the true inventor. |\n| instead of Whitney | \"predated those of Whitney\" | **✅** — The text says the French gunsmith's work \"predated those of Whitney\", meaning someone else came before Whitney. |\n**Why other headings do not fit:**\n- ❌ **Not i**: The section discusses who deserves credit for innovations, not the invention of precision machine tools themselves.\n- ❌ **Not iii**: The section debates historical credit among multiple claimants, not the dedicated work of specific prominent researchers.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney** — The paragraph explicitly presents an alternative claim that \"the credit for these modern innovations should go to a French gunsmith\" whose work came before Whitney's, directly matching the heading about disagreement over who truly invented interchangeable parts.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            },
-            {
-              "question_number": 29,
-              "correct_answers": [
-                "i. The appearance of precision machine tools"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph D**:\n> \"Maudslay's contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper.\"\n→ *Main idea: Maudslay invented precision machine tools that could produce identical parts needed for mass production.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| The appearance of precision machine tools | \"the invention of precision machine tools\" | **✅** — The passage directly states \"the invention of precision machine tools\", which matches the heading's focus on their appearance. |\n**Why other headings do not fit:**\n- ❌ **Not ii**: The section focuses on one specific invention by Maudslay, not a variety of different techniques.\n- ❌ **Not viii**: The section is about the tools that produce interchangeable parts, not the role of the parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: i. The appearance of precision machine tools** — The paragraph's opening sentence explicitly states that Maudslay's contribution to modern mass production was the invention of precision machine tools, making this the clear main focus of the section.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            },
-            {
-              "question_number": 30,
-              "correct_answers": [
-                "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph E**:\n> \"Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms.\"\n→ *Main idea: Samuel Colt and Elisha King Root successfully developed industrial processes for mass-producing firearms.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Prominent researchers | \"Samuel Colt and Elisha King Root\" | **✅** — The passage names \"Samuel Colt and Elisha King Root\" as notable figures, matching the idea of prominent researchers. |\n| work dedicated to | \"very successful innovators in the development of industrial processes\" | **✅** — The text describes them as \"very successful innovators in the development of industrial processes\", showing their dedicated work. |\n| mass production of firearm making | \"mass produce interchangeable parts for the assembly-line production of firearms\" | **✅** — The passage states they developed processes to \"mass produce interchangeable parts for the assembly-line production of firearms\", directly matching firearms manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vii**: The section focuses on the specific contributions of Colt and Root, not the general use of mass production for guns.\n- ❌ **Not viii**: The section is about the researchers who developed processes, not the role of interchangeable parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iii. Prominent researchers‘ work dedicated to mass production of firearm making** — The paragraph centers on \"Samuel Colt and Elisha King Root\" as \"very successful innovators\" who developed \"industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms\", perfectly matching the heading about prominent researchers' work in firearm making.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            },
-            {
-              "question_number": 31,
-              "correct_answers": [
-                "vii. The use of mass production to manufacture guns"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph F**:\n> \"Around the same time, production of guns also entered the assembly line.\"\n→ *Main idea: Gun production began using assembly-line techniques during the same period as other mass production innovations.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| use of mass production to manufacture guns | \"production of guns also entered the assembly line\" | **✅** — The passage states \"production of guns also entered the assembly line\", which means guns were manufactured using mass production methods. |\n**Why other headings do not fit:**\n- ❌ **Not iii**: The section mentions guns entering assembly lines but does not discuss specific prominent researchers or their work.\n- ❌ **Not ii**: The section focuses specifically on guns entering assembly lines, not on different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vii. The use of mass production to manufacture guns** — The paragraph's key sentence states that \"production of guns also entered the assembly line\", which directly describes the application of mass production methods to gun manufacturing.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            },
-            {
-              "question_number": 32,
-              "correct_answers": [
-                "vi. Controversy on the permission of guns production"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph G**:\n> \"Apart from this, people showed different views over whether guns should be involved in mass production.\"\n→ *Main idea: People held conflicting opinions about whether guns should be mass-produced.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Controversy | \"people showed different views\" | **✅** — The phrase \"people showed different views\" indicates disagreement or controversy among people. |\n| permission of guns production | \"whether guns should be involved in mass production\" | **✅** — The text asks \"whether guns should be involved in mass production\", which is about permission or authorization for gun production. |\n| Controversy | \"trigger the debate\" | **✅** — The passage mentions \"trigger the debate\", reinforcing the idea of controversy. |\n**Why other headings do not fit:**\n- ❌ **Not v**: The section describes ongoing debate about whether to allow gun production, not successful restrictions already imposed.\n- ❌ **Not vii**: The section is about controversy over permission, not the actual use of mass production to manufacture guns.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vi. Controversy on the permission of guns production** — The paragraph states that \"people showed different views over whether guns should be involved in mass production\" and mentions \"trigger the debate\", clearly indicating controversy over permission for gun production.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            },
-            {
-              "question_number": 33,
-              "correct_answers": [
-                "v. Successful elements for imposing restrictions on the production of guns"
-              ],
-              "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph H**:\n> \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.\"\n→ *Main idea: People successfully limited gun production to only four authorized manufacturers.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Successful elements | \"People succeeded\" | **✅** — The passage states \"People succeeded\", which directly matches the idea of successful elements or achievements. |\n| imposing restrictions on the production of guns | \"restraining the production of guns\" | **✅** — The text says \"restraining the production of guns\", which means imposing restrictions or limits on gun manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vi**: The section describes successful restrictions already achieved, not ongoing controversy over whether to permit production.\n- ❌ **Not ii**: The section focuses on restrictions on gun production, not different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: v. Successful elements for imposing restrictions on the production of guns** — The paragraph explicitly states that \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns\", which directly describes successful elements for imposing restrictions on gun production.",
-              "options_pool": [
-                {
-                  "key": "i. The appearance of precision machine tools",
-                  "text": "i. The appearance of precision machine tools"
-                },
-                {
-                  "key": "ii. Different techniques applied to mass production",
-                  "text": "ii. Different techniques applied to mass production"
-                },
-                {
-                  "key": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
-                  "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-                },
-                {
-                  "key": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
-                  "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-                },
-                {
-                  "key": "v. Successful elements for imposing restrictions on the production of guns",
-                  "text": "v. Successful elements for imposing restrictions on the production of guns"
-                },
-                {
-                  "key": "vi. Controversy on the permission of guns production",
-                  "text": "vi. Controversy on the permission of guns production"
-                },
-                {
-                  "key": "vii. The use of mass production to manufacture guns",
-                  "text": "vii. The use of mass production to manufacture guns"
-                },
-                {
-                  "key": "viii. The significant role of interchangeable parts",
-                  "text": "viii. The significant role of interchangeable parts"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "group_id": "g2_p3",
-          "question_type": "multiple_choice",
-          "instruction": "Answer the questions.",
-          "options_pool": [
-            {
-              "key": "Grind the gun",
-              "text": "Grind the gun"
-            },
-            {
-              "key": "Decorate the gun",
-              "text": "Decorate the gun"
-            },
-            {
-              "key": "Fire the gun",
-              "text": "Fire the gun"
-            },
-            {
-              "key": "Maintain the gun",
-              "text": "Maintain the gun"
-            }
-          ],
-          "questions": [
-            {
-              "question_number": 34,
-              "prompt": "What is the function of flintlock as mentioned in the passage?",
-              "correct_answers": [
-                "Fire the gun"
-              ],
-              "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the **function** of **flintlock** as mentioned in the passage?\n**Options:**\n- **A** — **Grind** the gun\n- **B** — **Decorate** the gun\n- **C** — **Fire** the gun\n- **D** — **Maintain** the gun\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph B, the section that discusses John Hall's work with muskets.*\nLocated in **Paragraph B**:\n> \"Flintlock, as it was implied, meant **people used it to trigger the gun**.\"\n→ *The passage explains that flintlock was used to trigger the gun.*\n**Key phrases in the passage:**\n- 'people used it to trigger the gun' — fire the gun\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Grind the gun | **❌ Wrong** | The passage does not mention grinding anywhere in connection with flintlock. |\n| **B** — Decorate the gun | **❌ Wrong** | No decorative purpose is mentioned; the passage describes a functional use instead. |\n| **C** — Fire the gun | **✅ Correct** | The passage states \"people used it to trigger the gun\", which directly matches Fire the gun. |\n| **D** — Maintain the gun | **❌ Wrong** | Maintenance is never mentioned as a function of flintlock in the passage. |\n✅ **Answer: C** — The passage explicitly says flintlock was used to trigger the gun, which is the same as firing it.",
-              "options_pool": [
-                {
-                  "key": "Grind the gun",
-                  "text": "Grind the gun"
-                },
-                {
-                  "key": "Decorate the gun",
-                  "text": "Decorate the gun"
-                },
-                {
-                  "key": "Fire the gun",
-                  "text": "Fire the gun"
-                },
-                {
-                  "key": "Maintain the gun",
-                  "text": "Maintain the gun"
-                }
-              ]
-            },
-            {
-              "question_number": 35,
-              "prompt": "Why does the author quote an example concerning Ford?",
-              "correct_answers": [
-                "To show that every object could be detached into several parts"
-              ],
-              "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Why does the author quote an example concerning Ford?\n**Options:**\n- **A** — To demonstrate that mass production needed **detailed techniques**\n- **B** — To show that every object could be **detached** into **several parts**\n- **C** — To emphasize that Ford was a **successful enterprise**\n- **D** — To stress that cars were **popular** at that time in the U.S.\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph F, the section that describes Ford's production methods in detail.*\nLocated in **Paragraph F**:\n> \"**Bodies were built on one line and the chassis and drivetrain were built on another**. When both were essentially complete, the body was lowered onto the chassis for final assembly.\"\n→ *The passage describes how Ford built car bodies on one line and chassis on another, then combined them.*\n**Key phrases in the passage:**\n- 'Bodies were built on one line and the chassis and drivetrain were built on another' — objects could be detached into several parts\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — To demonstrate that mass production needed detailed techniques | **❌ Wrong** | The Ford example focuses on dividing production into parts, not on the level of detail in techniques. |\n| **B** — To show that every object could be detached into several parts | **✅ Correct** | The passage shows \"Bodies were built on one line and the chassis and drivetrain were built on another\", demonstrating that every object could be detached into several parts. |\n| **C** — To emphasize that Ford was a successful enterprise | **❌ Wrong** | While Ford's success is mentioned in Paragraph G, the example in Paragraph F illustrates the division of parts, not business success. |\n| **D** — To stress that cars were popular at that time in the U.S. | **❌ Wrong** | Car popularity is discussed in Paragraph G, but the Ford example in Paragraph F is about production methods, not popularity. |\n✅ **Answer: B** — The Ford example shows how bodies and chassis were built separately then combined, illustrating that objects can be divided into parts for production.",
-              "options_pool": [
-                {
-                  "key": "To demonstrate that mass production needed detailed techniques",
-                  "text": "To demonstrate that mass production needed detailed techniques"
-                },
-                {
-                  "key": "To show that every object could be detached into several parts",
-                  "text": "To show that every object could be detached into several parts"
-                },
-                {
-                  "key": "To emphasize that Ford was a successful enterprise",
-                  "text": "To emphasize that Ford was a successful enterprise"
-                },
-                {
-                  "key": "To stress that cars were popular at that time in the U.S.",
-                  "text": "To stress that cars were popular at that time in the U.S."
-                }
-              ]
-            },
-            {
-              "question_number": 36,
-              "prompt": "What is the main contribution of Maudslay?",
-              "correct_answers": [
-                "Created useful tools for manufacture of guns with economic feasibility"
-              ],
-              "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the main **contribution of Maudslay**?\n**Options:**\n- **A** — Introduced **assembly line** for producing interchangeable parts of guns\n- **B** — **Created useful tools** for **manufacture of guns** with **economic feasibility**\n- **C** — **Lessened the time** for making guns\n- **D** — **Set a standard** of making guns and the standard of interchangeable parts\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph D, the section that describes Maudslay's contribution to mass production.*\nLocated in **Paragraph D**:\n> \"Maudslay‘s contribution to modern mass production was the **invention of precision machine tools** capable of producing the identical parts necessary for mass production techniques which **made producing guns cheaper**.\"\n→ *The passage states that Maudslay invented precision machine tools that could produce identical parts and made gun production cheaper.*\n**Key phrases in the passage:**\n- 'invention of precision machine tools' — created useful tools for manufacture\n- 'made producing guns cheaper' — economic feasibility\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Introduced assembly line for producing interchangeable parts of guns | **❌ Wrong** | The passage credits Maudslay with inventing machine tools, not with introducing the assembly line itself. |\n| **B** — Created useful tools for manufacture of guns with economic feasibility | **✅ Correct** | The passage states Maudslay's contribution was the \"invention of precision machine tools\" that \"made producing guns cheaper\", matching Created useful tools with economic feasibility. |\n| **C** — Lessened the time for making guns | **❌ Wrong** | Time reduction is mentioned for Ford's Model T production, but not for Maudslay's work. |\n| **D** — Set a standard of making guns and the standard of interchangeable parts | **❌ Wrong** | Setting standards is attributed to Gribeauval and Hall, but not to Maudslay. |\n✅ **Answer: B** — Paragraph D clearly states that Maudslay invented precision machine tools that produced identical parts and made gun production cheaper, which matches creating useful tools with economic feasibility.",
-              "options_pool": [
-                {
-                  "key": "Introduced assembly line for producing interchangeable parts of guns",
-                  "text": "Introduced assembly line for producing interchangeable parts of guns"
-                },
-                {
-                  "key": "Created useful tools for manufacture of guns with economic feasibility",
-                  "text": "Created useful tools for manufacture of guns with economic feasibility"
-                },
-                {
-                  "key": "Lessened the time for making guns",
-                  "text": "Lessened the time for making guns"
-                },
-                {
-                  "key": "Set a standard of making guns and the standard of interchangeable parts",
-                  "text": "Set a standard of making guns and the standard of interchangeable parts"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "group_id": "g3_p3",
-          "question_type": "sentence_completion",
-          "instruction": "Answer the questions.",
-          "template": "People mainly expressed {{37}}  to buying ammunition after the success of applying assembly line to the production of automobiles which led to the same practice for guns followed by a heated debate over this application. Besides, other {{38}}  was needed in the war which demanded a big {{39}}  to support.",
-          "options_pool": null,
-          "questions": [
-            {
-              "question_number": 37,
-              "correct_answers": [
-                "opposition"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'People mainly **expressed** ______ **to buying ammunition** after the success of applying assembly line to the production of automobiles'\nℹ️ *'expressed [NOUN]' — the blank follows the verb 'expressed' and comes before 'to buying ammunition', so the answer is a noun naming what people expressed.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"The expense opposition **to ammunition** was **the first one to trigger the debate**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| heated debate | \"the first one to trigger the debate\" | **✅** — The passage says this was \"the first one to trigger the debate\", which means it started the heated debate mentioned in the summary. |\n| to buying ammunition | \"to ammunition\" | **✅** — The passage states \"______ to ammunition\", which matches the summary's idea of expressing something toward buying ammunition. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> People mainly expressed **opposition** to buying ammunition after the success of applying assembly line to the production of automobiles\n✅ **Answer: opposition** — The passage states \"The expense opposition to ammunition was the first one to trigger the debate\", so ______ that people expressed to buying ammunition is opposition.\n**Verification:**\n- ✅ Grammar: 'opposition' fits the grammatical slot in the summary.\n- ✅ Spelling: 'opposition' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-            },
-            {
-              "question_number": 38,
-              "correct_answers": [
-                "equipment"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'Besides, **other** ______ **was needed in the war** which demanded a big workforce to support'\nℹ️ *'other [NOUN] was needed' — the blank follows 'other' and comes before the singular verb 'was', so the answer is a singular noun naming what was needed in the war.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"**Other** equipment **involved in war or preparation for war** was also against.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| was needed in the war | \"involved in war or preparation for war\" | **✅** — The passage says \"involved in war or preparation for war\", which means the same as being needed in the war. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> Besides, other **equipment** was needed in the war which demanded a big workforce to support\n✅ **Answer: equipment** — The passage states \"Other equipment involved in war or preparation for war was also against\", so ______ for what was needed in the war is equipment.\n**Verification:**\n- ✅ Grammar: 'equipment' fits the grammatical slot in the summary.\n- ✅ Spelling: 'equipment' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-            },
-            {
-              "question_number": 39,
-              "correct_answers": [
-                "workforce"
-              ],
-              "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'which **demanded a big** ______ **to support**'\nℹ️ *'a big [NOUN]' — the blank follows the adjective 'big' and comes before 'to support', so the answer is a noun naming what was demanded.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"Let alone all these **required** **a lot of** workforce **to accomplish**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| demanded | \"required\" | **✅** — The passage uses \"required\", which means the same as demanded in the summary. |\n| to support | \"to accomplish\" | **✅** — The passage uses \"to accomplish\", which has a similar meaning to the summary's phrase about supporting something. |\n| a big | \"a lot of\" | **✅** — The passage says \"a lot of\", which matches the summary's phrase about a big amount of something. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> which demanded a big **workforce** to support\n✅ **Answer: workforce** — The passage states \"Let alone all these required a lot of workforce to accomplish\", so ______ for what was demanded in a big amount is workforce.\n**Verification:**\n- ✅ Grammar: 'workforce' fits the grammatical slot in the summary.\n- ✅ Spelling: 'workforce' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-            }
-          ]
-        },
-        {
-          "group_id": "g4_p3",
-          "question_type": "multiple_choice",
-          "instruction": "Answer the questions.",
-          "options_pool": [
-            {
-              "key": "The origin of auto assembly line",
-              "text": "The origin of auto assembly line"
-            },
-            {
-              "key": "A marvelous advancement in firearm production",
-              "text": "A marvelous advancement in firearm production"
-            },
-            {
-              "key": "The origin of mass production",
-              "text": "The origin of mass production"
-            },
-            {
-              "key": "The significance of producing interchangeable parts",
-              "text": "The significance of producing interchangeable parts"
-            }
-          ],
-          "questions": [
-            {
-              "question_number": 40,
-              "prompt": "Which might be the best subtitle for the passage?",
-              "correct_answers": [
-                "The origin of mass production"
-              ],
-              "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Which might be the best subtitle for the passage?\n**Options:**\n- **A** — The origin of **auto assembly line**\n- **B** — A marvelous advancement in **firearm production**\n- **C** — The **origin of mass production**\n- **D** — The significance of producing **interchangeable parts**\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph A, the opening section that introduces the main topic of the entire passage.*\nLocated in **Paragraph A**:\n> \"Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. **Various mass production techniques had been practiced in ancient times**, from ceramic production in the Orient to manufacturing in ancient Greece.\"\nLocated in **Paragraph F**:\n> \"Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods.\"\n> \"Yet it is generally agreed that **modern mass production techniques came into widespread use** through the innovation of an assortment of Americans who substantially improved the ancient techniques.\"\n> \"Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s.\"\n→ *The passage traces mass production from ancient times through various innovators and industries to modern techniques.*\n**Key phrases in the passage:**\n- 'Various mass production techniques had been practiced in ancient times' — the historical beginning of mass production\n- 'modern mass production techniques came into widespread use' — the development of mass production methods\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — The origin of auto assembly line | **❌ Wrong** | The passage discusses auto assembly lines in only two paragraphs (F and G), but covers many other industries and innovators throughout, so auto assembly line is too narrow for the whole passage. |\n| **B** — A marvelous advancement in firearm production | **❌ Wrong** | Firearms appear in several paragraphs as one example among many industries (textiles, clocks, photography, automobiles), so firearm production alone does not capture the passage's full scope. |\n| **C** — The origin of mass production | **✅ Correct** | The passage opens with \"Various mass production techniques had been practiced in ancient times\" and traces the development through multiple innovators and industries, which matches origin of mass production. |\n| **D** — The significance of producing interchangeable parts | **❌ Wrong** | Interchangeable parts is an important technique mentioned in several paragraphs, but the passage covers the broader history and development of mass production across many industries, not just this one aspect. |\n✅ **Answer: C** — The passage begins by tracing mass production from ancient times and follows its development through many innovators and industries, making the origin of mass production the best overall subtitle.",
-              "options_pool": [
-                {
-                  "key": "The origin of auto assembly line",
-                  "text": "The origin of auto assembly line"
-                },
-                {
-                  "key": "A marvelous advancement in firearm production",
-                  "text": "A marvelous advancement in firearm production"
-                },
-                {
-                  "key": "The origin of mass production",
-                  "text": "The origin of mass production"
-                },
-                {
-                  "key": "The significance of producing interchangeable parts",
-                  "text": "The significance of producing interchangeable parts"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
+export interface CleanReadingKeywordMapping {
+  original_text: string;
+  paraphrased_text: string;
+  mapping_type?: string;
+}
 
-export const cleanReadingTest1Submission = {
+export interface CleanReadingQuestion {
+  id: number;
+  question_number: number;
+  passage_number: number;
+  question_type: string | number;
+  prompt: string;
+  options: { key: string; text: string }[];
+  user_answer: string;
+  correct_answer: string;
+  is_correct: boolean;
+  explanation_4_steps: string;
+  evidence_text: string;
+  evidence_source_id?: string;
+  keywords_mapping: CleanReadingKeywordMapping[];
+}
+
+export interface CleanReadingPassage {
+  id: string;
+  passage_number: number;
+  title: string;
+  content: string;
+  paragraphs: { id: string; text: string }[];
+}
+
+export interface CleanReadingExerciseGroup {
+  id: number;
+  passage_number: number;
+  type: string | number;
+  title: string;
+  content: string;
+  table_data?: any;
+  question_start: number;
+  question_end: number;
+}
+
+export interface CleanTaskFormatResult {
+  code?: string;
+  name?: string;
+  correct_answers?: number;
+  total_questions?: number;
+  correct_rate?: number;
+  correct?: number;
+  total?: number;
+  percentage?: number;
+  [key: string]: any;
+}
+
+export interface CleanReadingTestData {
+  test_id: string;
+  slug: string;
+  title: string;
+  overall_band: number;
+  correct_count: number;
+  total_questions: number;
+  time_spent: string;
+  submitted_at: string;
+  task_formats_result: CleanTaskFormatResult[];
+  exercise_groups: CleanReadingExerciseGroup[];
+  passages: CleanReadingPassage[];
+  questions: CleanReadingQuestion[];
+}
+
+export const cleanReadingTest1Data: CleanReadingTestData = {
   "test_id": "test-1",
-  "raw_id": 25863,
+  "slug": "recent-actual-test-reading-test-1",
   "title": "Recent Actual Test - Reading Test 1",
-  "band_score": 4,
+  "overall_band": 4,
   "correct_count": 10,
   "total_questions": 40,
-  "time_spent": 95,
+  "time_spent": "95 giây",
   "submitted_at": "15:43 12/10/2026",
   "task_formats_result": [
     {
@@ -1209,488 +136,1898 @@ export const cleanReadingTest1Submission = {
       "incorrect_rate": 100
     }
   ],
-  "user_answers": {
-    "1": "True",
-    "2": "False",
-    "3": "Not Given",
-    "4": "True",
-    "5": "False",
-    "6": "False",
-    "7": "Not Given",
-    "8": "False",
-    "9": "A",
-    "10": "B",
-    "11": "C",
-    "12": "D",
-    "13": "E",
-    "14": "F",
-    "15": "No",
-    "16": "Yes",
-    "17": "Not Given",
-    "18": "Yes",
-    "19": "No",
-    "20": "Yes",
-    "21": "No",
-    "22": "A",
-    "23": "C",
-    "24": "B",
-    "25": "DSFS",
-    "26": "FSAFD",
-    "27": "AFASDF",
-    "28": "i. The appearance of precision machine tools",
-    "29": "i. The appearance of precision machine tools",
-    "30": "i. The appearance of precision machine tools",
-    "31": "i. The appearance of precision machine tools",
-    "32": "i. The appearance of precision machine tools",
-    "33": "i. The appearance of precision machine tools",
-    "34": "Grind the gun",
-    "35": "To emphasize that Ford was a successful enterprise",
-    "36": "Created useful tools for manufacture of guns with economic feasibility",
-    "37": "C",
-    "38": "B",
-    "39": "A",
-    "40": "The origin of mass production"
-  },
-  "questions": {
-    "1": {
-      "question_id": 1175915,
-      "question_number": 1,
-      "prompt": "Growth interest in sleeping disorder studies caused a growth in the number of centers for researching sleep medicines.",
-      "user_answer": "True",
-      "correct_answers": [
-        "True"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to cause-and-effect relationships and numbers._\n**Statement:**\n> Growth **interest in sleeping disorder studies** **caused a growth** in the number of centers for researching sleep medicines.\n**Keywords:**\n- interest in sleeping disorder studies\n- caused a growth\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 1, the section describing the development of sleep medicine in the UK. The passage explains that in the last decade a number of centers have sprouted, often led by chest physicians and ENT surgeons with an interest in obstructive sleep apnoea._\nLocated in **Paragraph 1**:\n> \"**In the last decade a number of centers have sprouted**, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons **with an interest in obstructive sleep apnoea**, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same ideas about interest, growth, and centers._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| interest in sleeping disorder studies | \"with an interest in obstructive sleep apnoea\" | **✅** — The passage mentions physicians and surgeons \"with an interest in obstructive sleep apnoea\", which is a type of sleeping disorder. |\n| caused a growth | \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\" | **✅** — The passage says \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\", showing that interest led to growth. |\n→ *All keywords match the passage, which confirms that interest in sleep disorders led to more centers being established.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage confirms that \"a number of centers have sprouted\" in the last decade, led by physicians \"with an interest in obstructive sleep apnoea\", which directly supports the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._"
+  "exercise_groups": [
+    {
+      "id": 229462,
+      "passage_number": 1,
+      "type": 21,
+      "title": "Questions 1-8 Do the following statements agree with the claims of the writer in Reading Passage 1?",
+      "content": "Choose\nTRUE               if the statement is true\nFALSE              if the statement is false\nNOT GIVEN    if the information is not given in the passage.",
+      "table_data": null,
+      "question_start": 1,
+      "question_end": 8
     },
-    "2": {
-      "question_id": 1175916,
-      "question_number": 2,
-      "prompt": "People are often injured when dreaming aggressive scenes or sleepwalking.",
-      "user_answer": "False",
-      "correct_answers": [
-        "Not Given"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'often' and multiple conditions joined by 'or'._\n**Statement:**\n> People are **often injured** when **dreaming aggressive scenes** or **sleepwalking**.\n**Keywords:**\n- often injured\n- dreaming aggressive scenes\n- sleepwalking\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 3, the section about REM sleep and dreams. The passage explains that in REM behavior disorder, violent dream content can lead to patients acting out their dreams, often resulting in injury._\nLocated in **Paragraph 3**:\n> \"The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when **dreams content becomes violent** and patients act out their dream, **often resulting in injury**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions injury from violent dreams but does not say anything about sleepwalking causing injury._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| often injured | \"often resulting in injury\" | **✅** — The passage uses the same phrase \"often resulting in injury\" when describing REM behavior disorder. |\n| dreaming aggressive scenes | \"dreams content becomes violent\" | **⚠️** — The passage says \"dreams content becomes violent\", which matches the idea of aggressive scenes, but only in the context of REM behavior disorder. |\n| sleepwalking | _(not in passage)_ | **⚠️** — The passage does not mention whether sleepwalking causes injury; it only discusses injury from acting out violent dreams. |\n→ *The passage confirms injury from violent dreams but does not provide information about injury from sleepwalking.*\n### Step 4 — Decide the answer\n_The passage confirms injury from violent dreams but does not mention sleepwalking in this context, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that \"often resulting in injury\" occurs when patients act out violent dreams in REM behavior disorder, but it does not say whether sleepwalking causes injury.\n⚠️ *The passage mentions sleepwalking in a different context but does not link it to injury, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._"
+    {
+      "id": 229463,
+      "passage_number": 1,
+      "type": 1,
+      "title": "Questions 9-14 Complete the summary using the list of words, A-G, below. Write the correct letter, A-P, in boxes 9-14.",
+      "content": "NB   There are more words than spaces so you will not use them all.",
+      "table_data": null,
+      "question_start": 9,
+      "question_end": 14
     },
-    "3": {
-      "question_id": 1175917,
-      "question_number": 3,
-      "prompt": "Parkinsons is scientifically proved to be the only result of REM disorders.",
-      "user_answer": "Not Given",
-      "correct_answers": [
-        "Not Given"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially limiting words like 'only' and 'scientifically proved'._\n**Statement:**\n> **Parkinsons** is **scientifically proved** to be **the only result** of **REM disorders**.\n**Keywords:**\n- Parkinsons\n- scientifically proved\n- the only result\n- REM disorders\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 4, the section about REM behavior disorder. The passage says that REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's._\nLocated in **Paragraph 4**:\n> \"**REM behavior disorder** can be a precursor of neurodegenerative disease **including Parkinson's**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions Parkinson's but does not say it is the only result or that this is scientifically proved._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| scientifically proved | _(not in passage)_ | **⚠️** — The passage does not mention scientific proof; it simply states that REM behavior disorder can be a precursor. |\n| the only result | \"including Parkinson's\" | **⚠️** — The passage says \"including Parkinson's\", which suggests there are other diseases, not that Parkinson's is the only result. |\n| REM disorders | \"REM behavior disorder\" | **✅** — The passage uses the exact term \"REM behavior disorder\" when discussing this condition. |\n→ *The passage mentions Parkinson's as one possible result but does not confirm it is the only result or that this is scientifically proved.*\n### Step 4 — Decide the answer\n_The passage does not provide information about scientific proof or whether Parkinson's is the only result, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that REM behavior disorder can be a precursor of neurodegenerative disease \"including Parkinson's\", but it does not say whether Parkinson's is the only result or whether this is scientifically proved.\n⚠️ *The word 'including' suggests there are other diseases, but the passage does not explicitly state whether Parkinson's is the only result, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._"
+    {
+      "id": 229464,
+      "passage_number": 2,
+      "type": 22,
+      "title": "Questions 15-21 Do the following statements agree with the claims of the writer in Reading Passage 2?",
+      "content": "Choose\nYES                  if the statement agrees with the writer\nNO                   if the statement contradicts with the writer\nNOT GIVEN    if there is no information about this in the passage.",
+      "table_data": null,
+      "question_start": 15,
+      "question_end": 21
     },
-    "4": {
-      "question_id": 1175918,
-      "question_number": 4,
-      "prompt": "REM sleep counts for less proportion of total sleep time for grownups than newborns.",
-      "user_answer": "True",
-      "correct_answers": [
-        "True"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to comparisons between two groups and percentages._\n**Statement:**\n> **REM sleep** counts for **less proportion** of total sleep time for **grownups** than **newborns**.\n**Keywords:**\n- REM sleep\n- less proportion\n- grownups\n- newborns\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep across different ages. The passage explains that in newborns, 50 percent of total sleep time is REM sleep, progressively shrinking to 25 percent in adults._\nLocated in **Paragraph 5**:\n> \"**In the newborn**, **50 percent of total sleep time** is occupied by **REM sleep**, **progressively shrinking to 25 percent in the adult**, the first block of REM sleep occurring about 90 minutes after sleep onset.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage provides specific percentages showing that adults have a smaller proportion of REM sleep than newborns._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| less proportion | \"progressively shrinking to 25 percent in the adult\" | **✅** — The passage says REM sleep is \"progressively shrinking to 25 percent in the adult\", which means a smaller proportion. |\n| grownups | \"25 percent in the adult\" | **✅** — The passage refers to \"25 percent in the adult\", which is another way of saying grownups. |\n| newborns | \"In the newborn\" | **✅** — The passage uses the phrase \"In the newborn\" when describing the 50 percent figure. |\n→ *All keywords match the passage, which confirms that adults have a smaller proportion of REM sleep compared to newborns.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, confirming that adults have less REM sleep than newborns, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult\", which directly confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._"
+    {
+      "id": 229465,
+      "passage_number": 2,
+      "type": 1,
+      "title": "Questions 22-24 Complete the summary using the list of words, A-H, below. Write the correct letter, A-H, in boxes 1-4.",
+      "content": "NB   There are more words than spaces so you will not use them all.",
+      "table_data": null,
+      "question_start": 22,
+      "question_end": 24
     },
-    "5": {
-      "question_id": 1175919,
-      "question_number": 5,
-      "prompt": "Frightening dreams are considered irrelevant to alcohol and drugs.",
-      "user_answer": "False",
-      "correct_answers": [
-        "False"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'irrelevant' that indicate no connection._\n**Statement:**\n> **Frightening dreams** are considered **irrelevant** to **alcohol and drugs**.\n**Keywords:**\n- Frightening dreams\n- irrelevant\n- alcohol and drugs\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep and substances. The passage explains that abrupt withdrawal of alcohol and drugs can increase REM sleep, leading to intense vivid often frightening dreams._\nLocated in **Paragraph 5**:\n> \"**Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs** **can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to** **intense vivid often frightening dreams**, similar to that experienced by patients with narcolepsy.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage shows a clear connection between alcohol, drugs, and frightening dreams, which contradicts the claim that they are irrelevant._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Frightening dreams | \"intense vivid often frightening dreams\" | **❌** — The passage mentions \"intense vivid often frightening dreams\", which matches the idea of frightening dreams. |\n| irrelevant | \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" | **❌** — The passage says withdrawal of alcohol and drugs \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" frightening dreams, showing they are relevant, not irrelevant. |\n| alcohol and drugs | \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" | **❌** — The passage states \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to frightening dreams, showing a direct connection. |\n→ *The passage shows a clear connection between alcohol, drugs, and frightening dreams, which directly contradicts the claim that they are irrelevant.*\n### Step 4 — Decide the answer\n_The passage shows that alcohol and drugs are connected to frightening dreams, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to \"intense vivid often frightening dreams\", which contradicts the claim that they are irrelevant.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._"
+    {
+      "id": 229468,
+      "passage_number": 2,
+      "type": 1,
+      "title": "Questions 25-27 Complete the note below Use NO MORE THAN THREE WORDS from the passage for each answer.",
+      "content": "From a novice chess player to an expert",
+      "table_data": null,
+      "question_start": 25,
+      "question_end": 27
     },
-    "6": {
-      "question_id": 1175920,
-      "question_number": 6,
-      "prompt": "According to the author, babies would sleep more at night from the second month of their births.",
-      "user_answer": "False",
-      "correct_answers": [
-        "True"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to time markers and comparisons._\n**Statement:**\n> According to the author, **babies** would **sleep more at night** **from the second month** of their births.\n**Keywords:**\n- babies\n- sleep more at night\n- from the second month\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 7, the section about infant sleep patterns. The passage explains that by the second month, favoring of sleep towards night time occurs._\nLocated in **Paragraph 7**:\n> \"**By the second month** **favoring of sleep towards night time** occurs and by six months **the baby** will have about 12 hours of sleep at night in addition to a couple of daytime naps.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same idea about babies sleeping more at night from the second month._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| babies | \"the baby\" | **✅** — The passage refers to \"the baby\", which is the same as babies in general. |\n| sleep more at night | \"favoring of sleep towards night time\" | **✅** — The passage says \"favoring of sleep towards night time\" occurs, which means sleeping more at night. |\n| from the second month | \"By the second month\" | **✅** — The passage uses the exact phrase \"By the second month\" when describing this change. |\n→ *All keywords match the passage, which confirms that babies sleep more at night from the second month.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"By the second month favoring of sleep towards night time occurs\", which directly supports the statement that babies sleep more at night from the second month.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._"
+    {
+      "id": 229469,
+      "passage_number": 3,
+      "type": 7,
+      "title": "Questions 28-33 The reading passage has seven paragraphs, A-H. Choose the correct heading for paragraphs A-H from the list below.",
+      "content": "",
+      "table_data": null,
+      "question_start": 28,
+      "question_end": 33
     },
-    "7": {
-      "question_id": 1175921,
-      "question_number": 7,
-      "prompt": "During the night, children born prematurely wake as frequently as breast fed babies.",
-      "user_answer": "Not Given",
-      "correct_answers": [
-        "False"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially comparisons like 'as frequently as'._\n**Statement:**\n> During the night, **children born prematurely** **wake** **as frequently as** **breast fed babies**.\n**Keywords:**\n- children born prematurely\n- wake\n- as frequently as\n- breast fed babies\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 8, the section about premature and breast-fed babies. The passage explains that children born prematurely tend to be awake more at night in the first year and breast-fed babies wake more frequently._\nLocated in **Paragraph 8**:\n> \"In general, **children born prematurely** **have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently**, but the difference disappears by the second year.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage describes different waking patterns for the two groups, not the same frequency._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| wake | \"awake more at night\" | **❌** — The passage says premature children \"awake more at night\", which is different from waking frequently like breast-fed babies. |\n| as frequently as | \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\" | **❌** — The passage states \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns, not the same frequency. |\n| breast fed babies | \"breast-fed babies wake more frequently\" | **❌** — The passage mentions \"breast-fed babies wake more frequently\", which describes a different pattern from premature babies. |\n→ *The passage describes different waking patterns for premature and breast-fed babies, which contradicts the claim that they wake as frequently.*\n### Step 4 — Decide the answer\n_The passage shows that the two groups have different waking patterns, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns rather than the same frequency.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._"
+    {
+      "id": 229470,
+      "passage_number": 3,
+      "type": 2,
+      "title": "Questions 34-36 Choose the correct letter, A, B, C or D.",
+      "content": "",
+      "table_data": null,
+      "question_start": 34,
+      "question_end": 36
     },
-    "8": {
-      "question_id": 1175922,
-      "question_number": 8,
-      "prompt": "Children require more deep sleep and less disruption during their sleep in the first half of the night.",
-      "user_answer": "False",
-      "correct_answers": [
-        "Not Given"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for specific groups like 'children' and time references like 'first half of the night'._\n**Statement:**\n> **Children** **require more** **deep sleep** and less **disruption** during their sleep in the **first half of the night**.\n**Keywords:**\n- Children\n- require more\n- deep sleep\n- disruption\n- first half of the night\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, which discusses arousals during sleep, and paragraph 2, which defines deep sleep. The passage mentions deep sleep stages and arousals but does not specifically discuss children's requirements._\nLocated in **Paragraph 6**:\n> \"The frequency of the **arousals** may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.\"\nLocated in **Paragraph 2**:\n> \"NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and **stages 3 and 4 which are considered deep sleep** with high arousal threshold.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage does not mention whether children require more deep sleep or less disruption in the first half of the night._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Children | _(not in passage)_ | **⚠️** — The passage does not mention children's specific sleep requirements or whether they need more or less of any sleep stage. |\n| require more | _(not in passage)_ | **⚠️** — The passage does not say anything about whether children require more deep sleep than other age groups. |\n| deep sleep | \"stages 3 and 4 which are considered deep sleep\" | **✅** — The passage defines \"stages 3 and 4 which are considered deep sleep\" but does not link this to children's needs. |\n| disruption | \"arousals\" | **⚠️** — The passage mentions \"arousals\", which are a type of disruption, but does not link this to children specifically. |\n| first half of the night | _(not in passage)_ | **⚠️** — The passage does not mention the first half of the night or any specific timing for children's sleep requirements. |\n→ *The passage mentions deep sleep and arousals but does not provide information about children's specific requirements or timing.*\n### Step 4 — Decide the answer\n_The passage does not provide information about children's specific sleep requirements or timing, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage defines \"stages 3 and 4 which are considered deep sleep\" and mentions \"arousals\", but it does not say whether children require more deep sleep or less disruption in the first half of the night.\n⚠️ *The passage discusses deep sleep and arousals in general terms but does not link these to children's specific needs or the timing during the night, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._"
+    {
+      "id": 229471,
+      "passage_number": 3,
+      "type": 1,
+      "title": "Questions 37-39 Complete the following summary of the paragraphs of Reading Passage 3. Using NO MORE THAN TWO WORDS from the Reading Passage for each answer.",
+      "content": "",
+      "table_data": null,
+      "question_start": 37,
+      "question_end": 39
     },
-    "9": {
-      "question_id": 1175923,
-      "question_number": 9,
-      "prompt": "",
-      "user_answer": "A",
-      "correct_answers": [
-        "A"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 11*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The **NREM/REM cycles affect sleep** **along with human** ______'\nℹ️ *'human [noun phrase]' — the blank follows 'human' and pairs with 'outside factors', so the answer is a noun phrase naming internal biological factors.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 11**:\n> \"In addition to the NREM/REM cycles, there is a **circadian sleep/wake cycle** entrained by intrinsic rhythms –melatonin and body temperature and **extrinsic factors** –light and social cues such as mealtimes, work times.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| NREM/REM cycles affect sleep | \"circadian sleep/wake cycle\" | **✅** — The passage says \"circadian sleep/wake cycle\" works alongside the NREM/REM cycles, showing they both affect sleep. |\n| outside factors | \"extrinsic factors\" | **✅** — The passage mentions \"extrinsic factors\", which means the same as outside factors. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — rhythms\n**Eliminated options:**\n- ❌ **B** — About darkness, not about internal biological patterns that affect sleep.\n- ❌ **C** — An adjective describing variation, not a noun naming internal factors.\n- ❌ **D** — An adjective describing sameness, not a noun naming internal factors.\n- ❌ **E** — About speed of movement, not about biological cycles that regulate sleep.\n- ❌ **F** — An adjective describing light intensity, not a noun naming internal factors.\n- ❌ **G** — Too general — the blank needs a specific internal factor, not the body itself.\n- ❌ **H** — A group of people, not an internal biological factor affecting sleep.\n- ❌ **I** — A verb describing synchronization, not a noun naming internal factors.\n- ❌ **J** — An external factor, not an internal human factor.\n- ❌ **K** — A group of people, not an internal biological factor.\n- ❌ **L** — An adjective describing vision loss, not a noun naming internal factors.\n- ❌ **M** — An adjective describing body processes, not a noun naming specific internal factors.\n- ❌ **N** — Singular form, but the blank needs a plural to match the context.\n- ❌ **O** — An adjective describing age, not a noun naming internal factors.\n- ❌ **P** — About vision ability, not about internal biological patterns that regulate sleep."
-    },
-    "10": {
-      "question_id": 1175924,
-      "question_number": 10,
-      "prompt": "",
-      "user_answer": "B",
-      "correct_answers": [
-        "I"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Melatonin plays a determinant role in** ______ **the sleep wake cycle to the day-night cycle**.'\nℹ️ *'in [verb]' — the blank follows the preposition 'in' and takes an object 'the sleep wake cycle', so the answer is a verb form (gerund) describing the action melatonin performs.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"The pineal hormone **melatonin** plays a role in entraining **the sleep/wake cycle to the light/dark cycle**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| the sleep wake cycle to the day-night cycle | \"the sleep/wake cycle to the light/dark cycle\" | **✅** — The passage says \"the sleep/wake cycle to the light/dark cycle\", which means the same as the sleep wake cycle to the day-night cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: I** — entraining\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not a verb describing melatonin's action.\n- ❌ **B** — A noun about darkness, not a verb describing synchronization.\n- ❌ **C** — An adjective describing variation, not a verb describing an action.\n- ❌ **D** — An adjective describing sameness, not a verb describing an action.\n- ❌ **E** — A noun about speed, not a verb describing synchronization.\n- ❌ **F** — An adjective describing light, not a verb describing an action.\n- ❌ **G** — A noun naming a physical structure, not a verb describing an action.\n- ❌ **H** — A noun phrase naming people, not a verb describing an action.\n- ❌ **J** — A noun about light, not a verb describing synchronization.\n- ❌ **K** — A noun naming people, not a verb describing an action.\n- ❌ **L** — An adjective describing vision loss, not a verb describing an action.\n- ❌ **M** — An adjective describing body processes, not a verb describing an action.\n- ❌ **N** — A noun naming a sequence, not a verb describing an action.\n- ❌ **O** — An adjective describing age, not a verb describing an action.\n- ❌ **P** — A noun about vision, not a verb describing synchronization."
-    },
-    "11": {
-      "question_id": 1175925,
-      "question_number": 11,
-      "prompt": "",
-      "user_answer": "C",
-      "correct_answers": [
-        "B"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'Scientists found that **melatonin is high within** ______ **environment**'\nℹ️ *'within [noun] environment' — the blank is an adjective or noun modifying 'environment', describing the lighting condition where melatonin is high.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"**Melatonin secretion** is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| melatonin | \"Melatonin secretion\" | **✅** — The passage says \"Melatonin secretion is high in darkness\", showing where the missing word is found. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: B** — shadow\n**Eliminated options:**\n- ❌ **A** — About biological patterns, not about a lighting condition or environment.\n- ❌ **C** — Describes variation, not a specific lighting condition where melatonin is high.\n- ❌ **D** — Describes sameness, not a lighting condition where melatonin is high.\n- ❌ **E** — About speed, not about a lighting condition or environment.\n- ❌ **F** — Describes a light environment, but melatonin is high in darkness, not brightness.\n- ❌ **G** — About physical structure, not about a lighting condition or environment.\n- ❌ **H** — A group of people, not a lighting condition or environment.\n- ❌ **I** — A verb describing synchronization, not a noun or adjective describing environment.\n- ❌ **J** — Melatonin is low in daylight, not high, so this contradicts the context.\n- ❌ **K** — A group of people, not a lighting condition or environment.\n- ❌ **L** — Describes vision loss, not a lighting condition or environment.\n- ❌ **M** — Describes body processes, not a lighting condition or environment.\n- ❌ **N** — About a sequence, not a lighting condition or environment.\n- ❌ **O** — Describes age, not a lighting condition or environment.\n- ❌ **P** — About vision ability, not a lighting condition or environment."
-    },
-    "12": {
-      "question_id": 1175926,
-      "question_number": 12,
-      "prompt": "",
-      "user_answer": "D",
-      "correct_answers": [
-        "L"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'with an **exception of** ______ **subjects who may build up a free cycle**'\nℹ️ *'exception of [adjective] subjects' — the blank is an adjective describing which type of subjects are the exception.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"Blind people **may lose this entrainment** and develop a **free running sleep/wake cycle** with progressive advancement of sleep onset time.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| exception | \"may lose this entrainment\" | **✅** — The passage says \"may lose this entrainment\", which explains why these subjects are an exception. |\n| free cycle | \"free running sleep/wake cycle\" | **✅** — The passage mentions \"free running sleep/wake cycle\", which matches the summary's free cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: L** — blind\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing subjects.\n- ❌ **B** — A noun about darkness, not an adjective describing subjects.\n- ❌ **C** — Too vague — the blank needs a specific characteristic, not just 'not the same'.\n- ❌ **D** — Describes sameness, but the context is about an exception group with a specific characteristic.\n- ❌ **E** — A noun about speed, not an adjective describing subjects.\n- ❌ **F** — Describes light intensity, not a characteristic of subjects who lose entrainment.\n- ❌ **G** — A noun naming physical structure, not an adjective describing subjects.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing subjects who lose light entrainment.\n- ❌ **I** — A verb describing synchronization, not an adjective describing subjects.\n- ❌ **J** — A noun about light, not an adjective describing subjects.\n- ❌ **K** — A noun naming older people, not an adjective describing vision-impaired subjects.\n- ❌ **M** — Too general — the blank needs a specific characteristic related to vision loss.\n- ❌ **N** — A noun naming a sequence, not an adjective describing subjects.\n- ❌ **O** — Describes age, but the context is about subjects who lose light-based entrainment.\n- ❌ **P** — A noun about vision ability, not an adjective describing subjects."
-    },
-    "13": {
-      "question_id": 1175927,
-      "question_number": 13,
-      "prompt": "",
-      "user_answer": "E",
-      "correct_answers": [
-        "C"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 13*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Circadian clock genes are** ______ between \"morning people\" and \"night people\".'\nℹ️ *'genes are [adjective]' — the blank follows the linking verb 'are' and describes the relationship between genes in morning versus night people, so the answer is an adjective.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 13**:\n> \"**Polymorphism of the circadian clock gene** has now been identified with the population divided between morning types (larks) and evening types (owls).\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Circadian clock genes | \"Polymorphism of the circadian clock gene\" | **✅** — The passage mentions \"Polymorphism of the circadian clock gene\", which refers to ______ in the genes. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: C** — different\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing variation between groups.\n- ❌ **B** — A noun about darkness, not an adjective describing variation.\n- ❌ **D** — Means the same, but the passage says the population is divided, implying variation.\n- ❌ **E** — A noun about speed, not an adjective describing variation between groups.\n- ❌ **F** — Describes light intensity, not variation between groups.\n- ❌ **G** — A noun naming physical structure, not an adjective describing variation.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing variation.\n- ❌ **I** — A verb describing synchronization, not an adjective describing variation.\n- ❌ **J** — A noun about light, not an adjective describing variation between groups.\n- ❌ **K** — A noun naming older people, not an adjective describing variation.\n- ❌ **L** — Describes vision loss, not variation between morning and night people.\n- ❌ **M** — Describes body processes generally, not the specific variation between groups.\n- ❌ **N** — A noun naming a sequence, not an adjective describing variation.\n- ❌ **O** — Describes age, not variation between morning and night people.\n- ❌ **P** — A noun about vision, not an adjective describing variation between groups."
-    },
-    "14": {
-      "question_id": 1175928,
-      "question_number": 14,
-      "prompt": "",
-      "user_answer": "F",
-      "correct_answers": [
-        "K"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 15*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Conversely**, ______ **are more susceptible to sleep early in the evening**.'\nℹ️ *'[noun phrase] are more susceptible' — the blank is the subject of the sentence, so the answer is a noun phrase naming a group of people.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 15**:\n> \"In contrast **the elderly** who are **more susceptible to perturbation in their sleep/wake schedule** can develop advanced sleep phase syndrome with **sleep onset occurring early in the evening**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| more susceptible to sleep | \"more susceptible to perturbation in their sleep/wake schedule\" | **✅** — The passage says \"more susceptible to perturbation in their sleep/wake schedule\", which relates to ______ being susceptible to sleep issues. |\n| elders | \"the elderly\" | **✅** — The passage uses \"the elderly\", which means the same as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: K** — elders\n**Eliminated options:**\n- ❌ **A** — Names biological patterns, not a group of people who sleep early.\n- ❌ **B** — A noun about darkness, not a group of people.\n- ❌ **C** — An adjective describing variation, not a noun phrase naming people.\n- ❌ **D** — An adjective describing sameness, not a noun phrase naming people.\n- ❌ **E** — A noun about speed, not a group of people.\n- ❌ **F** — An adjective describing light, not a noun phrase naming people.\n- ❌ **G** — A noun naming physical structure, not a group of people.\n- ❌ **H** — Names workers with irregular schedules, not the age group susceptible to early evening sleep.\n- ❌ **I** — A verb describing synchronization, not a noun phrase naming people.\n- ❌ **J** — A noun about light, not a group of people.\n- ❌ **L** — An adjective describing vision loss, not a noun phrase naming an age group.\n- ❌ **M** — An adjective describing body processes, not a noun phrase naming people.\n- ❌ **N** — A noun naming a sequence, not a group of people.\n- ❌ **O** — An adjective describing age, but the passage says older people sleep early, not younger.\n- ❌ **P** — A noun about vision, not a group of people."
-    },
-    "15": {
-      "question_id": 1175929,
-      "question_number": 15,
-      "prompt": "Both freshmen and journeymen need the help of a mentor to solve specific problems.",
-      "user_answer": "No",
-      "correct_answers": [
-        "Yes"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Both **freshmen** and **journeymen** need the **help of a mentor to solve specific problems**.\n**Keywords:**\n- freshmen\n- journeymen\n- help of a mentor to solve specific problems\n### Step 2 — Locate evidence in the passage\n_Look in paragraphs 2 and 3, the sections about novices and journeymen learning their craft. The passage explains that novices find mentors to guide them through acquiring new knowledge, and journeymen maintain regular contact with mentors to solve specific problems and learn more complex strategies._\nLocated in **Paragraph 2**:\n> \"Generally, a **novice** will **find a mentor** to guide her through the process of acquiring new knowledge.\"\nLocated in **Paragraph 3**:\n> \"The **journeyman** still **maintains regular contact with a mentor to solve specific problems** and learn more complex strategies.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words for the same roles and describes the same kind of support for both groups._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| freshmen | \"novice\" | **✅** — The passage uses \"novice\" to refer to beginners in a field of study. |\n| journeymen | \"journeyman\" | **✅** — The passage uses the exact term \"journeyman\" for the next stage after novice. |\n| help of a mentor to solve specific problems | \"maintains regular contact with a mentor to solve specific problems\" | **✅** — The passage states the journeyman \"maintains regular contact with a mentor to solve specific problems\", confirming this part of the claim. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming both novices and journeymen need mentor support.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage clearly states that \"a novice will find a mentor to guide her through the process of acquiring new knowledge\" and that the journeyman still maintains regular contact with a mentor to solve specific problems, which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._"
-    },
-    "16": {
-      "question_id": 1175930,
-      "question_number": 16,
-      "prompt": "Novices take more time to deal with a large number of cases than experts.",
-      "user_answer": "Yes",
-      "correct_answers": [
-        "Not Given"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Novices take more time** to **deal with a large number of cases** than experts.\n**Keywords:**\n- Novices take more time\n- deal with a large number of cases\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices perform tasks differently. The passage mentions that experts perform tasks faster than novices and commit fewer errors._\nLocated in **Paragraph 13**:\n> \"Moreover, **experts perform tasks in their domains faster than novices** and commit fewer errors while problem solving.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts work faster, but does not say anything about dealing with a large number of cases specifically._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Novices take more time | \"experts perform tasks in their domains faster than novices\" | **⚠️** — The passage says \"experts perform tasks in their domains faster than novices\", which means novices are slower, but this is about tasks in general. |\n| deal with a large number of cases | _(not in passage)_ | **⚠️** — The passage does not mention anything about dealing with a large number of cases when comparing speed. |\n→ *The passage confirms novices are slower at tasks but does not specify whether this applies to handling a large number of cases.*\n### Step 4 — Decide the answer\n_One key detail is missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — Although the passage states that \"experts perform tasks in their domains faster than novices\", it does not specifically address whether novices take more time to deal with a large number of cases.\n⚠️ *The passage mentions speed differences between experts and novices, but this does not automatically mean the statement about handling many cases is true.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._"
-    },
-    "17": {
-      "question_id": 1175931,
-      "question_number": 17,
-      "prompt": "The apprenticeship model is always used to analyze the behavior of experts and novices.",
-      "user_answer": "Not Given",
-      "correct_answers": [
-        "Not Given"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> The **apprenticeship model** is **always used** to **analyze the behavior** of experts and novices.\n**Keywords:**\n- apprenticeship model\n- always used\n- analyze the behavior\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, the section about the apprenticeship model. The passage describes the chess example as an apprenticeship model and mentions it is still used for training in many complex tasks._\nLocated in **Paragraph 6**:\n> \"The chess example is a rather short description of an **apprenticeship model**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions the apprenticeship model but does not say anything about whether it is always used or used for analysis purposes._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| always used | _(not in passage)_ | **⚠️** — The passage does not mention whether the model is always used or only sometimes used. |\n| analyze the behavior | _(not in passage)_ | **⚠️** — The passage does not say anything about using the model to analyze behavior. |\n→ *The passage mentions the apprenticeship model but does not specify whether it is always used or used for analyzing behavior.*\n### Step 4 — Decide the answer\n_Key details about frequency and purpose are missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage mentions the \"apprenticeship model\" as a training method but does not state whether it is always used or whether it is used to analyze the behavior of experts and novices.\n⚠️ *The passage discusses the apprenticeship model in detail, but this does not mean it is always used for the specific purpose mentioned in the statement.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._"
-    },
-    "18": {
-      "question_id": 1175932,
-      "question_number": 18,
-      "prompt": "A chess master is certainly qualified to play poker well.",
-      "user_answer": "Yes",
-      "correct_answers": [
-        "No"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> A **chess master** is certainly **qualified to play poker well**.\n**Keywords:**\n- chess master\n- qualified to play poker well\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 10, the section about whether expertise transfers to other domains. The passage explains that a master chess player cannot apply chess expertise in poker and would be a novice poker player._\nLocated in **Paragraph 10**:\n> \"A master chess player **cannot apply chess expertise in a game of poker** –although both chess and poker are games, a **chess master** who has never played poker is a **novice poker player**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage directly contradicts the claim by stating chess masters cannot apply their expertise to poker._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| qualified to play poker well | \"cannot apply chess expertise in a game of poker\" | **❌** — The passage says a chess master \"cannot apply chess expertise in a game of poker\", which directly contradicts being qualified to play well. |\n→ *The passage directly contradicts the statement by saying chess masters cannot apply their expertise to poker and would be novices.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement, so the answer is NO._\n✅ **Answer: B. No** — The passage explicitly states that a master chess player cannot apply chess expertise in a game of poker and that \"a chess master who has never played poker is a novice poker player\", which contradicts the claim.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._"
-    },
-    "19": {
-      "question_id": 1175933,
-      "question_number": 19,
-      "prompt": "Experts and novices comprehend the meaning of data and weigh variables in different ways.",
-      "user_answer": "No",
-      "correct_answers": [
-        "Yes"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Experts** and **novices** **comprehend the meaning of data** and **weigh variables in different ways**.\n**Keywords:**\n- Experts\n- novices\n- comprehend the meaning of data\n- weigh variables in different ways\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 12, the section about how experts understand their domains better than novices. The passage explains that experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices._\nLocated in **Paragraph 12**:\n> \"**Experts** **comprehend the meaning of data** and **weigh variables with different criteria** within their domains better than **novices**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses nearly identical wording and confirms experts and novices approach data and variables differently._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| weigh variables in different ways | \"weigh variables with different criteria\" | **✅** — The passage says experts \"weigh variables with different criteria\", which means the same as weighing variables in different ways. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming experts and novices handle data and variables differently.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage directly states that \"Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices\", which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._"
-    },
-    "20": {
-      "question_id": 1175934,
-      "question_number": 20,
-      "prompt": "Experts generally have better memories than novices do.",
-      "user_answer": "Yes",
-      "correct_answers": [
-        "No"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Experts **generally have better memories** than novices do.\n**Keywords:**\n- generally have better memories\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about expert memory compared to novices. The passage explains that experts have better domain-specific short-term and long-term memory than novices do._\nLocated in **Paragraph 13**:\n> \"**Experts have better domain-specific short-term and long-term memory than novices do**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage says experts have better memory, but only in their specific domain, not generally._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| generally have better memories | \"Experts have better domain-specific short-term and long-term memory than novices do\" | **❌** — The passage says \"Experts have better domain-specific short-term and long-term memory than novices do\", but the word generally suggests all types of memory, not just in their domain. |\n→ *The passage confirms experts have better memory but only in their specific domain, not generally across all areas.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the limiting word, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts have better domain-specific short-term and long-term memory than novices do\", which contradicts the claim that experts generally have better memories, because the advantage is limited to their domain.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._"
-    },
-    "21": {
-      "question_id": 1175935,
-      "question_number": 21,
-      "prompt": "Interestingly, experts take more time to solve problems than novices who immediately seek to find a solution.",
-      "user_answer": "No",
-      "correct_answers": [
-        "No"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Interestingly, **experts take more time** to **solve problems** than **novices who immediately seek to find a solution**.\n**Keywords:**\n- experts take more time\n- solve problems\n- novices who immediately seek to find a solution\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices approach problem solving differently. The passage explains that experts spend more time thinking about a problem at the beginning of a task to fully understand it, while novices immediately seek to find a solution._\nLocated in **Paragraph 13**:\n> \"**Experts spend more time thinking about a problem** to fully understand it **at the beginning of a task** than do **novices, who immediately seek to find a solution**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts take more time, but only at the beginning to understand the problem, not to solve it overall._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| experts take more time | \"Experts spend more time thinking about a problem\" | **✅** — The passage says \"Experts spend more time thinking about a problem\", which matches the idea of taking more time. |\n| solve problems | \"at the beginning of a task\" | **❌** — The passage says this happens \"at the beginning of a task\", not when solving the problem overall, which creates a conflict with the statement. |\n→ *The passage confirms experts take more time but only at the beginning to understand the problem, not to solve it, which contradicts the statement.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the timing detail, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts spend more time thinking about a problem to fully understand it at the beginning of a task\", not to solve the entire problem, which contradicts the claim that experts take more time to solve problems.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._"
-    },
-    "22": {
-      "question_id": 1175936,
-      "question_number": 22,
-      "prompt": "",
-      "user_answer": "A",
-      "correct_answers": [
-        "E"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The ______ is not only a **mode of education**, but a **standard method of training**.'\nℹ️ *'The [noun phrase]' — the blank is the subject of the sentence, so the answer is a noun phrase naming what serves as both a mode of education and a training method.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Apprenticeship** may seem like a restrictive 18th century **mode of education**, but it is still a **standard method of training** for many complex tasks.\"\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: E** — apprenticeship\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not a mode of education or training method.\n- ❌ **B** — Chess is an example used in the passage, not an educational mode or training method.\n- ❌ **C** — A description is a way of explaining something, not a mode of education or training method.\n- ❌ **D** — Laws are mentioned as a field of study, not as a mode of education or training method.\n- ❌ **F** — New knowledge is what experts generate, not a mode of education or training method.\n- ❌ **G** — Doctoral programs are based on the apprenticeship model, not the model itself.\n- ❌ **H** — Complex tasks are what the training method is used for, not the method itself."
-    },
-    "23": {
-      "question_id": 1175937,
-      "question_number": 23,
-      "prompt": "",
-      "user_answer": "C",
-      "correct_answers": [
-        "G"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**On this basis**, ______ **have been developed**.'\nℹ️ *'[plural noun phrase] have been developed' — the blank is the subject of a passive verb phrase, so the answer is a plural noun phrase naming what has been created based on the apprenticeship model.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Academic doctoral programs** are **based on an apprenticeship model**, as are fields like law, music, engineering, and medicine.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| have been developed | \"based on an apprenticeship model\" | **✅** — The passage says ______ \"are based on an apprenticeship model\", which carries the same idea as developed from it. |\n| doctoral programs | \"Academic doctoral programs\" | **✅** — The passage mentions \"Academic doctoral programs\" as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: G** — doctoral programs\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not something developed based on apprenticeship.\n- ❌ **B** — Chess is an example used in the passage, not something developed based on apprenticeship.\n- ❌ **C** — A description is singular and refers to an explanation, not something developed based on apprenticeship.\n- ❌ **D** — Laws are mentioned as a field of study, not as programs developed based on apprenticeship.\n- ❌ **E** — Apprenticeship is the basis itself, not what has been developed from it.\n- ❌ **F** — New knowledge is what experts generate, not programs developed based on apprenticeship.\n- ❌ **H** — Complex tasks are what the training method is used for, not programs developed from it."
-    },
-    "24": {
-      "question_id": 1175938,
-      "question_number": 24,
-      "prompt": "",
-      "user_answer": "B",
-      "correct_answers": [
-        "A"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Graduates seek their** ______ **in respective fields** and begin the **long process of becoming experts**.'\nℹ️ *'their [noun phrase]' — 'their' refers to graduates, so the blank is a noun phrase naming what graduates seek in their fields.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Graduate students** enter fields of study, **find mentors**, and begin the **long process of becoming independent experts** and generating new knowledge in their **respective domains**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Graduates | \"Graduate students\" | **✅** — The passage uses \"Graduate students\" to refer to the same group as the summary's term. |\n| respective fields | \"respective domains\" | **✅** — The passage uses \"respective domains\" to mean the same as the summary's phrase. |\n| long process of becoming experts | \"long process of becoming independent experts\" | **✅** — The passage uses the identical phrase \"long process of becoming independent experts\". |\n| mentors | \"find mentors\" | **✅** — The passage states that graduate students \"find mentors\", which matches the summary's idea of seeking ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — mentors\n**Eliminated options:**\n- ❌ **B** — Chess is an example used in the passage, not something graduates seek in their fields.\n- ❌ **C** — A description is an explanation, not something graduates seek in their fields.\n- ❌ **D** — Laws are mentioned as a field of study, not what graduates seek within their fields.\n- ❌ **E** — Apprenticeship is the overall model, not what graduates seek within their fields.\n- ❌ **F** — New knowledge is what experts generate, not what graduates seek when entering fields.\n- ❌ **G** — Doctoral programs are what graduates enter, not what they seek within their fields.\n- ❌ **H** — Complex tasks are what the training method is used for, not what graduates seek."
-    },
-    "25": {
-      "question_id": 1175939,
-      "question_number": 25,
-      "prompt": "",
-      "user_answer": "DSFS",
-      "correct_answers": [
-        "journeyman"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> A ............\nLocated in **Paragraph 3**:\n> \"**In time, and with much practice**, the novice begins to recognize patterns of behavior within cases and, thus, **becomes a** journeyman.\"\n> \"Returning to the example of the chess player, the individual begins to learn **patterns of opening moves**, offensive and defensive game-playing strategies, and **patterns of victory and defeat**.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"In time, and with much practice\" | **✅** — The passage says \"In time, and with much practice\" the novice begins to recognize patterns — this describes the learning process. |\n| Pattern of victory and defeat | \"patterns of victory and defeat\" | **✅** — The passage mentions \"patterns of victory and defeat\" — an exact match. |\n→ *Paragraph 3 describes the transition from novice to the next stage and lists what is learned at that stage.*\n### Step 4 — Write and check the answer\n_Copy the word straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'journeyman' is copied exactly from the passage.\n- ✅ Word count: 1 word.\n- ✅ Grammar: '**A journeyman**' fits the surrounding text.\n✅ **Answer: journeyman** — The passage explains that with practice the novice \"becomes a journeyman\" and then lists the patterns learned, including opening moves and victory/defeat patterns, which matches the note structure.\nℹ️ *Word-form note: 'journeyman' is singular — do not write 'journeymen' or 'a journeyman'.*"
-    },
-    "26": {
-      "question_id": 1175940,
-      "question_number": 26,
-      "prompt": "",
-      "user_answer": "FSAFD",
-      "correct_answers": [
-        "offensive and defensive"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • ............   game-playing strategies\nLocated in **Paragraph 3**:\n> \"Returning to the example of the chess player, **the individual begins to learn** patterns of opening moves, offensive and defensive **game-playing strategies**, and patterns of victory and defeat.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"the individual begins to learn\" | **✅** — The passage says \"the individual begins to learn\" — this describes the learning process at this stage. |\n→ *Paragraph 3 lists the types of strategies learned at the journeyman stage, including ______.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'offensive and defensive' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• offensive and defensive   game-playing strategies**' fits the surrounding text.\n✅ **Answer: offensive and defensive** — The passage describes what the chess player learns at the journeyman stage, listing \"offensive and defensive game-playing strategies\" alongside opening moves and victory patterns.\nℹ️ *Word-form note: 'offensive and defensive' are two adjectives — copy both words exactly as they appear.*"
-    },
-    "27": {
-      "question_id": 1175941,
-      "question_number": 27,
-      "prompt": "",
-      "user_answer": "AFASDF",
-      "correct_answers": [
-        "her own cases"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'An expert'*\n→ *Search area: Paragraph 5*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • Create ............\nLocated in **Paragraph 5**:\n> \"**She is creating** her own cases rather than relying on the cases of others.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Create | \"She is creating\" | **✅** — The passage says \"She is creating\" — this matches the verb in the note. |\n→ *Paragraph 5 explains what the expert creates rather than relying on others.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'her own cases' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• Create her own cases**' fits the surrounding text.\n✅ **Answer: her own cases** — The passage explains that the expert \"is creating her own cases rather than relying on the cases of others\", which completes the final bullet point about what experts create.\nℹ️ *Word-form note: 'her own cases' is three words — copy all three exactly as they appear.*"
-    },
-    "28": {
-      "question_id": 1175942,
-      "question_number": 28,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph C**:\n> \"Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade.\"\n→ *Main idea: Some historians argue that a French gunsmith, not Whitney, deserves credit for inventing true interchangeable parts.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| disagreement | \"Still others maintain\" | **✅** — The phrase \"Still others maintain\" signals an alternative viewpoint, matching the idea of disagreement over who deserves credit. |\n| first person who invented | \"the credit for these modern innovations should go to\" | **✅** — The passage states \"the credit for these modern innovations should go to\" a different person, matching the concept of identifying the true inventor. |\n| instead of Whitney | \"predated those of Whitney\" | **✅** — The text says the French gunsmith's work \"predated those of Whitney\", meaning someone else came before Whitney. |\n**Why other headings do not fit:**\n- ❌ **Not i**: The section discusses who deserves credit for innovations, not the invention of precision machine tools themselves.\n- ❌ **Not iii**: The section debates historical credit among multiple claimants, not the dedicated work of specific prominent researchers.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney** — The paragraph explicitly presents an alternative claim that \"the credit for these modern innovations should go to a French gunsmith\" whose work came before Whitney's, directly matching the heading about disagreement over who truly invented interchangeable parts."
-    },
-    "29": {
-      "question_id": 1175943,
-      "question_number": 29,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "i. The appearance of precision machine tools"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph D**:\n> \"Maudslay's contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper.\"\n→ *Main idea: Maudslay invented precision machine tools that could produce identical parts needed for mass production.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| The appearance of precision machine tools | \"the invention of precision machine tools\" | **✅** — The passage directly states \"the invention of precision machine tools\", which matches the heading's focus on their appearance. |\n**Why other headings do not fit:**\n- ❌ **Not ii**: The section focuses on one specific invention by Maudslay, not a variety of different techniques.\n- ❌ **Not viii**: The section is about the tools that produce interchangeable parts, not the role of the parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: i. The appearance of precision machine tools** — The paragraph's opening sentence explicitly states that Maudslay's contribution to modern mass production was the invention of precision machine tools, making this the clear main focus of the section."
-    },
-    "30": {
-      "question_id": 1175944,
-      "question_number": 30,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph E**:\n> \"Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms.\"\n→ *Main idea: Samuel Colt and Elisha King Root successfully developed industrial processes for mass-producing firearms.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Prominent researchers | \"Samuel Colt and Elisha King Root\" | **✅** — The passage names \"Samuel Colt and Elisha King Root\" as notable figures, matching the idea of prominent researchers. |\n| work dedicated to | \"very successful innovators in the development of industrial processes\" | **✅** — The text describes them as \"very successful innovators in the development of industrial processes\", showing their dedicated work. |\n| mass production of firearm making | \"mass produce interchangeable parts for the assembly-line production of firearms\" | **✅** — The passage states they developed processes to \"mass produce interchangeable parts for the assembly-line production of firearms\", directly matching firearms manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vii**: The section focuses on the specific contributions of Colt and Root, not the general use of mass production for guns.\n- ❌ **Not viii**: The section is about the researchers who developed processes, not the role of interchangeable parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iii. Prominent researchers‘ work dedicated to mass production of firearm making** — The paragraph centers on \"Samuel Colt and Elisha King Root\" as \"very successful innovators\" who developed \"industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms\", perfectly matching the heading about prominent researchers' work in firearm making."
-    },
-    "31": {
-      "question_id": 1175945,
-      "question_number": 31,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "vii. The use of mass production to manufacture guns"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph F**:\n> \"Around the same time, production of guns also entered the assembly line.\"\n→ *Main idea: Gun production began using assembly-line techniques during the same period as other mass production innovations.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| use of mass production to manufacture guns | \"production of guns also entered the assembly line\" | **✅** — The passage states \"production of guns also entered the assembly line\", which means guns were manufactured using mass production methods. |\n**Why other headings do not fit:**\n- ❌ **Not iii**: The section mentions guns entering assembly lines but does not discuss specific prominent researchers or their work.\n- ❌ **Not ii**: The section focuses specifically on guns entering assembly lines, not on different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vii. The use of mass production to manufacture guns** — The paragraph's key sentence states that \"production of guns also entered the assembly line\", which directly describes the application of mass production methods to gun manufacturing."
-    },
-    "32": {
-      "question_id": 1175946,
-      "question_number": 32,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "vi. Controversy on the permission of guns production"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph G**:\n> \"Apart from this, people showed different views over whether guns should be involved in mass production.\"\n→ *Main idea: People held conflicting opinions about whether guns should be mass-produced.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Controversy | \"people showed different views\" | **✅** — The phrase \"people showed different views\" indicates disagreement or controversy among people. |\n| permission of guns production | \"whether guns should be involved in mass production\" | **✅** — The text asks \"whether guns should be involved in mass production\", which is about permission or authorization for gun production. |\n| Controversy | \"trigger the debate\" | **✅** — The passage mentions \"trigger the debate\", reinforcing the idea of controversy. |\n**Why other headings do not fit:**\n- ❌ **Not v**: The section describes ongoing debate about whether to allow gun production, not successful restrictions already imposed.\n- ❌ **Not vii**: The section is about controversy over permission, not the actual use of mass production to manufacture guns.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vi. Controversy on the permission of guns production** — The paragraph states that \"people showed different views over whether guns should be involved in mass production\" and mentions \"trigger the debate\", clearly indicating controversy over permission for gun production."
-    },
-    "33": {
-      "question_id": 1175947,
-      "question_number": 33,
-      "prompt": "",
-      "user_answer": "i. The appearance of precision machine tools",
-      "correct_answers": [
-        "v. Successful elements for imposing restrictions on the production of guns"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph H**:\n> \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.\"\n→ *Main idea: People successfully limited gun production to only four authorized manufacturers.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Successful elements | \"People succeeded\" | **✅** — The passage states \"People succeeded\", which directly matches the idea of successful elements or achievements. |\n| imposing restrictions on the production of guns | \"restraining the production of guns\" | **✅** — The text says \"restraining the production of guns\", which means imposing restrictions or limits on gun manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vi**: The section describes successful restrictions already achieved, not ongoing controversy over whether to permit production.\n- ❌ **Not ii**: The section focuses on restrictions on gun production, not different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: v. Successful elements for imposing restrictions on the production of guns** — The paragraph explicitly states that \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns\", which directly describes successful elements for imposing restrictions on gun production."
-    },
-    "34": {
-      "question_id": 1175948,
-      "question_number": 34,
-      "prompt": "What is the function of flintlock as mentioned in the passage?",
-      "user_answer": "Grind the gun",
-      "correct_answers": [
-        "Fire the gun"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the **function** of **flintlock** as mentioned in the passage?\n**Options:**\n- **A** — **Grind** the gun\n- **B** — **Decorate** the gun\n- **C** — **Fire** the gun\n- **D** — **Maintain** the gun\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph B, the section that discusses John Hall's work with muskets.*\nLocated in **Paragraph B**:\n> \"Flintlock, as it was implied, meant **people used it to trigger the gun**.\"\n→ *The passage explains that flintlock was used to trigger the gun.*\n**Key phrases in the passage:**\n- 'people used it to trigger the gun' — fire the gun\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Grind the gun | **❌ Wrong** | The passage does not mention grinding anywhere in connection with flintlock. |\n| **B** — Decorate the gun | **❌ Wrong** | No decorative purpose is mentioned; the passage describes a functional use instead. |\n| **C** — Fire the gun | **✅ Correct** | The passage states \"people used it to trigger the gun\", which directly matches Fire the gun. |\n| **D** — Maintain the gun | **❌ Wrong** | Maintenance is never mentioned as a function of flintlock in the passage. |\n✅ **Answer: C** — The passage explicitly says flintlock was used to trigger the gun, which is the same as firing it."
-    },
-    "35": {
-      "question_id": 1175949,
-      "question_number": 35,
-      "prompt": "Why does the author quote an example concerning Ford?",
-      "user_answer": "To emphasize that Ford was a successful enterprise",
-      "correct_answers": [
-        "To show that every object could be detached into several parts"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Why does the author quote an example concerning Ford?\n**Options:**\n- **A** — To demonstrate that mass production needed **detailed techniques**\n- **B** — To show that every object could be **detached** into **several parts**\n- **C** — To emphasize that Ford was a **successful enterprise**\n- **D** — To stress that cars were **popular** at that time in the U.S.\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph F, the section that describes Ford's production methods in detail.*\nLocated in **Paragraph F**:\n> \"**Bodies were built on one line and the chassis and drivetrain were built on another**. When both were essentially complete, the body was lowered onto the chassis for final assembly.\"\n→ *The passage describes how Ford built car bodies on one line and chassis on another, then combined them.*\n**Key phrases in the passage:**\n- 'Bodies were built on one line and the chassis and drivetrain were built on another' — objects could be detached into several parts\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — To demonstrate that mass production needed detailed techniques | **❌ Wrong** | The Ford example focuses on dividing production into parts, not on the level of detail in techniques. |\n| **B** — To show that every object could be detached into several parts | **✅ Correct** | The passage shows \"Bodies were built on one line and the chassis and drivetrain were built on another\", demonstrating that every object could be detached into several parts. |\n| **C** — To emphasize that Ford was a successful enterprise | **❌ Wrong** | While Ford's success is mentioned in Paragraph G, the example in Paragraph F illustrates the division of parts, not business success. |\n| **D** — To stress that cars were popular at that time in the U.S. | **❌ Wrong** | Car popularity is discussed in Paragraph G, but the Ford example in Paragraph F is about production methods, not popularity. |\n✅ **Answer: B** — The Ford example shows how bodies and chassis were built separately then combined, illustrating that objects can be divided into parts for production."
-    },
-    "36": {
-      "question_id": 1175950,
-      "question_number": 36,
-      "prompt": "What is the main contribution of Maudslay?",
-      "user_answer": "Created useful tools for manufacture of guns with economic feasibility",
-      "correct_answers": [
-        "Created useful tools for manufacture of guns with economic feasibility"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the main **contribution of Maudslay**?\n**Options:**\n- **A** — Introduced **assembly line** for producing interchangeable parts of guns\n- **B** — **Created useful tools** for **manufacture of guns** with **economic feasibility**\n- **C** — **Lessened the time** for making guns\n- **D** — **Set a standard** of making guns and the standard of interchangeable parts\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph D, the section that describes Maudslay's contribution to mass production.*\nLocated in **Paragraph D**:\n> \"Maudslay‘s contribution to modern mass production was the **invention of precision machine tools** capable of producing the identical parts necessary for mass production techniques which **made producing guns cheaper**.\"\n→ *The passage states that Maudslay invented precision machine tools that could produce identical parts and made gun production cheaper.*\n**Key phrases in the passage:**\n- 'invention of precision machine tools' — created useful tools for manufacture\n- 'made producing guns cheaper' — economic feasibility\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Introduced assembly line for producing interchangeable parts of guns | **❌ Wrong** | The passage credits Maudslay with inventing machine tools, not with introducing the assembly line itself. |\n| **B** — Created useful tools for manufacture of guns with economic feasibility | **✅ Correct** | The passage states Maudslay's contribution was the \"invention of precision machine tools\" that \"made producing guns cheaper\", matching Created useful tools with economic feasibility. |\n| **C** — Lessened the time for making guns | **❌ Wrong** | Time reduction is mentioned for Ford's Model T production, but not for Maudslay's work. |\n| **D** — Set a standard of making guns and the standard of interchangeable parts | **❌ Wrong** | Setting standards is attributed to Gribeauval and Hall, but not to Maudslay. |\n✅ **Answer: B** — Paragraph D clearly states that Maudslay invented precision machine tools that produced identical parts and made gun production cheaper, which matches creating useful tools with economic feasibility."
-    },
-    "37": {
-      "question_id": 1175951,
-      "question_number": 37,
-      "prompt": "",
-      "user_answer": "C",
-      "correct_answers": [
-        "opposition"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'People mainly **expressed** ______ **to buying ammunition** after the success of applying assembly line to the production of automobiles'\nℹ️ *'expressed [NOUN]' — the blank follows the verb 'expressed' and comes before 'to buying ammunition', so the answer is a noun naming what people expressed.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"The expense opposition **to ammunition** was **the first one to trigger the debate**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| heated debate | \"the first one to trigger the debate\" | **✅** — The passage says this was \"the first one to trigger the debate\", which means it started the heated debate mentioned in the summary. |\n| to buying ammunition | \"to ammunition\" | **✅** — The passage states \"______ to ammunition\", which matches the summary's idea of expressing something toward buying ammunition. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> People mainly expressed **opposition** to buying ammunition after the success of applying assembly line to the production of automobiles\n✅ **Answer: opposition** — The passage states \"The expense opposition to ammunition was the first one to trigger the debate\", so ______ that people expressed to buying ammunition is opposition.\n**Verification:**\n- ✅ Grammar: 'opposition' fits the grammatical slot in the summary.\n- ✅ Spelling: 'opposition' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-    },
-    "38": {
-      "question_id": 1175952,
-      "question_number": 38,
-      "prompt": "",
-      "user_answer": "B",
-      "correct_answers": [
-        "equipment"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'Besides, **other** ______ **was needed in the war** which demanded a big workforce to support'\nℹ️ *'other [NOUN] was needed' — the blank follows 'other' and comes before the singular verb 'was', so the answer is a singular noun naming what was needed in the war.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"**Other** equipment **involved in war or preparation for war** was also against.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| was needed in the war | \"involved in war or preparation for war\" | **✅** — The passage says \"involved in war or preparation for war\", which means the same as being needed in the war. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> Besides, other **equipment** was needed in the war which demanded a big workforce to support\n✅ **Answer: equipment** — The passage states \"Other equipment involved in war or preparation for war was also against\", so ______ for what was needed in the war is equipment.\n**Verification:**\n- ✅ Grammar: 'equipment' fits the grammatical slot in the summary.\n- ✅ Spelling: 'equipment' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-    },
-    "39": {
-      "question_id": 1175953,
-      "question_number": 39,
-      "prompt": "",
-      "user_answer": "A",
-      "correct_answers": [
-        "workforce"
-      ],
-      "is_correct": false,
-      "explanation": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'which **demanded a big** ______ **to support**'\nℹ️ *'a big [NOUN]' — the blank follows the adjective 'big' and comes before 'to support', so the answer is a noun naming what was demanded.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"Let alone all these **required** **a lot of** workforce **to accomplish**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| demanded | \"required\" | **✅** — The passage uses \"required\", which means the same as demanded in the summary. |\n| to support | \"to accomplish\" | **✅** — The passage uses \"to accomplish\", which has a similar meaning to the summary's phrase about supporting something. |\n| a big | \"a lot of\" | **✅** — The passage says \"a lot of\", which matches the summary's phrase about a big amount of something. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> which demanded a big **workforce** to support\n✅ **Answer: workforce** — The passage states \"Let alone all these required a lot of workforce to accomplish\", so ______ for what was demanded in a big amount is workforce.\n**Verification:**\n- ✅ Grammar: 'workforce' fits the grammatical slot in the summary.\n- ✅ Spelling: 'workforce' is copied exactly from the passage.\n- ✅ Word count: 1 word."
-    },
-    "40": {
-      "question_id": 1175954,
-      "question_number": 40,
-      "prompt": "Which might be the best subtitle for the passage?",
-      "user_answer": "The origin of mass production",
-      "correct_answers": [
-        "The origin of mass production"
-      ],
-      "is_correct": true,
-      "explanation": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Which might be the best subtitle for the passage?\n**Options:**\n- **A** — The origin of **auto assembly line**\n- **B** — A marvelous advancement in **firearm production**\n- **C** — The **origin of mass production**\n- **D** — The significance of producing **interchangeable parts**\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph A, the opening section that introduces the main topic of the entire passage.*\nLocated in **Paragraph A**:\n> \"Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. **Various mass production techniques had been practiced in ancient times**, from ceramic production in the Orient to manufacturing in ancient Greece.\"\nLocated in **Paragraph F**:\n> \"Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods.\"\n> \"Yet it is generally agreed that **modern mass production techniques came into widespread use** through the innovation of an assortment of Americans who substantially improved the ancient techniques.\"\n> \"Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s.\"\n→ *The passage traces mass production from ancient times through various innovators and industries to modern techniques.*\n**Key phrases in the passage:**\n- 'Various mass production techniques had been practiced in ancient times' — the historical beginning of mass production\n- 'modern mass production techniques came into widespread use' — the development of mass production methods\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — The origin of auto assembly line | **❌ Wrong** | The passage discusses auto assembly lines in only two paragraphs (F and G), but covers many other industries and innovators throughout, so auto assembly line is too narrow for the whole passage. |\n| **B** — A marvelous advancement in firearm production | **❌ Wrong** | Firearms appear in several paragraphs as one example among many industries (textiles, clocks, photography, automobiles), so firearm production alone does not capture the passage's full scope. |\n| **C** — The origin of mass production | **✅ Correct** | The passage opens with \"Various mass production techniques had been practiced in ancient times\" and traces the development through multiple innovators and industries, which matches origin of mass production. |\n| **D** — The significance of producing interchangeable parts | **❌ Wrong** | Interchangeable parts is an important technique mentioned in several paragraphs, but the passage covers the broader history and development of mass production across many industries, not just this one aspect. |\n✅ **Answer: C** — The passage begins by tracing mass production from ancient times and follows its development through many innovators and industries, making the origin of mass production the best overall subtitle."
+    {
+      "id": 229472,
+      "passage_number": 3,
+      "type": 2,
+      "title": "Question 40 Choose the correct letter, A, B, C or D.",
+      "content": "",
+      "table_data": null,
+      "question_start": 40,
+      "question_end": 40
     }
-  }
+  ],
+  "passages": [
+    {
+      "id": "passage_1",
+      "passage_number": 1,
+      "title": "Dealing with Different Sleep Patterns",
+      "content": "Dealing with Different Sleep Patterns\nSleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s. In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.\nWithin sleep, two states are recognized – non rapid eye movement (NREM) and rapid eye movement (REM). These alternate cyclically through the night with a cycle time of 90 minutes (50 ~ 60 minutes in the newborn). NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and stages 3 and 4 which are considered deep sleep with high arousal threshold.\nREM is ontogenetically primitive with EEG (electroencephalo-graph) activity closer to wake state, intermittent bursts of REMs and muscle atonia interrupted by phasic burst producing asynchronous twitching. The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and patients act out their dream, often resulting in injury.\nREM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's. Dream content –pleasant or unpleasant –will be remembered on waking from REM sleep but there is often little or no memory of the preceding mental activity on arousals from NREM sleep, even when associated with complex behaviors and autonomic disturbance as occurs in night terrors or sleep walking.\nIn the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset. Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to intense vivid often frightening dreams, similar to that experienced by patients with narcolepsy.\nThe NREM/REM sleep states are interrupted by brief arousals and transient awakenings. The frequency of the arousals may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.\nA basic rest/activity cycle originates in fetal life. The newborn sleeps an equal amount during the day and night, the sleep/wake cycle organized around three to four hourly feeds. By the second month favoring of sleep towards night time occurs and by six months the baby will have about 12 hours of sleep at night in addition to a couple of daytime naps.\nIn general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently, but the difference disappears by the second year. Persistent night awakenings in infants and toddlers usually reflect the child’s inability to self-soothe back to sleep without parental attention and will respond to a well supported behavioral programme.\nThe establishment of a consolidated night sleep pattern in children reflects brain maturation and may be disrupted in children with developmental problems. Even in this group success is possible by persisting with behavioral work, though many paediatricians prescribe melatonin for these children with some success. But as the long-term safety of melatonin remains unknown it should be used as a last resort.\nThere are now good studies looking at short term use of melatonin in sleep wake cycle disorders such as delayed sleep phase syndrome. Its use as a hypnotic should be discouraged, especially in the developing child as there is uncertainty on other cycles, such as menstrual.\nIn addition to the NREM/REM cycles, there is a circadian sleep/wake cycle entrained by intrinsic rhythms –melatonin and body temperature and extrinsic factors –light and social cues such as mealtimes, work times.\nThe pineal hormone melatonin plays a role in entraining the sleep/wake cycle to the light/dark cycle. Melatonin secretion is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin. Blind people may lose this entrainment and develop a free running sleep/wake cycle with progressive advancement of sleep onset time.\nPolymorphism of the circadian clock gene has now been identified with the population divided between morning types (larks) and evening types (owls). Those predisposed to later sleep onset time are susceptible to developing delayed sleep phase syndrome especially during adolescence when sleep requirement increases and there is a tendency towards later time for sleeping and waking.\nIn delayed sleep phase syndrome, sleep onset is delayed to the early hours of the morning with consequent difficulty in waking in time for school/work. Once established, advancing sleep onset time is difficult and requires treatment with appropriately timed melatonin or bright light therapy, or chronotherapy –advancing sleep onset progressively forwards until the desired sleep time is reached.\nIn contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening. Shift workers often struggle to cope with shift patterns as they grow older due to difficulty in re-adjusting their circadian clock. In general, morning bright light exposure is a more powerful synchronizer of the circadian rhythm than melatonin.",
+      "paragraphs": [
+        {
+          "id": "210342_1",
+          "text": "Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s. In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject."
+        },
+        {
+          "id": "210342_2",
+          "text": "Within sleep, two states are recognized – non rapid eye movement (NREM) and rapid eye movement (REM). These alternate cyclically through the night with a cycle time of 90 minutes (50 ~ 60 minutes in the newborn). NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and stages 3 and 4 which are considered deep sleep with high arousal threshold."
+        },
+        {
+          "id": "210342_3",
+          "text": "REM is ontogenetically primitive with EEG (electroencephalo-graph) activity closer to wake state, intermittent bursts of REMs and muscle atonia interrupted by phasic burst producing asynchronous twitching. The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and patients act out their dream, often resulting in injury."
+        },
+        {
+          "id": "210342_4",
+          "text": "REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's. Dream content –pleasant or unpleasant –will be remembered on waking from REM sleep but there is often little or no memory of the preceding mental activity on arousals from NREM sleep, even when associated with complex behaviors and autonomic disturbance as occurs in night terrors or sleep walking."
+        },
+        {
+          "id": "210342_5",
+          "text": "In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset. Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to intense vivid often frightening dreams, similar to that experienced by patients with narcolepsy."
+        },
+        {
+          "id": "210342_6",
+          "text": "The NREM/REM sleep states are interrupted by brief arousals and transient awakenings. The frequency of the arousals may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy."
+        },
+        {
+          "id": "210342_7",
+          "text": "A basic rest/activity cycle originates in fetal life. The newborn sleeps an equal amount during the day and night, the sleep/wake cycle organized around three to four hourly feeds. By the second month favoring of sleep towards night time occurs and by six months the baby will have about 12 hours of sleep at night in addition to a couple of daytime naps."
+        },
+        {
+          "id": "210342_8",
+          "text": "In general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently, but the difference disappears by the second year. Persistent night awakenings in infants and toddlers usually reflect the child’s inability to self-soothe back to sleep without parental attention and will respond to a well supported behavioral programme."
+        },
+        {
+          "id": "210342_9",
+          "text": "The establishment of a consolidated night sleep pattern in children reflects brain maturation and may be disrupted in children with developmental problems. Even in this group success is possible by persisting with behavioral work, though many paediatricians prescribe melatonin for these children with some success. But as the long-term safety of melatonin remains unknown it should be used as a last resort."
+        },
+        {
+          "id": "210342_10",
+          "text": "There are now good studies looking at short term use of melatonin in sleep wake cycle disorders such as delayed sleep phase syndrome. Its use as a hypnotic should be discouraged, especially in the developing child as there is uncertainty on other cycles, such as menstrual."
+        },
+        {
+          "id": "210342_11",
+          "text": "In addition to the NREM/REM cycles, there is a circadian sleep/wake cycle entrained by intrinsic rhythms –melatonin and body temperature and extrinsic factors –light and social cues such as mealtimes, work times."
+        },
+        {
+          "id": "210342_12",
+          "text": "The pineal hormone melatonin plays a role in entraining the sleep/wake cycle to the light/dark cycle. Melatonin secretion is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin. Blind people may lose this entrainment and develop a free running sleep/wake cycle with progressive advancement of sleep onset time."
+        },
+        {
+          "id": "210342_13",
+          "text": "Polymorphism of the circadian clock gene has now been identified with the population divided between morning types (larks) and evening types (owls). Those predisposed to later sleep onset time are susceptible to developing delayed sleep phase syndrome especially during adolescence when sleep requirement increases and there is a tendency towards later time for sleeping and waking."
+        },
+        {
+          "id": "210342_14",
+          "text": "In delayed sleep phase syndrome, sleep onset is delayed to the early hours of the morning with consequent difficulty in waking in time for school/work. Once established, advancing sleep onset time is difficult and requires treatment with appropriately timed melatonin or bright light therapy, or chronotherapy –advancing sleep onset progressively forwards until the desired sleep time is reached."
+        },
+        {
+          "id": "210342_15",
+          "text": "In contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening. Shift workers often struggle to cope with shift patterns as they grow older due to difficulty in re-adjusting their circadian clock. In general, morning bright light exposure is a more powerful synchronizer of the circadian rhythm than melatonin."
+        }
+      ]
+    },
+    {
+      "id": "passage_2",
+      "passage_number": 2,
+      "title": "From Novices to Experts",
+      "content": "From Novices to Experts\nExpertise is commitment coupled with creativity. Specifically, it is the commitment of time, energy, and resources to a relatively narrow field of study and the creative energy necessary to generate new knowledge in that field. It takes a considerable amount of time and regular exposure to a large number of cases to become an expert.\nAn individual enters a field of study as a novice. The novice needs to learn the guiding principles and rules –the heuristics and constraints –of a given task in order to perform that task. Concurrently, the novice needs to be exposed to specific cases, or instances, that test the boundaries of such heuristics. Generally, a novice will find a mentor to guide her through the process of acquiring new knowledge. A fairly simple example would be someone learning to play chess. The novice chess player seeks a mentor to teach her the object of the game, the number of spaces, the names of the pieces, the function of each piece, how each piece is moved, and the necessary conditions for winning or losing the game.\nIn time, and with much practice, the novice begins to recognize patterns of behavior within cases and, thus, becomes a journeyman. With more practice and exposure to increasingly complex cases, the journeyman finds patterns not only within cases but also between cases. More importantly, the journeyman learns that these patterns often repeat themselves over time. The journeyman still maintains regular contact with a mentor to solve specific problems and learn more complex strategies. Returning to the example of the chess player, the individual begins to learn patterns of opening moves, offensive and defensive game-playing strategies, and patterns of victory and defeat.\nWhen a journeyman starts to make and test hypotheses about future behavior based on past experiences, she begins the next transition. Once she creatively generates knowledge, rather than simply matching superficial patterns, she becomes an expert. At this point, she is confident in her knowledge and no longer needs a mentor as a guide –she becomes responsible for her own knowledge.\nIn the chess example, once a journeyman begins competing against experts, makes predictions based on patterns, and tests those predictions against actual behavior, she is generating new knowledge and a deeper understanding of the game. She is creating her own cases rather than relying on the cases of others.\nThe chess example is a rather short description of an apprenticeship model. Apprenticeship may seem like a restrictive 18th century mode of education, but it is still a standard method of training for many complex tasks. Academic doctoral programs are based on an apprenticeship model, as are fields like law, music, engineering, and medicine. Graduate students enter fields of study, find mentors, and begin the long process of becoming independent experts and generating new knowledge in their respective domains.\nTo some, playing chess may appear rather trivial when compared, for example, with making medical diagnoses, but both are highly complex tasks. Chess has a well-defined set of heuristics, whereas medical diagnoses seem more open ended and variable. In both instances, however, there are tens, if not hundreds, of thousands of potential patterns. A research study discovered that chess masters had spent between 10,000 and 20,000 hours, or more than ten years, studying and playing chess. On average, a chess master stores 50,000 different chess patterns in long-term memory.\nSimilarly, a diagnostic radiologist spends eight years in full time medical training – four years of medical school and four years of residency –before she is qualified to take a national board exam and begin independent practice. According to a 1988 study, the average diagnostic radiology resident sees forty cases per day, or around 12,000 cases per year. At the end of a residency, a diagnostic radiologist has stored, on average, 48,000 cases in long-term memory.\nPsychologists and cognitive scientists agree that the time it takes to become an expert depends on the complexity of the task and the number of cases, or patterns, to which an individual is exposed. The more complex the task, the longer it takes to build expertise, or, more accurately, the longer it takes to experience and store a large number of cases or patterns.\nExperts are individuals with specialized knowledge suited to perform the specific tasks for which they are trained, but that expertise does not necessarily transfer to other domains. A master chess player cannot apply chess expertise in a game of poker –although both chess and poker are games, a chess master who has never played poker is a novice poker player. Similarly, a biochemist is not qualified to perform neurosurgery, even though both biochemists and neurosurgeons study human physiology. In other words, the more complex a task is, the more specialized and exclusive is the knowledge required to perform that task.\nAn expert perceives meaningful patterns in her domain better than non-experts. Where a novice perceives random or disconnected data points, an expert connects regular patterns within and between cases. This ability to identify patterns is not an innate perceptual skill; rather it reflects the organization of knowledge after exposure to and experience with thousands of cases.\nExperts have a deeper understanding of their domains than novices do, and utilize higher-order principles to solve problems. A novice, for example, might group objects together by color or size, whereas an expert would group the same objects according to their function or utility. Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices.  Experts recognize variables that have the largest influence on a particular problem and focus their attention on those variables.\nExperts have better domain-specific short-term and long-term memory than novices do. Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving. Interestingly, experts go about solving problems differently than novices. Experts spend more time thinking about a problem to fully understand it at the beginning of a task than do novices, who immediately seek to find a solution. Experts use their knowledge of previous cases as context for creating mental models to solve given problems.\nBetter at self-monitoring than novices, experts are more aware of instances where they have committed errors or failed to understand a problem. Experts check their solutions more often than novices and recognize when they are missing information necessary for solving a problem. Experts are aware of the limits of their domain knowledge and apply their domain’s heuristics to solve problems that fall outside of their experience base.",
+      "paragraphs": [
+        {
+          "id": "210344_1",
+          "text": "Expertise is commitment coupled with creativity. Specifically, it is the commitment of time, energy, and resources to a relatively narrow field of study and the creative energy necessary to generate new knowledge in that field. It takes a considerable amount of time and regular exposure to a large number of cases to become an expert."
+        },
+        {
+          "id": "210344_2",
+          "text": "An individual enters a field of study as a novice. The novice needs to learn the guiding principles and rules –the heuristics and constraints –of a given task in order to perform that task. Concurrently, the novice needs to be exposed to specific cases, or instances, that test the boundaries of such heuristics. Generally, a novice will find a mentor to guide her through the process of acquiring new knowledge. A fairly simple example would be someone learning to play chess. The novice chess player seeks a mentor to teach her the object of the game, the number of spaces, the names of the pieces, the function of each piece, how each piece is moved, and the necessary conditions for winning or losing the game."
+        },
+        {
+          "id": "210344_3",
+          "text": "In time, and with much practice, the novice begins to recognize patterns of behavior within cases and, thus, becomes a journeyman. With more practice and exposure to increasingly complex cases, the journeyman finds patterns not only within cases but also between cases. More importantly, the journeyman learns that these patterns often repeat themselves over time. The journeyman still maintains regular contact with a mentor to solve specific problems and learn more complex strategies. Returning to the example of the chess player, the individual begins to learn patterns of opening moves, offensive and defensive game-playing strategies, and patterns of victory and defeat."
+        },
+        {
+          "id": "210344_4",
+          "text": "When a journeyman starts to make and test hypotheses about future behavior based on past experiences, she begins the next transition. Once she creatively generates knowledge, rather than simply matching superficial patterns, she becomes an expert. At this point, she is confident in her knowledge and no longer needs a mentor as a guide –she becomes responsible for her own knowledge."
+        },
+        {
+          "id": "210344_5",
+          "text": "In the chess example, once a journeyman begins competing against experts, makes predictions based on patterns, and tests those predictions against actual behavior, she is generating new knowledge and a deeper understanding of the game. She is creating her own cases rather than relying on the cases of others."
+        },
+        {
+          "id": "210344_6",
+          "text": "The chess example is a rather short description of an apprenticeship model. Apprenticeship may seem like a restrictive 18th century mode of education, but it is still a standard method of training for many complex tasks. Academic doctoral programs are based on an apprenticeship model, as are fields like law, music, engineering, and medicine. Graduate students enter fields of study, find mentors, and begin the long process of becoming independent experts and generating new knowledge in their respective domains."
+        },
+        {
+          "id": "210344_7",
+          "text": "To some, playing chess may appear rather trivial when compared, for example, with making medical diagnoses, but both are highly complex tasks. Chess has a well-defined set of heuristics, whereas medical diagnoses seem more open ended and variable. In both instances, however, there are tens, if not hundreds, of thousands of potential patterns. A research study discovered that chess masters had spent between 10,000 and 20,000 hours, or more than ten years, studying and playing chess. On average, a chess master stores 50,000 different chess patterns in long-term memory."
+        },
+        {
+          "id": "210344_8",
+          "text": "Similarly, a diagnostic radiologist spends eight years in full time medical training – four years of medical school and four years of residency –before she is qualified to take a national board exam and begin independent practice. According to a 1988 study, the average diagnostic radiology resident sees forty cases per day, or around 12,000 cases per year. At the end of a residency, a diagnostic radiologist has stored, on average, 48,000 cases in long-term memory."
+        },
+        {
+          "id": "210344_9",
+          "text": "Psychologists and cognitive scientists agree that the time it takes to become an expert depends on the complexity of the task and the number of cases, or patterns, to which an individual is exposed. The more complex the task, the longer it takes to build expertise, or, more accurately, the longer it takes to experience and store a large number of cases or patterns."
+        },
+        {
+          "id": "210344_10",
+          "text": "Experts are individuals with specialized knowledge suited to perform the specific tasks for which they are trained, but that expertise does not necessarily transfer to other domains. A master chess player cannot apply chess expertise in a game of poker –although both chess and poker are games, a chess master who has never played poker is a novice poker player. Similarly, a biochemist is not qualified to perform neurosurgery, even though both biochemists and neurosurgeons study human physiology. In other words, the more complex a task is, the more specialized and exclusive is the knowledge required to perform that task."
+        },
+        {
+          "id": "210344_11",
+          "text": "An expert perceives meaningful patterns in her domain better than non-experts. Where a novice perceives random or disconnected data points, an expert connects regular patterns within and between cases. This ability to identify patterns is not an innate perceptual skill; rather it reflects the organization of knowledge after exposure to and experience with thousands of cases."
+        },
+        {
+          "id": "210344_12",
+          "text": "Experts have a deeper understanding of their domains than novices do, and utilize higher-order principles to solve problems. A novice, for example, might group objects together by color or size, whereas an expert would group the same objects according to their function or utility. Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices. Experts recognize variables that have the largest influence on a particular problem and focus their attention on those variables."
+        },
+        {
+          "id": "210344_13",
+          "text": "Experts have better domain-specific short-term and long-term memory than novices do. Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving. Interestingly, experts go about solving problems differently than novices. Experts spend more time thinking about a problem to fully understand it at the beginning of a task than do novices, who immediately seek to find a solution. Experts use their knowledge of previous cases as context for creating mental models to solve given problems."
+        },
+        {
+          "id": "210344_14",
+          "text": "Better at self-monitoring than novices, experts are more aware of instances where they have committed errors or failed to understand a problem. Experts check their solutions more often than novices and recognize when they are missing information necessary for solving a problem. Experts are aware of the limits of their domain knowledge and apply their domain’s heuristics to solve problems that fall outside of their experience base."
+        }
+      ]
+    },
+    {
+      "id": "passage_3",
+      "passage_number": 3,
+      "title": "MASS PRODUCTION",
+      "content": "MASS PRODUCTION\nA\nDespite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. Various mass production techniques had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece. The British were most likely the first modern economy to adapt water-powered, then steam-powered, machinery to industrial production methods, most notably in the textiles industry. Yet it is generally agreed that modern mass production techniques came into widespread use through the innovation of an assortment of Americans who substantially improved the ancient techniques. Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s.\nB\nIn the late 18th century, French General Jean-Baptiste Vaquette de Gribeauval, promoted standardized weapons, which became known as the Systeme Gribeauval after it was issued as a royal order in 1765. (Its focus at the time was artillery more than muskets or handguns.) The crucial step toward interchangeability in metal parts was taken by Simeon North, working only a few miles from Eli Terry. North created one of the world‘s first true milling machines to do metal shaping that previously was done by hand with a file. Diana Muir believes that North‘s milling machine was online around 1816. While Whitney was certainly an innovator of the American System, others maintain that Whitney‘s parts were not truly interchangeable and that credit should more appropriately go to John Hall, the New England gunsmith who built Muskets with flintlock for the United States government at the Harper‘s Ferry armory. Flintlock, as it was implied, meant people used it to trigger the gun. Hall, born in Maine in 1769, built many of the machine tools needed for precision manufacturing and instituted a system that employed accurate gauges for measuring every aspect and piece of work his factory produced. Consequently, he achieved a much higher level of interchangeability and precision than did Whitney.\nC\nStill others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade. In Britain, and somewhat simultaneously with Whitney, the Frenchman Marc Isambard Brunei adapted steam-driven machinery and assembly-line techniques to the production of 130,000 pulleys for the marine industry in just one year. Brunei‘s achievements were made possible by the design and manufacture of several machine tools by the noted British inventor, Henry Maudslay.\nD\nMaudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper. It is generally conceded that the British machine tool industry was far more advanced than that of the Americans in these early stages of mass production development. Simultaneous with Whitney‘s innovations in the United States were those of Oliver Evans, whose many inventions in the flour milling process led to an automated mill that could be run by a single miller.\nE\nSamuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms. Colt and Root wished to advance the machining of parts so that even the most minute of tasks could be performed with the precision that they believed only machines could achieve. In these endeavors, Colt and Root were largely successful.\nF\nEli Terry also adapted mass production methods to clockmaking in the early 1800s, and George Eastman made innovations to assembly-line techniques in the manufacture and the developing of photographic film later in the century. Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods. Henry Ford had his workers standing in one place while parts were brought by on conveyor belts, and the car itself moved past the workers on another conveyor belt. Bodies were built on one line and the chassis and drivetrain were built on another. When both were essentially complete, the body was lowered onto the chassis for final assembly. Around the same time, production of guns also entered the assembly line.\nG\nDespite the fact that he was not the first, Ford can certainly be viewed as the most successful of these early innovators due to one simple fact – Ford envisioned and fostered mass consumption as a corollary to mass production. Ford‘s techniques lessened the time needed to build a Model T from about twelve and a half hours to an hour and a half; the price was reduced as well–from $850 for the first Model T in 1908, to only $290 in 1927 after assembly-line techniques were introduced in 1913. The automobile was no longer a luxury for the rich, the Model T fast became a necessity for nearly everyone. Indeed, Ford sold almost half of all of the automobiles bought worldwide from 1908 to 1927–the years of Model T production. Apart from this, people showed different views over whether guns should be involved in mass production. The expense opposition to ammunition was the first one to trigger the debate. Other equipment involved in war or preparation for war was also against. Let alone all these required a lot of workforce to accomplish.\nH\nAssembly-line techniques also required that the manual skills necessary to build a product be altered. Previous to mass production techniques, as seen in the early manufacture of firearms, each workman was responsible for the complete manufacture and assembly of all of the component parts needed to build any single product. Mass production and parts interchangeability demanded that all parts be identical and the individual worker no longer be allowed the luxury of building a complete product based on his personal skills and inclinations. Machines came to dictate the production process, and each part–once created individually by hand–was now duplicated by a machine process that was merely guided by human control. The craft tradition, dominant in human endeavor for centuries, was abandoned in favor of a process that created parts by machine. Furthermore, assembly of these machine-made parts was divided into a series of small repetitive steps that required much less skill than traditional craftsmanship. Consequently, modern mass production techniques, while certainly increasing the efficiency of the manufacturing process and bringing industrial products within the reach of virtually all of humanity, apart from manufacturing ballpoint pens, making of gun is also part of it. But safety is also a factor to consider. People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.",
+      "paragraphs": [
+        {
+          "id": "210346_1",
+          "text": "Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. Various mass production techniques had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece. The British were most likely the first modern economy to adapt water-powered, then steam-powered, machinery to industrial production methods, most notably in the textiles industry. Yet it is generally agreed that modern mass production techniques came into widespread use through the innovation of an assortment of Americans who substantially improved the ancient techniques. Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s."
+        },
+        {
+          "id": "210346_2",
+          "text": "In the late 18th century, French General Jean-Baptiste Vaquette de Gribeauval, promoted standardized weapons, which became known as the Systeme Gribeauval after it was issued as a royal order in 1765. (Its focus at the time was artillery more than muskets or handguns.) The crucial step toward interchangeability in metal parts was taken by Simeon North, working only a few miles from Eli Terry. North created one of the world‘s first true milling machines to do metal shaping that previously was done by hand with a file. Diana Muir believes that North‘s milling machine was online around 1816. While Whitney was certainly an innovator of the American System, others maintain that Whitney‘s parts were not truly interchangeable and that credit should more appropriately go to John Hall, the New England gunsmith who built Muskets with flintlock for the United States government at the Harper‘s Ferry armory. Flintlock, as it was implied, meant people used it to trigger the gun. Hall, born in Maine in 1769, built many of the machine tools needed for precision manufacturing and instituted a system that employed accurate gauges for measuring every aspect and piece of work his factory produced. Consequently, he achieved a much higher level of interchangeability and precision than did Whitney."
+        },
+        {
+          "id": "210346_3",
+          "text": "Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade. In Britain, and somewhat simultaneously with Whitney, the Frenchman Marc Isambard Brunei adapted steam-driven machinery and assembly-line techniques to the production of 130,000 pulleys for the marine industry in just one year. Brunei‘s achievements were made possible by the design and manufacture of several machine tools by the noted British inventor, Henry Maudslay."
+        },
+        {
+          "id": "210346_4",
+          "text": "Maudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper. It is generally conceded that the British machine tool industry was far more advanced than that of the Americans in these early stages of mass production development. Simultaneous with Whitney‘s innovations in the United States were those of Oliver Evans, whose many inventions in the flour milling process led to an automated mill that could be run by a single miller."
+        },
+        {
+          "id": "210346_5",
+          "text": "Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms. Colt and Root wished to advance the machining of parts so that even the most minute of tasks could be performed with the precision that they believed only machines could achieve. In these endeavors, Colt and Root were largely successful."
+        },
+        {
+          "id": "210346_6",
+          "text": "Eli Terry also adapted mass production methods to clockmaking in the early 1800s, and George Eastman made innovations to assembly-line techniques in the manufacture and the developing of photographic film later in the century. Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods. Henry Ford had his workers standing in one place while parts were brought by on conveyor belts, and the car itself moved past the workers on another conveyor belt. Bodies were built on one line and the chassis and drivetrain were built on another. When both were essentially complete, the body was lowered onto the chassis for final assembly. Around the same time, production of guns also entered the assembly line."
+        },
+        {
+          "id": "210346_7",
+          "text": "Despite the fact that he was not the first, Ford can certainly be viewed as the most successful of these early innovators due to one simple fact – Ford envisioned and fostered mass consumption as a corollary to mass production. Ford‘s techniques lessened the time needed to build a Model T from about twelve and a half hours to an hour and a half; the price was reduced as well–from $850 for the first Model T in 1908, to only $290 in 1927 after assembly-line techniques were introduced in 1913. The automobile was no longer a luxury for the rich, the Model T fast became a necessity for nearly everyone. Indeed, Ford sold almost half of all of the automobiles bought worldwide from 1908 to 1927–the years of Model T production. Apart from this, people showed different views over whether guns should be involved in mass production. The expense opposition to ammunition was the first one to trigger the debate. Other equipment involved in war or preparation for war was also against. Let alone all these required a lot of workforce to accomplish."
+        },
+        {
+          "id": "210346_8",
+          "text": "Assembly-line techniques also required that the manual skills necessary to build a product be altered. Previous to mass production techniques, as seen in the early manufacture of firearms, each workman was responsible for the complete manufacture and assembly of all of the component parts needed to build any single product. Mass production and parts interchangeability demanded that all parts be identical and the individual worker no longer be allowed the luxury of building a complete product based on his personal skills and inclinations. Machines came to dictate the production process, and each part–once created individually by hand–was now duplicated by a machine process that was merely guided by human control. The craft tradition, dominant in human endeavor for centuries, was abandoned in favor of a process that created parts by machine. Furthermore, assembly of these machine-made parts was divided into a series of small repetitive steps that required much less skill than traditional craftsmanship. Consequently, modern mass production techniques, while certainly increasing the efficiency of the manufacturing process and bringing industrial products within the reach of virtually all of humanity, apart from manufacturing ballpoint pens, making of gun is also part of it. But safety is also a factor to consider. People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": 1175915,
+      "question_number": 1,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "Growth interest in sleeping disorder studies caused a growth in the number of centers for researching sleep medicines.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "True",
+      "correct_answer": "True",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to cause-and-effect relationships and numbers._\n**Statement:**\n> Growth **interest in sleeping disorder studies** **caused a growth** in the number of centers for researching sleep medicines.\n**Keywords:**\n- interest in sleeping disorder studies\n- caused a growth\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 1, the section describing the development of sleep medicine in the UK. The passage explains that in the last decade a number of centers have sprouted, often led by chest physicians and ENT surgeons with an interest in obstructive sleep apnoea._\nLocated in **Paragraph 1**:\n> \"**In the last decade a number of centers have sprouted**, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons **with an interest in obstructive sleep apnoea**, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same ideas about interest, growth, and centers._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| interest in sleeping disorder studies | \"with an interest in obstructive sleep apnoea\" | **✅** — The passage mentions physicians and surgeons \"with an interest in obstructive sleep apnoea\", which is a type of sleeping disorder. |\n| caused a growth | \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\" | **✅** — The passage says \"centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea\", showing that interest led to growth. |\n→ *All keywords match the passage, which confirms that interest in sleep disorders led to more centers being established.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage confirms that \"a number of centers have sprouted\" in the last decade, led by physicians \"with an interest in obstructive sleep apnoea\", which directly supports the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
+      "evidence_text": "In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non –respiratory aspect of this neglected subject.",
+      "evidence_source_id": "210342_1",
+      "keywords_mapping": [
+        {
+          "original_text": "with an interest in obstructive sleep apnoea",
+          "paraphrased_text": "interest in sleeping disorder studies",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons",
+          "paraphrased_text": "caused a growth in the number of centers",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175916,
+      "question_number": 2,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "People are often injured when dreaming aggressive scenes or sleepwalking.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "False",
+      "correct_answer": "Not Given",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'often' and multiple conditions joined by 'or'._\n**Statement:**\n> People are **often injured** when **dreaming aggressive scenes** or **sleepwalking**.\n**Keywords:**\n- often injured\n- dreaming aggressive scenes\n- sleepwalking\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 3, the section about REM sleep and dreams. The passage explains that in REM behavior disorder, violent dream content can lead to patients acting out their dreams, often resulting in injury._\nLocated in **Paragraph 3**:\n> \"The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when **dreams content becomes violent** and patients act out their dream, **often resulting in injury**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions injury from violent dreams but does not say anything about sleepwalking causing injury._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| often injured | \"often resulting in injury\" | **✅** — The passage uses the same phrase \"often resulting in injury\" when describing REM behavior disorder. |\n| dreaming aggressive scenes | \"dreams content becomes violent\" | **⚠️** — The passage says \"dreams content becomes violent\", which matches the idea of aggressive scenes, but only in the context of REM behavior disorder. |\n| sleepwalking | _(not in passage)_ | **⚠️** — The passage does not mention whether sleepwalking causes injury; it only discusses injury from acting out violent dreams. |\n→ *The passage confirms injury from violent dreams but does not provide information about injury from sleepwalking.*\n### Step 4 — Decide the answer\n_The passage confirms injury from violent dreams but does not mention sleepwalking in this context, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that \"often resulting in injury\" occurs when patients act out violent dreams in REM behavior disorder, but it does not say whether sleepwalking causes injury.\n⚠️ *The passage mentions sleepwalking in a different context but does not link it to injury, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
+      "evidence_text": "The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and patients act out their dream, often resulting in injury.",
+      "evidence_source_id": "210342_3",
+      "keywords_mapping": [
+        {
+          "original_text": "often resulting in injury",
+          "paraphrased_text": "often injured",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "dreams content becomes violent",
+          "paraphrased_text": "dreaming aggressive scenes",
+          "mapping_type": "partial_match"
+        }
+      ]
+    },
+    {
+      "id": 1175917,
+      "question_number": 3,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "Parkinsons is scientifically proved to be the only result of REM disorders.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Not Given",
+      "correct_answer": "Not Given",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially limiting words like 'only' and 'scientifically proved'._\n**Statement:**\n> **Parkinsons** is **scientifically proved** to be **the only result** of **REM disorders**.\n**Keywords:**\n- Parkinsons\n- scientifically proved\n- the only result\n- REM disorders\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 4, the section about REM behavior disorder. The passage says that REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's._\nLocated in **Paragraph 4**:\n> \"**REM behavior disorder** can be a precursor of neurodegenerative disease **including Parkinson's**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions Parkinson's but does not say it is the only result or that this is scientifically proved._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| scientifically proved | _(not in passage)_ | **⚠️** — The passage does not mention scientific proof; it simply states that REM behavior disorder can be a precursor. |\n| the only result | \"including Parkinson's\" | **⚠️** — The passage says \"including Parkinson's\", which suggests there are other diseases, not that Parkinson's is the only result. |\n| REM disorders | \"REM behavior disorder\" | **✅** — The passage uses the exact term \"REM behavior disorder\" when discussing this condition. |\n→ *The passage mentions Parkinson's as one possible result but does not confirm it is the only result or that this is scientifically proved.*\n### Step 4 — Decide the answer\n_The passage does not provide information about scientific proof or whether Parkinson's is the only result, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage states that REM behavior disorder can be a precursor of neurodegenerative disease \"including Parkinson's\", but it does not say whether Parkinson's is the only result or whether this is scientifically proved.\n⚠️ *The word 'including' suggests there are other diseases, but the passage does not explicitly state whether Parkinson's is the only result, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
+      "evidence_text": "REM behavior disorder can be a precursor of neurodegenerative disease including Parkinson's.",
+      "evidence_source_id": "210342_4",
+      "keywords_mapping": [
+        {
+          "original_text": "Parkinson's",
+          "paraphrased_text": "Parkinsons",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "including Parkinson's",
+          "paraphrased_text": "the only result",
+          "mapping_type": "partial_match"
+        },
+        {
+          "original_text": "REM behavior disorder",
+          "paraphrased_text": "REM disorders",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175918,
+      "question_number": 4,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "REM sleep counts for less proportion of total sleep time for grownups than newborns.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "True",
+      "correct_answer": "True",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to comparisons between two groups and percentages._\n**Statement:**\n> **REM sleep** counts for **less proportion** of total sleep time for **grownups** than **newborns**.\n**Keywords:**\n- REM sleep\n- less proportion\n- grownups\n- newborns\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep across different ages. The passage explains that in newborns, 50 percent of total sleep time is REM sleep, progressively shrinking to 25 percent in adults._\nLocated in **Paragraph 5**:\n> \"**In the newborn**, **50 percent of total sleep time** is occupied by **REM sleep**, **progressively shrinking to 25 percent in the adult**, the first block of REM sleep occurring about 90 minutes after sleep onset.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage provides specific percentages showing that adults have a smaller proportion of REM sleep than newborns._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| less proportion | \"progressively shrinking to 25 percent in the adult\" | **✅** — The passage says REM sleep is \"progressively shrinking to 25 percent in the adult\", which means a smaller proportion. |\n| grownups | \"25 percent in the adult\" | **✅** — The passage refers to \"25 percent in the adult\", which is another way of saying grownups. |\n| newborns | \"In the newborn\" | **✅** — The passage uses the phrase \"In the newborn\" when describing the 50 percent figure. |\n→ *All keywords match the passage, which confirms that adults have a smaller proportion of REM sleep compared to newborns.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, confirming that adults have less REM sleep than newborns, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult\", which directly confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
+      "evidence_text": "In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset.",
+      "evidence_source_id": "210342_5",
+      "keywords_mapping": [
+        {
+          "original_text": "REM sleep",
+          "paraphrased_text": "REM sleep",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "progressively shrinking to 25 percent in the adult",
+          "paraphrased_text": "less proportion",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "50 percent of total sleep time",
+          "paraphrased_text": "proportion of total sleep time",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "in the adult",
+          "paraphrased_text": "grownups",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "In the newborn",
+          "paraphrased_text": "newborns",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175919,
+      "question_number": 5,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "Frightening dreams are considered irrelevant to alcohol and drugs.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "False",
+      "correct_answer": "False",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for words like 'irrelevant' that indicate no connection._\n**Statement:**\n> **Frightening dreams** are considered **irrelevant** to **alcohol and drugs**.\n**Keywords:**\n- Frightening dreams\n- irrelevant\n- alcohol and drugs\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 5, the section about REM sleep and substances. The passage explains that abrupt withdrawal of alcohol and drugs can increase REM sleep, leading to intense vivid often frightening dreams._\nLocated in **Paragraph 5**:\n> \"**Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs** **can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to** **intense vivid often frightening dreams**, similar to that experienced by patients with narcolepsy.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage shows a clear connection between alcohol, drugs, and frightening dreams, which contradicts the claim that they are irrelevant._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Frightening dreams | \"intense vivid often frightening dreams\" | **❌** — The passage mentions \"intense vivid often frightening dreams\", which matches the idea of frightening dreams. |\n| irrelevant | \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" | **❌** — The passage says withdrawal of alcohol and drugs \"can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to\" frightening dreams, showing they are relevant, not irrelevant. |\n| alcohol and drugs | \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" | **❌** — The passage states \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to frightening dreams, showing a direct connection. |\n→ *The passage shows a clear connection between alcohol, drugs, and frightening dreams, which directly contradicts the claim that they are irrelevant.*\n### Step 4 — Decide the answer\n_The passage shows that alcohol and drugs are connected to frightening dreams, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs\" can lead to \"intense vivid often frightening dreams\", which contradicts the claim that they are irrelevant.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._",
+      "evidence_text": "Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to intense vivid often frightening dreams, similar to that experienced by patients with narcolepsy.",
+      "evidence_source_id": "210342_5",
+      "keywords_mapping": [
+        {
+          "original_text": "intense vivid often frightening dreams",
+          "paraphrased_text": "Frightening dreams",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "can cause REM sleep to occur at sleep onset. This can also increase total REM sleep, leading to",
+          "paraphrased_text": "irrelevant",
+          "mapping_type": "contrast"
+        },
+        {
+          "original_text": "Abrupt withdrawal of alcohol and many centrally acting recreational and non-recreational drugs",
+          "paraphrased_text": "alcohol and drugs",
+          "mapping_type": "contrast"
+        }
+      ]
+    },
+    {
+      "id": 1175920,
+      "question_number": 6,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "According to the author, babies would sleep more at night from the second month of their births.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "False",
+      "correct_answer": "True",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, paying attention to time markers and comparisons._\n**Statement:**\n> According to the author, **babies** would **sleep more at night** **from the second month** of their births.\n**Keywords:**\n- babies\n- sleep more at night\n- from the second month\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 7, the section about infant sleep patterns. The passage explains that by the second month, favoring of sleep towards night time occurs._\nLocated in **Paragraph 7**:\n> \"**By the second month** **favoring of sleep towards night time** occurs and by six months **the baby** will have about 12 hours of sleep at night in addition to a couple of daytime naps.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words to express the same idea about babies sleeping more at night from the second month._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| babies | \"the baby\" | **✅** — The passage refers to \"the baby\", which is the same as babies in general. |\n| sleep more at night | \"favoring of sleep towards night time\" | **✅** — The passage says \"favoring of sleep towards night time\" occurs, which means sleeping more at night. |\n| from the second month | \"By the second month\" | **✅** — The passage uses the exact phrase \"By the second month\" when describing this change. |\n→ *All keywords match the passage, which confirms that babies sleep more at night from the second month.*\n### Step 4 — Decide the answer\n_All the keywords match the passage information, so the answer is TRUE._\n✅ **Answer: A. True** — The passage states that \"By the second month favoring of sleep towards night time occurs\", which directly supports the statement that babies sleep more at night from the second month.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is TRUE._",
+      "evidence_text": "By the second month favoring of sleep towards night time occurs and by six months the baby will have about 12 hours of sleep at night in addition to a couple of daytime naps.",
+      "evidence_source_id": "210342_7",
+      "keywords_mapping": [
+        {
+          "original_text": "the baby",
+          "paraphrased_text": "babies",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "favoring of sleep towards night time",
+          "paraphrased_text": "sleep more at night",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "By the second month",
+          "paraphrased_text": "from the second month",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175921,
+      "question_number": 7,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "During the night, children born prematurely wake as frequently as breast fed babies.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Not Given",
+      "correct_answer": "False",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, especially comparisons like 'as frequently as'._\n**Statement:**\n> During the night, **children born prematurely** **wake** **as frequently as** **breast fed babies**.\n**Keywords:**\n- children born prematurely\n- wake\n- as frequently as\n- breast fed babies\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 8, the section about premature and breast-fed babies. The passage explains that children born prematurely tend to be awake more at night in the first year and breast-fed babies wake more frequently._\nLocated in **Paragraph 8**:\n> \"In general, **children born prematurely** **have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently**, but the difference disappears by the second year.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage describes different waking patterns for the two groups, not the same frequency._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| wake | \"awake more at night\" | **❌** — The passage says premature children \"awake more at night\", which is different from waking frequently like breast-fed babies. |\n| as frequently as | \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\" | **❌** — The passage states \"have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns, not the same frequency. |\n| breast fed babies | \"breast-fed babies wake more frequently\" | **❌** — The passage mentions \"breast-fed babies wake more frequently\", which describes a different pattern from premature babies. |\n→ *The passage describes different waking patterns for premature and breast-fed babies, which contradicts the claim that they wake as frequently.*\n### Step 4 — Decide the answer\n_The passage shows that the two groups have different waking patterns, which contradicts the statement, so the answer is FALSE._\n✅ **Answer: B. False** — The passage states that \"children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently\", showing different patterns rather than the same frequency.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is FALSE._",
+      "evidence_text": "In general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently, but the difference disappears by the second year.",
+      "evidence_source_id": "210342_8",
+      "keywords_mapping": [
+        {
+          "original_text": "children born prematurely",
+          "paraphrased_text": "children born prematurely",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "awake more at night",
+          "paraphrased_text": "wake",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "the difference disappears by the second year",
+          "paraphrased_text": "as frequently as",
+          "mapping_type": "contrast"
+        },
+        {
+          "original_text": "breast-fed babies",
+          "paraphrased_text": "breast fed babies",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175922,
+      "question_number": 8,
+      "passage_number": 1,
+      "question_type": 21,
+      "prompt": "Children require more deep sleep and less disruption during their sleep in the first half of the night.",
+      "options": [
+        {
+          "key": "A",
+          "text": "True"
+        },
+        {
+          "key": "B",
+          "text": "False"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "False",
+      "correct_answer": "Not Given",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords, watching for specific groups like 'children' and time references like 'first half of the night'._\n**Statement:**\n> **Children** **require more** **deep sleep** and less **disruption** during their sleep in the **first half of the night**.\n**Keywords:**\n- Children\n- require more\n- deep sleep\n- disruption\n- first half of the night\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, which discusses arousals during sleep, and paragraph 2, which defines deep sleep. The passage mentions deep sleep stages and arousals but does not specifically discuss children's requirements._\nLocated in **Paragraph 6**:\n> \"The frequency of the **arousals** may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.\"\nLocated in **Paragraph 2**:\n> \"NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and **stages 3 and 4 which are considered deep sleep** with high arousal threshold.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage does not mention whether children require more deep sleep or less disruption in the first half of the night._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Children | _(not in passage)_ | **⚠️** — The passage does not mention children's specific sleep requirements or whether they need more or less of any sleep stage. |\n| require more | _(not in passage)_ | **⚠️** — The passage does not say anything about whether children require more deep sleep than other age groups. |\n| deep sleep | \"stages 3 and 4 which are considered deep sleep\" | **✅** — The passage defines \"stages 3 and 4 which are considered deep sleep\" but does not link this to children's needs. |\n| disruption | \"arousals\" | **⚠️** — The passage mentions \"arousals\", which are a type of disruption, but does not link this to children specifically. |\n| first half of the night | _(not in passage)_ | **⚠️** — The passage does not mention the first half of the night or any specific timing for children's sleep requirements. |\n→ *The passage mentions deep sleep and arousals but does not provide information about children's specific requirements or timing.*\n### Step 4 — Decide the answer\n_The passage does not provide information about children's specific sleep requirements or timing, so the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage defines \"stages 3 and 4 which are considered deep sleep\" and mentions \"arousals\", but it does not say whether children require more deep sleep or less disruption in the first half of the night.\n⚠️ *The passage discusses deep sleep and arousals in general terms but does not link these to children's specific needs or the timing during the night, so the statement cannot be confirmed or contradicted.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
+      "evidence_text": "The frequency of the arousals may increase with emotional disturbance or environmental discomfort but also in many intrinsic sleep disorders such as periodic leg movements in sleep, obstructive sleep apnoea and narcolepsy.",
+      "evidence_source_id": "210342_6",
+      "keywords_mapping": [
+        {
+          "original_text": "arousals",
+          "paraphrased_text": "disruption",
+          "mapping_type": "partial_match"
+        }
+      ]
+    },
+    {
+      "id": 1175923,
+      "question_number": 9,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 9",
+      "options": [],
+      "user_answer": "A",
+      "correct_answer": "A",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 11*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The **NREM/REM cycles affect sleep** **along with human** ______'\nℹ️ *'human [noun phrase]' — the blank follows 'human' and pairs with 'outside factors', so the answer is a noun phrase naming internal biological factors.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 11**:\n> \"In addition to the NREM/REM cycles, there is a **circadian sleep/wake cycle** entrained by intrinsic rhythms –melatonin and body temperature and **extrinsic factors** –light and social cues such as mealtimes, work times.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| NREM/REM cycles affect sleep | \"circadian sleep/wake cycle\" | **✅** — The passage says \"circadian sleep/wake cycle\" works alongside the NREM/REM cycles, showing they both affect sleep. |\n| outside factors | \"extrinsic factors\" | **✅** — The passage mentions \"extrinsic factors\", which means the same as outside factors. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — rhythms\n**Eliminated options:**\n- ❌ **B** — About darkness, not about internal biological patterns that affect sleep.\n- ❌ **C** — An adjective describing variation, not a noun naming internal factors.\n- ❌ **D** — An adjective describing sameness, not a noun naming internal factors.\n- ❌ **E** — About speed of movement, not about biological cycles that regulate sleep.\n- ❌ **F** — An adjective describing light intensity, not a noun naming internal factors.\n- ❌ **G** — Too general — the blank needs a specific internal factor, not the body itself.\n- ❌ **H** — A group of people, not an internal biological factor affecting sleep.\n- ❌ **I** — A verb describing synchronization, not a noun naming internal factors.\n- ❌ **J** — An external factor, not an internal human factor.\n- ❌ **K** — A group of people, not an internal biological factor.\n- ❌ **L** — An adjective describing vision loss, not a noun naming internal factors.\n- ❌ **M** — An adjective describing body processes, not a noun naming specific internal factors.\n- ❌ **N** — Singular form, but the blank needs a plural to match the context.\n- ❌ **O** — An adjective describing age, not a noun naming internal factors.\n- ❌ **P** — About vision ability, not about internal biological patterns that regulate sleep.",
+      "evidence_text": "In addition to the NREM/REM cycles, there is a circadian sleep/wake cycle entrained by intrinsic rhythms –melatonin and body temperature and extrinsic factors –light and social cues such as mealtimes, work times.",
+      "evidence_source_id": "210342_11",
+      "keywords_mapping": [
+        {
+          "original_text": "circadian sleep/wake cycle",
+          "paraphrased_text": "NREM/REM cycles affect sleep",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "extrinsic factors",
+          "paraphrased_text": "outside factors",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "intrinsic rhythms –melatonin and body temperature",
+          "paraphrased_text": "human",
+          "mapping_type": "supporting_fact"
+        }
+      ]
+    },
+    {
+      "id": 1175924,
+      "question_number": 10,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 10",
+      "options": [],
+      "user_answer": "B",
+      "correct_answer": "I",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Melatonin plays a determinant role in** ______ **the sleep wake cycle to the day-night cycle**.'\nℹ️ *'in [verb]' — the blank follows the preposition 'in' and takes an object 'the sleep wake cycle', so the answer is a verb form (gerund) describing the action melatonin performs.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"The pineal hormone **melatonin** plays a role in entraining **the sleep/wake cycle to the light/dark cycle**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| the sleep wake cycle to the day-night cycle | \"the sleep/wake cycle to the light/dark cycle\" | **✅** — The passage says \"the sleep/wake cycle to the light/dark cycle\", which means the same as the sleep wake cycle to the day-night cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: I** — entraining\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not a verb describing melatonin's action.\n- ❌ **B** — A noun about darkness, not a verb describing synchronization.\n- ❌ **C** — An adjective describing variation, not a verb describing an action.\n- ❌ **D** — An adjective describing sameness, not a verb describing an action.\n- ❌ **E** — A noun about speed, not a verb describing synchronization.\n- ❌ **F** — An adjective describing light, not a verb describing an action.\n- ❌ **G** — A noun naming a physical structure, not a verb describing an action.\n- ❌ **H** — A noun phrase naming people, not a verb describing an action.\n- ❌ **J** — A noun about light, not a verb describing synchronization.\n- ❌ **K** — A noun naming people, not a verb describing an action.\n- ❌ **L** — An adjective describing vision loss, not a verb describing an action.\n- ❌ **M** — An adjective describing body processes, not a verb describing an action.\n- ❌ **N** — A noun naming a sequence, not a verb describing an action.\n- ❌ **O** — An adjective describing age, not a verb describing an action.\n- ❌ **P** — A noun about vision, not a verb describing synchronization.",
+      "evidence_text": "The pineal hormone melatonin plays a role in entraining the sleep/wake cycle to the light/dark cycle.",
+      "evidence_source_id": "210342_12",
+      "keywords_mapping": [
+        {
+          "original_text": "melatonin",
+          "paraphrased_text": "Melatonin",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "the sleep/wake cycle to the light/dark cycle",
+          "paraphrased_text": "the sleep wake cycle to the day-night cycle",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "plays a role",
+          "paraphrased_text": "plays a determinant role",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175925,
+      "question_number": 11,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 11",
+      "options": [],
+      "user_answer": "C",
+      "correct_answer": "B",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'Scientists found that **melatonin is high within** ______ **environment**'\nℹ️ *'within [noun] environment' — the blank is an adjective or noun modifying 'environment', describing the lighting condition where melatonin is high.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"**Melatonin secretion** is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| melatonin | \"Melatonin secretion\" | **✅** — The passage says \"Melatonin secretion is high in darkness\", showing where the missing word is found. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: B** — shadow\n**Eliminated options:**\n- ❌ **A** — About biological patterns, not about a lighting condition or environment.\n- ❌ **C** — Describes variation, not a specific lighting condition where melatonin is high.\n- ❌ **D** — Describes sameness, not a lighting condition where melatonin is high.\n- ❌ **E** — About speed, not about a lighting condition or environment.\n- ❌ **F** — Describes a light environment, but melatonin is high in darkness, not brightness.\n- ❌ **G** — About physical structure, not about a lighting condition or environment.\n- ❌ **H** — A group of people, not a lighting condition or environment.\n- ❌ **I** — A verb describing synchronization, not a noun or adjective describing environment.\n- ❌ **J** — Melatonin is low in daylight, not high, so this contradicts the context.\n- ❌ **K** — A group of people, not a lighting condition or environment.\n- ❌ **L** — Describes vision loss, not a lighting condition or environment.\n- ❌ **M** — Describes body processes, not a lighting condition or environment.\n- ❌ **N** — About a sequence, not a lighting condition or environment.\n- ❌ **O** — Describes age, not a lighting condition or environment.\n- ❌ **P** — About vision ability, not a lighting condition or environment.",
+      "evidence_text": "Melatonin secretion is high in darkness and low in daylight hours, the process beginning in the retina with the supra chiasmatic nucleus playing a major role as a sleep regulator via melatonin.",
+      "evidence_source_id": "210342_12",
+      "keywords_mapping": [
+        {
+          "original_text": "Melatonin secretion",
+          "paraphrased_text": "melatonin",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "high",
+          "paraphrased_text": "high",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175926,
+      "question_number": 12,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 12",
+      "options": [],
+      "user_answer": "D",
+      "correct_answer": "L",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 12*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'with an **exception of** ______ **subjects who may build up a free cycle**'\nℹ️ *'exception of [adjective] subjects' — the blank is an adjective describing which type of subjects are the exception.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 12**:\n> \"Blind people **may lose this entrainment** and develop a **free running sleep/wake cycle** with progressive advancement of sleep onset time.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| exception | \"may lose this entrainment\" | **✅** — The passage says \"may lose this entrainment\", which explains why these subjects are an exception. |\n| free cycle | \"free running sleep/wake cycle\" | **✅** — The passage mentions \"free running sleep/wake cycle\", which matches the summary's free cycle. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: L** — blind\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing subjects.\n- ❌ **B** — A noun about darkness, not an adjective describing subjects.\n- ❌ **C** — Too vague — the blank needs a specific characteristic, not just 'not the same'.\n- ❌ **D** — Describes sameness, but the context is about an exception group with a specific characteristic.\n- ❌ **E** — A noun about speed, not an adjective describing subjects.\n- ❌ **F** — Describes light intensity, not a characteristic of subjects who lose entrainment.\n- ❌ **G** — A noun naming physical structure, not an adjective describing subjects.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing subjects who lose light entrainment.\n- ❌ **I** — A verb describing synchronization, not an adjective describing subjects.\n- ❌ **J** — A noun about light, not an adjective describing subjects.\n- ❌ **K** — A noun naming older people, not an adjective describing vision-impaired subjects.\n- ❌ **M** — Too general — the blank needs a specific characteristic related to vision loss.\n- ❌ **N** — A noun naming a sequence, not an adjective describing subjects.\n- ❌ **O** — Describes age, but the context is about subjects who lose light-based entrainment.\n- ❌ **P** — A noun about vision ability, not an adjective describing subjects.",
+      "evidence_text": "Blind people may lose this entrainment and develop a free running sleep/wake cycle with progressive advancement of sleep onset time.",
+      "evidence_source_id": "210342_12",
+      "keywords_mapping": [
+        {
+          "original_text": "may lose this entrainment",
+          "paraphrased_text": "exception",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "develop a free running sleep/wake cycle",
+          "paraphrased_text": "build up a free cycle",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "people",
+          "paraphrased_text": "subjects",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175927,
+      "question_number": 13,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 13",
+      "options": [],
+      "user_answer": "E",
+      "correct_answer": "C",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 13*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Circadian clock genes are** ______ between \"morning people\" and \"night people\".'\nℹ️ *'genes are [adjective]' — the blank follows the linking verb 'are' and describes the relationship between genes in morning versus night people, so the answer is an adjective.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 13**:\n> \"**Polymorphism of the circadian clock gene** has now been identified with the population divided between morning types (larks) and evening types (owls).\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Circadian clock genes | \"Polymorphism of the circadian clock gene\" | **✅** — The passage mentions \"Polymorphism of the circadian clock gene\", which refers to ______ in the genes. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: C** — different\n**Eliminated options:**\n- ❌ **A** — A noun naming patterns, not an adjective describing variation between groups.\n- ❌ **B** — A noun about darkness, not an adjective describing variation.\n- ❌ **D** — Means the same, but the passage says the population is divided, implying variation.\n- ❌ **E** — A noun about speed, not an adjective describing variation between groups.\n- ❌ **F** — Describes light intensity, not variation between groups.\n- ❌ **G** — A noun naming physical structure, not an adjective describing variation.\n- ❌ **H** — A noun phrase naming workers, not an adjective describing variation.\n- ❌ **I** — A verb describing synchronization, not an adjective describing variation.\n- ❌ **J** — A noun about light, not an adjective describing variation between groups.\n- ❌ **K** — A noun naming older people, not an adjective describing variation.\n- ❌ **L** — Describes vision loss, not variation between morning and night people.\n- ❌ **M** — Describes body processes generally, not the specific variation between groups.\n- ❌ **N** — A noun naming a sequence, not an adjective describing variation.\n- ❌ **O** — Describes age, not variation between morning and night people.\n- ❌ **P** — A noun about vision, not an adjective describing variation between groups.",
+      "evidence_text": "Polymorphism of the circadian clock gene has now been identified with the population divided between morning types (larks) and evening types (owls).",
+      "evidence_source_id": "210342_13",
+      "keywords_mapping": [
+        {
+          "original_text": "Polymorphism of the circadian clock gene",
+          "paraphrased_text": "Circadian clock genes",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "morning types (larks)",
+          "paraphrased_text": "morning people",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "evening types (owls)",
+          "paraphrased_text": "night people",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175928,
+      "question_number": 14,
+      "passage_number": 1,
+      "question_type": 1,
+      "prompt": "Question 14",
+      "options": [],
+      "user_answer": "F",
+      "correct_answer": "K",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes how melatonin and circadian rhythms regulate sleep-wake cycles in different populations.*\n→ *Search area: Paragraph 15*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Conversely**, ______ **are more susceptible to sleep early in the evening**.'\nℹ️ *'[noun phrase] are more susceptible' — the blank is the subject of the sentence, so the answer is a noun phrase naming a group of people.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | rhythms | regular repeating patterns or cycles — plural noun |\n| B | shadow | dark area blocked from light — noun |\n| C | different | not the same — adjective |\n| D | identical | exactly the same — adjective |\n| E | paces | speeds or rates of movement — plural noun |\n| F | bright | full of light — adjective |\n| G | body | physical structure of a person — noun |\n| H | shift workers | people who work non-standard hours — noun phrase |\n| I | entraining | synchronizing to a cycle — verb |\n| J | daylight | natural light during the day — noun |\n| K | elders | older people — plural noun |\n| L | blind | unable to see — adjective |\n| M | physiological | relating to body functions — adjective |\n| N | cycle | repeating sequence of events — noun |\n| O | younger | less old — adjective |\n| P | sight | ability to see — noun |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 15**:\n> \"In contrast **the elderly** who are **more susceptible to perturbation in their sleep/wake schedule** can develop advanced sleep phase syndrome with **sleep onset occurring early in the evening**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| more susceptible to sleep | \"more susceptible to perturbation in their sleep/wake schedule\" | **✅** — The passage says \"more susceptible to perturbation in their sleep/wake schedule\", which relates to ______ being susceptible to sleep issues. |\n| elders | \"the elderly\" | **✅** — The passage uses \"the elderly\", which means the same as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: K** — elders\n**Eliminated options:**\n- ❌ **A** — Names biological patterns, not a group of people who sleep early.\n- ❌ **B** — A noun about darkness, not a group of people.\n- ❌ **C** — An adjective describing variation, not a noun phrase naming people.\n- ❌ **D** — An adjective describing sameness, not a noun phrase naming people.\n- ❌ **E** — A noun about speed, not a group of people.\n- ❌ **F** — An adjective describing light, not a noun phrase naming people.\n- ❌ **G** — A noun naming physical structure, not a group of people.\n- ❌ **H** — Names workers with irregular schedules, not the age group susceptible to early evening sleep.\n- ❌ **I** — A verb describing synchronization, not a noun phrase naming people.\n- ❌ **J** — A noun about light, not a group of people.\n- ❌ **L** — An adjective describing vision loss, not a noun phrase naming an age group.\n- ❌ **M** — An adjective describing body processes, not a noun phrase naming people.\n- ❌ **N** — A noun naming a sequence, not a group of people.\n- ❌ **O** — An adjective describing age, but the passage says older people sleep early, not younger.\n- ❌ **P** — A noun about vision, not a group of people.",
+      "evidence_text": "In contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening.",
+      "evidence_source_id": "210342_15",
+      "keywords_mapping": [
+        {
+          "original_text": "the elderly",
+          "paraphrased_text": "elders",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "more susceptible to perturbation in their sleep/wake schedule",
+          "paraphrased_text": "more susceptible to sleep",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "sleep onset occurring early in the evening",
+          "paraphrased_text": "sleep early in the evening",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "In contrast",
+          "paraphrased_text": "Conversely",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175929,
+      "question_number": 15,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "Both freshmen and journeymen need the help of a mentor to solve specific problems.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "No",
+      "correct_answer": "Yes",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Both **freshmen** and **journeymen** need the **help of a mentor to solve specific problems**.\n**Keywords:**\n- freshmen\n- journeymen\n- help of a mentor to solve specific problems\n### Step 2 — Locate evidence in the passage\n_Look in paragraphs 2 and 3, the sections about novices and journeymen learning their craft. The passage explains that novices find mentors to guide them through acquiring new knowledge, and journeymen maintain regular contact with mentors to solve specific problems and learn more complex strategies._\nLocated in **Paragraph 2**:\n> \"Generally, a **novice** will **find a mentor** to guide her through the process of acquiring new knowledge.\"\nLocated in **Paragraph 3**:\n> \"The **journeyman** still **maintains regular contact with a mentor to solve specific problems** and learn more complex strategies.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses different words for the same roles and describes the same kind of support for both groups._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| freshmen | \"novice\" | **✅** — The passage uses \"novice\" to refer to beginners in a field of study. |\n| journeymen | \"journeyman\" | **✅** — The passage uses the exact term \"journeyman\" for the next stage after novice. |\n| help of a mentor to solve specific problems | \"maintains regular contact with a mentor to solve specific problems\" | **✅** — The passage states the journeyman \"maintains regular contact with a mentor to solve specific problems\", confirming this part of the claim. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming both novices and journeymen need mentor support.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage clearly states that \"a novice will find a mentor to guide her through the process of acquiring new knowledge\" and that the journeyman still maintains regular contact with a mentor to solve specific problems, which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._",
+      "evidence_text": "Generally, a novice will find a mentor to guide her through the process of acquiring new knowledge.",
+      "evidence_source_id": "210344_2",
+      "keywords_mapping": [
+        {
+          "original_text": "novice",
+          "paraphrased_text": "freshmen",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "find a mentor",
+          "paraphrased_text": "help of a mentor",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175930,
+      "question_number": 16,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "Novices take more time to deal with a large number of cases than experts.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Yes",
+      "correct_answer": "Not Given",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Novices take more time** to **deal with a large number of cases** than experts.\n**Keywords:**\n- Novices take more time\n- deal with a large number of cases\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices perform tasks differently. The passage mentions that experts perform tasks faster than novices and commit fewer errors._\nLocated in **Paragraph 13**:\n> \"Moreover, **experts perform tasks in their domains faster than novices** and commit fewer errors while problem solving.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts work faster, but does not say anything about dealing with a large number of cases specifically._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| Novices take more time | \"experts perform tasks in their domains faster than novices\" | **⚠️** — The passage says \"experts perform tasks in their domains faster than novices\", which means novices are slower, but this is about tasks in general. |\n| deal with a large number of cases | _(not in passage)_ | **⚠️** — The passage does not mention anything about dealing with a large number of cases when comparing speed. |\n→ *The passage confirms novices are slower at tasks but does not specify whether this applies to handling a large number of cases.*\n### Step 4 — Decide the answer\n_One key detail is missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — Although the passage states that \"experts perform tasks in their domains faster than novices\", it does not specifically address whether novices take more time to deal with a large number of cases.\n⚠️ *The passage mentions speed differences between experts and novices, but this does not automatically mean the statement about handling many cases is true.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
+      "evidence_text": "Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving.",
+      "evidence_source_id": "210344_13",
+      "keywords_mapping": [
+        {
+          "original_text": "experts perform tasks in their domains faster than novices",
+          "paraphrased_text": "Novices take more time",
+          "mapping_type": "partial_match"
+        }
+      ]
+    },
+    {
+      "id": 1175931,
+      "question_number": 17,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "The apprenticeship model is always used to analyze the behavior of experts and novices.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Not Given",
+      "correct_answer": "Not Given",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> The **apprenticeship model** is **always used** to **analyze the behavior** of experts and novices.\n**Keywords:**\n- apprenticeship model\n- always used\n- analyze the behavior\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 6, the section about the apprenticeship model. The passage describes the chess example as an apprenticeship model and mentions it is still used for training in many complex tasks._\nLocated in **Paragraph 6**:\n> \"The chess example is a rather short description of an **apprenticeship model**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage mentions the apprenticeship model but does not say anything about whether it is always used or used for analysis purposes._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| always used | _(not in passage)_ | **⚠️** — The passage does not mention whether the model is always used or only sometimes used. |\n| analyze the behavior | _(not in passage)_ | **⚠️** — The passage does not say anything about using the model to analyze behavior. |\n→ *The passage mentions the apprenticeship model but does not specify whether it is always used or used for analyzing behavior.*\n### Step 4 — Decide the answer\n_Key details about frequency and purpose are missing from the passage, so the statement cannot be confirmed or contradicted and the answer is NOT GIVEN._\n✅ **Answer: C. Not Given** — The passage mentions the \"apprenticeship model\" as a training method but does not state whether it is always used or whether it is used to analyze the behavior of experts and novices.\n⚠️ *The passage discusses the apprenticeship model in detail, but this does not mean it is always used for the specific purpose mentioned in the statement.*\n_✅ Decision rule applied: At least one element in the statement is not addressed by the passage and nothing in the passage contradicts the statement, so the answer is NOT GIVEN._",
+      "evidence_text": "The chess example is a rather short description of an apprenticeship model.",
+      "evidence_source_id": "210344_6",
+      "keywords_mapping": [
+        {
+          "original_text": "apprenticeship model",
+          "paraphrased_text": "apprenticeship model",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175932,
+      "question_number": 18,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "A chess master is certainly qualified to play poker well.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Yes",
+      "correct_answer": "No",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> A **chess master** is certainly **qualified to play poker well**.\n**Keywords:**\n- chess master\n- qualified to play poker well\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 10, the section about whether expertise transfers to other domains. The passage explains that a master chess player cannot apply chess expertise in poker and would be a novice poker player._\nLocated in **Paragraph 10**:\n> \"A master chess player **cannot apply chess expertise in a game of poker** –although both chess and poker are games, a **chess master** who has never played poker is a **novice poker player**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage directly contradicts the claim by stating chess masters cannot apply their expertise to poker._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| qualified to play poker well | \"cannot apply chess expertise in a game of poker\" | **❌** — The passage says a chess master \"cannot apply chess expertise in a game of poker\", which directly contradicts being qualified to play well. |\n→ *The passage directly contradicts the statement by saying chess masters cannot apply their expertise to poker and would be novices.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement, so the answer is NO._\n✅ **Answer: B. No** — The passage explicitly states that a master chess player cannot apply chess expertise in a game of poker and that \"a chess master who has never played poker is a novice poker player\", which contradicts the claim.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
+      "evidence_text": "A master chess player cannot apply chess expertise in a game of poker –although both chess and poker are games, a chess master who has never played poker is a novice poker player.",
+      "evidence_source_id": "210344_10",
+      "keywords_mapping": [
+        {
+          "original_text": "chess master",
+          "paraphrased_text": "chess master",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "cannot apply chess expertise in a game of poker",
+          "paraphrased_text": "qualified to play poker well",
+          "mapping_type": "contrast"
+        }
+      ]
+    },
+    {
+      "id": 1175933,
+      "question_number": 19,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "Experts and novices comprehend the meaning of data and weigh variables in different ways.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "No",
+      "correct_answer": "Yes",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> **Experts** and **novices** **comprehend the meaning of data** and **weigh variables in different ways**.\n**Keywords:**\n- Experts\n- novices\n- comprehend the meaning of data\n- weigh variables in different ways\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 12, the section about how experts understand their domains better than novices. The passage explains that experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices._\nLocated in **Paragraph 12**:\n> \"**Experts** **comprehend the meaning of data** and **weigh variables with different criteria** within their domains better than **novices**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage uses nearly identical wording and confirms experts and novices approach data and variables differently._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| weigh variables in different ways | \"weigh variables with different criteria\" | **✅** — The passage says experts \"weigh variables with different criteria\", which means the same as weighing variables in different ways. |\n→ *All keywords map to the passage through exact matches or paraphrase, confirming experts and novices handle data and variables differently.*\n### Step 4 — Decide the answer\n_Every keyword is confirmed by the passage, so the statement is supported and the answer is YES._\n✅ **Answer: A. Yes** — The passage directly states that \"Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices\", which confirms the statement.\n_✅ Decision rule applied: Every element in the statement is confirmed by the passage (paraphrase, exact match, or supporting fact), so the answer is YES._",
+      "evidence_text": "Experts comprehend the meaning of data and weigh variables with different criteria within their domains better than novices.",
+      "evidence_source_id": "210344_12",
+      "keywords_mapping": [
+        {
+          "original_text": "Experts",
+          "paraphrased_text": "Experts",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "novices",
+          "paraphrased_text": "novices",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "comprehend the meaning of data",
+          "paraphrased_text": "comprehend the meaning of data",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "weigh variables with different criteria",
+          "paraphrased_text": "weigh variables in different ways",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175934,
+      "question_number": 20,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "Experts generally have better memories than novices do.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "Yes",
+      "correct_answer": "No",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Experts **generally have better memories** than novices do.\n**Keywords:**\n- generally have better memories\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about expert memory compared to novices. The passage explains that experts have better domain-specific short-term and long-term memory than novices do._\nLocated in **Paragraph 13**:\n> \"**Experts have better domain-specific short-term and long-term memory than novices do**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage says experts have better memory, but only in their specific domain, not generally._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| generally have better memories | \"Experts have better domain-specific short-term and long-term memory than novices do\" | **❌** — The passage says \"Experts have better domain-specific short-term and long-term memory than novices do\", but the word generally suggests all types of memory, not just in their domain. |\n→ *The passage confirms experts have better memory but only in their specific domain, not generally across all areas.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the limiting word, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts have better domain-specific short-term and long-term memory than novices do\", which contradicts the claim that experts generally have better memories, because the advantage is limited to their domain.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
+      "evidence_text": "Experts have better domain-specific short-term and long-term memory than novices do.",
+      "evidence_source_id": "210344_13",
+      "keywords_mapping": [
+        {
+          "original_text": "Experts have better domain-specific short-term and long-term memory than novices do",
+          "paraphrased_text": "generally have better memories",
+          "mapping_type": "contrast"
+        },
+        {
+          "original_text": "domain-specific",
+          "paraphrased_text": "generally",
+          "mapping_type": "contrast"
+        }
+      ]
+    },
+    {
+      "id": 1175935,
+      "question_number": 21,
+      "passage_number": 2,
+      "question_type": 22,
+      "prompt": "Interestingly, experts take more time to solve problems than novices who immediately seek to find a solution.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes"
+        },
+        {
+          "key": "B",
+          "text": "No"
+        },
+        {
+          "key": "C",
+          "text": "Not Given"
+        }
+      ],
+      "user_answer": "No",
+      "correct_answer": "No",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Highlight keywords\n_Read the statement carefully and highlight the keywords that carry the claim._\n**Statement:**\n> Interestingly, **experts take more time** to **solve problems** than **novices who immediately seek to find a solution**.\n**Keywords:**\n- experts take more time\n- solve problems\n- novices who immediately seek to find a solution\n### Step 2 — Locate evidence in the passage\n_Look in paragraph 13, the section about how experts and novices approach problem solving differently. The passage explains that experts spend more time thinking about a problem at the beginning of a task to fully understand it, while novices immediately seek to find a solution._\nLocated in **Paragraph 13**:\n> \"**Experts spend more time thinking about a problem** to fully understand it **at the beginning of a task** than do **novices, who immediately seek to find a solution**.\"\n### Step 3 — Compare statement to passage\n_Compare each keyword against what the passage actually says. The passage confirms experts take more time, but only at the beginning to understand the problem, not to solve it overall._\n| Element in statement | Element in passage | Verdict & reasoning |\n|---|---|---|\n| experts take more time | \"Experts spend more time thinking about a problem\" | **✅** — The passage says \"Experts spend more time thinking about a problem\", which matches the idea of taking more time. |\n| solve problems | \"at the beginning of a task\" | **❌** — The passage says this happens \"at the beginning of a task\", not when solving the problem overall, which creates a conflict with the statement. |\n→ *The passage confirms experts take more time but only at the beginning to understand the problem, not to solve it, which contradicts the statement.*\n### Step 4 — Decide the answer\n_The passage contradicts the statement because of the timing detail, so the answer is NO._\n✅ **Answer: B. No** — The passage states that \"Experts spend more time thinking about a problem to fully understand it at the beginning of a task\", not to solve the entire problem, which contradicts the claim that experts take more time to solve problems.\n_✅ Decision rule applied: At least one element in the statement is explicitly contradicted by the passage, so the answer is NO._",
+      "evidence_text": "Moreover, experts perform tasks in their domains faster than novices and commit fewer errors while problem solving.",
+      "evidence_source_id": "210344_13",
+      "keywords_mapping": [
+        {
+          "original_text": "experts",
+          "paraphrased_text": "experts",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "perform tasks in their domains faster",
+          "paraphrased_text": "take more time to solve problems",
+          "mapping_type": "contrast"
+        }
+      ]
+    },
+    {
+      "id": 1175936,
+      "question_number": 22,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 22",
+      "options": [],
+      "user_answer": "A",
+      "correct_answer": "E",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> 'The ______ is not only a **mode of education**, but a **standard method of training**.'\nℹ️ *'The [noun phrase]' — the blank is the subject of the sentence, so the answer is a noun phrase naming what serves as both a mode of education and a training method.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Apprenticeship** may seem like a restrictive 18th century **mode of education**, but it is still a **standard method of training** for many complex tasks.\"\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: E** — apprenticeship\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not a mode of education or training method.\n- ❌ **B** — Chess is an example used in the passage, not an educational mode or training method.\n- ❌ **C** — A description is a way of explaining something, not a mode of education or training method.\n- ❌ **D** — Laws are mentioned as a field of study, not as a mode of education or training method.\n- ❌ **F** — New knowledge is what experts generate, not a mode of education or training method.\n- ❌ **G** — Doctoral programs are based on the apprenticeship model, not the model itself.\n- ❌ **H** — Complex tasks are what the training method is used for, not the method itself.",
+      "evidence_text": "Apprenticeship may seem like a restrictive 18th century mode of education, but it is still a standard method of training for many complex tasks.",
+      "evidence_source_id": "210344_6",
+      "keywords_mapping": [
+        {
+          "original_text": "mode of education",
+          "paraphrased_text": "mode of education",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "standard method of training",
+          "paraphrased_text": "standard method of training",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "Apprenticeship",
+          "paraphrased_text": "apprenticeship",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175937,
+      "question_number": 23,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 23",
+      "options": [],
+      "user_answer": "C",
+      "correct_answer": "G",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**On this basis**, ______ **have been developed**.'\nℹ️ *'[plural noun phrase] have been developed' — the blank is the subject of a passive verb phrase, so the answer is a plural noun phrase naming what has been created based on the apprenticeship model.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Academic doctoral programs** are **based on an apprenticeship model**, as are fields like law, music, engineering, and medicine.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| have been developed | \"based on an apprenticeship model\" | **✅** — The passage says ______ \"are based on an apprenticeship model\", which carries the same idea as developed from it. |\n| doctoral programs | \"Academic doctoral programs\" | **✅** — The passage mentions \"Academic doctoral programs\" as ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: G** — doctoral programs\n**Eliminated options:**\n- ❌ **A** — Mentors are people who guide learners, not something developed based on apprenticeship.\n- ❌ **B** — Chess is an example used in the passage, not something developed based on apprenticeship.\n- ❌ **C** — A description is singular and refers to an explanation, not something developed based on apprenticeship.\n- ❌ **D** — Laws are mentioned as a field of study, not as programs developed based on apprenticeship.\n- ❌ **E** — Apprenticeship is the basis itself, not what has been developed from it.\n- ❌ **F** — New knowledge is what experts generate, not programs developed based on apprenticeship.\n- ❌ **H** — Complex tasks are what the training method is used for, not programs developed from it.",
+      "evidence_text": "Academic doctoral programs are based on an apprenticeship model, as are fields like law, music, engineering, and medicine.",
+      "evidence_source_id": "210344_6",
+      "keywords_mapping": [
+        {
+          "original_text": "based on an apprenticeship model",
+          "paraphrased_text": "have been developed",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "Academic doctoral programs",
+          "paraphrased_text": "doctoral programs",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175938,
+      "question_number": 24,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 24",
+      "options": [],
+      "user_answer": "B",
+      "correct_answer": "A",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary explains how apprenticeship serves as an educational model for doctoral programs where graduates find mentors and develop expertise.*\n→ *Search area: Paragraph 6*\n### Step 2 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of phrase (noun phrase, verb phrase, ...) belongs in the blank._\n**Context around the blank:**\n> '**Graduates seek their** ______ **in respective fields** and begin the **long process of becoming experts**.'\nℹ️ *'their [noun phrase]' — 'their' refers to graduates, so the blank is a noun phrase naming what graduates seek in their fields.*\n### Step 3 — Analyse the wordlist options\n_Read every wordlist option and rule out the ones whose meaning or word form does not match this blank's context._\n| Letter | Phrase | Meaning & word form |\n|---|---|---|\n| A | mentors | experienced guides or teachers — plural noun |\n| B | chess | a strategic board game — noun |\n| C | description | an account or explanation — noun |\n| D | laws | rules or legal systems — plural noun |\n| E | apprenticeship | learning through guided practice — noun |\n| F | new knowledge | recently acquired information — noun phrase |\n| G | doctoral programs | advanced academic degree courses — plural noun phrase |\n| H | complex tasks | difficult or intricate activities — plural noun phrase |\n### Step 4 — Scan the passage and match it to the summary\n_Find the matching sentence in the passage and pair the summary phrase with the passage phrase to identify the wordlist option._\nLocated in **Paragraph 6**:\n> \"**Graduate students** enter fields of study, **find mentors**, and begin the **long process of becoming independent experts** and generating new knowledge in their **respective domains**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Graduates | \"Graduate students\" | **✅** — The passage uses \"Graduate students\" to refer to the same group as the summary's term. |\n| respective fields | \"respective domains\" | **✅** — The passage uses \"respective domains\" to mean the same as the summary's phrase. |\n| long process of becoming experts | \"long process of becoming independent experts\" | **✅** — The passage uses the identical phrase \"long process of becoming independent experts\". |\n| mentors | \"find mentors\" | **✅** — The passage states that graduate students \"find mentors\", which matches the summary's idea of seeking ______. |\n### Step 5 — Choose the correct option\n_State the chosen option letter and explain why each rival option is ruled out._\n✅ **Answer: A** — mentors\n**Eliminated options:**\n- ❌ **B** — Chess is an example used in the passage, not something graduates seek in their fields.\n- ❌ **C** — A description is an explanation, not something graduates seek in their fields.\n- ❌ **D** — Laws are mentioned as a field of study, not what graduates seek within their fields.\n- ❌ **E** — Apprenticeship is the overall model, not what graduates seek within their fields.\n- ❌ **F** — New knowledge is what experts generate, not what graduates seek when entering fields.\n- ❌ **G** — Doctoral programs are what graduates enter, not what they seek within their fields.\n- ❌ **H** — Complex tasks are what the training method is used for, not what graduates seek.",
+      "evidence_text": "Graduate students enter fields of study, find mentors, and begin the long process of becoming independent experts and generating new knowledge in their respective domains.",
+      "evidence_source_id": "210344_6",
+      "keywords_mapping": [
+        {
+          "original_text": "Graduate students",
+          "paraphrased_text": "Graduates",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "respective domains",
+          "paraphrased_text": "respective fields",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "long process of becoming independent experts",
+          "paraphrased_text": "long process of becoming experts",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "find mentors",
+          "paraphrased_text": "seek their",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175939,
+      "question_number": 25,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 25",
+      "options": [],
+      "user_answer": "DSFS",
+      "correct_answer": "journeyman",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> A ............\nLocated in **Paragraph 3**:\n> \"**In time, and with much practice**, the novice begins to recognize patterns of behavior within cases and, thus, **becomes a** journeyman.\"\n> \"Returning to the example of the chess player, the individual begins to learn **patterns of opening moves**, offensive and defensive game-playing strategies, and **patterns of victory and defeat**.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"In time, and with much practice\" | **✅** — The passage says \"In time, and with much practice\" the novice begins to recognize patterns — this describes the learning process. |\n| Pattern of victory and defeat | \"patterns of victory and defeat\" | **✅** — The passage mentions \"patterns of victory and defeat\" — an exact match. |\n→ *Paragraph 3 describes the transition from novice to the next stage and lists what is learned at that stage.*\n### Step 4 — Write and check the answer\n_Copy the word straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'journeyman' is copied exactly from the passage.\n- ✅ Word count: 1 word.\n- ✅ Grammar: '**A journeyman**' fits the surrounding text.\n✅ **Answer: journeyman** — The passage explains that with practice the novice \"becomes a journeyman\" and then lists the patterns learned, including opening moves and victory/defeat patterns, which matches the note structure.\nℹ️ *Word-form note: 'journeyman' is singular — do not write 'journeymen' or 'a journeyman'.*",
+      "evidence_text": "In time, and with much practice, the novice begins to recognize patterns of behavior within cases and, thus, becomes a journeyman.",
+      "evidence_source_id": "210344_3",
+      "keywords_mapping": [
+        {
+          "original_text": "with much practice",
+          "paraphrased_text": "Learns",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "becomes a journeyman",
+          "paraphrased_text": "journeyman",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175940,
+      "question_number": 26,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 26",
+      "options": [],
+      "user_answer": "FSAFD",
+      "correct_answer": "offensive and defensive",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'A ............'*\n→ *Search area: Paragraph 3*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • ............   game-playing strategies\nLocated in **Paragraph 3**:\n> \"Returning to the example of the chess player, **the individual begins to learn** patterns of opening moves, offensive and defensive **game-playing strategies**, and patterns of victory and defeat.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Learns | \"the individual begins to learn\" | **✅** — The passage says \"the individual begins to learn\" — this describes the learning process at this stage. |\n→ *Paragraph 3 lists the types of strategies learned at the journeyman stage, including ______.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'offensive and defensive' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• offensive and defensive   game-playing strategies**' fits the surrounding text.\n✅ **Answer: offensive and defensive** — The passage describes what the chess player learns at the journeyman stage, listing \"offensive and defensive game-playing strategies\" alongside opening moves and victory patterns.\nℹ️ *Word-form note: 'offensive and defensive' are two adjectives — copy both words exactly as they appear.*",
+      "evidence_text": "Returning to the example of the chess player, the individual begins to learn patterns of opening moves, offensive and defensive game-playing strategies, and patterns of victory and defeat.",
+      "evidence_source_id": "210344_3",
+      "keywords_mapping": [
+        {
+          "original_text": "the individual begins to learn",
+          "paraphrased_text": "Learns",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "offensive and defensive game-playing strategies",
+          "paraphrased_text": "offensive and defensive game-playing strategies",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175941,
+      "question_number": 27,
+      "passage_number": 2,
+      "question_type": 1,
+      "prompt": "Question 27",
+      "options": [],
+      "user_answer": "AFASDF",
+      "correct_answer": "her own cases",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN THREE WORDS**.\n**Word limit rule:**\n- ✅ Up to three words\n- ❌ Four or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the note and find the search area\n_Read the whole note, paying attention to the three sections (novice, middle stage, expert), so it's clear what each part is about and where this gap fits in._\n**Sub-headings → paragraph mapping:**\n- 'A novice' → Paragraph 2\n- 'A ............' → Paragraph 3\n- 'An expert' → Paragraphs 4-5\n→ *This gap falls under: 'An expert'*\n→ *Search area: Paragraph 5*\n### Step 3 — Locate the clues in the passage\n_Pick out the clue words around the gap, then look in the passage for the same ideas — sometimes the exact word, sometimes a synonym._\n**Note:**\n> • Create ............\nLocated in **Paragraph 5**:\n> \"**She is creating** her own cases rather than relying on the cases of others.\"\n| Clue in the gapped text | Phrase in passage | Link & reasoning |\n|---|---|---|\n| Create | \"She is creating\" | **✅** — The passage says \"She is creating\" — this matches the verb in the note. |\n→ *Paragraph 5 explains what the expert creates rather than relying on others.*\n### Step 4 — Write and check the answer\n_Copy the words straight from the passage, then double-check the spelling, the word count, and that the answer fits the grammar of the sentence._\n**Verification:**\n- ✅ Spelling: 'her own cases' is copied exactly from the passage.\n- ✅ Word count: 3 words.\n- ✅ Grammar: '**• Create her own cases**' fits the surrounding text.\n✅ **Answer: her own cases** — The passage explains that the expert \"is creating her own cases rather than relying on the cases of others\", which completes the final bullet point about what experts create.\nℹ️ *Word-form note: 'her own cases' is three words — copy all three exactly as they appear.*",
+      "evidence_text": "She is creating her own cases rather than relying on the cases of others.",
+      "evidence_source_id": "210344_5",
+      "keywords_mapping": [
+        {
+          "original_text": "creating her own cases",
+          "paraphrased_text": "Create her own cases",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175942,
+      "question_number": 28,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph C",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph C**:\n> \"Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade.\"\n→ *Main idea: Some historians argue that a French gunsmith, not Whitney, deserves credit for inventing true interchangeable parts.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| disagreement | \"Still others maintain\" | **✅** — The phrase \"Still others maintain\" signals an alternative viewpoint, matching the idea of disagreement over who deserves credit. |\n| first person who invented | \"the credit for these modern innovations should go to\" | **✅** — The passage states \"the credit for these modern innovations should go to\" a different person, matching the concept of identifying the true inventor. |\n| instead of Whitney | \"predated those of Whitney\" | **✅** — The text says the French gunsmith's work \"predated those of Whitney\", meaning someone else came before Whitney. |\n**Why other headings do not fit:**\n- ❌ **Not i**: The section discusses who deserves credit for innovations, not the invention of precision machine tools themselves.\n- ❌ **Not iii**: The section debates historical credit among multiple claimants, not the dedicated work of specific prominent researchers.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney** — The paragraph explicitly presents an alternative claim that \"the credit for these modern innovations should go to a French gunsmith\" whose work came before Whitney's, directly matching the heading about disagreement over who truly invented interchangeable parts.",
+      "evidence_text": "Still others maintain that the credit for these modern innovations should go to a French gunsmith whose methods and results predated those of Whitney and Hall by at least a decade.",
+      "evidence_source_id": "210346_3",
+      "keywords_mapping": [
+        {
+          "original_text": "Still others maintain",
+          "paraphrased_text": "disagreement",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "the credit for these modern innovations should go to a French gunsmith",
+          "paraphrased_text": "first person who invented",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "predated those of Whitney",
+          "paraphrased_text": "instead of Whitney",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175943,
+      "question_number": 29,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph D",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "i. The appearance of precision machine tools",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph D**:\n> \"Maudslay's contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper.\"\n→ *Main idea: Maudslay invented precision machine tools that could produce identical parts needed for mass production.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| The appearance of precision machine tools | \"the invention of precision machine tools\" | **✅** — The passage directly states \"the invention of precision machine tools\", which matches the heading's focus on their appearance. |\n**Why other headings do not fit:**\n- ❌ **Not ii**: The section focuses on one specific invention by Maudslay, not a variety of different techniques.\n- ❌ **Not viii**: The section is about the tools that produce interchangeable parts, not the role of the parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: i. The appearance of precision machine tools** — The paragraph's opening sentence explicitly states that Maudslay's contribution to modern mass production was the invention of precision machine tools, making this the clear main focus of the section.",
+      "evidence_text": "Maudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper.",
+      "evidence_source_id": "210346_4",
+      "keywords_mapping": [
+        {
+          "original_text": "the invention of precision machine tools",
+          "paraphrased_text": "The appearance of precision machine tools",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "capable of producing the identical parts",
+          "paraphrased_text": "precision machine tools",
+          "mapping_type": "supporting_fact"
+        }
+      ]
+    },
+    {
+      "id": 1175944,
+      "question_number": 30,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph E",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "iii. Prominent researchers‘ work dedicated to mass production of firearm making",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph E**:\n> \"Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms.\"\n→ *Main idea: Samuel Colt and Elisha King Root successfully developed industrial processes for mass-producing firearms.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Prominent researchers | \"Samuel Colt and Elisha King Root\" | **✅** — The passage names \"Samuel Colt and Elisha King Root\" as notable figures, matching the idea of prominent researchers. |\n| work dedicated to | \"very successful innovators in the development of industrial processes\" | **✅** — The text describes them as \"very successful innovators in the development of industrial processes\", showing their dedicated work. |\n| mass production of firearm making | \"mass produce interchangeable parts for the assembly-line production of firearms\" | **✅** — The passage states they developed processes to \"mass produce interchangeable parts for the assembly-line production of firearms\", directly matching firearms manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vii**: The section focuses on the specific contributions of Colt and Root, not the general use of mass production for guns.\n- ❌ **Not viii**: The section is about the researchers who developed processes, not the role of interchangeable parts themselves.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: iii. Prominent researchers‘ work dedicated to mass production of firearm making** — The paragraph centers on \"Samuel Colt and Elisha King Root\" as \"very successful innovators\" who developed \"industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms\", perfectly matching the heading about prominent researchers' work in firearm making.",
+      "evidence_text": "Samuel Colt and Elisha King Root were also very successful innovators in the development of industrial processes that could mass produce interchangeable parts for the assembly-line production of firearms.",
+      "evidence_source_id": "210346_5",
+      "keywords_mapping": [
+        {
+          "original_text": "Samuel Colt and Elisha King Root",
+          "paraphrased_text": "Prominent researchers",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "very successful innovators in the development of industrial processes",
+          "paraphrased_text": "work dedicated to",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "mass produce interchangeable parts for the assembly-line production of firearms",
+          "paraphrased_text": "mass production of firearm making",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175945,
+      "question_number": 31,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph F",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "vii. The use of mass production to manufacture guns",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph F**:\n> \"Around the same time, production of guns also entered the assembly line.\"\n→ *Main idea: Gun production began using assembly-line techniques during the same period as other mass production innovations.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| use of mass production to manufacture guns | \"production of guns also entered the assembly line\" | **✅** — The passage states \"production of guns also entered the assembly line\", which means guns were manufactured using mass production methods. |\n**Why other headings do not fit:**\n- ❌ **Not iii**: The section mentions guns entering assembly lines but does not discuss specific prominent researchers or their work.\n- ❌ **Not ii**: The section focuses specifically on guns entering assembly lines, not on different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vii. The use of mass production to manufacture guns** — The paragraph's key sentence states that \"production of guns also entered the assembly line\", which directly describes the application of mass production methods to gun manufacturing.",
+      "evidence_text": "Around the same time, production of guns also entered the assembly line.",
+      "evidence_source_id": "210346_6",
+      "keywords_mapping": [
+        {
+          "original_text": "production of guns also entered the assembly line",
+          "paraphrased_text": "use of mass production to manufacture guns",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "guns",
+          "paraphrased_text": "guns",
+          "mapping_type": "exact_phrase"
+        }
+      ]
+    },
+    {
+      "id": 1175946,
+      "question_number": 32,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph G",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "vi. Controversy on the permission of guns production",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph G**:\n> \"Apart from this, people showed different views over whether guns should be involved in mass production.\"\n→ *Main idea: People held conflicting opinions about whether guns should be mass-produced.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Controversy | \"people showed different views\" | **✅** — The phrase \"people showed different views\" indicates disagreement or controversy among people. |\n| permission of guns production | \"whether guns should be involved in mass production\" | **✅** — The text asks \"whether guns should be involved in mass production\", which is about permission or authorization for gun production. |\n| Controversy | \"trigger the debate\" | **✅** — The passage mentions \"trigger the debate\", reinforcing the idea of controversy. |\n**Why other headings do not fit:**\n- ❌ **Not v**: The section describes ongoing debate about whether to allow gun production, not successful restrictions already imposed.\n- ❌ **Not vii**: The section is about controversy over permission, not the actual use of mass production to manufacture guns.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: vi. Controversy on the permission of guns production** — The paragraph states that \"people showed different views over whether guns should be involved in mass production\" and mentions \"trigger the debate\", clearly indicating controversy over permission for gun production.",
+      "evidence_text": "Apart from this, people showed different views over whether guns should be involved in mass production. The expense opposition to ammunition was the first one to trigger the debate.",
+      "evidence_source_id": "210346_7",
+      "keywords_mapping": [
+        {
+          "original_text": "people showed different views",
+          "paraphrased_text": "Controversy",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "whether guns should be involved in mass production",
+          "paraphrased_text": "permission of guns production",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "trigger the debate",
+          "paraphrased_text": "Controversy",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175947,
+      "question_number": 33,
+      "passage_number": 3,
+      "question_type": 7,
+      "prompt": "Paragraph H",
+      "options": [
+        {
+          "key": "A",
+          "text": "i. The appearance of precision machine tools"
+        },
+        {
+          "key": "B",
+          "text": "ii. Different techniques applied to mass production"
+        },
+        {
+          "key": "C",
+          "text": "iii. Prominent researchers‘ work dedicated to mass production of firearm making"
+        },
+        {
+          "key": "D",
+          "text": "iv. The disagreement on the first person who invented real interchangeable parts instead of Whitney"
+        },
+        {
+          "key": "E",
+          "text": "v. Successful elements for imposing restrictions on the production of guns"
+        },
+        {
+          "key": "F",
+          "text": "vi. Controversy on the permission of guns production"
+        },
+        {
+          "key": "G",
+          "text": "vii. The use of mass production to manufacture guns"
+        },
+        {
+          "key": "H",
+          "text": "viii. The significant role of interchangeable parts"
+        }
+      ],
+      "user_answer": "i. The appearance of precision machine tools",
+      "correct_answer": "v. Successful elements for imposing restrictions on the production of guns",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the headings and think of possible paraphrases\n_Start by reading every heading and brainstorming likely paraphrases — this analysis is shared by every section in the group._\n**Heading analysis:**\n| Heading | Keywords | Paraphrases |\n|---|---|---|\n| **i**. The appearance of precision machine tools | appearance, precision machine tools\n| the invention of accurate machinery, the development of exact manufacturing equipment, the creation of precise tools\n|\n| **ii**. Different techniques applied to mass production | different techniques, applied, mass production\n| various methods used in large-scale manufacturing, multiple approaches to producing goods in bulk, diverse strategies for industrial production\n|\n| **iii**. Prominent researchers' work dedicated to mass production of firearm making | prominent researchers, work dedicated, mass production, firearm making\n| famous inventors' efforts in gun manufacturing, notable innovators developing weapons production, key figures advancing firearms assembly\n|\n| **iv**. The disagreement on the first person who invented real interchangeable parts instead of Whitney | disagreement, first person, invented, real interchangeable parts, instead of Whitney\n| debate over who truly created identical components before Whitney, dispute about the actual pioneer of standardized parts, conflicting claims about the original inventor\n|\n| **v**. Successful elements for imposing restrictions on the production of guns | successful elements, imposing restrictions, production of guns\n| effective factors in limiting firearms manufacturing, key reasons for controlling gun production, achievements in restraining weapons output\n|\n| **vi**. Controversy on the permission of guns production | controversy, permission, guns production\n| debate over allowing firearms manufacturing, disagreement about authorizing gun production, conflicting views on whether to permit weapons making\n|\n| **vii**. The use of mass production to manufacture guns | use, mass production, manufacture guns\n| applying large-scale methods to firearms making, employing assembly-line techniques for weapons, adopting industrial processes for gun production\n|\n| **viii**. The significant role of interchangeable parts | significant role, interchangeable parts\n| the important function of standardized components, the crucial contribution of identical pieces, the key impact of replaceable elements\n|\n**Distractor pairs to watch:**\n- ⚠️ iv vs vi: Both mention disagreement, but iv is about historical credit for an invention while vi is about modern debate over allowing production.\n- ⚠️ iii vs vii: Both relate to firearms, but iii focuses on specific researchers' contributions while vii describes the general application of mass production methods.\n- ⚠️ v vs vi: Both concern guns production, but v is about successful restrictions already imposed while vi is about ongoing controversy over permission.\n### Step 2 — Read each paragraph and identify its main idea\n_Read the section carefully and identify the main idea using its topic sentence._\nLocated in **Paragraph H**:\n> \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.\"\n→ *Main idea: People successfully limited gun production to only four authorized manufacturers.*\n### Step 3 — Match heading keywords to the section\n_Match each keyword in the candidate heading to a phrase in the section, and explain why close-but-wrong headings do NOT fit._\n| Heading keyword | Phrase in section | Link & reasoning |\n|---|---|---|\n| Successful elements | \"People succeeded\" | **✅** — The passage states \"People succeeded\", which directly matches the idea of successful elements or achievements. |\n| imposing restrictions on the production of guns | \"restraining the production of guns\" | **✅** — The text says \"restraining the production of guns\", which means imposing restrictions or limits on gun manufacturing. |\n**Why other headings do not fit:**\n- ❌ **Not vi**: The section describes successful restrictions already achieved, not ongoing controversy over whether to permit production.\n- ❌ **Not ii**: The section focuses on restrictions on gun production, not different techniques applied to mass production generally.\n### Step 4 — Choose the correct heading\n_State the chosen heading and give a short justification citing the section's main idea._\n✅ **Answer: v. Successful elements for imposing restrictions on the production of guns** — The paragraph explicitly states that \"People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns\", which directly describes successful elements for imposing restrictions on gun production.",
+      "evidence_text": "People succeeded in restraining the production of guns resulting in only 4 manufactures being permitted to produce guns in mass production.",
+      "evidence_source_id": "210346_8",
+      "keywords_mapping": [
+        {
+          "original_text": "People succeeded",
+          "paraphrased_text": "Successful elements",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "restraining the production of guns",
+          "paraphrased_text": "imposing restrictions on the production of guns",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "only 4 manufactures being permitted to produce guns",
+          "paraphrased_text": "restrictions on the production of guns",
+          "mapping_type": "supporting_fact"
+        }
+      ]
+    },
+    {
+      "id": 1175948,
+      "question_number": 34,
+      "passage_number": 3,
+      "question_type": 2,
+      "prompt": "What is the function of flintlock as mentioned in the passage?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Grind the gun"
+        },
+        {
+          "key": "B",
+          "text": "Decorate the gun"
+        },
+        {
+          "key": "C",
+          "text": "Fire the gun"
+        },
+        {
+          "key": "D",
+          "text": "Maintain the gun"
+        }
+      ],
+      "user_answer": "Grind the gun",
+      "correct_answer": "Fire the gun",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the **function** of **flintlock** as mentioned in the passage?\n**Options:**\n- **A** — **Grind** the gun\n- **B** — **Decorate** the gun\n- **C** — **Fire** the gun\n- **D** — **Maintain** the gun\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph B, the section that discusses John Hall's work with muskets.*\nLocated in **Paragraph B**:\n> \"Flintlock, as it was implied, meant **people used it to trigger the gun**.\"\n→ *The passage explains that flintlock was used to trigger the gun.*\n**Key phrases in the passage:**\n- 'people used it to trigger the gun' — fire the gun\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Grind the gun | **❌ Wrong** | The passage does not mention grinding anywhere in connection with flintlock. |\n| **B** — Decorate the gun | **❌ Wrong** | No decorative purpose is mentioned; the passage describes a functional use instead. |\n| **C** — Fire the gun | **✅ Correct** | The passage states \"people used it to trigger the gun\", which directly matches Fire the gun. |\n| **D** — Maintain the gun | **❌ Wrong** | Maintenance is never mentioned as a function of flintlock in the passage. |\n✅ **Answer: C** — The passage explicitly says flintlock was used to trigger the gun, which is the same as firing it.",
+      "evidence_text": "Flintlock, as it was implied, meant people used it to trigger the gun.",
+      "evidence_source_id": "210346_2",
+      "keywords_mapping": [
+        {
+          "original_text": "used it to trigger the gun",
+          "paraphrased_text": "function",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "Flintlock",
+          "paraphrased_text": "flintlock",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "trigger the gun",
+          "paraphrased_text": "Fire the gun",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175949,
+      "question_number": 35,
+      "passage_number": 3,
+      "question_type": 2,
+      "prompt": "Why does the author quote an example concerning Ford?",
+      "options": [
+        {
+          "key": "A",
+          "text": "To demonstrate that mass production needed detailed techniques"
+        },
+        {
+          "key": "B",
+          "text": "To show that every object could be detached into several parts"
+        },
+        {
+          "key": "C",
+          "text": "To emphasize that Ford was a successful enterprise"
+        },
+        {
+          "key": "D",
+          "text": "To stress that cars were popular at that time in the U.S."
+        }
+      ],
+      "user_answer": "To emphasize that Ford was a successful enterprise",
+      "correct_answer": "To show that every object could be detached into several parts",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Why does the author quote an example concerning Ford?\n**Options:**\n- **A** — To demonstrate that mass production needed **detailed techniques**\n- **B** — To show that every object could be **detached** into **several parts**\n- **C** — To emphasize that Ford was a **successful enterprise**\n- **D** — To stress that cars were **popular** at that time in the U.S.\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph F, the section that describes Ford's production methods in detail.*\nLocated in **Paragraph F**:\n> \"**Bodies were built on one line and the chassis and drivetrain were built on another**. When both were essentially complete, the body was lowered onto the chassis for final assembly.\"\n→ *The passage describes how Ford built car bodies on one line and chassis on another, then combined them.*\n**Key phrases in the passage:**\n- 'Bodies were built on one line and the chassis and drivetrain were built on another' — objects could be detached into several parts\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — To demonstrate that mass production needed detailed techniques | **❌ Wrong** | The Ford example focuses on dividing production into parts, not on the level of detail in techniques. |\n| **B** — To show that every object could be detached into several parts | **✅ Correct** | The passage shows \"Bodies were built on one line and the chassis and drivetrain were built on another\", demonstrating that every object could be detached into several parts. |\n| **C** — To emphasize that Ford was a successful enterprise | **❌ Wrong** | While Ford's success is mentioned in Paragraph G, the example in Paragraph F illustrates the division of parts, not business success. |\n| **D** — To stress that cars were popular at that time in the U.S. | **❌ Wrong** | Car popularity is discussed in Paragraph G, but the Ford example in Paragraph F is about production methods, not popularity. |\n✅ **Answer: B** — The Ford example shows how bodies and chassis were built separately then combined, illustrating that objects can be divided into parts for production.",
+      "evidence_text": "Bodies were built on one line and the chassis and drivetrain were built on another. When both were essentially complete, the body was lowered onto the chassis for final assembly.",
+      "evidence_source_id": "210346_6",
+      "keywords_mapping": [
+        {
+          "original_text": "body was lowered onto the chassis",
+          "paraphrased_text": "detached",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "Bodies were built on one line",
+          "paraphrased_text": "several parts",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "chassis and drivetrain were built on another",
+          "paraphrased_text": "several parts",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175950,
+      "question_number": 36,
+      "passage_number": 3,
+      "question_type": 2,
+      "prompt": "What is the main contribution of Maudslay?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Introduced assembly line for producing interchangeable parts of guns"
+        },
+        {
+          "key": "B",
+          "text": "Created useful tools for manufacture of guns with economic feasibility"
+        },
+        {
+          "key": "C",
+          "text": "Lessened the time for making guns"
+        },
+        {
+          "key": "D",
+          "text": "Set a standard of making guns and the standard of interchangeable parts"
+        }
+      ],
+      "user_answer": "Created useful tools for manufacture of guns with economic feasibility",
+      "correct_answer": "Created useful tools for manufacture of guns with economic feasibility",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> What is the main **contribution of Maudslay**?\n**Options:**\n- **A** — Introduced **assembly line** for producing interchangeable parts of guns\n- **B** — **Created useful tools** for **manufacture of guns** with **economic feasibility**\n- **C** — **Lessened the time** for making guns\n- **D** — **Set a standard** of making guns and the standard of interchangeable parts\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph D, the section that describes Maudslay's contribution to mass production.*\nLocated in **Paragraph D**:\n> \"Maudslay‘s contribution to modern mass production was the **invention of precision machine tools** capable of producing the identical parts necessary for mass production techniques which **made producing guns cheaper**.\"\n→ *The passage states that Maudslay invented precision machine tools that could produce identical parts and made gun production cheaper.*\n**Key phrases in the passage:**\n- 'invention of precision machine tools' — created useful tools for manufacture\n- 'made producing guns cheaper' — economic feasibility\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — Introduced assembly line for producing interchangeable parts of guns | **❌ Wrong** | The passage credits Maudslay with inventing machine tools, not with introducing the assembly line itself. |\n| **B** — Created useful tools for manufacture of guns with economic feasibility | **✅ Correct** | The passage states Maudslay's contribution was the \"invention of precision machine tools\" that \"made producing guns cheaper\", matching Created useful tools with economic feasibility. |\n| **C** — Lessened the time for making guns | **❌ Wrong** | Time reduction is mentioned for Ford's Model T production, but not for Maudslay's work. |\n| **D** — Set a standard of making guns and the standard of interchangeable parts | **❌ Wrong** | Setting standards is attributed to Gribeauval and Hall, but not to Maudslay. |\n✅ **Answer: B** — Paragraph D clearly states that Maudslay invented precision machine tools that produced identical parts and made gun production cheaper, which matches creating useful tools with economic feasibility.",
+      "evidence_text": "Maudslay‘s contribution to modern mass production was the invention of precision machine tools capable of producing the identical parts necessary for mass production techniques which made producing guns cheaper.",
+      "evidence_source_id": "210346_4",
+      "keywords_mapping": [
+        {
+          "original_text": "Maudslay‘s contribution",
+          "paraphrased_text": "contribution of Maudslay",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "invention of precision machine tools",
+          "paraphrased_text": "Created useful tools",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "made producing guns",
+          "paraphrased_text": "manufacture of guns",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "cheaper",
+          "paraphrased_text": "economic feasibility",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175951,
+      "question_number": 37,
+      "passage_number": 3,
+      "question_type": 1,
+      "prompt": "Question 37",
+      "options": [],
+      "user_answer": "C",
+      "correct_answer": "opposition",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'People mainly **expressed** ______ **to buying ammunition** after the success of applying assembly line to the production of automobiles'\nℹ️ *'expressed [NOUN]' — the blank follows the verb 'expressed' and comes before 'to buying ammunition', so the answer is a noun naming what people expressed.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"The expense opposition **to ammunition** was **the first one to trigger the debate**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| heated debate | \"the first one to trigger the debate\" | **✅** — The passage says this was \"the first one to trigger the debate\", which means it started the heated debate mentioned in the summary. |\n| to buying ammunition | \"to ammunition\" | **✅** — The passage states \"______ to ammunition\", which matches the summary's idea of expressing something toward buying ammunition. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> People mainly expressed **opposition** to buying ammunition after the success of applying assembly line to the production of automobiles\n✅ **Answer: opposition** — The passage states \"The expense opposition to ammunition was the first one to trigger the debate\", so ______ that people expressed to buying ammunition is opposition.\n**Verification:**\n- ✅ Grammar: 'opposition' fits the grammatical slot in the summary.\n- ✅ Spelling: 'opposition' is copied exactly from the passage.\n- ✅ Word count: 1 word.",
+      "evidence_text": "The expense opposition to ammunition was the first one to trigger the debate.",
+      "evidence_source_id": "210346_7",
+      "keywords_mapping": [
+        {
+          "original_text": "opposition to ammunition",
+          "paraphrased_text": "opposition to buying ammunition",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "the first one to trigger the debate",
+          "paraphrased_text": "heated debate",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175952,
+      "question_number": 38,
+      "passage_number": 3,
+      "question_type": 1,
+      "prompt": "Question 38",
+      "options": [],
+      "user_answer": "B",
+      "correct_answer": "equipment",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'Besides, **other** ______ **was needed in the war** which demanded a big workforce to support'\nℹ️ *'other [NOUN] was needed' — the blank follows 'other' and comes before the singular verb 'was', so the answer is a singular noun naming what was needed in the war.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"**Other** equipment **involved in war or preparation for war** was also against.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| was needed in the war | \"involved in war or preparation for war\" | **✅** — The passage says \"involved in war or preparation for war\", which means the same as being needed in the war. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> Besides, other **equipment** was needed in the war which demanded a big workforce to support\n✅ **Answer: equipment** — The passage states \"Other equipment involved in war or preparation for war was also against\", so ______ for what was needed in the war is equipment.\n**Verification:**\n- ✅ Grammar: 'equipment' fits the grammatical slot in the summary.\n- ✅ Spelling: 'equipment' is copied exactly from the passage.\n- ✅ Word count: 1 word.",
+      "evidence_text": "Other equipment involved in war or preparation for war was also against.",
+      "evidence_source_id": "210346_7",
+      "keywords_mapping": [
+        {
+          "original_text": "Other equipment",
+          "paraphrased_text": "other equipment",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "involved in war or preparation for war",
+          "paraphrased_text": "was needed in the war",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175953,
+      "question_number": 39,
+      "passage_number": 3,
+      "question_type": 1,
+      "prompt": "Question 39",
+      "options": [],
+      "user_answer": "A",
+      "correct_answer": "workforce",
+      "is_correct": false,
+      "explanation_4_steps": "### Step 1 — Check the word limit\n_Start by checking the instruction to see how many words your answer can have._\n**Instructions:**\n> The answer must be **NO MORE THAN TWO WORDS**.\n**Word limit rules:**\n- ✅ Up to two words\n- ❌ Three or more words\n- ❌ A number on its own\n- ❌ A paraphrase or synonym\n⚠️ *Going over the word limit makes the answer wrong, even when the meaning is right.*\n### Step 2 — Read the summary and locate the search area\n_Read the WHOLE summary first so the main idea is clear and the paragraph(s) to search in for THIS gap can be identified._\n→ *Main idea: The summary describes public reactions to mass production of guns and ammunition, and the resources needed for war.*\n→ *Search area: Paragraph G*\n### Step 3 — Highlight the keyword and predict the word form\n_Look at the words right before and after the gap to decide what kind of word (noun, verb, adjective, ...) belongs in the blank._\n**Context around the blank:**\n> 'which **demanded a big** ______ **to support**'\nℹ️ *'a big [NOUN]' — the blank follows the adjective 'big' and comes before 'to support', so the answer is a noun naming what was demanded.*\n### Step 4 — Scan the passage and build the paraphrase link\n_Find the matching sentence in the passage and build a short paraphrase link from the summary phrase to the passage phrase._\nLocated in **Paragraph G**:\n> \"Let alone all these **required** **a lot of** workforce **to accomplish**.\"\n| Clue in the summary | Phrase in passage | Link & reasoning |\n|---|---|---|\n| demanded | \"required\" | **✅** — The passage uses \"required\", which means the same as demanded in the summary. |\n| to support | \"to accomplish\" | **✅** — The passage uses \"to accomplish\", which has a similar meaning to the summary's phrase about supporting something. |\n| a big | \"a lot of\" | **✅** — The passage says \"a lot of\", which matches the summary's phrase about a big amount of something. |\n### Step 5 — Write the answer and check it\n_Copy the word straight from the passage, then double-check the grammar, the spelling, and the word count._\n**Completed summary clause:**\n> which demanded a big **workforce** to support\n✅ **Answer: workforce** — The passage states \"Let alone all these required a lot of workforce to accomplish\", so ______ for what was demanded in a big amount is workforce.\n**Verification:**\n- ✅ Grammar: 'workforce' fits the grammatical slot in the summary.\n- ✅ Spelling: 'workforce' is copied exactly from the passage.\n- ✅ Word count: 1 word.",
+      "evidence_text": "Let alone all these required a lot of workforce to accomplish.",
+      "evidence_source_id": "210346_7",
+      "keywords_mapping": [
+        {
+          "original_text": "required",
+          "paraphrased_text": "demanded",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "a lot of workforce",
+          "paraphrased_text": "a big workforce",
+          "mapping_type": "rephrasing"
+        },
+        {
+          "original_text": "to accomplish",
+          "paraphrased_text": "to support",
+          "mapping_type": "rephrasing"
+        }
+      ]
+    },
+    {
+      "id": 1175954,
+      "question_number": 40,
+      "passage_number": 3,
+      "question_type": 2,
+      "prompt": "Which might be the best subtitle for the passage?",
+      "options": [
+        {
+          "key": "A",
+          "text": "The origin of auto assembly line"
+        },
+        {
+          "key": "B",
+          "text": "A marvelous advancement in firearm production"
+        },
+        {
+          "key": "C",
+          "text": "The origin of mass production"
+        },
+        {
+          "key": "D",
+          "text": "The significance of producing interchangeable parts"
+        }
+      ],
+      "user_answer": "The origin of mass production",
+      "correct_answer": "The origin of mass production",
+      "is_correct": true,
+      "explanation_4_steps": "### Step 1 — Read the question and all options\n_Read the whole question and each option, then mark the word or phrase that makes each option different from the others._\n**Question:**\n> Which might be the best subtitle for the passage?\n**Options:**\n- **A** — The origin of **auto assembly line**\n- **B** — A marvelous advancement in **firearm production**\n- **C** — The **origin of mass production**\n- **D** — The significance of producing **interchangeable parts**\n### Step 2 — Locate evidence in the passage\n_Scan the passage for the option's topic, then read 3-5 sentences carefully around the matching area._\n→ *Look in Paragraph A, the opening section that introduces the main topic of the entire passage.*\nLocated in **Paragraph A**:\n> \"Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. **Various mass production techniques had been practiced in ancient times**, from ceramic production in the Orient to manufacturing in ancient Greece.\"\nLocated in **Paragraph F**:\n> \"Credit for the development of large scale, assembly-line, mass production techniques is usually given to Henry Ford and his innovative Model T production methods.\"\n> \"Yet it is generally agreed that **modern mass production techniques came into widespread use** through the innovation of an assortment of Americans who substantially improved the ancient techniques.\"\n> \"Indeed, this modern mass production was called the American System and its early successes are often attributed to Eli Whitney, who adapted mass production techniques and the interchangeability of parts to the manufacture of muskets for the U.S. government in the late 1790s.\"\n→ *The passage traces mass production from ancient times through various innovators and industries to modern techniques.*\n**Key phrases in the passage:**\n- 'Various mass production techniques had been practiced in ancient times' — the historical beginning of mass production\n- 'modern mass production techniques came into widespread use' — the development of mass production methods\n### Step 3 — Eliminate wrong options and pick the answer\n_Check each option against the passage: one is supported by the text; the others are missing from it or contradicted by it._\n| Option | Decision | Reasoning |\n|---|---|---|\n| **A** — The origin of auto assembly line | **❌ Wrong** | The passage discusses auto assembly lines in only two paragraphs (F and G), but covers many other industries and innovators throughout, so auto assembly line is too narrow for the whole passage. |\n| **B** — A marvelous advancement in firearm production | **❌ Wrong** | Firearms appear in several paragraphs as one example among many industries (textiles, clocks, photography, automobiles), so firearm production alone does not capture the passage's full scope. |\n| **C** — The origin of mass production | **✅ Correct** | The passage opens with \"Various mass production techniques had been practiced in ancient times\" and traces the development through multiple innovators and industries, which matches origin of mass production. |\n| **D** — The significance of producing interchangeable parts | **❌ Wrong** | Interchangeable parts is an important technique mentioned in several paragraphs, but the passage covers the broader history and development of mass production across many industries, not just this one aspect. |\n✅ **Answer: C** — The passage begins by tracing mass production from ancient times and follows its development through many innovators and industries, making the origin of mass production the best overall subtitle.",
+      "evidence_text": "Despite its obvious connection, mass production was not a corollary to the modern Industrial Revolution. Various mass production techniques had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece.",
+      "evidence_source_id": "210346_1",
+      "keywords_mapping": [
+        {
+          "original_text": "mass production",
+          "paraphrased_text": "mass production",
+          "mapping_type": "exact_phrase"
+        },
+        {
+          "original_text": "not a corollary to the modern Industrial Revolution",
+          "paraphrased_text": "origin",
+          "mapping_type": "supporting_fact"
+        },
+        {
+          "original_text": "had been practiced in ancient times, from ceramic production in the Orient to manufacturing in ancient Greece",
+          "paraphrased_text": "origin",
+          "mapping_type": "supporting_fact"
+        }
+      ]
+    }
+  ]
 };
