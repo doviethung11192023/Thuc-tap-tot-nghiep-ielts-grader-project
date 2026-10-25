@@ -17,7 +17,7 @@ export function useAuth() {
   // === [DEMO MODE] ===
   // Đổi giá trị này thành `true` để chạy giao diện mà không cần Backend (bỏ qua màn Login).
   // Đổi lại thành `false` khi có Backend/Supabase.
-  const IS_DEMO_MODE = true;
+  const IS_DEMO_MODE = false;
   // ---------------------------
 
   async function fetchUserProfile(userId: string, authUser?: any) {
