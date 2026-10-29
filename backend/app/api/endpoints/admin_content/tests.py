@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from app.core.security import require_admin, User
 from app.db.supabase import supabase
+from app.services.test_tree_formatter import format_nested_test_tree
 from app.schemas.exam_content import (
     TestSetCreate, TestSetResponse,
     TestCreate, TestUpdate, TestStatusUpdate, TestResponse,
@@ -40,11 +41,12 @@ async def list_tests(
     status_filter: Optional[ContentStatus] = Query(None, alias="status"),
     allowed_mode: Optional[AllowedMode] = None,
     test_set_id: Optional[str] = None,
+    difficulty: Optional[str] = None,
     sort_by: Optional[str] = Query("newest"),
     search: Optional[str] = None,
     current_user: User = Depends(require_admin)
 ):
-    """Danh sách bài thi phân trang, lọc theo kỹ năng, trạng thái, bộ đề và sắp xếp."""
+    """Danh sách bài thi phân trang, lọc theo kỹ năng, độ khó, trạng thái, bộ đề và sắp xếp."""
     offset = (page - 1) * limit
     query = supabase.table("tests").select("*, test_sets(id, name)", count="exact")
 
@@ -52,6 +54,7 @@ async def list_tests(
     if status_filter: query = query.eq("status", status_filter.value)
     if allowed_mode: query = query.eq("allowed_mode", allowed_mode.value)
     if test_set_id: query = query.eq("test_set_id", test_set_id)
+    if difficulty: query = query.eq("difficulty", difficulty)
     if search and search.strip(): query = query.ilike("title", f"%{search.strip()}%")
 
     if sort_by == "oldest": query = query.order("created_at", desc=False)
@@ -82,6 +85,7 @@ async def create_test(
         "allowed_mode": test_data.allowed_mode.value,
         "status": test_data.status.value,
         "duration_min": test_data.duration_min,
+        "difficulty": test_data.difficulty or "medium",
         "origin": test_data.origin.value,
         "source_name": test_data.source_name,
         "source_url": test_data.source_url,
@@ -102,34 +106,25 @@ async def get_test_detail(
     test_id: str,
     current_user: User = Depends(require_admin)
 ):
-    """Xem chi tiết bài thi bao gồm sections, question groups, questions và answer keys."""
-    test_res = supabase.table("tests").select("*, test_sets(id, name)").eq("id", test_id).execute()
+    """Xem chi tiết bài thi bao gồm sections, question groups, questions và answer keys (Single Query Optimized)."""
+    test_res = supabase.table("tests").select("""
+        *,
+        test_sets(id, name),
+        test_sections(
+            *,
+            question_groups(
+                *,
+                questions(
+                    *,
+                    question_answer_keys(*)
+                )
+            )
+        )
+    """).eq("id", test_id).single().execute()
     if not test_res.data:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
     
-    test_info = test_res.data[0]
-    
-    # Lấy sections của test
-    sec_res = supabase.table("test_sections").select("*").eq("test_id", test_id).order("order_no").execute()
-    sections = sec_res.data or []
-
-    # Với mỗi section, lấy các nhóm câu hỏi và câu hỏi
-    for sec in sections:
-        grp_res = supabase.table("question_groups").select("*").eq("section_id", sec["id"]).order("order_no").execute()
-        groups = grp_res.data or []
-        for grp in groups:
-            q_res = supabase.table("questions").select("*, question_answer_keys(*)").eq("group_id", grp["id"]).order("number").execute()
-            q_list = q_res.data or []
-            for q in q_list:
-                ak = q.get("question_answer_keys")
-                if isinstance(ak, dict):
-                    q["question_answer_keys"] = [ak]
-                elif ak is None:
-                    q["question_answer_keys"] = []
-            grp["questions"] = q_list
-        sec["question_groups"] = groups
-
-    test_info["sections"] = sections
+    test_info = format_nested_test_tree(test_res.data)
     return {"meta": {"code": 200}, "data": test_info}
 
 @router.put("/tests/{test_id}")

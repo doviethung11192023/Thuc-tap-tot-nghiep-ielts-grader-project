@@ -38,9 +38,11 @@ class ScannedTestItem(BaseModel):
     path: str
     is_imported: bool = False
     duration_min: int = 60
+    difficulty: Optional[str] = "medium"
 
 class CrawledDatasetIngestRequest(BaseModel):
     dataset_path: Optional[str] = None
+    default_difficulty: Optional[str] = "medium"
     include_reading_listening: bool = True
     include_writing: bool = True
     include_speaking: bool = True

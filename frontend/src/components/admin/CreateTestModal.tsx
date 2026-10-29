@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createTest, createSection, getTestSets } from "@/services/admin-content";
-import type { SkillType, AllowedMode, TestSet } from "@/types/exam";
+import { CreateTestFields } from "@/components/admin/CreateTestFields";
+import type { SkillType, AllowedMode, TestDifficulty, TestSet } from "@/types/exam";
 
 interface CreateTestModalProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ const PLACEHOLDERS: Record<SkillType, string> = {
 
 const DEFAULT_SECTIONS: Record<SkillType, string[]> = {
   writing: ["Writing Task 1 (Biểu đồ / Bản đồ / Quy trình)", "Writing Task 2 (Bài luận 250+ từ)"],
-  speaking: ["Part 1 - Phỏng vấn cá nhân (Interview)", "Part 2 - Thuyết trình Cue Card", "Part 3 - Thảo luận 2 chiều (Discussion)"],
+  speaking: ["Part 1 - Phỏng vấn cá nhân", "Part 2 - Cue Card", "Part 3 - Thảo luận 2 chiều"],
   reading: ["Reading Passage 1", "Reading Passage 2", "Reading Passage 3"],
   listening: ["Listening Section 1", "Listening Section 2", "Listening Section 3", "Listening Section 4"],
 };
@@ -30,6 +31,7 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [skill, setSkill] = useState<SkillType>("reading");
+  const [difficulty, setDifficulty] = useState<TestDifficulty>("medium");
   const [testSetId, setTestSetId] = useState<string>("");
   const [durationMin, setDurationMin] = useState<number>(60);
   const [allowedMode, setAllowedMode] = useState<AllowedMode>("both");
@@ -64,23 +66,18 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
       const res = await createTest({
         title: title.trim(),
         skill,
+        difficulty,
         test_set_id: testSetId || undefined,
         duration_min: durationMin,
         allowed_mode: allowedMode,
         status: "draft"
       });
 
-      // Auto-initialize standard default sections for this skill
       const sectionsToCreate = DEFAULT_SECTIONS[skill] || [];
       for (let i = 0; i < sectionsToCreate.length; i++) {
         try {
-          await createSection(res.id, {
-            order_no: i + 1,
-            title: sectionsToCreate[i],
-          });
-        } catch {
-          // Non-critical if auto-section fails
-        }
+          await createSection(res.id, { order_no: i + 1, title: sectionsToCreate[i] });
+        } catch {}
       }
 
       onCreated();
@@ -112,72 +109,22 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1">Kỹ năng thi:</label>
-              <select
-                value={skill}
-                onChange={(e) => handleSkillChange(e.target.value as SkillType)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#932120] font-semibold text-zinc-800"
-              >
-                <option value="reading">Reading (Đọc)</option>
-                <option value="listening">Listening (Nghe)</option>
-                <option value="writing">Writing (Viết)</option>
-                <option value="speaking">Speaking (Nói)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1">Thời gian (phút):</label>
-              <input
-                type="number"
-                min={1}
-                max={180}
-                value={durationMin}
-                onChange={(e) => setDurationMin(parseInt(e.target.value) || 60)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#932120]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">Tiêu đề bài thi:</label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={PLACEHOLDERS[skill]}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#932120]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">Thuộc Bộ Đề Thi (Tùy chọn):</label>
-            <select
-              value={testSetId}
-              onChange={(e) => setTestSetId(e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#932120]"
-            >
-              <option value="">-- Không phân loại --</option>
-              {testSets.map((ts) => (
-                <option key={ts.id} value={ts.id}>{ts.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">Chế độ cho phép:</label>
-            <select
-              value={allowedMode}
-              onChange={(e) => setAllowedMode(e.target.value as AllowedMode)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#932120]"
-            >
-              <option value="both">Cả Luyện tập & Thi thử (Both)</option>
-              <option value="practice">Chỉ Luyện tập (Practice)</option>
-              <option value="mock">Chỉ Thi thử (Mock Test)</option>
-            </select>
-          </div>
+          <CreateTestFields
+            skill={skill}
+            onSkillChange={handleSkillChange}
+            durationMin={durationMin}
+            onDurationChange={setDurationMin}
+            title={title}
+            onTitleChange={setTitle}
+            placeholder={PLACEHOLDERS[skill]}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            allowedMode={allowedMode}
+            onAllowedModeChange={setAllowedMode}
+            testSetId={testSetId}
+            onTestSetIdChange={setTestSetId}
+            testSets={testSets}
+          />
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">

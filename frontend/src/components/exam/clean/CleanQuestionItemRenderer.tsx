@@ -10,7 +10,7 @@ type QuestionUnion = CleanReadingQuestion | CleanListeningQuestion;
 
 interface CleanQuestionItemRendererProps {
   question: QuestionUnion;
-  onSelectEvidence?: (originalText: string) => void;
+  onSelectEvidence?: (originalText: string, questionNumber?: number) => void;
   defaultExpanded?: boolean;
 }
 
@@ -27,7 +27,10 @@ export function CleanQuestionItemRenderer({
   const correctAnsNorm = normalize(question.correct_answer);
 
   return (
-    <div className="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+    <div
+      id={`question-card-${question.question_number}`}
+      className="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3 scroll-mt-24"
+    >
       {/* Question Header & Prompt (Image 3) */}
       <div className="flex items-start gap-3">
         {/* Circular Number Badge: Green if correct, Red if incorrect */}
@@ -43,27 +46,62 @@ export function CleanQuestionItemRenderer({
 
         {/* Question Statement */}
         <div className="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
-          {question.prompt.startsWith('{{') ? (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-zinc-600 text-sm font-normal">Đáp án câu {question.question_number}:</span>
-              <span className={`px-2.5 py-1 rounded-md text-sm font-bold border ${
-                question.is_correct 
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                  : 'border-red-400 bg-red-50 text-red-800'
-              }`}>
-                {question.user_answer || '(Chưa điền)'}
-              </span>
-              {!question.is_correct && (
-                <span className="text-xs text-emerald-700 font-medium">
-                  (Đáp án đúng: <span className="font-bold underline">{question.correct_answer}</span>)
-                </span>
-              )}
-            </div>
+          {question.prompt.includes('{{') ? (
+            <span>
+              {question.prompt.split(/(\{\{\d+\}\})/g).map((part, idx) => {
+                if (/^\{\{\d+\}\}$/.test(part)) {
+                  return (
+                    <span
+                      key={idx}
+                      className="inline-block px-1.5 py-0.5 mx-1 rounded border border-dashed border-zinc-400 bg-zinc-100 text-xs font-mono font-bold text-zinc-700"
+                    >
+                      [{part.replace(/[{}]/g, '')}]
+                    </span>
+                  );
+                }
+                return <span key={idx}>{part}</span>;
+              })}
+            </span>
           ) : (
             <span>{question.prompt}</span>
           )}
         </div>
       </div>
+
+      {/* Answer Pill for Non-Multiple Choice (Completion / Summary / Short Answer) */}
+      {!isMultipleChoice && (
+        <div className="pl-10">
+          <div
+            className={`p-3 rounded-xl border flex flex-wrap items-center gap-3 text-xs sm:text-sm ${
+              question.is_correct
+                ? 'border-emerald-300 bg-emerald-50/50 text-emerald-950'
+                : 'border-red-300 bg-red-50/50 text-red-950'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-zinc-500 uppercase text-[11px]">Bạn đã chọn:</span>
+              <span
+                className={`font-bold px-2 py-0.5 rounded border ${
+                  question.is_correct
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : 'bg-red-100 text-red-800 border-red-300'
+                }`}
+              >
+                {question.user_answer || '(Chưa điền)'}
+              </span>
+            </div>
+
+            {!question.is_correct && (
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-zinc-500 uppercase text-[11px]">Đáp án đúng:</span>
+                <span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
+                  {question.correct_answer}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Options Cards List (Image 3) */}
       {isMultipleChoice && (

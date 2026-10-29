@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search } from "lucide-react";
 import type { ScannedTestItem, SkillType } from "@/types/exam";
 import { DatasetTestRow } from "@/components/admin/DatasetTestRow";
+import { DatasetTestListToolbar } from "@/components/admin/DatasetTestListToolbar";
 
 interface DatasetTestListProps {
   tests: ScannedTestItem[];
@@ -11,6 +11,7 @@ interface DatasetTestListProps {
   onToggleSelect: (id: string) => void;
   onSelectMultiple: (ids: string[]) => void;
   onDeselectAll: () => void;
+  onDifficultyChange?: (id: string, diff: "easy" | "medium" | "hard") => void;
   disabled?: boolean;
 }
 
@@ -20,13 +21,13 @@ export function DatasetTestList({
   onToggleSelect,
   onSelectMultiple,
   onDeselectAll,
+  onDifficultyChange,
   disabled = false
 }: DatasetTestListProps) {
   const [skillFilter, setSkillFilter] = useState<SkillType | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "imported">("all");
   const [search, setSearch] = useState("");
 
-  // Filtered tests based on skill, status, and search query
   const filteredTests = useMemo(() => {
     return tests.filter((t) => {
       if (skillFilter !== "all" && t.skill !== skillFilter) return false;
@@ -43,7 +44,6 @@ export function DatasetTestList({
     });
   }, [tests, skillFilter, statusFilter, search]);
 
-  // Skill counts for quick badges
   const counts = useMemo(() => {
     return {
       all: tests.length,
@@ -56,91 +56,24 @@ export function DatasetTestList({
     };
   }, [tests]);
 
-  const handleSelectAllFiltered = () => {
-    onSelectMultiple(filteredTests.map((t) => t.id));
-  };
-
-  const handleSelectAllPending = () => {
-    onSelectMultiple(tests.filter((t) => !t.is_imported).map((t) => t.id));
-  };
-
   return (
     <div className="space-y-2.5">
-      {/* Skill Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
-        <button
-          type="button"
-          onClick={() => setSkillFilter("all")}
-          className={`px-2.5 py-1 rounded-lg font-bold transition-colors shrink-0 ${
-            skillFilter === "all" ? "bg-[#932120] text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-          }`}
-        >
-          Tất cả ({counts.all})
-        </button>
-        {(["reading", "listening", "writing", "speaking"] as SkillType[]).map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setSkillFilter(s)}
-            className={`px-2.5 py-1 rounded-lg font-bold transition-colors shrink-0 capitalize ${
-              skillFilter === s ? "bg-[#932120] text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-            }`}
-          >
-            {s} ({counts[s]})
-          </button>
-        ))}
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-zinc-50 p-2 rounded-xl border border-zinc-200 text-xs">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setStatusFilter("all")}
-            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-              statusFilter === "all" ? "bg-zinc-800 text-white" : "text-zinc-600 hover:bg-zinc-200"
-            }`}
-          >
-            Tất cả
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter("pending")}
-            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-              statusFilter === "pending" ? "bg-amber-700 text-white" : "text-amber-800 hover:bg-amber-100"
-            }`}
-          >
-            Chưa nạp ({counts.pending})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter("imported")}
-            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-              statusFilter === "imported" ? "bg-emerald-700 text-white" : "text-emerald-800 hover:bg-emerald-100"
-            }`}
-          >
-            Đã có ({counts.imported})
-          </button>
-        </div>
-
-        <div className="relative flex-1 min-w-[160px] max-w-[240px]">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Tìm tên đề, thư mục..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-2.5 py-1 bg-white border border-zinc-200 rounded-lg text-xs focus:ring-1 focus:ring-[#932120]"
-          />
-        </div>
-      </div>
+      <DatasetTestListToolbar
+        skillFilter={skillFilter}
+        setSkillFilter={setSkillFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        search={search}
+        setSearch={setSearch}
+        counts={counts}
+      />
 
       {/* Quick Selection Toolbar */}
       <div className="flex items-center justify-between px-1 text-[11px] text-zinc-500">
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleSelectAllPending}
+            onClick={() => onSelectMultiple(tests.filter((t) => !t.is_imported).map((t) => t.id))}
             className="text-amber-700 font-bold hover:underline"
           >
             + Chọn tất cả {counts.pending} bài chưa nạp
@@ -148,10 +81,10 @@ export function DatasetTestList({
           <span>•</span>
           <button
             type="button"
-            onClick={handleSelectAllFiltered}
+            onClick={() => onSelectMultiple(filteredTests.map((t) => t.id))}
             className="text-zinc-700 font-semibold hover:underline"
           >
-            Chọn {filteredTests.length} bài đang hiển thị
+            Chọn {filteredTests.length} bài hiển thị
           </button>
           {selectedIds.size > 0 && (
             <>
@@ -185,6 +118,7 @@ export function DatasetTestList({
               isSelected={selectedIds.has(t.id)}
               disabled={disabled}
               onToggleSelect={onToggleSelect}
+              onDifficultyChange={onDifficultyChange}
             />
           ))
         )}

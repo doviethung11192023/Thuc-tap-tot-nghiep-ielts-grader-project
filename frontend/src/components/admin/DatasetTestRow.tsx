@@ -9,6 +9,7 @@ interface DatasetTestRowProps {
   isSelected: boolean;
   disabled?: boolean;
   onToggleSelect: (id: string) => void;
+  onDifficultyChange?: (id: string, diff: "easy" | "medium" | "hard") => void;
 }
 
 const SKILL_ICONS: Record<string, React.ReactNode> = {
@@ -22,8 +23,18 @@ export function DatasetTestRow({
   test,
   isSelected,
   disabled = false,
-  onToggleSelect
+  onToggleSelect,
+  onDifficultyChange
 }: DatasetTestRowProps) {
+  const currentDiff = test.difficulty || "medium";
+
+  const handleCycleDifficulty = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (disabled || !onDifficultyChange) return;
+    const nextDiff = currentDiff === "easy" ? "medium" : (currentDiff === "medium" ? "hard" : "easy");
+    onDifficultyChange(test.id, nextDiff);
+  };
+
   return (
     <div
       onClick={() => !disabled && onToggleSelect(test.id)}
@@ -55,7 +66,22 @@ export function DatasetTestRow({
         </div>
       </div>
 
-      <div className="shrink-0">
+      <div className="shrink-0 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleCycleDifficulty}
+          title="Nhấn để đổi độ khó cho đề này"
+          className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+            currentDiff === "easy"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+              : currentDiff === "hard"
+              ? "bg-red-50 text-[#932120] border-red-300 hover:bg-red-100"
+              : "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
+          }`}
+        >
+          {currentDiff === "easy" ? "Dễ" : currentDiff === "hard" ? "Khó" : "Vừa"}
+        </button>
+
         {test.is_imported ? (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
             <CheckCircle2 className="w-3 h-3" /> Đã có

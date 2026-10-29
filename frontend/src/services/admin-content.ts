@@ -1,7 +1,7 @@
 import apiClient from "@/lib/api-client";
 import type { 
   TestItem, TestSet, BandConversion, SystemSetting, IngestResponse,
-  DatasetScanResult, ScannedTestItem, SkillType, ContentStatus, AllowedMode 
+  DatasetScanResult, ScannedTestItem, SkillType, ContentStatus, AllowedMode, TestDifficulty 
 } from "@/types/exam";
 
 export interface ListTestsParams {
@@ -11,6 +11,7 @@ export interface ListTestsParams {
   status?: ContentStatus;
   allowed_mode?: AllowedMode;
   test_set_id?: string;
+  difficulty?: string;
   sort_by?: string;
   search?: string;
 }
@@ -37,6 +38,7 @@ export async function createTest(payload: {
   allowed_mode?: AllowedMode;
   status?: ContentStatus;
   duration_min?: number;
+  difficulty?: TestDifficulty;
   origin?: string;
 }) {
   const res = await apiClient.post("/api/v1/admin/tests", payload);
@@ -155,6 +157,7 @@ export async function scanDataset(dataset_path?: string): Promise<DatasetScanRes
 
 export async function ingestCrawledDataset(payload?: {
   dataset_path?: string;
+  default_difficulty?: string;
   test_limit?: number;
   include_reading_listening?: boolean;
   include_writing?: boolean;

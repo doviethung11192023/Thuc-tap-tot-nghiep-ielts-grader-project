@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
-import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Eye, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { prefetchExamContent } from '@/services/exam-content-cache';
 
 interface TestPrepModalProps {
   testId: string;
@@ -16,45 +17,28 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
   const [mode, setMode] = useState<'exam' | 'practice'>('practice');
   const [selectedParts, setSelectedParts] = useState<number[]>([1, 2, 3]);
 
+  // Nạp ngầm trước đề thi ngay khi thí sinh mở modal để khi bấm "Vào phòng thi" là mở tức thì 0s
+  useEffect(() => {
+    if (testId) prefetchExamContent(testId);
+  }, [testId]);
+
   const togglePart = (partNum: number) => {
     setSelectedParts(prev => 
-      prev.includes(partNum) 
-        ? prev.filter(p => p !== partNum)
-        : [...prev, partNum].sort()
+      prev.includes(partNum) ? prev.filter(p => p !== partNum) : [...prev, partNum].sort()
     );
   };
 
   const handleStart = () => {
+    const s = skill.toLowerCase();
     const partsParam = selectedParts.join(',');
-    
-    // --- [MÃ MỚI BỞI AGENT: Định tuyến thông minh theo 4 kỹ năng] ---
-    let path = '';
-    if (skill === 'Writing') {
-      path = `/test-practice/writing/${testId}?mode=${mode}`;
-    } else if (skill === 'Listening') {
-      path = `/test-practice/listening/${testId}?mode=${mode}&parts=${partsParam}`;
-    } else if (skill === 'Speaking') {
-      path = `/test-practice/speaking/${testId}?mode=${mode}`;
-    } else {
-      path = `/test-practice/reading/${testId}?mode=${mode}&parts=${partsParam}`;
-    }
-    // -------------------------------------------------------------
-
+    const path = s === 'writing' || s === 'speaking'
+      ? `/test-practice/${s}/${testId}?mode=${mode}`
+      : `/test-practice/${s}/${testId}?mode=${mode}&parts=${partsParam}`;
     router.push(path);
   };
 
   const handlePreviewResults = () => {
-    let path = '';
-    if (skill === 'Writing') {
-      path = `/test-practice/writing/${testId}?view=result`;
-    } else if (skill === 'Listening') {
-      path = `/test-practice/listening/${testId}?view=result`;
-    } else if (skill === 'Speaking') {
-      path = `/test-practice/speaking/${testId}?view=result`;
-    } else {
-      path = `/test-practice/reading/${testId}?view=result`;
-    }
-    router.push(path);
+    router.push(`/test-practice/${skill.toLowerCase()}/${testId}?view=result`);
   };
 
   const getSkillIcon = () => {
@@ -62,7 +46,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
       case 'Listening': return <Headphones className="w-5 h-5 text-[#932120]" />;
       case 'Reading': return <BookOpen className="w-5 h-5 text-[#932120]" />;
       case 'Writing': return <PenTool className="w-5 h-5 text-[#932120]" />;
-      case 'Speaking': return <Mic className="w-5 h-5 text-[#932120]" />;
+      default: return <Mic className="w-5 h-5 text-[#932120]" />;
     }
   };
 
@@ -83,7 +67,6 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
         </div>
         
         <div className="p-6 space-y-6">
-          {/* Mode Selection */}
           <div className="space-y-3">
             <label className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
               <Settings className="w-4 h-4 text-[#932120]" /> Chế độ làm bài
@@ -92,17 +75,11 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
               <button
                 onClick={() => setMode('practice')}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  mode === 'practice' 
-                    ? 'border-[#932120] bg-red-50/50' 
-                    : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                  mode === 'practice' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
                 }`}
               >
-                <h4 className={`font-bold mb-1 ${mode === 'practice' ? 'text-[#932120]' : 'text-zinc-700'}`}>
-                  Luyện tập
-                </h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">
-                  Thời gian đếm tiến, không giới hạn. Cho phép lưu nháp và thoát tự do.
-                </p>
+                <h4 className={`font-bold mb-1 ${mode === 'practice' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện tập</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">Thời gian đếm tiến, không giới hạn. Cho phép lưu nháp và thoát tự do.</p>
               </button>
               
               <button
@@ -111,22 +88,15 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
                   setSelectedParts(skill === 'Reading' ? [1, 2, 3] : skill === 'Listening' ? [1, 2, 3, 4] : [1, 2]);
                 }}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  mode === 'exam' 
-                    ? 'border-[#932120] bg-red-50/50' 
-                    : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                  mode === 'exam' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
                 }`}
               >
-                <h4 className={`font-bold mb-1 ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>
-                  Luyện thi
-                </h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">
-                  Đếm ngược thời gian. Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần.
-                </p>
+                <h4 className={`font-bold mb-1 ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện thi</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">Đếm ngược thời gian. Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần.</p>
               </button>
             </div>
           </div>
 
-          {/* Parts Selection for Reading/Listening */}
           {(skill === 'Reading' || skill === 'Listening') && (
             <div className="space-y-3 pt-2">
               <label className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
@@ -137,11 +107,9 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
                 <div className="bg-red-50/70 border border-red-200 rounded-xl p-3.5 flex items-center justify-between text-xs text-red-950">
                   <div className="flex items-center gap-2 font-medium">
                     <span className="w-2 h-2 rounded-full bg-[#932120]"></span>
-                    <span><strong>Chế độ phòng thi:</strong> Mặc định làm toàn bộ {skill === 'Reading' ? '3 Passages' : '4 Sections'}, yêu cầu làm đủ các phần</span>
+                    <span><strong>Chế độ phòng thi:</strong> Mặc định làm toàn bộ {skill === 'Reading' ? '3 Passages' : '4 Sections'}</span>
                   </div>
-                  <span className="font-bold text-[#932120] bg-white px-2 py-0.5 rounded border border-red-200 uppercase text-[10px]">
-                    Full Test
-                  </span>
+                  <span className="font-bold text-[#932120] bg-white px-2 py-0.5 rounded border border-red-200 uppercase text-[10px]">Full Test</span>
                 </div>
               ) : (
                 <>
@@ -168,16 +136,12 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
             </div>
           )}
 
-          {/* Time estimation */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-3 text-sm text-blue-800">
             <Clock className="w-5 h-5 shrink-0 text-blue-500" />
             <p>
               Thời gian {mode === 'exam' ? 'giới hạn' : 'khuyến nghị'}:{' '}
               <strong className="font-bold">
-                {skill === 'Writing' ? '60 phút' :
-                 skill === 'Speaking' ? '14 phút' :
-                 skill === 'Listening' ? '30 phút' :
-                 `${selectedParts.length * 20} phút`}
+                {skill === 'Writing' ? '60 phút' : skill === 'Speaking' ? '14 phút' : skill === 'Listening' ? '30 phút' : `${selectedParts.length * 20} phút`}
               </strong>
             </p>
           </div>

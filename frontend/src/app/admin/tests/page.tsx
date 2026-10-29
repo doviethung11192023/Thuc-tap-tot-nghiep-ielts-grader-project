@@ -27,6 +27,8 @@ export default function AdminTestsPage() {
     setStatus,
     testSetId,
     setTestSetId,
+    difficulty,
+    setDifficulty,
     allowedMode,
     setAllowedMode,
     sortBy,
@@ -82,6 +84,7 @@ export default function AdminTestsPage() {
         skill={skill}
         status={status}
         testSetId={testSetId}
+        difficulty={difficulty}
         allowedMode={allowedMode}
         sortBy={sortBy}
         search={search}
@@ -91,6 +94,7 @@ export default function AdminTestsPage() {
         onTabClick={handleTabClick}
         onStatusChange={(st) => { setStatus(st); setPage(1); }}
         onTestSetChange={(ts) => { setTestSetId(ts); setPage(1); }}
+        onDifficultyChange={(d) => { setDifficulty(d); setPage(1); }}
         onModeChange={(m) => { setAllowedMode(m); setPage(1); }}
         onSortChange={(s) => { setSortBy(s); setPage(1); }}
         onSearchChange={(val) => { setSearch(val); setPage(1); }}
@@ -118,6 +122,7 @@ export default function AdminTestsPage() {
                 </th>
                 <th className="py-4 px-4">Bài Thi & Bộ Đề</th>
                 <th className="py-4 px-4">Kỹ Năng</th>
+                <th className="py-4 px-4">Độ Khó</th>
                 <th className="py-4 px-4">Chế Độ</th>
                 <th className="py-4 px-4">Thời Lượng</th>
                 <th className="py-4 px-4">Trạng Thái</th>
@@ -127,14 +132,14 @@ export default function AdminTestsPage() {
             <tbody className="divide-y divide-zinc-100 text-zinc-700">
               {loading && tests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-zinc-400">
+                  <td colSpan={8} className="py-16 text-center text-zinc-400">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#932120] mb-3" />
                     Đang nạp dữ liệu đề thi...
                   </td>
                 </tr>
               ) : tests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-zinc-500 text-sm">
+                  <td colSpan={8} className="py-16 text-center text-zinc-500 text-sm">
                     {hasActiveFilters ? (
                       <div className="space-y-3">
                         <p>Không tìm thấy đề thi nào khớp với bộ lọc hiện tại.</p>

@@ -64,3 +64,15 @@ export interface ExamCollection {
   tests: SingleTestItem[];
 }
 
+export interface PublishedTestItem {
+  id: string;
+  title: string;
+  skill: 'reading' | 'listening' | 'writing' | 'speaking';
+  duration_min: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  allowed_mode?: 'practice' | 'mock' | 'both';
+  test_set_id?: string | null;
+  test_sets?: { id: string; name: string } | null;
+  created_at?: string;
+}
+

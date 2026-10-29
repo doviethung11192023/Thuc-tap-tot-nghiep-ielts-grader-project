@@ -16,6 +16,7 @@ interface TestFilterBarProps {
   skill: SkillType | undefined;
   status: ContentStatus | undefined;
   testSetId: string | undefined;
+  difficulty?: string;
   allowedMode: AllowedMode | undefined;
   sortBy: string;
   search: string;
@@ -25,6 +26,7 @@ interface TestFilterBarProps {
   onTabClick: (newSkill: SkillType | undefined) => void;
   onStatusChange: (status: ContentStatus | undefined) => void;
   onTestSetChange: (testSetId: string | undefined) => void;
+  onDifficultyChange?: (difficulty: string | undefined) => void;
   onModeChange: (mode: AllowedMode | undefined) => void;
   onSortChange: (sort: string) => void;
   onSearchChange: (val: string) => void;
@@ -36,6 +38,7 @@ export function TestFilterBar({
   skill,
   status,
   testSetId,
+  difficulty,
   allowedMode,
   sortBy,
   search,
@@ -45,6 +48,7 @@ export function TestFilterBar({
   onTabClick,
   onStatusChange,
   onTestSetChange,
+  onDifficultyChange,
   onModeChange,
   onSortChange,
   onSearchChange,
@@ -98,7 +102,17 @@ export function TestFilterBar({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-100">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-2 border-t border-zinc-100">
+        <div>
+          <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Độ khó</label>
+          <select value={difficulty || ""} onChange={(e) => onDifficultyChange?.(e.target.value || undefined)} className="w-full px-2.5 py-1.5 border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 bg-zinc-50 focus:bg-white focus:outline-none focus:border-[#932120]">
+            <option value="">Tất cả độ khó</option>
+            <option value="easy">Dễ (Easy)</option>
+            <option value="medium">Vừa (Medium)</option>
+            <option value="hard">Khó (Hard)</option>
+          </select>
+        </div>
+
         <div>
           <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Trạng thái</label>
           <select value={status || ""} onChange={(e) => onStatusChange(e.target.value ? (e.target.value as ContentStatus) : undefined)} className="w-full px-2.5 py-1.5 border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 bg-zinc-50 focus:bg-white focus:outline-none focus:border-[#932120]">

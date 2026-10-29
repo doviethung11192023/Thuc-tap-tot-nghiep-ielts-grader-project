@@ -5,8 +5,8 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { WritingSummaryResult } from '@/components/exam/summary/WritingSummaryResult';
 import { SpeakingSummaryResult } from '@/components/exam/summary/SpeakingSummaryResult';
-import { cleanReadingTest1Data } from '@/mocks/clean-dataset/reading-test-1-clean';
-import { cleanListeningTest1Data } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { SkillSummarySkeleton } from '@/components/exam/summary/SkillSummarySkeleton';
+import { useAttemptSummary } from '@/hooks/useAttemptSummary';
 import { 
   CheckCircle2, 
   Sparkles, 
@@ -14,12 +14,7 @@ import {
   RotateCcw, 
   FileSearch, 
   ArrowRight,
-  Clock,
-  BookOpen,
-  Headphones,
-  BarChart3,
-  TrendingUp,
-  AlertCircle
+  BarChart3
 } from 'lucide-react';
 
 export default function SkillSummaryResultPage() {
@@ -29,6 +24,10 @@ export default function SkillSummaryResultPage() {
   const skill = (params?.skill as string)?.toLowerCase();
   const testId = params?.testId as string;
   const attemptId = searchParams.get('attemptId') || undefined;
+  const partsParam = searchParams.get('parts') || '';
+
+  const isReading = skill === 'reading';
+  const { data: cleanData, loading } = useAttemptSummary(attemptId, skill);
 
   if (skill === 'writing') {
     return (
@@ -50,13 +49,13 @@ export default function SkillSummaryResultPage() {
     );
   }
 
-  // =========================================================================
-  // DỮ LIỆU THẬT CHO READING & LISTENING TEST 1 TỪ BỘ CLEAN DATASET
-  // =========================================================================
-  const isReading = skill === 'reading';
-  const cleanData = isReading ? cleanReadingTest1Data : cleanListeningTest1Data;
-
   const skillTitle = isReading ? 'Reading' : 'Listening';
+
+  // Hiển thị Skeleton layout nếu đang tải kết quả thực tế, ngăn chặn giật 4.0 mock
+  if (loading || !cleanData) {
+    return <SkillSummarySkeleton skillTitle={skillTitle} />;
+  }
+
   const bandScore = cleanData.overall_band;
   const correctCount = cleanData.correct_count;
   const totalQuestions = cleanData.total_questions;
@@ -114,7 +113,7 @@ export default function SkillSummaryResultPage() {
         </div>
       </div>
 
-      {/* Bảng Phân Tích Chi Tiết Từng Dạng Bài Thật (Task Formats Breakdown) */}
+      {/* Bảng Phân Tích Chi Tiết Từng Dạng Bài Thật */}
       <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-2xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -183,7 +182,7 @@ export default function SkillSummaryResultPage() {
 
         <Link
           id={`btn-view-detailed-${skill}-result`}
-          href={`/test-practice/${skill}/${testId}/detail${attemptId ? `?attemptId=${attemptId}` : ''}`}
+          href={`/test-practice/${skill}/${testId}/detail?${[attemptId ? `attemptId=${attemptId}` : '', partsParam ? `parts=${partsParam}` : ''].filter(Boolean).join('&')}`}
           className="w-full sm:w-auto h-10 px-6 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-95"
         >
           <FileSearch className="w-4 h-4" />

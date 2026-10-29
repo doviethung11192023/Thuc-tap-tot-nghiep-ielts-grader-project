@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Save, Plus, Loader2, Clock, ShieldAlert } from "lucide-react";
 import { getTestDetail, updateTest, createSection } from "@/services/admin-content";
 import { SectionEditor } from "@/components/admin/SectionEditor";
-import type { TestItem, ContentStatus, AllowedMode } from "@/types/exam";
+import type { TestItem, ContentStatus, AllowedMode, TestDifficulty } from "@/types/exam";
 
 export default function ExamBuilderPage() {
   const params = useParams();
@@ -16,6 +16,7 @@ export default function ExamBuilderPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
+  const [difficulty, setDifficulty] = useState<TestDifficulty>("medium");
   const [durationMin, setDurationMin] = useState(60);
   const [status, setStatus] = useState<ContentStatus>("draft");
   const [allowedMode, setAllowedMode] = useState<AllowedMode>("both");
@@ -25,6 +26,7 @@ export default function ExamBuilderPage() {
       const data = await getTestDetail(testId);
       setTest(data);
       setTitle(data.title);
+      setDifficulty((data.difficulty as TestDifficulty) || "medium");
       setDurationMin(data.duration_min || 60);
       setStatus(data.status);
       setAllowedMode(data.allowed_mode);
@@ -42,6 +44,7 @@ export default function ExamBuilderPage() {
     try {
       await updateTest(testId, {
         title: title.trim(),
+        difficulty,
         duration_min: durationMin,
         status,
         allowed_mode: allowedMode,
@@ -118,20 +121,28 @@ export default function ExamBuilderPage() {
         </div>
       </div>
 
-      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-5 text-xs sm:text-sm">
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm">
         <div>
-          <label className="block text-zinc-600 font-bold mb-1.5 uppercase text-xs tracking-wider">Thời lượng thi (phút):</label>
+          <label className="block text-zinc-600 font-bold mb-1.5 uppercase text-xs tracking-wider">Thời lượng (phút):</label>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-zinc-400 shrink-0" />
             <input type="number" min={1} value={durationMin} onChange={(e) => setDurationMin(parseInt(e.target.value) || 60)} className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#932120]" />
           </div>
         </div>
         <div>
+          <label className="block text-zinc-600 font-bold mb-1.5 uppercase text-xs tracking-wider">Mức độ khó:</label>
+          <select value={difficulty} onChange={(e) => setDifficulty(e.target.value as TestDifficulty)} className="w-full px-3 py-2 border border-zinc-300 rounded-xl bg-white focus:outline-none focus:ring-1 focus:ring-[#932120]">
+            <option value="easy">Dễ (Easy)</option>
+            <option value="medium">Vừa (Medium)</option>
+            <option value="hard">Khó (Hard)</option>
+          </select>
+        </div>
+        <div>
           <label className="block text-zinc-600 font-bold mb-1.5 uppercase text-xs tracking-wider">Chế độ cho phép:</label>
           <select value={allowedMode} onChange={(e) => setAllowedMode(e.target.value as AllowedMode)} className="w-full px-3 py-2 border border-zinc-300 rounded-xl bg-white focus:outline-none focus:ring-1 focus:ring-[#932120]">
-            <option value="both">Cả Luyện tập & Thi thử (Both)</option>
-            <option value="practice">Chỉ Luyện tập (Practice)</option>
-            <option value="mock">Chỉ Thi thử (Mock Test)</option>
+            <option value="both">Cả hai (Both)</option>
+            <option value="practice">Chỉ Luyện tập</option>
+            <option value="mock">Chỉ Thi thử</option>
           </select>
         </div>
         <div>

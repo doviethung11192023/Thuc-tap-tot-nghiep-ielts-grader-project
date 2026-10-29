@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, MoreVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { mockSpeakingExamDataset } from '@/mocks/exam-speaking';
+import { mockSpeakingExamDataset, type MockSpeakingExamDataset, type SpeakingPartData } from '@/mocks/exam-speaking';
 import { SpeakingIntroModal } from './speaking/speaking-intro-modal';
 import { SpeakingPartGuideline } from './speaking/speaking-part-guideline';
 import { SpeakingQuestionSidebar } from './speaking/speaking-question-sidebar';
@@ -13,39 +13,26 @@ import { SpeakingReviewScreen } from './speaking/speaking-review-screen';
 import { ExitConfirmModal } from './ExitConfirmModal';
 
 interface SpeakingWorkspaceProps {
+  testData?: MockSpeakingExamDataset;
   mode?: 'exam' | 'practice';
   onSubmit: () => void;
 }
 
-export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspaceProps) {
+export function SpeakingWorkspace({ testData, mode = 'exam', onSubmit }: SpeakingWorkspaceProps) {
   const router = useRouter();
-  const exam = mockSpeakingExamDataset;
+  const exam = testData || mockSpeakingExamDataset;
 
-  // View phase: 'intro' | 'guideline' | 'testing' | 'review'
   const [viewPhase, setViewPhase] = useState<'intro' | 'guideline' | 'testing' | 'review'>('intro');
-
-  // Navigation state
   const [currentPart, setCurrentPart] = useState<1 | 2 | 3>(1);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-
-  // Recorded questions map: key: "p1_q1", value: true
-  const [recordedMap, setRecordedMap] = useState<Record<string, boolean>>({
-    'p1_q1': true,
-    'p1_q2': true,
-  });
-
-  // Scratchpad notes
-  const [notes, setNotes] = useState(
-    'Ha Giang motorbike trip with university friends\nBreathtaking Ma Pi Leng pass, limestone karsts\nSteep roads, ethnic minority children warmth'
-  );
-
-  // Exit Modal state
+  const [recordedMap, setRecordedMap] = useState<Record<string, boolean>>({});
+  const [notes, setNotes] = useState('');
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
-  const activePartData = exam.parts.find((p) => p.part_number === currentPart) || exam.parts[0];
+  const activePartData = exam.parts.find((p: SpeakingPartData) => p.part_number === currentPart) || exam.parts[0];
   const questions =
-    activePartData.questions ||
-    (activePartData.cue_card
+    activePartData?.questions ||
+    (activePartData?.cue_card
       ? [
           {
             id: 'p2_cue',
@@ -58,17 +45,6 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
 
   const currentQuestionItem = questions[currentQuestionIndex];
 
-  // Handle intro modal confirm
-  const handleIntroConfirm = () => {
-    setViewPhase('guideline');
-  };
-
-  // Handle starting a part from guideline screen
-  const handleStartPart = () => {
-    setViewPhase('testing');
-  };
-
-  // Handle question selection
   const handleSelectQuestion = (partNumber: 1 | 2 | 3, qIdx: number) => {
     if (partNumber !== currentPart) {
       setCurrentPart(partNumber);
@@ -80,72 +56,58 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
     }
   };
 
-  // Handle recording completion for current question
   const handleRecordComplete = () => {
     const key = `p${currentPart}_q${currentQuestionIndex + 1}`;
-    setRecordedMap((prev) => ({
-      ...prev,
-      [key]: true,
-    }));
+    setRecordedMap((prev) => ({ ...prev, [key]: true }));
   };
 
-  // Handle next question
   const handleNextQuestion = () => {
     if (currentQuestionIndex + 1 < questions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
+    } else if (currentPart === 1 && exam.parts.some((p: SpeakingPartData) => p.part_number === 2)) {
+      setCurrentPart(2);
+      setCurrentQuestionIndex(0);
+      setViewPhase('guideline');
+    } else if (currentPart === 2 && exam.parts.some((p: SpeakingPartData) => p.part_number === 3)) {
+      setCurrentPart(3);
+      setCurrentQuestionIndex(0);
+      setViewPhase('guideline');
     } else {
-      // End of this part
-      if (currentPart === 1) {
-        setCurrentPart(2);
-        setCurrentQuestionIndex(0);
-        setViewPhase('guideline');
-      } else if (currentPart === 2) {
-        setCurrentPart(3);
-        setCurrentQuestionIndex(0);
-        setViewPhase('guideline');
-      } else {
-        // All parts completed, go to review
-        setViewPhase('review');
-      }
+      setViewPhase('review');
     }
   };
 
-  // Handle retake a single question from review screen
   const handleRetakeQuestion = (partNum: 1 | 2 | 3, qIdx: number) => {
     setCurrentPart(partNum);
     setCurrentQuestionIndex(qIdx);
     setViewPhase('testing');
   };
 
-  // Handle reset all
   const handleRetakeAll = () => {
     setRecordedMap({});
-    setCurrentPart(1);
+    setCurrentPart((exam.parts[0]?.part_number as 1 | 2 | 3) || 1);
     setCurrentQuestionIndex(0);
     setViewPhase('guideline');
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
-      {/* 1. Intro Modal Phase */}
       <SpeakingIntroModal
         isOpen={viewPhase === 'intro'}
         onClose={() => setViewPhase('guideline')}
-        onConfirm={handleIntroConfirm}
+        onConfirm={() => setViewPhase('guideline')}
       />
 
-      {/* 2. Part Guideline Phase */}
-      {viewPhase === 'guideline' && (
+      {viewPhase === 'guideline' && activePartData && (
         <SpeakingPartGuideline
           partNumber={currentPart}
           instructions={activePartData.instructions}
           guidelines={activePartData.guidelines}
           onBack={() => setIsExitModalOpen(true)}
-          onStart={handleStartPart}
+          onStart={() => setViewPhase('testing')}
         />
       )}
 
-      {/* 3. Review Screen Phase */}
       {viewPhase === 'review' && (
         <SpeakingReviewScreen
           testTitle={exam.title}
@@ -157,10 +119,8 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
         />
       )}
 
-      {/* 4. Main 3-Column Virtual Speaking Room Testing Phase */}
-      {viewPhase === 'testing' && (
+      {viewPhase === 'testing' && activePartData && (
         <div className="flex-1 flex flex-col justify-between">
-          {/* Header */}
           <header className="w-full bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
             <button
               onClick={() => setIsExitModalOpen(true)}
@@ -183,9 +143,7 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
             </button>
           </header>
 
-          {/* 3-Column Body */}
           <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col lg:flex-row gap-4 items-stretch">
-            {/* Left Sidebar */}
             <SpeakingQuestionSidebar
               parts={exam.parts}
               currentPart={currentPart}
@@ -195,7 +153,6 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
               onOpenReview={() => setViewPhase('review')}
             />
 
-            {/* Center Virtual Examiner Stage */}
             <SpeakingVirtualRoomStage
               partNumber={currentPart}
               questionIndex={currentQuestionIndex}
@@ -207,7 +164,6 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
               onNextQuestion={handleNextQuestion}
             />
 
-            {/* Right Aids Panel */}
             <SpeakingAidsPanel
               ideas={currentQuestionItem?.ideas || activePartData.cue_card?.ideas}
               notes={notes}
@@ -217,7 +173,6 @@ export function SpeakingWorkspace({ mode = 'exam', onSubmit }: SpeakingWorkspace
         </div>
       )}
 
-      {/* Exit Confirmation Modal */}
       <ExitConfirmModal
         isOpen={isExitModalOpen}
         mode={mode}

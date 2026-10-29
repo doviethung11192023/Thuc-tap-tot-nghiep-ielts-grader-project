@@ -38,7 +38,8 @@ async def ingest_crawled_dataset(
     importer = DatasetImporter(
         root_path=req.dataset_path,
         admin_id=str(current_user.id),
-        only_pending=req.only_pending
+        only_pending=req.only_pending,
+        default_difficulty=req.default_difficulty or "medium"
     )
     result = importer.run(
         limit=req.test_limit,
@@ -88,7 +89,8 @@ async def ingest_crawled_dataset_stream(
                 root_path=req.dataset_path,
                 admin_id=str(current_user.id),
                 only_pending=req.only_pending,
-                progress_callback=progress_callback
+                progress_callback=progress_callback,
+                default_difficulty=req.default_difficulty or "medium"
             )
             result = importer.run(
                 limit=req.test_limit,

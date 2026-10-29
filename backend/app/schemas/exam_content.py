@@ -55,6 +55,7 @@ class TestCreate(BaseModel):
     allowed_mode: AllowedMode = AllowedMode.BOTH
     status: ContentStatus = ContentStatus.DRAFT
     duration_min: Optional[int] = Field(None, gt=0)
+    difficulty: Optional[str] = "medium"
     origin: ContentOrigin = ContentOrigin.MANUAL
     source_name: Optional[str] = None
     source_url: Optional[str] = None
@@ -66,6 +67,7 @@ class TestUpdate(BaseModel):
     allowed_mode: Optional[AllowedMode] = None
     status: Optional[ContentStatus] = None
     duration_min: Optional[int] = None
+    difficulty: Optional[str] = None
     origin: Optional[ContentOrigin] = None
     source_name: Optional[str] = None
     source_url: Optional[str] = None
@@ -83,6 +85,7 @@ class TestResponse(BaseModel):
     status: ContentStatus
     version: int
     duration_min: Optional[int] = None
+    difficulty: Optional[str] = "medium"
     origin: ContentOrigin
     source_name: Optional[str] = None
     created_by: Optional[str] = None

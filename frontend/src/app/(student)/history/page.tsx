@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getEssayHistory } from '@/services/essays';
+import { getStudentHistory } from '@/services/student-test-practice';
 import { EssayHistoryItem } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -89,7 +90,26 @@ export default function HistoryPage() {
           },
         ];
 
-        // 2. Fetch thêm các bài viết từ API backend (nếu có)
+        // 2. Fetch thêm các bài thi từ test_attempts backend
+        try {
+          const studentHistoryData = await getStudentHistory(1, 20);
+          if (studentHistoryData?.items && studentHistoryData.items.length > 0) {
+            const mappedAttempts: UnifiedHistoryItem[] = studentHistoryData.items.map((item: any) => ({
+              id: item.id,
+              test_title: item.title,
+              skill: item.skill,
+              submitted_at: item.submitted_at,
+              status: item.status === 'scored' ? 'completed' : 'pending',
+              overall_band: item.band,
+              summary_url: `/test-practice/${item.skill.toLowerCase()}/${item.test_id}/summary?attemptId=${item.id}`
+            }));
+            cleanDatasetItems.unshift(...mappedAttempts);
+          }
+        } catch (e) {
+          console.log('Using local clean dataset history fallback');
+        }
+
+        // 3. Fetch thêm các bài viết từ API backend (nếu có)
         try {
           const apiData = await getEssayHistory({ page: 1, limit: 20 });
           if (apiData && apiData.items && apiData.items.length > 0) {

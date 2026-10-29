@@ -49,6 +49,21 @@ export function TestTableRow({
           {skillLabel}
         </span>
       </td>
+      <td className="py-4 px-4 whitespace-nowrap">
+        {t.difficulty === "easy" ? (
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Dễ (Easy)
+          </span>
+        ) : t.difficulty === "hard" ? (
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-[#932120] border border-red-200">
+            Khó (Hard)
+          </span>
+        ) : (
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            Vừa (Medium)
+          </span>
+        )}
+      </td>
       <td className="py-4 px-4 capitalize text-xs sm:text-sm text-zinc-600 font-medium">
         {t.allowed_mode}
       </td>

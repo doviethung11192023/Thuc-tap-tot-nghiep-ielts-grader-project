@@ -21,6 +21,7 @@ export function useAdminTests() {
   const [skill, setSkill] = useState<SkillType | undefined>(undefined);
   const [status, setStatus] = useState<ContentStatus | undefined>(undefined);
   const [testSetId, setTestSetId] = useState<string | undefined>(undefined);
+  const [difficulty, setDifficulty] = useState<string | undefined>(undefined);
   const [allowedMode, setAllowedMode] = useState<AllowedMode | undefined>(undefined);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [search, setSearch] = useState("");
@@ -28,7 +29,7 @@ export function useAdminTests() {
   const [testSets, setTestSets] = useState<TestSet[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const cacheKey = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+  const cacheKey = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
   const initialCached = testsCacheMap.get(cacheKey);
 
   const [tests, setTests] = useState<TestItem[]>(() => initialCached?.items || []);
@@ -43,20 +44,13 @@ export function useAdminTests() {
 
   const fetchTests = useCallback(
     async (isSilent = false) => {
-      const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+      const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
       if (!testsCacheMap.has(key) && !isSilent) setLoading(true);
       else setIsRefreshing(true);
 
       try {
         const data = await getTests({
-          page,
-          limit,
-          skill,
-          status,
-          test_set_id: testSetId,
-          allowed_mode: allowedMode,
-          sort_by: sortBy,
-          search: search.trim() || undefined,
+          page, limit, skill, status, test_set_id: testSetId, difficulty, allowed_mode: allowedMode, sort_by: sortBy, search: search.trim() || undefined
         });
         setTests(data.items);
         setTotal(data.total);
@@ -68,11 +62,11 @@ export function useAdminTests() {
         setIsRefreshing(false);
       }
     },
-    [page, limit, skill, status, testSetId, allowedMode, sortBy, search]
+    [page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]
   );
 
   useEffect(() => {
-    const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+    const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
     const cached = testsCacheMap.get(key);
     if (cached) {
       setTests(cached.items);
@@ -81,7 +75,7 @@ export function useAdminTests() {
     } else {
       fetchTests(false);
     }
-  }, [fetchTests, page, limit, skill, status, testSetId, allowedMode, sortBy, search]);
+  }, [fetchTests, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]);
 
   const handleTabClick = (newSkill: SkillType | undefined) => {
     startTransition(() => {
@@ -142,6 +136,7 @@ export function useAdminTests() {
     setSkill(undefined);
     setStatus(undefined);
     setTestSetId(undefined);
+    setDifficulty(undefined);
     setAllowedMode(undefined);
     setSortBy("newest");
     setSearch("");
@@ -150,38 +145,14 @@ export function useAdminTests() {
   };
 
   const hasActiveFilters = Boolean(
-    skill || status || testSetId || allowedMode || search || sortBy !== "newest"
+    skill || status || testSetId || difficulty || allowedMode || search || sortBy !== "newest"
   );
 
   return {
-    page,
-    setPage,
-    limit,
-    skill,
-    status,
-    setStatus,
-    testSetId,
-    setTestSetId,
-    allowedMode,
-    setAllowedMode,
-    sortBy,
-    setSortBy,
-    search,
-    setSearch,
-    tests,
-    total,
-    testSets,
-    selectedIds,
-    loading,
-    isRefreshing,
-    isPendingTransition,
-    hasActiveFilters,
-    handleTabClick,
-    handleStatusChange,
-    handleBulkStatus,
-    handleDelete,
-    toggleSelectAll,
-    toggleSelectOne,
+    page, setPage, limit, skill, status, setStatus, testSetId, setTestSetId,
+    difficulty, setDifficulty, allowedMode, setAllowedMode, sortBy, setSortBy, search, setSearch,
+    tests, total, testSets, selectedIds, loading, isRefreshing, isPendingTransition, hasActiveFilters,
+    handleTabClick, handleStatusChange, handleBulkStatus, handleDelete, toggleSelectAll, toggleSelectOne,
     resetAllFilters,
     clearCacheAndRefresh: (silent = false) => {
       testsCacheMap.clear();

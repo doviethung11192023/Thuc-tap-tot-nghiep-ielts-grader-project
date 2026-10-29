@@ -8,6 +8,7 @@ from app.api.endpoints.admin_content import (
     core as admin_core,
     ingest as admin_ingest
 )
+from app.api.endpoints.student_practice import student_practice_router
 
 api_router = APIRouter()
 api_router.include_router(essays.router, prefix="/essays", tags=["Essays"])
@@ -22,4 +23,6 @@ api_router.include_router(admin_core.router, prefix="/admin", tags=["Admin Core"
 api_router.include_router(admin_ingest.router, prefix="/admin", tags=["Admin Ingestion"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(expert.router, prefix="/expert", tags=["Expert"])
+api_router.include_router(student_practice_router, tags=["Student Practice"])
+
 

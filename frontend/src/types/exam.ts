@@ -1,6 +1,7 @@
 export type SkillType = "listening" | "reading" | "writing" | "speaking";
 export type AllowedMode = "practice" | "mock" | "both";
 export type ContentStatus = "draft" | "pending_review" | "published" | "archived";
+export type TestDifficulty = "easy" | "medium" | "hard";
 
 export interface TestSet {
   id: string;
@@ -61,6 +62,7 @@ export interface TestItem {
   status: ContentStatus;
   version: number;
   duration_min?: number | null;
+  difficulty?: TestDifficulty;
   origin: string;
   source_name?: string | null;
   created_at: string;
@@ -112,6 +114,7 @@ export interface ScannedTestItem {
   path: string;
   is_imported: boolean;
   duration_min?: number;
+  difficulty?: TestDifficulty;
 }
 
 export interface DatasetScanResult {
@@ -119,16 +122,10 @@ export interface DatasetScanResult {
   total_imported: number;
   total_pending: number;
   by_skill: Record<string, SkillScanSummary>;
-  pending_samples: Array<{
-    title: string;
-    skill: string;
-    folder: string;
-    path: string;
-  }>;
+  pending_samples: Array<{ title: string; skill: string; folder: string; path: string }>;
   tests: ScannedTestItem[];
 }
 
-// Student exam client & practice types
 export type QuestionMode = 'exam' | 'practice' | 'review';
 
 export interface DiagramCoordinate {
@@ -176,10 +173,7 @@ export interface PassageData {
 export interface ReadingTestData {
   test_id: string;
   title: string;
-  passages: {
-    passage: PassageData;
-    question_groups: QuestionGroupData[];
-  }[];
+  passages: { passage: PassageData; question_groups: QuestionGroupData[] }[];
 }
 
 export interface WritingTaskData {
@@ -196,4 +190,3 @@ export interface WritingTestData {
   title: string;
   tasks: WritingTaskData[];
 }
-

@@ -103,3 +103,14 @@ async def require_student(current_user: User = Depends(get_current_active_user))
         )
     return current_user
 
+security_optional = HTTPBearer(auto_error=False)
+
+async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(security_optional)) -> User | None:
+    if not credentials or not credentials.credentials:
+        return None
+    try:
+        return await get_current_user(credentials)
+    except Exception:
+        return None
+
+
