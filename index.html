@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Phối Trung Tâm - Đánh Giá Độ Phủ & Thiết Kế Giao Diện IELTS</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full font-sans text-zinc-900 antialiased flex flex-col">
+
+  <!-- Header Điều Hướng Hệ Thống -->
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-40 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            M
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-zinc-900 leading-tight">Hồ Sơ Đặc Tả Giao Diện IELTS</h1>
+            <p class="text-xs text-zinc-500 font-medium">Báo cáo rà soát hiện trạng LongRevert &amp; Nguyên mẫu chuẩn hóa</p>
+          </div>
+        </div>
+
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="#matrix-section" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">Ma Trận Độ Phủ</a>
+          <a href="base-components.html" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">7 Base Components</a>
+          <a href="reading/workspace-exam.html" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">Reading Exam</a>
+          <a href="reading/workspace-review.html" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">Reading Review</a>
+          <a href="listening/workspace-exam.html" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">Listening Exam</a>
+          <a href="listening/workspace-review.html" class="px-3 py-2 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg hover:bg-zinc-100 transition-colors">Listening Review</a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
+            Worktree: LongRevert
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Tổng Quan & Chỉ Số KPI -->
+  <section class="bg-white border-b border-zinc-200 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="md:flex md:items-center md:justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-black text-zinc-900 tracking-tight sm:text-3xl">Bảng Điều Phối Trực Quan Dạng Bài IELTS</h2>
+          <p class="mt-1 text-sm text-zinc-600 max-w-3xl">
+            Tổng hợp dữ liệu đối chuẩn giữa mã nguồn hiện có trên nhánh <code>LongRevert</code>, hợp đồng dữ liệu <code>data_scheme</code> và các bộ đề Cambridge thực tế. Toàn bộ các khối giao diện được trích xuất trực tiếp phục vụ nghiệm thu kỹ thuật.
+          </p>
+        </div>
+        <div class="mt-4 md:mt-0 flex gap-2">
+          <a href="reading/components-gallery.html" class="inline-flex items-center px-4 py-2 text-xs font-bold rounded-lg text-white bg-primary hover:bg-primary-hover shadow-xs transition-colors">
+            16 Dạng Reading &rarr;
+          </a>
+          <a href="listening/components-gallery.html" class="inline-flex items-center px-4 py-2 text-xs font-bold rounded-lg text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors">
+            12 Dạng Listening &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Thống Kê 4 Thẻ Trạng Thái -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-zinc-50 border border-zinc-200 rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-zinc-500">Tổng Số Dạng Bài</span>
+            <span class="p-1.5 rounded-lg bg-zinc-200 text-zinc-700 font-mono text-xs">28 Tasks</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-zinc-900">28</span>
+            <span class="text-xs text-zinc-500 font-medium">16 Reading + 12 Listening</span>
+          </div>
+          <div class="mt-3 w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-zinc-800 h-full w-full"></div>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Hoạt Động Ổn Định</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-emerald-700">17</span>
+            <span class="text-xs text-emerald-800 font-semibold">60.7% độ phủ</span>
+          </div>
+          <p class="mt-2 text-xs text-emerald-700 leading-relaxed">
+            Các dạng điền từ đục lỗ, trắc nghiệm đơn, ghép nối danh mục vận hành đúng chuẩn.
+          </p>
+        </div>
+
+        <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-800">Cần Tối Ưu Hóa</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-amber-700">7</span>
+            <span class="text-xs text-amber-800 font-semibold">25.0% độ phủ</span>
+          </div>
+          <p class="mt-2 text-xs text-amber-700 leading-relaxed">
+            Giao diện hiển thị ở mức tạm thời; thiếu đồ họa quy trình, thanh ghim hoặc nút chọn nhanh.
+          </p>
+        </div>
+
+        <div class="bg-rose-50/60 border border-rose-200 rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-rose-800">Hạn Chế Trọng Yếu</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-rose-700">4</span>
+            <span class="text-xs text-rose-800 font-semibold">14.3% độ phủ</span>
+          </div>
+          <p class="mt-2 text-xs text-rose-700 leading-relaxed">
+            Mất cấu trúc phân cột bảng, thiếu bộ đếm giới hạn chọn nhiều, thiếu kéo thả bản đồ.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Thanh Lối Tắt Đến Các Không Gian Làm Bài Toàn Diện -->
+  <section class="bg-zinc-100/70 border-b border-zinc-200 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Truy Cập Nhanh Không Gian Giao Diện Hoàn Chỉnh</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <a href="reading/workspace-exam.html" class="p-3.5 bg-white border border-zinc-200 rounded-xl hover:border-primary hover:shadow-sm transition-all group flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-100 text-red-800">Reading Workspace</span>
+            <h4 class="mt-2 text-xs font-bold text-zinc-900 group-hover:text-primary">Phòng Thi Làm Bài</h4>
+            <p class="mt-1 text-[11px] text-zinc-500">Thanh kéo co giãn 30-70%, Palette 40 câu auto-scroll, bộ tăng cỡ chữ.</p>
+          </div>
+          <span class="mt-3 text-[11px] font-bold text-primary flex items-center gap-1">Khám phá &rarr;</span>
+        </a>
+
+        <a href="reading/workspace-review.html" class="p-3.5 bg-white border border-zinc-200 rounded-xl hover:border-primary hover:shadow-sm transition-all group flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Reading Results</span>
+            <h4 class="mt-2 text-xs font-bold text-zinc-900 group-hover:text-primary">Màn Hình Kết Quả</h4>
+            <p class="mt-1 text-[11px] text-zinc-500">Thẻ điểm Band Score, giải thích 4 bước, liên kết tự động đánh dấu bài đọc.</p>
+          </div>
+          <span class="mt-3 text-[11px] font-bold text-primary flex items-center gap-1">Khám phá &rarr;</span>
+        </a>
+
+        <a href="listening/workspace-exam.html" class="p-3.5 bg-white border border-zinc-200 rounded-xl hover:border-primary hover:shadow-sm transition-all group flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 text-blue-800">Listening Workspace</span>
+            <h4 class="mt-2 text-xs font-bold text-zinc-900 group-hover:text-primary">Phòng Thi Nghe</h4>
+            <p class="mt-1 text-[11px] text-zinc-500">Thanh phát âm thanh cố định, khóa tua phòng thi, bản đồ kéo thả tọa độ.</p>
+          </div>
+          <span class="mt-3 text-[11px] font-bold text-primary flex items-center gap-1">Khám phá &rarr;</span>
+        </a>
+
+        <a href="listening/workspace-review.html" class="p-3.5 bg-white border border-zinc-200 rounded-xl hover:border-primary hover:shadow-sm transition-all group flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-100 text-purple-800">Listening Results</span>
+            <h4 class="mt-2 text-xs font-bold text-zinc-900 group-hover:text-primary">Màn Kết Quả Nghe</h4>
+            <p class="mt-1 text-[11px] text-zinc-500">Phát lại kèm lời thoại phân vai, nhấp mốc thời gian để phát đúng dẫn chứng.</p>
+          </div>
+          <span class="mt-3 text-[11px] font-bold text-primary flex items-center gap-1">Khám phá &rarr;</span>
+        </a>
+
+        <a href="base-components.html" class="p-3.5 bg-white border border-zinc-200 rounded-xl hover:border-primary hover:shadow-sm transition-all group flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800">Architecture Engine</span>
+            <h4 class="mt-2 text-xs font-bold text-zinc-900 group-hover:text-primary">7 Base Components</h4>
+            <p class="mt-1 text-[11px] text-zinc-500">Thư viện thành phần nền tảng dùng chung 100% logic ở 2 chế độ tương tác.</p>
+          </div>
+          <span class="mt-3 text-[11px] font-bold text-primary flex items-center gap-1">Khám phá &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Khu Vực Ma Trận Đánh Giá Chi Tiết -->
+  <main id="matrix-section" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="sm:flex sm:items-center sm:justify-between pb-6 border-b border-zinc-200">
+      <div>
+        <h3 class="text-lg font-bold text-zinc-900">Ma Trận Đối Chuẩn Chi Tiết 28 Dạng Bài</h3>
+        <p class="text-xs text-zinc-500 mt-0.5">Trích xuất trực tiếp từ tài liệu Hienthidangbai.md phục vụ rà soát kỹ thuật</p>
+      </div>
+
+      <!-- Bộ Lọc Đa Năng -->
+      <div class="mt-4 sm:mt-0 flex flex-wrap items-center gap-2">
+        <div class="inline-flex rounded-lg border border-zinc-200 bg-white p-1 text-xs">
+          <button id="filter-all" class="filter-btn active px-3 py-1 font-semibold rounded-md bg-zinc-900 text-white transition-colors" onclick="setSkillFilter('all')">Tất Cả (28)</button>
+          <button id="filter-reading" class="filter-btn px-3 py-1 font-semibold rounded-md text-zinc-600 hover:text-zinc-900 transition-colors" onclick="setSkillFilter('reading')">Reading (16)</button>
+          <button id="filter-listening" class="filter-btn px-3 py-1 font-semibold rounded-md text-zinc-600 hover:text-zinc-900 transition-colors" onclick="setSkillFilter('listening')">Listening (12)</button>
+        </div>
+
+        <select id="status-filter" class="text-xs border border-zinc-200 rounded-lg px-3 py-1.5 bg-white font-medium text-zinc-700 outline-none focus:border-primary" onchange="setStatusFilter(this.value)">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="stable">Hoạt động ổn định (🟢)</option>
+          <option value="needs-opt">Cần tối ưu hóa (🟡)</option>
+          <option value="critical">Hạn chế trọng yếu (🔴)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bảng Ma Trận -->
+    <div class="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-2xs">
+      <table class="min-w-full divide-y divide-zinc-200 text-left text-xs">
+        <thead class="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider">
+          <tr>
+            <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-6 w-12 text-center">STT</th>
+            <th scope="col" class="px-3 py-3.5 w-24">Kỹ Năng</th>
+            <th scope="col" class="px-3 py-3.5">Tên Dạng Bài IELTS</th>
+            <th scope="col" class="px-3 py-3.5 w-28 font-mono text-center">Exercise ID</th>
+            <th scope="col" class="px-3 py-3.5">Component LongRevert</th>
+            <th scope="col" class="px-3 py-3.5 text-center">Phòng Thi</th>
+            <th scope="col" class="px-3 py-3.5 text-center">Kết Quả</th>
+            <th scope="col" class="px-3 py-3.5">Nhận Định Kỹ Thuật</th>
+            <th scope="col" class="py-3.5 pl-3 pr-4 sm:pr-6 text-right">Chi Tiết</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-table-body" class="divide-y divide-zinc-200 bg-white">
+          <!-- Dữ liệu được kết xuất thông qua script bên dưới -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-zinc-200 py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-zinc-500">
+      <p>MoonLab IELTS Grader &amp; Test Practice &bull; Bản đặc tả thiết kế giao diện độc lập &bull; Nhánh làm việc LongRevert</p>
+    </div>
+  </footer>
+
+  <!-- Dữ Liệu Ma Trận Chuẩn Hóa & Logic Bộ Lọc -->
+  <script>
+    const MATRIX_DATA = [
+      // 16 Dạng Reading
+      {
+        stt: 1, skill: 'reading', name: 'Sentence Completion', desc: 'Điền từ hoàn thành câu',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Render slot {{...}} thành input inline. Kết quả hiển thị đúng/sai và lời giải 4 bước.',
+        link: 'reading/components-gallery.html#type-reading-1'
+      },
+      {
+        stt: 2, skill: 'reading', name: 'Summary Completion (Không từ gợi ý)', desc: 'Điền từ trực tiếp từ bài đọc',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Dùng chung cơ chế đục lỗ văn bản inline với Type 1.',
+        link: 'reading/components-gallery.html#type-reading-2'
+      },
+      {
+        stt: 3, skill: 'reading', name: 'Summary Completion (Có danh sách từ gợi ý)', desc: 'Chọn từ vựng gợi ý A-H',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Trong cơ sở dữ liệu lưu Type 1. Trên giao diện phòng thi thiếu bảng hiển thị kho từ vựng A-H đặt ngay phía trên đoạn văn.',
+        link: 'reading/components-gallery.html#type-reading-3'
+      },
+      {
+        stt: 4, skill: 'reading', name: 'Note Completion', desc: 'Điền ghi chú học thuật',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Danh sách các gạch đầu dòng thụt lề chứa các ô input inline.',
+        link: 'reading/components-gallery.html#type-reading-4'
+      },
+      {
+        stt: 5, skill: 'reading', name: 'Table Completion', desc: 'Hoàn thành bảng thông tin',
+        typeId: '34', component: 'InlineFillBlankRenderer.tsx (Thi) / CleanListeningTableRenderer.tsx (Kết quả)',
+        practiceStatus: 'critical', practiceLabel: 'Hạn chế trọng yếu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Gán sai vào InlineFillBlankRenderer khiến bảng HTML mất định dạng phân cột. Cần chuyển sang TableGrid.',
+        link: 'reading/components-gallery.html#type-reading-5'
+      },
+      {
+        stt: 6, skill: 'reading', name: 'Flow-chart Completion', desc: 'Điền quy trình / sơ đồ chuỗi',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'needs-opt', resultsLabel: 'Cần tối ưu',
+        notes: 'Chỉ hiển thị các khối văn bản nối nhau; thiếu đồ họa mũi tên chỉ hướng luồng quy trình.',
+        link: 'reading/components-gallery.html#type-reading-6'
+      },
+      {
+        stt: 7, skill: 'reading', name: 'Diagram Label Completion', desc: 'Gắn nhãn sơ đồ kỹ thuật',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx / DiagramLabellingRenderer.tsx',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Trong Reading lưu Type 1 đục lỗ kèm hình ảnh minh họa bài đọc; cần đồng bộ khung hiển thị ảnh và ô nhập.',
+        link: 'reading/components-gallery.html#type-reading-7'
+      },
+      {
+        stt: 8, skill: 'reading', name: 'Short-answer Questions', desc: 'Trả lời câu hỏi ngắn',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Câu hỏi độc lập kèm ô nhập câu trả lời ngắn dưới 3 từ.',
+        link: 'reading/components-gallery.html#type-reading-8'
+      },
+      {
+        stt: 9, skill: 'reading', name: 'Single Choice Multiple Choice', desc: 'Trắc nghiệm 1 đáp án A, B, C, D',
+        typeId: '2', component: 'SingleChoiceRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Nút radio tiêu chuẩn, chỉ cho phép chọn 1 giá trị duy nhất trong nhóm.',
+        link: 'reading/components-gallery.html#type-reading-9'
+      },
+      {
+        stt: 10, skill: 'reading', name: 'Multiple Choice Multi-select', desc: 'Trắc nghiệm chọn nhiều (2 trong 5 hoặc 3 trong 7)',
+        typeId: '4', component: 'SingleChoiceRenderer.tsx (Bị gán sai)',
+        practiceStatus: 'critical', practiceLabel: 'Hạn chế trọng yếu',
+        resultsStatus: 'needs-opt', resultsLabel: 'Cần tối ưu',
+        notes: 'Đang dùng radio tròn chỉ chọn được 1 ô. Cần chuyển thành CheckboxGroup có bộ đếm và chặn khi đủ số lượng.',
+        link: 'reading/components-gallery.html#type-reading-10'
+      },
+      {
+        stt: 11, skill: 'reading', name: 'Matching Headings', desc: 'Nối tiêu đề đoạn văn',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Danh sách tiêu đề số La Mã trong menu thả xuống cho từng đoạn văn.',
+        link: 'reading/components-gallery.html#type-reading-11'
+      },
+      {
+        stt: 12, skill: 'reading', name: 'Matching Information', desc: 'Tìm thông tin thuộc đoạn văn nào',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Menu thả xuống chọn chữ cái định danh đoạn văn A, B, C.',
+        link: 'reading/components-gallery.html#type-reading-12'
+      },
+      {
+        stt: 13, skill: 'reading', name: 'Matching Features', desc: 'Nối đặc điểm / quan điểm với nhân vật',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Menu thả xuống chọn tên nhà nghiên cứu hoặc học thuyết tương ứng.',
+        link: 'reading/components-gallery.html#type-reading-13'
+      },
+      {
+        stt: 14, skill: 'reading', name: 'Matching Sentence Endings', desc: 'Nối nửa đầu câu với nửa cuối câu',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Menu thả xuống ghép nối nửa câu tương ứng từ danh sách phương án.',
+        link: 'reading/components-gallery.html#type-reading-14'
+      },
+      {
+        stt: 15, skill: 'reading', name: 'True / False / Not Given', desc: 'Xác thực tính chính xác của thông tin',
+        typeId: '21', component: 'SingleChoiceRenderer.tsx (Thi) / TrueFalseButtonGroup.tsx (Kết quả)',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Phòng thi hiển thị radio dọc chiếm diện tích. Cần chuẩn hóa thành cụm 3 nút Segmented Control bấm nhanh.',
+        link: 'reading/components-gallery.html#type-reading-15'
+      },
+      {
+        stt: 16, skill: 'reading', name: 'Yes / No / Not Given', desc: 'Xác định quan điểm tác giả',
+        typeId: '22', component: 'SingleChoiceRenderer.tsx (Thi) / TrueFalseButtonGroup.tsx (Kết quả)',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Tương tự Type 21, cần đưa cụm 3 nút bấm nằm ngang từ màn kết quả vào phòng thi.',
+        link: 'reading/components-gallery.html#type-reading-16'
+      },
+
+      // 12 Dạng Listening
+      {
+        stt: 17, skill: 'listening', name: 'Form Completion', desc: 'Điền biểu mẫu thông tin khách hàng',
+        typeId: '34 hoặc 1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Nếu dữ liệu có table_data thì render bảng 2 cột; nếu có body ngắt dòng thì cần căn lề lưới chuẩn.',
+        link: 'listening/components-gallery.html#type-listening-1'
+      },
+      {
+        stt: 18, skill: 'listening', name: 'Table Completion', desc: 'Điền bảng thông tin tổng hợp',
+        typeId: '34', component: 'InlineFillBlankRenderer.tsx (Thi) / CleanListeningTableRenderer.tsx (Kết quả)',
+        practiceStatus: 'critical', practiceLabel: 'Hạn chế trọng yếu',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Phòng thi Listening mất cấu trúc phân cột bảng do dùng sai renderer. Cần đồng bộ CleanListeningTableRenderer.',
+        link: 'listening/components-gallery.html#type-listening-2'
+      },
+      {
+        stt: 19, skill: 'listening', name: 'Note Completion', desc: 'Điền dàn ý bài thuyết trình Part 4',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Vận hành chuẩn xác với thụt đầu dòng markdown và các ô nhập văn bản inline.',
+        link: 'listening/components-gallery.html#type-listening-3'
+      },
+      {
+        stt: 20, skill: 'listening', name: 'Sentence Completion', desc: 'Điền từ hoàn thành câu nghe',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Vận hành ổn định với cú pháp slot {{...}} chuẩn.',
+        link: 'listening/components-gallery.html#type-listening-4'
+      },
+      {
+        stt: 21, skill: 'listening', name: 'Summary Completion', desc: 'Điền đoạn tóm tắt bài nghe',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Đục lỗ văn bản inline hoạt động ổn định.',
+        link: 'listening/components-gallery.html#type-listening-5'
+      },
+      {
+        stt: 22, skill: 'listening', name: 'Short-answer Questions', desc: 'Trả lời câu hỏi ngắn bài nghe',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Ô nhập text độc lập với giới hạn ký tự ngắn dưới 3 từ.',
+        link: 'listening/components-gallery.html#type-listening-6'
+      },
+      {
+        stt: 23, skill: 'listening', name: 'Multiple Choice (Single)', desc: 'Trắc nghiệm nghe 1 đáp án A, B, C',
+        typeId: '2', component: 'SingleChoiceRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Nút radio 3 lựa chọn A, B, C chuẩn quy cách IELTS Listening Part 2 & Part 3.',
+        link: 'listening/components-gallery.html#type-listening-7'
+      },
+      {
+        stt: 24, skill: 'listening', name: 'Multiple Choice (Multi-select)', desc: 'Trắc nghiệm nghe chọn 2/5 hoặc 3/7',
+        typeId: '4 hoặc 8', component: 'SingleChoiceRenderer.tsx (Bị gán sai)',
+        practiceStatus: 'critical', practiceLabel: 'Hạn chế trọng yếu',
+        resultsStatus: 'needs-opt', resultsLabel: 'Cần tối ưu',
+        notes: 'Đang dùng radio tròn chỉ chọn được 1 câu. Cần chuyển sang CheckboxGroup có giới hạn số lượng.',
+        link: 'listening/components-gallery.html#type-listening-8'
+      },
+      {
+        stt: 25, skill: 'listening', name: 'Matching Information / Opinions', desc: 'Nối ý kiến người nói Part 3',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Menu thả xuống chọn ký tự A, B, C đối sánh cho từng người tham gia hội thoại.',
+        link: 'listening/components-gallery.html#type-listening-9'
+      },
+      {
+        stt: 26, skill: 'listening', name: 'Map / Plan / Diagram Labelling', desc: 'Gắn nhãn bản đồ / sơ đồ vị trí Part 2/3',
+        typeId: '35', component: 'DiagramLabellingRenderer.tsx (Chưa hoàn thiện)',
+        practiceStatus: 'critical', practiceLabel: 'Hạn chế trọng yếu',
+        resultsStatus: 'critical', resultsLabel: 'Chưa có',
+        notes: 'Chuẩn là dạng Kéo & Thả (Drag & Drop) thẻ A-F vào tọa độ x, y trên ảnh. Code cũ chưa hỗ trợ kéo thả.',
+        link: 'listening/components-gallery.html#type-listening-10'
+      },
+      {
+        stt: 27, skill: 'listening', name: 'Flow-chart Completion', desc: 'Hoàn thành quy trình nghe theo bước',
+        typeId: '1', component: 'InlineFillBlankRenderer.tsx',
+        practiceStatus: 'needs-opt', practiceLabel: 'Cần tối ưu',
+        resultsStatus: 'needs-opt', resultsLabel: 'Cần tối ưu',
+        notes: 'Hiển thị văn bản thô, thiếu ký hiệu mũi tên định hướng luồng nghe.',
+        link: 'listening/components-gallery.html#type-listening-11'
+      },
+      {
+        stt: 28, skill: 'listening', name: 'Categorisation / Classification', desc: 'Phân loại thông tin theo nhóm',
+        typeId: '7', component: 'MatchingDropdownRenderer.tsx',
+        practiceStatus: 'stable', practiceLabel: 'Ổn định',
+        resultsStatus: 'stable', resultsLabel: 'Ổn định',
+        notes: 'Dùng chung cơ chế Select Dropdown đối sánh nhóm của Type 7.',
+        link: 'listening/components-gallery.html#type-listening-12'
+      }
+    ];
+
+    let currentSkillFilter = 'all';
+    let currentStatusFilter = 'all';
+
+    function setSkillFilter(skill) {
+      currentSkillFilter = skill;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-zinc-900', 'text-white');
+        btn.classList.add('text-zinc-600');
+      });
+      document.getElementById(`filter-${skill}`).classList.remove('text-zinc-600');
+      document.getElementById(`filter-${skill}`).classList.add('bg-zinc-900', 'text-white');
+      renderMatrix();
+    }
+
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      renderMatrix();
+    }
+
+    function getBadge(status, label) {
+      if (status === 'stable') {
+        return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${label}</span>`;
+      }
+      if (status === 'needs-opt') {
+        return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>${label}</span>`;
+      }
+      return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>${label}</span>`;
+    }
+
+    function renderMatrix() {
+      const tbody = document.getElementById('matrix-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = MATRIX_DATA.filter(item => {
+        const matchSkill = currentSkillFilter === 'all' || item.skill === currentSkillFilter;
+        let matchStatus = true;
+        if (currentStatusFilter !== 'all') {
+          matchStatus = item.practiceStatus === currentStatusFilter || item.resultsStatus === currentStatusFilter;
+        }
+        return matchSkill && matchStatus;
+      });
+
+      filtered.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-zinc-50/80 transition-colors';
+
+        const skillBadge = row.skill === 'reading' 
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800">Reading</span>'
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800">Listening</span>';
+
+        tr.innerHTML = `
+          <td class="py-3.5 pl-4 pr-3 sm:pl-6 text-center font-bold text-zinc-400 font-mono text-xs">${idx + 1}</td>
+          <td class="px-3 py-3.5 whitespace-nowrap">${skillBadge}</td>
+          <td class="px-3 py-3.5">
+            <div class="font-bold text-zinc-900">${row.name}</div>
+            <div class="text-[11px] text-zinc-500">${row.desc}</div>
+          </td>
+          <td class="px-3 py-3.5 text-center font-mono font-bold text-xs text-zinc-700">
+            <span class="px-2 py-1 rounded bg-zinc-100 border border-zinc-200">${row.typeId}</span>
+          </td>
+          <td class="px-3 py-3.5 font-mono text-[11px] text-zinc-600 max-w-[200px] truncate" title="${row.component}">
+            ${row.component}
+          </td>
+          <td class="px-3 py-3.5 text-center whitespace-nowrap">
+            ${getBadge(row.practiceStatus, row.practiceLabel)}
+          </td>
+          <td class="px-3 py-3.5 text-center whitespace-nowrap">
+            ${getBadge(row.resultsStatus, row.resultsLabel)}
+          </td>
+          <td class="px-3 py-3.5 text-[11px] text-zinc-600 max-w-xs leading-relaxed">
+            ${row.notes}
+          </td>
+          <td class="py-3.5 pl-3 pr-4 sm:pr-6 text-right whitespace-nowrap">
+            <a href="${row.link}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold text-primary hover:bg-primary-light transition-colors">
+              Xem Demo &rarr;
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Kết xuất ban đầu
+    renderMatrix();
+  </script>
+</body>
+</html>

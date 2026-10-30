@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng Thi IELTS Listening - Không Gian Nghe &amp; Tương Tác Bản Đồ</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full font-sans text-zinc-900 antialiased flex flex-col overflow-hidden">
+
+  <!-- 1. Header Điều Hướng -->
+  <header class="h-14 bg-white border-b border-zinc-200 px-4 flex items-center justify-between shrink-0 shadow-2xs z-30">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-primary transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Thoát Phòng Thi</span>
+      </a>
+      <span class="h-4 w-px bg-zinc-200"></span>
+      <div>
+        <h2 class="text-xs font-bold text-zinc-900">IELTS Academic Listening &bull; Test 4</h2>
+        <span class="text-[10px] text-zinc-500 font-medium">Bản đề thực tế Cambridge Test 4 &bull; Tương tác Kéo Thả Bản Đồ (Type 35)</span>
+      </div>
+    </div>
+
+    <!-- Cụm điều khiển phải: Đồng Hồ Đếm Ngược & Nút Nộp Bài -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-red-50 border border-red-200 px-3 py-1 rounded-lg">
+        <svg class="w-4 h-4 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span id="listening-timer" class="font-mono text-sm font-bold text-primary">29:50</span>
+      </div>
+
+      <button onclick="document.getElementById('submit-modal').classList.remove('hidden')" class="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span>Nộp Bài Thi</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Sticky Dark Audio Player Bar (Thanh Phát Âm Thanh Cố Định) -->
+  <div class="bg-slate-900 text-white px-6 py-3 shrink-0 shadow-md z-20 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Cụm Play & Thông Tin File -->
+      <div class="flex items-center gap-3">
+        <button id="btn-audio-play" class="w-9 h-9 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center transition-colors shadow-sm">
+          <svg id="icon-play" class="w-4 h-4 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-pause" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-100">Part 3: Facilities in University Library</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700">Audio 128kbps</span>
+          </div>
+          <span class="text-[10px] text-slate-400">Người trình bày: Thủ thư Adam Smith &bull; Section 3 (Câu 21 - 30)</span>
+        </div>
+      </div>
+
+      <!-- Thanh Tua (Tiến Trình Phát) -->
+      <div class="flex-1 max-w-md flex items-center gap-3">
+        <span id="audio-current-time" class="text-xs font-mono text-slate-400">01:15</span>
+        <div class="flex-1 relative flex items-center">
+          <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden cursor-not-allowed" title="Thanh tua bị khóa trong chế độ phòng thi để đảm bảo tính công bằng">
+            <div id="audio-progress-bar" class="bg-primary h-full w-[25%] transition-all"></div>
+          </div>
+        </div>
+        <span class="text-xs font-mono text-slate-400">05:42</span>
+      </div>
+
+      <!-- Tabs Chuyển Section 1-4 -->
+      <div class="flex items-center border border-slate-800 bg-slate-800/80 p-0.5 rounded-lg text-xs font-semibold">
+        <button class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Part 1 (1-10)</button>
+        <button class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Part 2 (11-20)</button>
+        <button class="px-2.5 py-1 rounded bg-primary text-white shadow-xs">Part 3 (21-30)</button>
+        <button class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Part 4 (31-40)</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. Không Gian Hiển Thị Câu Hỏi (Chứa Bài Thi Bản Đồ Type 35) -->
+  <main class="flex-1 overflow-y-auto px-4 py-8 bg-zinc-100">
+    <div class="max-w-5xl mx-auto space-y-8">
+
+      <!-- Khối Nhóm Câu Hỏi 21-26: Map Labelling Kéo Thả (Type 35) -->
+      <div class="bg-white rounded-2xl border border-zinc-200 p-6 shadow-2xs space-y-6">
+        
+        <!-- Header Nhóm Câu Hỏi -->
+        <div class="bg-zinc-50 border border-zinc-200 p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 font-mono">Part 3 &bull; Type 35</span>
+              <h3 class="text-sm font-bold text-zinc-900">Questions 21 - 26 &bull; Label the Map Below</h3>
+            </div>
+            <p class="text-xs text-zinc-600 mt-1 italic">Kéo và thả đáp án tương ứng từ cột bên phải vào các vị trí phòng trên sơ đồ thư viện.</p>
+          </div>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+            6 Câu Hỏi Bản Đồ
+          </span>
+        </div>
+
+        <!-- Layout 2 Cột: Mặt Bằng Trái (65%) & Panel Kéo Thả Phải (35%) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Cột Trái: Mặt Bằng Thư Viện Kèm Drop Targets (Tọa Độ Thực Tế) -->
+          <div class="lg:col-span-8 bg-zinc-900/5 rounded-2xl p-4 border border-zinc-200 flex flex-col items-center">
+            <div id="listening-map-container" class="relative max-w-full overflow-hidden rounded-xl border border-zinc-300 shadow-sm" style="width: 600px; height: 450px;">
+              <img src="../assets/images/library_map.png" alt="Library Floor Plan" class="w-full h-full object-contain select-none pointer-events-none">
+              
+              <!-- 6 Điểm Ghim Drop Targets tại đúng tọa độ bài Adam Smith -->
+              <div id="question-21" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="21" style="left: 36.8%; top: 44.5%;"></div>
+              <div id="question-22" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="22" style="left: 74.4%; top: 60.4%;"></div>
+              <div id="question-23" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="23" style="left: 64.6%; top: 13.7%;"></div>
+              <div id="question-24" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="24" style="left: 33.4%; top: 14.8%;"></div>
+              <div id="question-25" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="25" style="left: 6.4%; top: 16.1%;"></div>
+              <div id="question-26" class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="26" style="left: 11.7%; top: 53.1%;"></div>
+            </div>
+
+            <div class="mt-3 flex items-center gap-4 text-xs text-zinc-500">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900 border border-white"></span> Vị trí chưa điền</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Đã gán đáp án</span>
+              <span class="italic text-[11px]">&bull; Nhấp vào vòng tròn xanh để xóa hoặc kéo thẻ khác đè lên</span>
+            </div>
+          </div>
+
+          <!-- Cột Phải: Danh Sách Thẻ Phương Án (Draggable Cards A-F) -->
+          <div id="listening-options-container" class="lg:col-span-4 bg-zinc-50 rounded-2xl p-4 border border-zinc-200 space-y-3">
+            <div class="border-b border-zinc-200 pb-2">
+              <h4 class="text-xs font-bold text-zinc-900">Kéo và thả đáp án vào sơ đồ</h4>
+              <p class="text-[11px] text-zinc-500">Nhấp chọn thẻ hoặc kéo chuột sang vòng tròn câu hỏi</p>
+            </div>
+
+            <div class="space-y-2">
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="A">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">A</span>
+                <span class="font-medium text-zinc-800">Video Resource Centre</span>
+              </div>
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="B">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">B</span>
+                <span class="font-medium text-zinc-800">Reading Room</span>
+              </div>
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="C">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">C</span>
+                <span class="font-medium text-zinc-800">Food Service Centre</span>
+              </div>
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="D">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">D</span>
+                <span class="font-medium text-zinc-800">Periodicals Section</span>
+              </div>
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="E">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">E</span>
+                <span class="font-medium text-zinc-800">Enquiry Desk</span>
+              </div>
+              <div class="draggable-option-card flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="F">
+                <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0 font-mono">F</span>
+                <span class="font-medium text-zinc-800">Satellite TV Station</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Khối Nhóm Câu Hỏi 27-30: Sentence Completion (Type 1) -->
+      <div class="bg-white rounded-2xl border border-zinc-200 p-6 shadow-2xs space-y-4">
+        <div class="bg-zinc-50 border border-zinc-200 p-4 rounded-xl flex items-center justify-between">
+          <div>
+            <h3 class="text-xs font-bold text-zinc-900">Questions 27 - 30 &bull; Complete the sentences below</h3>
+            <p class="text-xs text-zinc-600 italic">Write NO MORE THAN THREE WORDS for each answer.</p>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Type ID: 1</span>
+        </div>
+
+        <div class="space-y-3 text-xs leading-loose text-zinc-800">
+          <div id="question-27" class="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+            27. If you need to find information on a certain book, you can use 
+            <input type="text" placeholder="Nhập câu trả lời..." class="mx-1 px-2.5 py-1 border border-zinc-300 rounded focus:border-primary font-bold text-zinc-900 w-44 bg-white">
+            check-out cards.
+          </div>
+          <div id="question-28" class="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+            28. If you want to find information in a specific field, use the 
+            <input type="text" placeholder="Nhập câu trả lời..." class="mx-1 px-2.5 py-1 border border-zinc-300 rounded focus:border-primary font-bold text-zinc-900 w-44 bg-white">
+            guides.
+          </div>
+          <div id="question-29" class="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+            29. Computers in some 
+            <input type="text" placeholder="Nhập câu trả lời..." class="mx-1 px-2.5 py-1 border border-zinc-300 rounded focus:border-primary font-bold text-zinc-900 w-44 bg-white">
+            cannot be linked to the network.
+          </div>
+          <div id="question-30" class="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+            30. You can find more information in a 
+            <input type="text" placeholder="Nhập câu trả lời..." class="mx-1 px-2.5 py-1 border border-zinc-300 rounded focus:border-primary font-bold text-zinc-900 w-44 bg-white">
+            on my desk.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 4. Thanh Điều Hướng 40 Câu Chân Trang -->
+  <footer class="h-14 bg-white border-t border-zinc-200 px-4 flex items-center justify-between shrink-0 shadow-xs z-30">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider hidden sm:inline">Palette:</span>
+    </div>
+
+    <!-- Thanh 40 Nút Cuộn Tự Động -->
+    <div class="flex items-center gap-1.5 overflow-x-auto py-1 max-w-4xl px-2">
+      <!-- Cụm Part 1 & 2 (1-20) -->
+      <div class="flex items-center gap-1 border-r border-zinc-200 pr-2 opacity-40">
+        <span class="text-[10px] text-zinc-400 font-bold">P1-2:</span>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">1</button>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">...</button>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">20</button>
+      </div>
+
+      <!-- Cụm Part 3 (Câu 21-30 Đang Làm) -->
+      <div class="flex items-center gap-1 border-r border-zinc-200 pr-2">
+        <span class="text-[10px] text-primary font-bold">P3:</span>
+        <button onclick="IELTSProto.scrollToQuestion(21)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">21</button>
+        <button onclick="IELTSProto.scrollToQuestion(22)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">22</button>
+        <button onclick="IELTSProto.scrollToQuestion(23)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">23</button>
+        <button onclick="IELTSProto.scrollToQuestion(24)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">24</button>
+        <button onclick="IELTSProto.scrollToQuestion(25)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">25</button>
+        <button onclick="IELTSProto.scrollToQuestion(26)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">26</button>
+        <button onclick="IELTSProto.scrollToQuestion(27)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">27</button>
+        <button onclick="IELTSProto.scrollToQuestion(28)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">28</button>
+        <button onclick="IELTSProto.scrollToQuestion(29)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">29</button>
+        <button onclick="IELTSProto.scrollToQuestion(30)" class="w-7 h-7 rounded-lg border border-zinc-300 bg-zinc-50 text-xs font-bold text-zinc-700 hover:border-primary hover:text-primary">30</button>
+      </div>
+
+      <!-- Cụm Part 4 (31-40) -->
+      <div class="flex items-center gap-1 opacity-40">
+        <span class="text-[10px] text-zinc-400 font-bold">P4:</span>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">31</button>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">...</button>
+        <button class="w-7 h-7 rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-400">40</button>
+      </div>
+    </div>
+
+    <div class="text-xs text-zinc-500 font-semibold hidden lg:block">
+      Tiến độ: <span class="text-primary font-bold">3 / 40</span> câu đã làm
+    </div>
+  </footer>
+
+  <!-- Modal Xác Nhận Nộp Bài -->
+  <div id="submit-modal" class="fixed inset-0 bg-zinc-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4">
+      <div class="flex items-center gap-3 text-primary">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h3 class="text-base font-bold text-zinc-900">Xác Nhận Nộp Bài Thi Listening</h3>
+      </div>
+      <p class="text-xs text-zinc-600 leading-relaxed">
+        Hệ thống sẽ ghi nhận toàn bộ đáp án kéo thả trên bản đồ cùng các ô nhập liệu và chuyển sang màn hình chấm điểm chi tiết.
+      </p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="document.getElementById('submit-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 transition-colors">
+          Tiếp Tục Làm Bài
+        </button>
+        <a href="workspace-review.html" class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors shadow-xs">
+          Xác Nhận Nộp Bài
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/common.js"></script>
+  <script src="../assets/js/drag-drop-map.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Khởi tạo đồng hồ đếm ngược 30 phút
+      IELTSProto.initTimer('listening-timer', 1800);
+
+      // Khởi tạo bản đồ Kéo Thả Type 35
+      initDragDropMap({
+        containerId: 'listening-map-container',
+        optionsContainerId: 'listening-options-container',
+        initialAnswers: {
+          '21': 'B',
+          '22': 'C'
+        }
+      });
+
+      // Điều khiển Play / Pause Audio giả lập
+      const playBtn = document.getElementById('btn-audio-play');
+      const iconPlay = document.getElementById('icon-play');
+      const iconPause = document.getElementById('icon-pause');
+      let isPlaying = false;
+
+      playBtn.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        if (isPlaying) {
+          iconPlay.classList.add('hidden');
+          iconPause.classList.remove('hidden');
+        } else {
+          iconPlay.classList.remove('hidden');
+          iconPause.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

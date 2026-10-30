@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Màn Hình Kết Quả IELTS Listening - Đồng Bộ Âm Thanh &amp; Lời Thoại</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full font-sans text-zinc-900 antialiased flex flex-col overflow-hidden">
+
+  <!-- Header Điều Hướng -->
+  <header class="h-14 bg-white border-b border-zinc-200 px-4 flex items-center justify-between shrink-0 shadow-2xs z-30">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-primary transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Bảng Điều Phối</span>
+      </a>
+      <span class="h-4 w-px bg-zinc-200"></span>
+      <div>
+        <h2 class="text-xs font-bold text-zinc-900">Báo Cáo Kết Quả Thi &bull; Listening Test 4</h2>
+        <span class="text-[10px] text-zinc-500 font-medium">Đồng bộ 3 chiều: Audio Player &bull; Bản Ghi Lời Thoại Transcript &bull; Thẻ Câu Hỏi</span>
+      </div>
+    </div>
+
+    <!-- Cụm Thống Kê Điểm -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 font-bold text-xs border border-purple-200">
+          Band 8.0
+        </span>
+        <span class="text-xs font-medium text-zinc-600">
+          Chính xác: <strong class="text-zinc-900 font-bold">34 / 40</strong> (85.0%)
+        </span>
+      </div>
+
+      <a href="workspace-exam.html" class="px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition-colors">
+        Làm Lại Đề Thi
+      </a>
+    </div>
+  </header>
+
+  <!-- Sticky Dark Audio Review Player -->
+  <div class="bg-slate-900 text-white px-6 py-3 shrink-0 shadow-md z-20 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-3">
+        <button id="btn-review-play" class="w-9 h-9 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center transition-colors shadow-sm">
+          <svg id="icon-rev-play" class="w-4 h-4 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-rev-pause" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-100">Review Audio &bull; Part 3</span>
+            <span id="playing-status" class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-950 text-emerald-300 border border-emerald-800">Sẵn Sàng</span>
+          </div>
+          <span class="text-[10px] text-slate-400">Đoạn thoại: Thư viện trường đại học (Adam Smith)</span>
+        </div>
+      </div>
+
+      <!-- Scrubber Unlocked in Review Mode -->
+      <div class="flex-1 max-w-md flex items-center gap-3">
+        <span id="review-current-time" class="text-xs font-mono text-slate-300">01:52</span>
+        <div class="flex-1 relative flex items-center">
+          <input type="range" min="0" max="342" value="112" class="w-full accent-primary bg-slate-700 h-1.5 rounded-full cursor-pointer">
+        </div>
+        <span class="text-xs font-mono text-slate-400">05:42</span>
+      </div>
+
+      <!-- Tốc Độ Phát Lại -->
+      <div class="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
+        <button class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">0.8x</button>
+        <button class="px-2 py-1 rounded bg-primary text-white font-bold">1.0x</button>
+        <button class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">1.25x</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Không Gian Đối Chiếu Hai Cột: Transcript Trái & Câu Hỏi Phải -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Cột Trái: Audio Script / Transcript Đầy Đủ (50%) -->
+    <div class="w-1/2 border-r border-zinc-200 bg-white overflow-y-auto px-6 py-6 space-y-4">
+      <div class="border-b border-zinc-200 pb-3 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-primary">Audio Transcript</span>
+          <h3 class="text-sm font-bold text-zinc-900 mt-0.5">Bản Ghi Lời Thoại Chi Tiết Kèm Mốc Thời Gian</h3>
+        </div>
+        <span class="text-[11px] text-zinc-500 italic">Nhấp vào mốc giây để phát đoạn âm thanh tương ứng</span>
+      </div>
+
+      <div class="space-y-4 text-xs leading-relaxed">
+        <!-- Lời thoại 1 -->
+        <div class="p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-1.5 hover:border-primary/50 transition-colors">
+          <div class="flex items-center justify-between text-zinc-500 font-mono text-[11px]">
+            <strong class="text-zinc-900 font-sans font-bold">Người Dẫn Chuyện (Narrator)</strong>
+            <button onclick="playAtTimestamp(0, '00:00')" class="text-primary hover:underline font-bold">[00:00 - 00:48]</button>
+          </div>
+          <p class="text-zinc-700">
+            Section 3. You will hear a librarian called Adam Smith talking to the students about how to use the facilities in the library. First, you have some time to look at questions 21 to 26.
+          </p>
+        </div>
+
+        <!-- Lời thoại 2 (Chứa dẫn chứng câu 21, 26) -->
+        <div id="transcript-line-2" class="p-3 rounded-xl border border-zinc-200 bg-white space-y-1.5 transition-all">
+          <div class="flex items-center justify-between text-zinc-500 font-mono text-[11px]">
+            <strong class="text-zinc-900 font-sans font-bold">Adam Smith (Thủ Thư)</strong>
+            <button onclick="playAtTimestamp(52, '00:52')" class="text-primary hover:underline font-bold">[00:52 - 02:33]</button>
+          </div>
+          <p class="text-zinc-800 leading-relaxed">
+            Welcome. Please come in and gather over here around the tables. My name is Adam Smith, and I'm the librarian here. Now we are at the gate of the library. Upon entering into the door, you'll find that the restrooms are on your left hand side, and opposite them is a photocopy room. 
+            <mark id="evidence-q26" class="bg-amber-100 text-amber-950 px-1 rounded font-medium">To the left of the main entrance door is the enquiry desk (Câu 26: E)</mark>. 
+            The circulation desk is to the east of the photocopy room. 
+            <mark id="evidence-q21" class="bg-emerald-100 text-emerald-950 px-1 rounded font-bold border border-emerald-300">The reading room is a really large area in the center of the library, just to the north of the circulation desk (Câu 21: B)</mark>. 
+            I'm sure you won't miss it.
+          </p>
+        </div>
+
+        <!-- Lời thoại 3 (Chứa dẫn chứng câu 22, 23, 24, 25) -->
+        <div id="transcript-line-3" class="p-3 rounded-xl border border-zinc-200 bg-white space-y-1.5 transition-all">
+          <div class="flex items-center justify-between text-zinc-500 font-mono text-[11px]">
+            <strong class="text-zinc-900 font-sans font-bold">Adam Smith (Thủ Thư)</strong>
+            <button onclick="playAtTimestamp(154, '02:34')" class="text-primary hover:underline font-bold">[02:34 - 04:10]</button>
+          </div>
+          <p class="text-zinc-800 leading-relaxed">
+            If you walk towards the north-west corner, you will find the 
+            <mark id="evidence-q25" class="bg-emerald-100 text-emerald-950 px-1 rounded font-bold">periodicals section where all recent journals and newspapers are stored (Câu 25: D)</mark>. 
+            Directly to the east of the periodicals section in the top middle room is the 
+            <mark id="evidence-q24" class="bg-emerald-100 text-emerald-950 px-1 rounded font-bold">satellite TV station (Câu 24: F)</mark>. 
+            In the far north-east corner is the 
+            <mark id="evidence-q23" class="bg-emerald-100 text-emerald-950 px-1 rounded font-bold">video resource centre (Câu 23: A)</mark>. 
+            Finally, on the south-eastern side near the study cubicles, you will find our 
+            <mark id="evidence-q22" class="bg-emerald-100 text-emerald-950 px-1 rounded font-bold">food service centre (Câu 22: C)</mark> for snacks and drinks.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột Phải: Thẻ Câu Hỏi & Bản Đồ Đối Chiếu Đúng/Sai (50%) -->
+    <div class="w-1/2 bg-zinc-50 overflow-y-auto px-6 py-6 space-y-6">
+      
+      <!-- Khối Bản Đồ Review: Hiển Thị Các Điểm Ghim Đúng (Xanh) và Sai (Đỏ) -->
+      <div class="bg-white rounded-2xl border border-zinc-200 p-5 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-zinc-900">Đối Soát Bản Đồ Sơ Đồ Thư Viện (Câu 21 - 26)</h4>
+          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">5 / 6 Đúng</span>
+        </div>
+
+        <div class="bg-zinc-900/5 p-3 rounded-xl border border-zinc-200 flex justify-center">
+          <div class="relative max-w-full overflow-hidden rounded-xl border border-zinc-300" style="width: 480px; height: 360px;">
+            <img src="../assets/images/library_map.png" alt="Library Plan" class="w-full h-full object-contain pointer-events-none select-none">
+            
+            <!-- Pin 21: Đúng (Green) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 36.8%; top: 44.5%;">
+              <div class="flex items-center gap-1 bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white">
+                <span>21</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-emerald-700 flex items-center justify-center text-[9px] font-black">B</span>
+              </div>
+            </div>
+
+            <!-- Pin 22: Đúng (Green) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 74.4%; top: 60.4%;">
+              <div class="flex items-center gap-1 bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white">
+                <span>22</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-emerald-700 flex items-center justify-center text-[9px] font-black">C</span>
+              </div>
+            </div>
+
+            <!-- Pin 23: Sai (Red) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 64.6%; top: 13.7%;">
+              <div class="flex items-center gap-1 bg-rose-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white animate-bounce">
+                <span>23</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-rose-700 flex items-center justify-center text-[9px] font-black line-through">D</span>
+                <span class="text-[10px] text-emerald-200 ml-0.5 font-bold">A</span>
+              </div>
+            </div>
+
+            <!-- Pin 24: Đúng (Green) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 33.4%; top: 14.8%;">
+              <div class="flex items-center gap-1 bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white">
+                <span>24</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-emerald-700 flex items-center justify-center text-[9px] font-black">F</span>
+              </div>
+            </div>
+
+            <!-- Pin 25: Đúng (Green) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 6.4%; top: 16.1%;">
+              <div class="flex items-center gap-1 bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white">
+                <span>25</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-emerald-700 flex items-center justify-center text-[9px] font-black">D</span>
+              </div>
+            </div>
+
+            <!-- Pin 26: Đúng (Green) -->
+            <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left: 11.7%; top: 53.1%;">
+              <div class="flex items-center gap-1 bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full shadow-md text-xs border border-white">
+                <span>26</span>
+                <span class="w-3.5 h-3.5 rounded-full bg-white text-emerald-700 flex items-center justify-center text-[9px] font-black">E</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Chi Tiết Câu 23 (Bị Sai) -->
+      <div class="bg-white rounded-2xl border-2 border-rose-500 shadow-2xs overflow-hidden">
+        <div class="bg-rose-50 px-5 py-3 border-b border-rose-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center text-xs">&times;</span>
+            <span class="text-xs font-bold text-rose-950">Câu 23: Sai &bull; Vị trí góc trên cùng bên phải</span>
+          </div>
+          <button onclick="playAtTimestamp(185, '03:05')" class="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] flex items-center gap-1">
+            <span>Nghe Lại Dẫn Chứng [03:05]</span> &rarr;
+          </button>
+        </div>
+
+        <div class="p-5 space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+            <div>
+              <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
+              <span class="font-bold text-rose-700 text-sm line-through">D. Periodicals Section</span>
+            </div>
+            <div>
+              <span class="text-zinc-500 block">Đáp án chính xác:</span>
+              <span class="font-bold text-emerald-700 text-sm">A. Video Resource Centre</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-3.5 rounded-xl border border-zinc-200 space-y-2 leading-relaxed">
+            <p><strong>Phân tích nguyên nhân sai sót:</strong> Bạn đã nhầm lẫn vị trí góc Tây-Bắc (North-West) với góc Đông-Bắc (North-East).</p>
+            <p class="text-zinc-600">Trích đoạn Adam Smith: <em>&ldquo;In the far north-east corner is the video resource centre.&rdquo;</em> Do đó phòng ở tọa độ x=64.6%, y=13.7% phải mang nhãn A.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/common.js"></script>
+  <script>
+    function playAtTimestamp(seconds, label) {
+      document.getElementById('review-current-time').textContent = label;
+      document.getElementById('playing-status').textContent = `Đang Phát ${label}`;
+      document.getElementById('icon-rev-play').classList.add('hidden');
+      document.getElementById('icon-rev-pause').classList.remove('hidden');
+
+      // Cuộn đến dòng lời thoại tương ứng
+      const line = document.getElementById('transcript-line-2') || document.getElementById('transcript-line-3');
+      if (line) {
+        line.classList.add('ring-2', 'ring-primary');
+        setTimeout(() => line.classList.remove('ring-2', 'ring-primary'), 2000);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7 Thành Phần Nền Tảng (Base Components) - Hệ Thống Giao Diện IELTS</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full font-sans text-zinc-900 antialiased flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-40 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <a href="index.html" class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm hover:bg-primary-hover transition-colors">
+            M
+          </a>
+          <div>
+            <h1 class="text-base font-bold text-zinc-900 leading-tight">Thư Viện 7 Thành Phần Nền Tảng (Base Engines)</h1>
+            <p class="text-xs text-zinc-500 font-medium">Quy chuẩn hóa 28 dạng bài IELTS về 7 Base Components theo thiết kế 01_UI_Component_Mapping_Master.md</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Bộ chuyển đổi toàn cục chế độ hiển thị -->
+          <div class="inline-flex rounded-lg border border-zinc-200 bg-zinc-100 p-1 text-xs">
+            <button id="global-mode-interactive" class="px-3 py-1 font-semibold rounded-md bg-white text-zinc-900 shadow-2xs transition-colors" onclick="setGlobalMode('interactive')">
+              Chế Độ Làm Bài (Interactive)
+            </button>
+            <button id="global-mode-review" class="px-3 py-1 font-semibold rounded-md text-zinc-600 hover:text-zinc-900 transition-colors" onclick="setGlobalMode('review')">
+              Chế Độ Kết Quả (Review)
+            </button>
+          </div>
+
+          <a href="index.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-primary rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
+            &larr; Bảng Điều Phối
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Giới Thiệu Nguyên Lý Base Component -->
+  <section class="bg-white border-b border-zinc-200 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+          Tư Duy Tái Sử Dụng Giao Diện
+        </span>
+        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chiến Lược Rút Gọn Kiến Trúc</h2>
+        <p class="mt-1 text-xs text-zinc-600 leading-relaxed">
+          Thay vì phát triển 28 component rời rạc dẫn đến phân mảnh mã nguồn, toàn bộ các dạng bài thực tế được quy về <strong>7 Base Components</strong> hoạt động theo kiến trúc <strong>Dual-Mode</strong> (hỗ trợ cả hai trạng thái <code>mode="interactive"</code> cho phòng thi và <code>mode="review"</code> cho màn hình giải thích kết quả).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Nội Dung 7 Components -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- 1. InlineTextInput -->
+    <section id="component-1" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800">Component 1</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">InlineTextInput &bull; Nhập Liệu Văn Bản Trực Tiếp</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Sentence, Summary, Note, Short-answer và Flow-chart Completion.</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 1
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Chế độ Interactive -->
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="p-5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm leading-loose text-zinc-800">
+            Scientists observed that the traditional roller coaster’s lifting force depends on a long 
+            <span class="inline-block relative mx-1">
+              <span class="text-[10px] font-bold text-zinc-400 absolute -top-3.5 left-2">27</span>
+              <input type="text" placeholder="Nhập từ..." value="chain" class="border-b-2 border-zinc-300 focus:border-primary focus:bg-white bg-zinc-100 px-2.5 py-0.5 text-sm font-semibold outline-none w-32 text-center transition-colors">
+            </span> 
+            running throughout the journey. In modern designs, magnets are installed to enhance 
+            <span class="inline-block relative mx-1">
+              <span class="text-[10px] font-bold text-zinc-400 absolute -top-3.5 left-2">28</span>
+              <input type="text" placeholder="Nhập từ..." value="" class="border-b-2 border-zinc-300 focus:border-primary focus:bg-white bg-zinc-100 px-2.5 py-0.5 text-sm font-semibold outline-none w-32 text-center transition-colors">
+            </span> 
+            without causing friction.
+          </div>
+        </div>
+
+        <!-- Chế độ Review -->
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-sm leading-loose text-zinc-800">
+            Scientists observed that the traditional roller coaster’s lifting force depends on a long 
+            <span class="inline-block relative mx-1">
+              <span class="text-[10px] font-bold text-emerald-700 absolute -top-3.5 left-2">27</span>
+              <span class="border-b-2 border-emerald-500 bg-emerald-50 text-emerald-800 px-2.5 py-0.5 text-sm font-bold inline-block">chain</span>
+            </span> 
+            running throughout the journey. In modern designs, magnets are installed to enhance 
+            <span class="inline-block relative mx-1">
+              <span class="text-[10px] font-bold text-rose-700 absolute -top-3.5 left-2">28</span>
+              <span class="border-b-2 border-rose-500 bg-rose-50 text-rose-800 line-through px-2.5 py-0.5 text-sm font-bold inline-block">speed</span>
+            </span> 
+            without causing friction.
+          </div>
+
+          <!-- Accordion Lời Giải Kèm Dẫn Chứng -->
+          <div class="mt-4 p-4 rounded-xl border border-zinc-200 bg-white space-y-3 text-xs">
+            <div class="flex items-center justify-between font-bold text-zinc-900 border-b border-zinc-100 pb-2">
+              <span class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-[10px]">28</span>
+                <span>Câu 28: Sai &bull; Đáp án của bạn: speed &bull; Đáp án đúng: safety</span>
+              </span>
+              <span class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Đoạn C, Dòng 4</span>
+            </div>
+            <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-amber-950 font-medium">
+              &ldquo;...engineers prioritized passenger safety by integrating electromagnetic brakes instead of relying purely on kinetic friction...&rdquo;
+            </div>
+            <p class="text-zinc-600">Từ khóa đối chiếu: <em>modern designs</em> tương ứng với <em>integrating electromagnetic brakes</em>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TableGrid -->
+    <section id="component-2" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800">Component 2</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">TableGrid &bull; Khung Lưới Bảng Thông Tin Động</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Table Completion (Reading Passage 3, Listening Section 1 &amp; Section 4), Form Completion.</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 34
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Chế độ Interactive -->
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="overflow-x-auto rounded-xl border border-zinc-200 shadow-2xs">
+            <table class="min-w-full divide-y divide-zinc-200 text-xs">
+              <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase">
+                <tr>
+                  <th class="px-4 py-3">Giai Đoạn Thời Gian</th>
+                  <th class="px-4 py-3">Đặc Tính Kỹ Thuật</th>
+                  <th class="px-4 py-3">Ưu Điểm Nổi Bật</th>
+                  <th class="px-4 py-3">Hạn Chế Gặp Phải</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200 bg-white">
+                <tr>
+                  <td class="px-4 py-3.5 font-bold text-zinc-900">Thập niên 1830</td>
+                  <td class="px-4 py-3.5 text-zinc-700">Bánh xe gỗ bọc kim loại</td>
+                  <td class="px-4 py-3.5">
+                    <span class="text-zinc-600">Cần ít</span>
+                    <input type="text" placeholder="Câu 31" value="effort" class="mx-1 px-2 py-1 border border-zinc-300 rounded focus:border-primary outline-none font-semibold text-zinc-900 w-24">
+                    <span class="text-zinc-600">hơn đi bộ</span>
+                  </td>
+                  <td class="px-4 py-3.5 text-zinc-500 italic">Rất rung lắc khi di chuyển</td>
+                </tr>
+                <tr class="bg-zinc-50/50">
+                  <td class="px-4 py-3.5 font-bold text-zinc-900">Thập niên 1880</td>
+                  <td class="px-4 py-3.5">
+                    <span class="text-zinc-600">Hệ thống xích và</span>
+                    <input type="text" placeholder="Câu 32" value="" class="mx-1 px-2 py-1 border border-zinc-300 rounded focus:border-primary outline-none font-semibold text-zinc-900 w-24">
+                  </td>
+                  <td class="px-4 py-3.5 text-zinc-700">Dễ giữ thăng bằng hơn</td>
+                  <td class="px-4 py-3.5 text-zinc-500 italic">Chưa có hệ thống phanh an toàn</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Chế độ Review -->
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="overflow-x-auto rounded-xl border border-zinc-200 shadow-2xs">
+            <table class="min-w-full divide-y divide-zinc-200 text-xs">
+              <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase">
+                <tr>
+                  <th class="px-4 py-3">Giai Đoạn Thời Gian</th>
+                  <th class="px-4 py-3">Đặc Tính Kỹ Thuật</th>
+                  <th class="px-4 py-3">Ưu Điểm Nổi Bật</th>
+                  <th class="px-4 py-3">Hạn Chế Gặp Phải</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200 bg-white">
+                <tr>
+                  <td class="px-4 py-3.5 font-bold text-zinc-900">Thập niên 1830</td>
+                  <td class="px-4 py-3.5 text-zinc-700">Bánh xe gỗ bọc kim loại</td>
+                  <td class="px-4 py-3.5">
+                    <span class="text-zinc-600">Cần ít</span>
+                    <span class="mx-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-300">effort</span>
+                    <span class="text-zinc-600">hơn đi bộ</span>
+                  </td>
+                  <td class="px-4 py-3.5 text-zinc-500 italic">Rất rung lắc khi di chuyển</td>
+                </tr>
+                <tr class="bg-zinc-50/50">
+                  <td class="px-4 py-3.5 font-bold text-zinc-900">Thập niên 1880</td>
+                  <td class="px-4 py-3.5">
+                    <span class="text-zinc-600">Hệ thống xích và</span>
+                    <span class="mx-1 px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold border border-rose-300 line-through">gears</span>
+                    <span class="text-emerald-700 font-bold ml-1">(Đúng: sprocket)</span>
+                  </td>
+                  <td class="px-4 py-3.5 text-zinc-700">Dễ giữ thăng bằng hơn</td>
+                  <td class="px-4 py-3.5 text-zinc-500 italic">Chưa có hệ thống phanh an toàn</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RadioGroup -->
+    <section id="component-3" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">Component 3</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">RadioGroup &bull; Trắc Nghiệm Chọn Một Đáp Án Duy Nhất</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Multiple Choice Single (A, B, C, D trong Reading; A, B, C trong Listening).</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 2
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3">
+            <h4 class="text-sm font-bold text-zinc-900">Question 34: What was the main reason for introducing the new traffic policy?</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="radio" name="demo-radio" value="A" class="w-4 h-4 text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800"><strong class="font-bold">A.</strong> To reduce carbon emissions in the city center</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-primary bg-primary-light cursor-pointer">
+                <input type="radio" name="demo-radio" value="B" checked class="w-4 h-4 text-primary focus:ring-primary">
+                <span class="text-xs font-bold text-primary"><strong class="font-bold">B.</strong> To encourage public transportation usage</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="radio" name="demo-radio" value="C" class="w-4 h-4 text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800"><strong class="font-bold">C.</strong> To generate funding for road repairs</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3">
+            <h4 class="text-sm font-bold text-zinc-900">Question 34: What was the main reason for introducing the new traffic policy?</h4>
+            <div class="space-y-2">
+              <div class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white opacity-60">
+                <span class="w-4 h-4 rounded-full border border-zinc-300"></span>
+                <span class="text-xs font-medium text-zinc-600">A. To reduce carbon emissions in the city center</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-900">
+                <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">&check;</span>
+                <span class="text-xs font-bold">B. To encourage public transportation usage (Đáp án đúng)</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white opacity-60">
+                <span class="w-4 h-4 rounded-full border border-zinc-300"></span>
+                <span class="text-xs font-medium text-zinc-600">C. To generate funding for road repairs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CheckboxGroup -->
+    <section id="component-4" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800">Component 4</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">CheckboxGroup &bull; Chọn Nhiều Có Bộ Đếm Giới Hạn</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Multiple Choice Multi-select (Chọn 2 trong 5 hoặc chọn 3 trong 7).</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 4 hoặc 8
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 checkbox-group-limiter" data-max-selection="2">
+            <div class="flex items-center justify-between border-b border-zinc-200 pb-2">
+              <h4 class="text-sm font-bold text-zinc-900">Questions 11-12: Choose TWO letters, A-E. Which TWO facilities are included in the ticket?</h4>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 selection-counter">0/2</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="checkbox" value="A" class="w-4 h-4 rounded text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800">A. Botanical Garden Tour</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="checkbox" value="B" class="w-4 h-4 rounded text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800">B. Model Village Museum</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="checkbox" value="C" class="w-4 h-4 rounded text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800">C. Free Refreshment Cafe</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="checkbox" value="D" class="w-4 h-4 rounded text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800">D. Shuttle Bus Service</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary transition-colors">
+                <input type="checkbox" value="E" class="w-4 h-4 rounded text-primary focus:ring-primary">
+                <span class="text-xs font-medium text-zinc-800">E. Audio Guide Rental</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3">
+            <h4 class="text-sm font-bold text-zinc-900">Questions 11-12: Đáp án học viên chọn B, C &bull; Điểm số: 1/2</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+              <div class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white opacity-50">
+                <span class="w-4 h-4 border border-zinc-300 rounded"></span>
+                <span class="text-xs text-zinc-600">A. Botanical Garden Tour</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-900">
+                <span class="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center text-[10px]">&check;</span>
+                <span class="text-xs font-bold">B. Model Village Museum (Bạn chọn &bull; Đúng)</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-rose-500 bg-rose-50 text-rose-900">
+                <span class="w-4 h-4 rounded bg-rose-600 text-white flex items-center justify-center text-[10px]">&times;</span>
+                <span class="text-xs font-bold">C. Free Refreshment Cafe (Bạn chọn &bull; Sai)</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50/60 text-emerald-900">
+                <span class="w-4 h-4 rounded border-2 border-emerald-600"></span>
+                <span class="text-xs font-bold">D. Shuttle Bus Service (Đáp án đúng bỏ sót)</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 bg-white opacity-50">
+                <span class="w-4 h-4 border border-zinc-300 rounded"></span>
+                <span class="text-xs text-zinc-600">E. Audio Guide Rental</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SelectDropdown -->
+    <section id="component-5" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800">Component 5</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">SelectDropdown &bull; Hộp Chọn Ghép Nối Đối Xứng</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Matching Headings, Matching Information, Matching Features, Sentence Endings.</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 7
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-zinc-900">22. Paragraph A</span>
+              <select class="text-xs font-semibold border border-zinc-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-primary w-64">
+                <option value="">-- Chọn tiêu đề phù hợp --</option>
+                <option value="i">i. The environmental consequences</option>
+                <option value="ii" selected>ii. Traditional methods of farming</option>
+                <option value="iii">iii. Technological breakthrough in genetics</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-zinc-900">23. Paragraph B</span>
+              <select class="text-xs font-semibold border border-zinc-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-primary w-64">
+                <option value="">-- Chọn tiêu đề phù hợp --</option>
+                <option value="i">i. The environmental consequences</option>
+                <option value="ii">ii. Traditional methods of farming</option>
+                <option value="iii">iii. Technological breakthrough in genetics</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 text-xs">
+            <div class="flex items-center justify-between p-3 rounded-lg border border-emerald-200 bg-emerald-50">
+              <span class="font-bold text-emerald-900">22. Paragraph A &bull; Đáp án đúng: ii. Traditional methods of farming</span>
+              <span class="font-bold text-emerald-700">&check; Chính xác</span>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg border border-rose-200 bg-rose-50">
+              <span class="font-bold text-rose-900">23. Paragraph B &bull; Lựa chọn: i &bull; Đáp án đúng: iii. Technological breakthrough</span>
+              <span class="font-bold text-rose-700">&times; Chưa chính xác</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SegmentedControl -->
+    <section id="component-6" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-100 text-teal-800">Component 6</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">SegmentedControl &bull; Cụm Ba Nút Bấm Chuyển Đổi Nhanh</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: True / False / Not Given (Type 21) và Yes / No / Not Given (Type 22).</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 21 &bull; 22
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi (Interactive Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-4">
+            <div class="space-y-2">
+              <p class="text-xs font-bold text-zinc-900">8. Michael Faraday spent his entire career working in academic research institutes.</p>
+              <div class="inline-flex rounded-lg border border-zinc-200 bg-zinc-100 p-1 segmented-control-group text-xs font-bold">
+                <button data-value="TRUE" class="px-4 py-1.5 rounded-md text-zinc-700 hover:bg-zinc-200 transition-colors">TRUE</button>
+                <button data-value="FALSE" class="px-4 py-1.5 rounded-md bg-primary text-white shadow-xs">FALSE</button>
+                <button data-value="NOT GIVEN" class="px-4 py-1.5 rounded-md text-zinc-700 hover:bg-zinc-200 transition-colors">NOT GIVEN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 text-xs">
+            <div class="p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50">
+              <p class="font-bold text-emerald-950">8. Michael Faraday spent his entire career working in academic research institutes.</p>
+              <div class="mt-2 flex items-center gap-2">
+                <span class="px-3 py-1 rounded bg-emerald-600 text-white font-bold text-xs">Đáp án đúng: FALSE</span>
+                <span class="text-emerald-800 font-medium">Lựa chọn của bạn: FALSE (&check; Chính xác)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. DiagramLabelling -->
+    <section id="component-7" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-800">Component 7</span>
+          <h3 class="text-base font-bold text-zinc-900 mt-1">DiagramLabelling &bull; Kéo Thả Tọa Độ Bản Đồ &amp; Sơ Đồ</h3>
+          <p class="text-xs text-zinc-500">Áp dụng cho: Map / Plan / Diagram Labelling có tọa độ x, y (Listening Part 2 &amp; Part 3).</p>
+        </div>
+        <div class="text-xs font-mono text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg">
+          Type ID: 35
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="mode-view mode-interactive space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-400">Giao diện Phòng Thi Kéo Thả (Interactive Mode)</div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Cột trái: Mặt bằng ảnh có tọa độ điểm ghim -->
+            <div class="lg:col-span-8 bg-zinc-900/5 rounded-2xl p-4 border border-zinc-200 flex flex-col items-center">
+              <div id="demo-map-container" class="relative max-w-full overflow-hidden rounded-xl border border-zinc-300 shadow-sm" style="width: 640px; height: 480px;">
+                <img src="assets/images/library_map.png" alt="Library Floor Plan" class="w-full h-full object-contain select-none pointer-events-none">
+                
+                <!-- 6 Điểm Ghim Drop Targets theo tọa độ thực tế -->
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="21" style="left: 36.8%; top: 44.5%;"></div>
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="22" style="left: 74.4%; top: 60.4%;"></div>
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="23" style="left: 64.6%; top: 13.7%;"></div>
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="24" style="left: 33.4%; top: 14.8%;"></div>
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="25" style="left: 6.4%; top: 16.1%;"></div>
+                <div class="map-drop-target absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all" data-question-number="26" style="left: 11.7%; top: 53.1%;"></div>
+              </div>
+              <p class="mt-2 text-[11px] text-zinc-500 italic">Hướng dẫn: Kéo thẻ bên phải thả vào các vòng tròn trên sơ đồ hoặc nhấp thẻ rồi nhấp vòng tròn.</p>
+            </div>
+
+            <!-- Cột phải: Panel thẻ đáp án có thể kéo thả -->
+            <div id="demo-options-container" class="lg:col-span-4 bg-zinc-50 rounded-2xl p-4 border border-zinc-200 space-y-3">
+              <div class="flex items-center justify-between border-b border-zinc-200 pb-2">
+                <span class="text-xs font-bold text-zinc-900">Danh Sách Phương Án</span>
+                <span class="text-[10px] text-zinc-500 font-medium">Kéo sang cột trái</span>
+              </div>
+              <div class="space-y-2">
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="A">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">A</span>
+                  <span class="font-medium text-zinc-800">Video Resource Centre</span>
+                </div>
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="B">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">B</span>
+                  <span class="font-medium text-zinc-800">Reading Room</span>
+                </div>
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="C">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">C</span>
+                  <span class="font-medium text-zinc-800">Food Service Centre</span>
+                </div>
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="D">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">D</span>
+                  <span class="font-medium text-zinc-800">Periodicals Section</span>
+                </div>
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="E">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">E</span>
+                  <span class="font-medium text-zinc-800">Enquiry Desk</span>
+                </div>
+                <div class="draggable-option-card flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-200 bg-white shadow-2xs cursor-grab active:cursor-grabbing hover:border-primary transition-all text-xs" data-char="F">
+                  <span class="w-6 h-6 rounded-lg bg-zinc-100 font-bold text-zinc-800 flex items-center justify-center shrink-0">F</span>
+                  <span class="font-medium text-zinc-800">Satellite TV Station</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-view mode-review space-y-3 hidden">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Giao diện Kết Quả (Review Mode)</div>
+          <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 text-xs">
+            <p class="font-bold text-zinc-900">Chi tiết đối soát 6 câu hỏi bản đồ thư viện:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              <div class="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 font-medium text-emerald-900 flex justify-between">
+                <span>Câu 21: Khu trung tâm</span>
+                <span class="font-bold">B (Reading Room) &check;</span>
+              </div>
+              <div class="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 font-medium text-emerald-900 flex justify-between">
+                <span>Câu 22: Góc phía đông</span>
+                <span class="font-bold">C (Food Service) &check;</span>
+              </div>
+              <div class="p-2.5 rounded-lg border border-rose-300 bg-rose-50 font-medium text-rose-900 flex justify-between">
+                <span>Câu 23: Góc trên phải</span>
+                <span class="font-bold">A (Đã chọn: D) &times;</span>
+              </div>
+              <div class="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 font-medium text-emerald-900 flex justify-between">
+                <span>Câu 24: Phòng giữa trên</span>
+                <span class="font-bold">F (Satellite TV) &check;</span>
+              </div>
+              <div class="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 font-medium text-emerald-900 flex justify-between">
+                <span>Câu 25: Góc trên trái</span>
+                <span class="font-bold">D (Periodicals) &check;</span>
+              </div>
+              <div class="p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 font-medium text-emerald-900 flex justify-between">
+                <span>Câu 26: Lối vào bên trái</span>
+                <span class="font-bold">E (Enquiry Desk) &check;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-white border-t border-zinc-200 py-6 mt-12 text-center text-xs text-zinc-500">
+    MoonLab IELTS Grader &bull; Thư Viện 7 Thành Phần Nền Tảng (Base Engines)
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/drag-drop-map.js"></script>
+  <script>
+    // Khởi tạo các tương tác cơ sở
+    document.addEventListener('DOMContentLoaded', () => {
+      IELTSProto.initCheckboxLimiter();
+      IELTSProto.initSegmentedControls();
+
+      // Khởi tạo bản đồ demo Type 35
+      initDragDropMap({
+        containerId: 'demo-map-container',
+        optionsContainerId: 'demo-options-container',
+        initialAnswers: {
+          '21': 'C',
+          '24': 'B',
+          '25': 'A'
+        }
+      });
+    });
+
+    // Chuyển đổi chế độ toàn cục
+    function setGlobalMode(mode) {
+      const interactiveBtns = document.querySelectorAll('.mode-interactive');
+      const reviewBtns = document.querySelectorAll('.mode-review');
+
+      if (mode === 'interactive') {
+        interactiveBtns.forEach(el => el.classList.remove('hidden'));
+        reviewBtns.forEach(el => el.classList.add('hidden'));
+
+        document.getElementById('global-mode-interactive').classList.add('bg-white', 'text-zinc-900', 'shadow-2xs');
+        document.getElementById('global-mode-interactive').classList.remove('text-zinc-600');
+        document.getElementById('global-mode-review').classList.remove('bg-white', 'text-zinc-900', 'shadow-2xs');
+        document.getElementById('global-mode-review').classList.add('text-zinc-600');
+      } else {
+        interactiveBtns.forEach(el => el.classList.add('hidden'));
+        reviewBtns.forEach(el => el.classList.remove('hidden'));
+
+        document.getElementById('global-mode-review').classList.add('bg-white', 'text-zinc-900', 'shadow-2xs');
+        document.getElementById('global-mode-review').classList.remove('text-zinc-600');
+        document.getElementById('global-mode-interactive').classList.remove('bg-white', 'text-zinc-900', 'shadow-2xs');
+        document.getElementById('global-mode-interactive').classList.add('text-zinc-600');
+      }
+    }
+  </script>
+</body>
+</html>

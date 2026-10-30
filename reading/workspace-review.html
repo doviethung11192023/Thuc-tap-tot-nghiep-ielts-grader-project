@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Màn Hình Kết Quả IELTS Reading - Đối Soát Lời Giải Chi Tiết 4 Bước</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full font-sans text-zinc-900 antialiased flex flex-col overflow-hidden">
+
+  <!-- Header Điều Hướng -->
+  <header class="h-14 bg-white border-b border-zinc-200 px-4 flex items-center justify-between shrink-0 shadow-2xs z-30">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-primary transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Bảng Điều Phối</span>
+      </a>
+      <span class="h-4 w-px bg-zinc-200"></span>
+      <div>
+        <h2 class="text-xs font-bold text-zinc-900">Báo Cáo Kết Quả Thi &bull; Reading Test 1</h2>
+        <span class="text-[10px] text-zinc-500 font-medium">Đối chiếu lời giải 4 bước và liên kết dẫn chứng văn bản hai chiều</span>
+      </div>
+    </div>
+
+    <!-- Cụm Thống Kê Nhanh -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
+          Band 7.5
+        </span>
+        <span class="text-xs font-medium text-zinc-600">
+          Chính xác: <strong class="text-zinc-900 font-bold">31 / 40</strong> (77.5%)
+        </span>
+      </div>
+
+      <a href="workspace-exam.html" class="px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition-colors">
+        Làm Lại Đề Thi
+      </a>
+    </div>
+  </header>
+
+  <!-- Thẻ Thống Kê & Bộ Lọc Trạng Thái Câu Hỏi -->
+  <div class="bg-white border-b border-zinc-200 px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0 text-xs">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-zinc-700">Lọc Theo Trạng Thái:</span>
+      <button class="px-2.5 py-1 rounded-md bg-zinc-900 text-white font-bold">Tất Cả (40)</button>
+      <button class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 hover:bg-emerald-100">Đúng (31)</button>
+      <button class="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 font-semibold border border-rose-200 hover:bg-rose-100">Sai (7)</button>
+      <button class="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-semibold hover:bg-zinc-200">Chưa Làm (2)</button>
+    </div>
+
+    <div class="text-[11px] text-zinc-500 flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+      <span>Nhấp vào nút <strong class="text-amber-800 font-semibold">[Xem Dẫn Chứng]</strong> để tự động cuộn và đánh dấu trên bài đọc</span>
+    </div>
+  </div>
+
+  <!-- Không Gian Hai Cột Xem Lại -->
+  <div id="split-review-container" class="flex-1 flex overflow-hidden relative">
+
+    <!-- Cột Trái: Văn Bản Bài Đọc (Có Highlight Dẫn Chứng) -->
+    <div id="review-left-pane" class="w-1/2 border-r border-zinc-200 bg-white overflow-y-auto px-8 py-6 select-text">
+      <div id="passage-content-container" class="max-w-2xl mx-auto space-y-6 text-zinc-800 leading-relaxed text-sm">
+        <div class="border-b border-zinc-200 pb-3">
+          <span class="text-xs font-bold text-primary uppercase tracking-wider">Reading Passage 1</span>
+          <h1 class="text-xl font-black text-zinc-900 mt-1">Circadian Rhythms and the Melatonin Cycle</h1>
+        </div>
+
+        <div class="space-y-4">
+          <p id="para-A">
+            <strong class="text-zinc-900 font-bold mr-1">Paragraph A:</strong>
+            Circadian rhythms are biological oscillations with an endogenous frequency approximating twenty-four hours. These rhythms are coordinated by a primary circadian pacemaker situated within the suprachiasmatic nucleus (SCN) of the anterior hypothalamus in mammalian brains. Exposure to environmental photic stimuli synchronizes the internal cellular clock to astronomical solar cycles, a physiological adaptation enabling terrestrial organisms to anticipate environmental variations.
+          </p>
+          <p id="para-B">
+            <strong class="text-zinc-900 font-bold mr-1">Paragraph B:</strong>
+            Central to neuroendocrine regulation is the hormone melatonin (N-acetyl-5-methoxytryptamine), synthesized predominantly within the pineal gland during periods of darkness. Photic transmission proceeds from retinal ganglion cells via the retinohypothalamic tract to the SCN, which subsequently suppresses norepinephrine-mediated pineal activity. Consequently, serum melatonin concentrations exhibit significant nocturnal elevations, functioning as an internal biochemical indicator of temporal diurnal position.
+          </p>
+          <p id="para-C">
+            <strong class="text-zinc-900 font-bold mr-1">Paragraph C:</strong>
+            Researchers have examined pharmaceutical interventions targeted at circadian desynchrony, such as phase shifts induced by rapid transmeridian travel. Controlled administration of exogenous melatonin facilitates phase advances when ingested prior to habitual bedtime, effectively re-entraining circadian misalignment. However, clinicians emphasize that pharmacotherapy must be precisely scheduled relative to individual phase-response curves, as inappropriate timing may exacerbate existing phase delays.
+          </p>
+          <p id="para-D">
+            <strong class="text-zinc-900 font-bold mr-1">Paragraph D:</strong>
+            The architecture of non-rapid eye movement (NREM) and rapid eye movement (REM) cycles demonstrates progressive homeostatic regulation across nocturnal sleep periods. Slow-wave activity predominates early sleep cycles, serving critical functions in metabolic clearance and neuroplastic synaptic consolidation. Disruption of these sequential phases frequently produces cognitive deficits, impaired sustained attention, and immunological alterations.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh Trượt Phân Tách -->
+    <div id="review-splitter-handle" class="w-2.5 bg-zinc-200 hover:bg-primary/80 active:bg-primary cursor-col-resize transition-colors flex items-center justify-center shrink-0 z-20 group">
+      <div class="h-8 w-1 bg-zinc-400 group-hover:bg-white rounded-full"></div>
+    </div>
+
+    <!-- Cột Phải: Thẻ Câu Hỏi & Lời Giải 4 Bước -->
+    <div id="review-right-pane" class="w-1/2 bg-zinc-50 overflow-y-auto px-6 py-6 space-y-6">
+
+      <!-- Câu 1: Trạng Thái Đúng (Green) -->
+      <div class="bg-white rounded-2xl border-2 border-emerald-500 shadow-2xs overflow-hidden">
+        <div class="bg-emerald-50/70 border-b border-emerald-100 px-5 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs">&check;</span>
+            <span class="text-xs font-bold text-emerald-950">Câu 1 &bull; Chính Xác</span>
+          </div>
+          <span class="text-[11px] font-bold text-emerald-800 bg-white px-2.5 py-0.5 rounded border border-emerald-200">+1.0 Điểm</span>
+        </div>
+
+        <div class="p-5 space-y-4 text-xs">
+          <div>
+            <span class="text-zinc-500 font-medium">Nội dung câu hỏi:</span>
+            <p class="font-bold text-zinc-900 mt-0.5">The primary biological pacemaker is located within the anterior [ Câu 1: ... ]</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+            <div>
+              <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
+              <span class="font-bold text-emerald-700 text-sm">A. hypothalamus</span>
+            </div>
+            <div>
+              <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
+              <span class="font-bold text-zinc-900 text-sm">A. hypothalamus</span>
+            </div>
+          </div>
+
+          <!-- Accordion Lời Giải 4 Bước Cố Định -->
+          <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+            <div class="bg-zinc-50 px-4 py-2.5 font-bold text-zinc-800 flex items-center justify-between border-b border-zinc-200">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Phân Tích Chi Tiết 4 Bước
+              </span>
+              <button onclick="IELTSProto.highlightEvidenceInPassage('para-A', 'suprachiasmatic nucleus (SCN) of the anterior hypothalamus in mammalian brains')" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2.5 py-1 rounded transition-colors text-[11px] flex items-center gap-1">
+                <span>Xem Dẫn Chứng Đoạn A</span> &rarr;
+              </button>
+            </div>
+            <div class="p-4 space-y-3 text-xs leading-relaxed text-zinc-700">
+              <p><strong>Bước 1 (Xác định từ khóa):</strong> <em>primary biological pacemaker</em>, <em>located within the anterior</em>.</p>
+              <p><strong>Bước 2 (Định vị dẫn chứng):</strong> Đoạn A, dòng 3: &ldquo;...coordinated by a primary circadian pacemaker situated within the suprachiasmatic nucleus (SCN) of the anterior hypothalamus...&rdquo;</p>
+              <p><strong>Bước 3 (Phân tích đối soát):</strong> <em>primary biological pacemaker</em> đồng nghĩa với <em>primary circadian pacemaker</em>; <em>located within</em> đồng nghĩa với <em>situated within</em>.</p>
+              <p><strong>Bước 4 (Kết luận):</strong> Cụm từ cần điền sau <em>anterior</em> là <em>hypothalamus</em> (phương án A).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Câu 2: Trạng Thái Sai (Red) -->
+      <div class="bg-white rounded-2xl border-2 border-rose-500 shadow-2xs overflow-hidden">
+        <div class="bg-rose-50/70 border-b border-rose-100 px-5 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center text-xs">&times;</span>
+            <span class="text-xs font-bold text-rose-950">Câu 2 &bull; Chưa Chính Xác</span>
+          </div>
+          <span class="text-[11px] font-bold text-rose-800 bg-white px-2.5 py-0.5 rounded border border-rose-200">0.0 Điểm</span>
+        </div>
+
+        <div class="p-5 space-y-4 text-xs">
+          <div>
+            <span class="text-zinc-500 font-medium">Nội dung câu hỏi:</span>
+            <p class="font-bold text-zinc-900 mt-0.5">The hormone melatonin is secreted mainly during periods of [ Câu 2: ... ]</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+            <div>
+              <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
+              <span class="font-bold text-rose-700 text-sm line-through">B. nocturnal</span>
+            </div>
+            <div>
+              <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
+              <span class="font-bold text-emerald-700 text-sm">C. darkness</span>
+            </div>
+          </div>
+
+          <!-- Accordion Lời Giải 4 Bước -->
+          <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+            <div class="bg-zinc-50 px-4 py-2.5 font-bold text-zinc-800 flex items-center justify-between border-b border-zinc-200">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Phân Tích Chi Tiết 4 Bước
+              </span>
+              <button onclick="IELTSProto.highlightEvidenceInPassage('para-B', 'synthesized predominantly within the pineal gland during periods of darkness')" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2.5 py-1 rounded transition-colors text-[11px] flex items-center gap-1">
+                <span>Xem Dẫn Chứng Đoạn B</span> &rarr;
+              </button>
+            </div>
+            <div class="p-4 space-y-3 text-xs leading-relaxed text-zinc-700">
+              <p><strong>Bước 1 (Xác định từ khóa):</strong> <em>melatonin</em>, <em>secreted mainly during periods of</em>.</p>
+              <p><strong>Bước 2 (Định vị dẫn chứng):</strong> Đoạn B, dòng 2: &ldquo;...synthesized predominantly within the pineal gland during periods of darkness.&rdquo;</p>
+              <p><strong>Bước 3 (Phân tích bẫy ngôn ngữ):</strong> Từ <em>nocturnal</em> là tính từ đi cùng <em>elevations</em> ở cuối đoạn B, không đi cùng cấu trúc giới từ <em>during periods of [danh từ]</em>.</p>
+              <p><strong>Bước 4 (Kết luận):</strong> Danh từ chính xác là <em>darkness</em> (phương án C).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/splitter.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initSplitter('split-review-container', 'review-left-pane', 'review-splitter-handle', 'review-right-pane');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Trưng Bày 12 Dạng Bài IELTS Listening - Rà Soát Thực Trạng &amp; Chuẩn Hóa</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full font-sans text-zinc-900 antialiased flex flex-col">
+
+  <!-- Header Điều Hướng -->
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-40 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm hover:bg-primary-hover transition-colors">
+            M
+          </a>
+          <div>
+            <h1 class="text-base font-bold text-zinc-900 leading-tight">Thư Viện 12 Dạng Bài IELTS Listening</h1>
+            <p class="text-xs text-zinc-500 font-medium">Đối chiếu thực trạng mã nguồn LongRevert và bản thiết kế chuẩn hóa</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="workspace-exam.html" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-red-100 rounded-lg transition-colors">
+            Vào Phòng Thi Listening &rarr;
+          </a>
+          <a href="../index.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
+            &larr; Bảng Điều Phối
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Giới Thiệu -->
+  <section class="bg-white border-b border-zinc-200 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+          Kỹ Năng Nghe (Listening)
+        </span>
+        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chi Tiết Rà Soát Thực Trạng 12 Dạng Bài Listening</h2>
+        <p class="mt-1 text-xs text-zinc-600 leading-relaxed">
+          Tập trung vào ba điểm nghẽn kỹ thuật then chốt của kỹ năng nghe: Mất định dạng phân cột của dạng bảng Section 4, thiếu bộ giới hạn chọn cho trắc nghiệm nhiều đáp án, và cơ chế kéo thả điểm ghim bản đồ Section 2/3.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Danh Sách Khối Dạng Bài Trọng Điểm -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- Dạng 1: Form Completion (Section 1) -->
+    <article id="type-listening-1" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 17 &bull; Type ID: 34 hoặc 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Form Completion &bull; Điền biểu mẫu thông tin khách hàng</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Phòng thi: 🟡 Cần tối ưu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">
+          Hiện trạng kỹ thuật: Cấu trúc biểu mẫu khách hàng thường có dạng hai cột phân định rõ ràng giữa Tiêu đề thông tin và Ô nhập liệu. Nếu lưu Type 1 dưới dạng chuỗi ngắt dòng thì cần căn chỉnh lề lưới đều đặn.
+        </p>
+      </div>
+
+      <div class="p-6">
+        <div class="max-w-xl mx-auto rounded-xl border border-zinc-200 bg-white p-5 shadow-2xs space-y-3">
+          <div class="border-b border-zinc-200 pb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-900">PACK &amp; SEND CUSTOMER INQUIRY FORM</h4>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between py-1 border-b border-zinc-100">
+              <span class="text-zinc-600 font-medium">Customer Full Name:</span>
+              <input type="text" value="Peter Wisrough" class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 w-56 bg-zinc-50 focus:bg-white focus:border-primary outline-none">
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-zinc-100">
+              <span class="text-zinc-600 font-medium">Street Address:</span>
+              <input type="text" placeholder="Câu 2..." class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 w-56 bg-zinc-50 focus:bg-white focus:border-primary outline-none">
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-zinc-600 font-medium">Postcode:</span>
+              <input type="text" placeholder="Câu 3..." class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 w-56 bg-zinc-50 focus:bg-white focus:border-primary outline-none">
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Dạng 2: Table Completion (Section 4) -->
+    <article id="type-listening-2" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-rose-50/70 border-b border-rose-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 18 &bull; Type ID: 34</span>
+            <h3 class="text-base font-bold text-zinc-900">Table Completion &bull; Điền bảng tổng hợp Section 4</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Hạn chế trọng yếu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-rose-900 mt-2">
+          Điểm nghẽn nghiêm trọng: Tại phòng thi Listening của LongRevert, component <code>CleanListeningTableRenderer</code> không được gọi, thay vào đó là <code>InlineFillBlankRenderer</code> làm bảng mất hoàn toàn cấu trúc cột.
+        </p>
+        <!-- Switcher -->
+        <div class="mt-4 flex items-center gap-2 text-xs">
+          <span class="text-zinc-600 font-medium">Chế độ hiển thị:</span>
+          <button onclick="toggleView('listening-2', 'current')" id="btn-listening-2-current" class="px-3 py-1 rounded-md border border-zinc-300 bg-white text-zinc-700 font-semibold shadow-2xs">
+            Hiện Trạng LongRevert (Mất Khung Cột)
+          </button>
+          <button onclick="toggleView('listening-2', 'standard')" id="btn-listening-2-standard" class="px-3 py-1 rounded-md bg-primary text-white font-semibold shadow-2xs">
+            Chuẩn Hóa Đề Xuất (Kẻ Viền TableGrid)
+          </button>
+        </div>
+      </div>
+
+      <!-- Demo LongRevert -->
+      <div id="view-listening-2-current" class="p-6 hidden">
+        <div class="p-4 rounded-xl border border-rose-300 bg-rose-50/40 text-xs font-mono text-zinc-700 space-y-1">
+          <div class="text-[11px] font-bold text-rose-700 mb-2 font-sans">&bull; Hiện trạng thực tế: Thí sinh phải tự đoán cột vì bảng bị nén thành văn bản thô:</div>
+          <p>Product Incident Report Model Number: [ ____ ] Price: £ [ ____ ] Branch Name: [ ____ ]</p>
+        </div>
+      </div>
+
+      <!-- Demo Chuẩn Hóa -->
+      <div id="view-listening-2-standard" class="p-6">
+        <div class="overflow-x-auto rounded-xl border border-zinc-200 shadow-2xs">
+          <table class="min-w-full divide-y divide-zinc-200 text-xs">
+            <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase">
+              <tr>
+                <th class="px-4 py-3">Mã Sản Phẩm</th>
+                <th class="px-4 py-3">Giá Bán</th>
+                <th class="px-4 py-3">Chi Nhánh</th>
+                <th class="px-4 py-3">Mô Tả Sự Cố</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 bg-white">
+              <tr>
+                <td class="px-4 py-3 font-mono font-bold">R242</td>
+                <td class="px-4 py-3">£ <input type="text" placeholder="Câu 31" class="px-2 py-0.5 border border-zinc-300 rounded w-20 font-bold"></td>
+                <td class="px-4 py-3"><input type="text" placeholder="Câu 32" class="px-2 py-0.5 border border-zinc-300 rounded w-28 font-bold"></td>
+                <td class="px-4 py-3 text-zinc-600">Bị rò rỉ dung dịch sau khi sử dụng</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <!-- Dạng 8: Multiple Choice Multi-select (Part 2 & 3) -->
+    <article id="type-listening-8" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-rose-50/70 border-b border-rose-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 24 &bull; Type ID: 4 hoặc 8</span>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice Multi-select &bull; Trắc nghiệm nghe chọn nhiều</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Hạn chế trọng yếu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-rose-900 mt-2">
+          Hạn chế: Tương tự như Reading, giao diện phòng thi gán nhầm vào SingleChoiceRenderer khiến thí sinh chỉ tick chọn được 1 câu và mất điểm các câu còn lại.
+        </p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 checkbox-group-limiter" data-max-selection="2">
+          <div class="flex items-center justify-between border-b border-zinc-200 pb-2">
+            <h4 class="text-xs font-bold text-zinc-900">Questions 23-24: Which TWO sales strategies are recommended for chocolate in Germany?</h4>
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 selection-counter">0/2</span>
+          </div>
+          <div class="space-y-2 text-xs pt-1">
+            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+              <input type="checkbox" value="A" class="w-4 h-4 rounded text-primary">
+              <span>A. Locate stores near primary schools</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+              <input type="checkbox" value="B" class="w-4 h-4 rounded text-primary">
+              <span>B. Change product placement on supermarket shelves</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+              <input type="checkbox" value="C" class="w-4 h-4 rounded text-primary">
+              <span>C. Provide complimentary gift vouchers</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+              <input type="checkbox" value="D" class="w-4 h-4 rounded text-primary">
+              <span>D. Make Schmutzig the second cheapest brand</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Dạng 10: Map / Plan / Diagram Labelling (Kéo Thả Type 35) -->
+    <article id="type-listening-10" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-rose-50/70 border-b border-rose-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 26 &bull; Type ID: 35</span>
+            <h3 class="text-base font-bold text-zinc-900">Map / Plan / Diagram Labelling &bull; Kéo thả điểm ghim bản đồ</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Hạn chế trọng yếu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Kết quả: 🔴 Chưa có</span>
+          </div>
+        </div>
+        <p class="text-xs text-rose-900 mt-2">
+          Đặc tả kỹ thuật: Dữ liệu JSON có trường map_data và tọa độ x, y. Giao diện chuẩn là thao tác kéo thẻ đáp án (A - F) từ panel bên phải và thả vào điểm ghim tròn trên sơ đồ.
+        </p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 flex items-center justify-between">
+          <div>
+            <h4 class="text-xs font-bold text-zinc-900">Bản đồ thư viện Adam Smith (Cambridge Test 4)</h4>
+            <p class="text-[11px] text-zinc-500">Đã hiện thực hóa hoàn chỉnh cơ chế kéo thả trực tiếp trên phòng thi</p>
+          </div>
+          <a href="workspace-exam.html#question-21" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-colors">
+            Trải Nghiệm Thao Tác Kéo Thả &rarr;
+          </a>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-zinc-200 py-6 mt-12 text-center text-xs text-zinc-500">
+    MoonLab IELTS Grader &bull; Thư Viện 12 Dạng Bài IELTS Listening
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      IELTSProto.initCheckboxLimiter();
+    });
+
+    function toggleView(typeKey, targetView) {
+      const currentEl = document.getElementById(`view-${typeKey}-current`);
+      const standardEl = document.getElementById(`view-${typeKey}-standard`);
+      const btnCurrent = document.getElementById(`btn-${typeKey}-current`);
+      const btnStandard = document.getElementById(`btn-${typeKey}-standard`);
+
+      if (targetView === 'current') {
+        currentEl.classList.remove('hidden');
+        standardEl.classList.add('hidden');
+        btnCurrent.classList.add('bg-zinc-900', 'text-white');
+        btnCurrent.classList.remove('bg-white', 'text-zinc-700');
+        btnStandard.classList.remove('bg-primary', 'text-white');
+        btnStandard.classList.add('bg-white', 'text-zinc-700');
+      } else {
+        currentEl.classList.add('hidden');
+        standardEl.classList.remove('hidden');
+        btnStandard.classList.add('bg-primary', 'text-white');
+        btnStandard.classList.remove('bg-white', 'text-zinc-700');
+        btnCurrent.classList.remove('bg-zinc-900', 'text-white');
+        btnCurrent.classList.add('bg-white', 'text-zinc-700');
+      }
+    }
+  </script>
+</body>
+</html>
