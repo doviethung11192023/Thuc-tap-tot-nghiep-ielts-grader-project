@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Kết Quả & Lời Giải 16 Dạng Bài IELTS Reading - Trích Xuất LongRevert</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full font-sans text-zinc-900 antialiased flex flex-col">
+
+  <!-- Header Điều Hướng -->
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-40 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm hover:bg-primary-hover transition-colors">
+            M
+          </a>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-bold text-zinc-900 leading-tight">Thư Viện Kết Quả 16 Dạng Bài IELTS Reading</h1>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">Trích xuất CleanReadingDetailView</span>
+            </div>
+            <p class="text-xs text-zinc-500 font-medium">Bóc tách trực tiếp từ component CleanQuestionItemRenderer &amp; CleanQuestionDropdownExplanation trên LongRevert</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="components-gallery.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors flex items-center gap-1">
+            <span>&larr; Xem Phòng Thi (Exam)</span>
+          </a>
+          <a href="workspace-review.html" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-red-100 rounded-lg transition-colors">
+            Màn Kết Quả Full &rarr;
+          </a>
+          <a href="../index.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
+            Bảng Điều Phối
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Thanh Lọc Chế Độ Xem (Focus Mode & Filter Tabs) -->
+  <nav class="bg-white border-b border-zinc-200 sticky top-16 z-30 py-2.5 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 text-xs max-w-4xl" id="filter-tabs">
+        <span class="text-zinc-500 font-semibold mr-1 shrink-0">Chọn dạng:</span>
+        <button onclick="filterGallery('all')" id="tab-all" class="filter-tab px-3 py-1 rounded-full bg-zinc-900 text-white font-bold transition-all shrink-0">
+          Tất Cả (16 Dạng)
+        </button>
+        <button onclick="filterGallery('type-reading-1')" id="tab-type-reading-1" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">01. Điền Câu</button>
+        <button onclick="filterGallery('type-reading-2')" id="tab-type-reading-2" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">02. Tóm Tắt Tự Điền</button>
+        <button onclick="filterGallery('type-reading-3')" id="tab-type-reading-3" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">03. Tóm Tắt Wordlist</button>
+        <button onclick="filterGallery('type-reading-4')" id="tab-type-reading-4" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">04. Ghi Chú</button>
+        <button onclick="filterGallery('type-reading-5')" id="tab-type-reading-5" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">05. Bảng Biểu</button>
+        <button onclick="filterGallery('type-reading-6')" id="tab-type-reading-6" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">06. Quy Trình</button>
+        <button onclick="filterGallery('type-reading-7')" id="tab-type-reading-7" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">07. Gắn Nhãn Sơ Đồ</button>
+        <button onclick="filterGallery('type-reading-8')" id="tab-type-reading-8" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">08. Trả Lời Ngắn</button>
+        <button onclick="filterGallery('type-reading-9')" id="tab-type-reading-9" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">09. Trắc Nghiệm Đơn</button>
+        <button onclick="filterGallery('type-reading-10')" id="tab-type-reading-10" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">10. Trắc Nghiệm Nhiều</button>
+        <button onclick="filterGallery('type-reading-11')" id="tab-type-reading-11" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">11. Nối Tiêu Đề</button>
+        <button onclick="filterGallery('type-reading-12')" id="tab-type-reading-12" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">12. Nối Thông Tin</button>
+        <button onclick="filterGallery('type-reading-13')" id="tab-type-reading-13" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">13. Nối Đặc Điểm</button>
+        <button onclick="filterGallery('type-reading-14')" id="tab-type-reading-14" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">14. Nối Đuôi Câu</button>
+        <button onclick="filterGallery('type-reading-15')" id="tab-type-reading-15" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">15. True/False</button>
+        <button onclick="filterGallery('type-reading-16')" id="tab-type-reading-16" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">16. Yes/No</button>
+      </div>
+
+      <div class="text-xs text-zinc-500 font-medium flex items-center gap-2">
+        <span id="active-filter-label" class="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200">Hiển thị: Tất cả</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Banner Giới Thiệu Chuẩn Trích Xuất LongRevert -->
+  <section class="bg-white border-b border-zinc-200 py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+          Quy Chuẩn Đối Chuẩn Mã Nguồn LongRevert
+        </span>
+        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chi Tiết Giao Diện Kết Quả &amp; Phân Tích Lời Giải 16 Dạng Bài Reading</h2>
+        <p class="mt-1 text-xs text-zinc-600 leading-relaxed">
+          Tất cả các khối bên dưới được sao chép trực tiếp từ component <code>CleanQuestionItemRenderer.tsx</code> và <code>CleanQuestionDropdownExplanation.tsx</code> trên nhánh <code>LongRevert</code>. Bao gồm huy hiệu số câu xanh/đỏ, đối soát đáp án học viên vs đáp án chuẩn, và khung phân tích 4 bước (Định vị, Từ loại, Từ khóa Paraphrase &amp; Kết luận).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Danh Sách 16 Khối Kết Quả Reading -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- STT 01: Sentence Completion (Correct State) -->
+    <article id="type-reading-1" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 01 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Sentence Completion &bull; Kết Quả Điền Từ Câu Đơn</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 font-bold">+1.0 Điểm</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Mã nguồn xử lý: <code>CleanQuestionItemRenderer.tsx</code> dòng 33-66. Render badge tròn xanh lá <code>w-7 h-7 bg-emerald-600</code> và ô đáp án xanh lá <code>border-emerald-500 bg-emerald-50</code>.</p>
+      </div>
+
+      <div class="p-6">
+        <!-- Trích xuất chính xác CleanQuestionItemRenderer -->
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-emerald-600 text-white ring-2 ring-emerald-100">
+              1
+            </div>
+            <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-zinc-600 text-sm font-normal">The primary circadian pacemaker in mammalian biology is located within the:</span>
+                <span class="px-2.5 py-1 rounded-md text-sm font-bold border border-emerald-500 bg-emerald-50 text-emerald-800">
+                  pacemaker
+                </span>
+                <span class="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                  &check; Chính xác (+1.0 điểm)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dropdown Lời Giải: Trích xuất chính xác CleanQuestionDropdownExplanation.tsx -->
+          <div class="pl-10">
+            <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+              <button onclick="toggleExplanation('reading-1')" class="w-full px-4 py-2.5 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                  </div>
+                  <span class="font-semibold text-sm text-blue-900">Giải thích chi tiết 4 bước</span>
+                </div>
+                <span class="text-xs font-semibold text-blue-700 flex items-center gap-1" id="chevron-reading-1">
+                  <span>Mở rộng</span> &darr;
+                </span>
+              </button>
+
+              <div id="exp-reading-1" class="p-4 space-y-3.5 leading-relaxed text-zinc-800 text-xs sm:text-sm">
+                <!-- Vị trí & Từ khóa Paraphrase -->
+                <div class="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-2">
+                  <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
+                    <span>Đối chiếu từ khóa với bài đọc</span>
+                  </div>
+                  <div class="flex items-center gap-2 flex-wrap text-xs sm:text-sm">
+                    <span class="border border-dashed border-emerald-500 bg-emerald-50/80 text-emerald-950 rounded-md px-2 py-0.5 font-medium shadow-2xs">
+                      biological pacemaker
+                    </span>
+                    <span class="text-emerald-600 font-bold">&approx;</span>
+                    <span class="border border-dashed border-emerald-500 bg-emerald-50/80 text-emerald-950 rounded-md px-2 py-0.5 font-medium shadow-2xs">
+                      primary circadian pacemaker
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 4 Bước giải thích -->
+                <div class="space-y-2">
+                  <div class="font-bold text-zinc-900 text-sm flex items-center gap-1.5 text-blue-950">
+                    <span class="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+                    <span>Bước 1: Định vị thông tin (Paragraph A, dòng 2)</span>
+                  </div>
+                  <div class="my-1.5 p-2.5 rounded-lg border-l-4 border-blue-500 bg-blue-50/60 text-blue-950 italic text-xs sm:text-sm">
+                    &ldquo;These rhythms are coordinated by a primary circadian pacemaker situated within the suprachiasmatic nucleus (SCN)...&rdquo;
+                  </div>
+                  <p class="text-xs text-zinc-700 pl-3.5">
+                    <strong>Bước 2 (Từ loại):</strong> Cần một danh từ số ít chỉ thực thể điều hòa nhịp học thuật.<br>
+                    <strong>Bước 3 (Đối chiếu):</strong> Cụm &ldquo;functions as the primary...&rdquo; tương đồng trực tiếp với &ldquo;coordinated by a primary circadian pacemaker&rdquo;.<br>
+                    <strong>Bước 4 (Kết luận):</strong> Từ duy nhất phù hợp với giới hạn 1 từ là <strong>pacemaker</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 02: Summary Completion (Incorrect State) -->
+    <article id="type-reading-2" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 02 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Summary Completion &bull; Kết Quả Điền Đoạn Tóm Tắt (Câu Trả Lời Sai)</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 font-bold">0.0 Điểm</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Mã nguồn xử lý: <code>CleanQuestionItemRenderer.tsx</code> dòng 38-59. Render badge tròn đỏ <code>bg-red-600</code>, ô sai đỏ <code>border-red-400 bg-red-50 text-red-800</code> kèm đáp án đúng gạch dưới xanh lá.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-red-600 text-white ring-2 ring-red-100">
+              3
+            </div>
+            <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-zinc-600 text-sm font-normal">Artificial illumination past dusk suppresses the body's natural synthesis of:</span>
+                <span class="px-2.5 py-1 rounded-md text-sm font-bold border border-red-400 bg-red-50 text-red-800 line-through">
+                  light
+                </span>
+                <span class="text-xs text-emerald-700 font-medium">
+                  (Đáp án đúng: <span class="font-bold underline text-emerald-800">melatonin</span>)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pl-10">
+            <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+              <button onclick="toggleExplanation('reading-2')" class="w-full px-4 py-2.5 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                  </div>
+                  <span class="font-semibold text-sm text-blue-900">Giải thích chi tiết 4 bước</span>
+                </div>
+                <span class="text-xs font-semibold text-blue-700 flex items-center gap-1" id="chevron-reading-2">
+                  <span>Mở rộng</span> &darr;
+                </span>
+              </button>
+
+              <div id="exp-reading-2" class="p-4 space-y-3.5 text-xs sm:text-sm text-zinc-800">
+                <div class="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="border border-dashed border-emerald-500 bg-emerald-50/80 text-emerald-950 rounded-md px-2 py-0.5 font-medium shadow-2xs">
+                      suppresses natural synthesis
+                    </span>
+                    <span class="text-emerald-600 font-bold">&approx;</span>
+                    <span class="border border-dashed border-emerald-500 bg-emerald-50/80 text-emerald-950 rounded-md px-2 py-0.5 font-medium shadow-2xs">
+                      suppresses pineal activity and synthesis
+                    </span>
+                  </div>
+                </div>
+                <div class="my-1.5 p-2.5 rounded-lg border-l-4 border-blue-500 bg-blue-50/60 text-blue-950 italic">
+                  &ldquo;Central to neuroendocrine regulation is the hormone melatonin... synthesized predominantly during periods of darkness.&rdquo; (Paragraph B)
+                </div>
+                <p class="text-xs text-zinc-700 pl-3.5">
+                  <strong>Bẫy đề thi:</strong> Thí sinh nhầm lẫn giữa tác nhân gây ức chế (ánh sáng - light) và chất sinh học bị ức chế tổng hợp (melatonin).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 03: Summary Completion with Wordlist -->
+    <article id="type-reading-3" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 03 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Summary Completion (Wordlist) &bull; Kết Quả Chọn Từ Gợi Ý</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 font-bold">+1.0 Điểm</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù màn kết quả: Hiển thị chữ cái chọn kèm từ vựng tương ứng (A. biological clock). Lời giải đối soát chữ cái với nội dung bài đọc.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-emerald-600 text-white ring-2 ring-emerald-100">
+              9
+            </div>
+            <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+              <span class="text-zinc-600 text-sm font-normal">Researchers verified that the SCN operates as the central: </span>
+              <span class="px-2.5 py-1 rounded-md text-sm font-bold border border-emerald-500 bg-emerald-50 text-emerald-800">
+                A (biological clock)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 04: Note Completion -->
+    <article id="type-reading-4" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 04 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Note Completion &bull; Kết Quả Điền Ghi Chú Học Thuật</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Dàn ý ghi chú thụt lề: Các ô đục lỗ hiển thị đối soát song song theo từng gạch đầu dòng.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shrink-0">5</span>
+            <span class="text-zinc-700">Primary pacemaker located in the anterior:</span>
+            <span class="px-2 py-0.5 rounded border border-emerald-500 bg-emerald-50 text-emerald-800 font-bold">hypothalamus</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shrink-0">6</span>
+            <span class="text-zinc-700">Duration in absolute isolation averages:</span>
+            <span class="px-2 py-0.5 rounded border border-emerald-500 bg-emerald-50 text-emerald-800 font-bold">24.2</span>
+            <span class="text-zinc-500">hours</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 05: Table Completion (Trích xuất từ CleanListeningTableRenderer.tsx) -->
+    <article id="type-reading-5" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 05 &bull; Type ID: 34</span>
+            <h3 class="text-base font-bold text-zinc-900">Table Completion &bull; Kết Quả Điền Bảng Ma Trận Lưới</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Trích xuất trực tiếp từ <code>CleanListeningTableRenderer.tsx</code>: Bảng được kẻ viền phân cột rõ ràng, các ô nhập hiển thị badge câu hỏi kèm đáp án đúng (xanh) hoặc đáp án sai gạch ngang (đỏ).</p>
+      </div>
+
+      <div class="p-6">
+        <!-- Render bảng chuẩn CleanListeningTableRenderer -->
+        <div class="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-2xs">
+          <div class="bg-zinc-50 border-b border-zinc-200 px-5 py-3">
+            <h4 class="font-bold text-sm text-zinc-900 tracking-tight uppercase">Bảng Tổng Hợp Phát Triển Phương Tiện Vận Tải (1830s - 1880s)</h4>
+          </div>
+          <div class="p-4 overflow-x-auto">
+            <table class="w-full border-collapse text-xs md:text-sm">
+              <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3 text-left">Giai Đoạn</th>
+                  <th class="py-2.5 px-3 text-left">Đặc Tính Kỹ Thuật</th>
+                  <th class="py-2.5 px-3 text-left">Ưu Điểm</th>
+                  <th class="py-2.5 px-3 text-left">Hạn Chế</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200">
+                <tr>
+                  <td class="py-3 px-3 font-bold text-zinc-900">1830s</td>
+                  <td class="py-3 px-3 text-zinc-700">Bánh xe gỗ bọc kim loại</td>
+                  <td class="py-3 px-3">
+                    Cần ít 
+                    <div class="inline-flex items-center gap-1.5 p-1 px-2 rounded-lg border bg-emerald-50/70 border-emerald-300 text-emerald-950 mx-1">
+                      <span class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">34</span>
+                      <span class="font-bold text-emerald-800 text-xs">effort</span>
+                    </div>
+                    hơn đi bộ
+                  </td>
+                  <td class="py-3 px-3 text-zinc-500 italic">Rất rung lắc</td>
+                </tr>
+                <tr class="bg-zinc-50/50">
+                  <td class="py-3 px-3 font-bold text-zinc-900">1880s</td>
+                  <td class="py-3 px-3">
+                    Hệ thống xích và 
+                    <div class="inline-flex items-center gap-1.5 p-1 px-2 rounded-lg border bg-red-50/70 border-red-300 text-red-950 mx-1">
+                      <span class="w-4 h-4 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[10px]">35</span>
+                      <span class="line-through text-red-600 font-semibold text-xs">gears</span>
+                      <span class="text-emerald-700 font-bold text-xs">sprockets</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-zinc-700">Dễ giữ thăng bằng hơn</td>
+                  <td class="py-3 px-3 text-zinc-500 italic">Chưa có phanh an toàn</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 06: Flow-chart Completion -->
+    <article id="type-reading-6" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 06 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Flow-chart Completion &bull; Kết Quả Điền Quy Trình Nghe / Đọc</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả LongRevert: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">Hiện trạng trên LongRevert: Màn kết quả hiển thị các bước theo khối text ngắt dòng tuần tự, chưa có mũi tên đồ họa kết nối các bước quy trình.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs">
+          <div class="p-3 bg-white border border-zinc-200 rounded-lg flex items-center justify-between">
+            <span><strong>Stage 1:</strong> Photic signal hits retinal ganglion cells</span>
+            <span class="text-zinc-400 font-mono">&check; Đã hoàn thành</span>
+          </div>
+          <div class="text-center font-bold text-zinc-400 text-xs">&darr; [Hiện trạng LongRevert: text ngắt dòng chưa có mũi tên đồ họa]</div>
+          <div class="p-3 bg-white border border-zinc-200 rounded-lg flex items-center justify-between">
+            <span><strong>Stage 2:</strong> Neural impulse transmitted directly to the 
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold font-mono">SCN</span>
+            </span>
+            <span class="text-emerald-700 font-bold text-xs">+1.0 Điểm</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 07: Diagram Label Completion -->
+    <article id="type-reading-7" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 07 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Diagram Label Completion &bull; Kết Quả Gắn Nhãn Sơ Đồ Đọc</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Hiện trạng LongRevert: Hiển thị hình ảnh sơ đồ kỹ thuật ở trên và danh sách đối soát nhãn câu hỏi ở bên dưới.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 text-xs">
+          <div class="p-3 bg-white border border-zinc-200 rounded-lg flex items-center justify-between">
+            <span class="font-semibold text-zinc-800">Label 13 (Retinal input pathway):</span>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-500 bg-emerald-50 text-emerald-800">retinohypothalamic tract</span>
+              <span class="text-emerald-700 font-bold text-xs">&check; Đúng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 08: Short-answer Questions -->
+    <article id="type-reading-8" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 08 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Short-answer Questions &bull; Kết Quả Trả Lời Câu Hỏi Ngắn</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Câu hỏi truy vấn độc lập: So sánh câu trả lời của học viên với chuỗi đáp án chuẩn cho phép (acceptable answers).</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-white space-y-2 text-xs">
+          <p class="font-bold text-zinc-900">15. What natural environmental cue acts as the strongest zeitgeber for the human body?</p>
+          <div class="flex items-center gap-3 pt-1">
+            <span class="text-zinc-500">Bạn đã điền:</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">solar daylight</span>
+            <span class="text-emerald-700 font-bold text-xs">&check; Chính xác</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 09: Single Choice Multiple Choice -->
+    <article id="type-reading-9" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 09 &bull; Type ID: 2</span>
+            <h3 class="text-base font-bold text-zinc-900">Single Choice MCQ &bull; Kết Quả Trắc Nghiệm 1 Đáp Án A-D</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Trích xuất từ <code>CleanQuestionItemRenderer.tsx</code> dòng 69-136: Card đáp án đúng có viền xanh <code>border-emerald-500 bg-emerald-50/40</code> và icon Checkmark; card học viên chọn sai có viền đỏ <code>border-red-400 bg-red-50/40</code> và icon X.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-emerald-600 text-white ring-2 ring-emerald-100">
+              17
+            </div>
+            <div class="flex-1 text-sm font-semibold text-zinc-900">
+              The primary purpose of the author in Paragraph 3 is to:
+            </div>
+          </div>
+
+          <div class="space-y-2 pl-10 text-xs">
+            <div class="w-full flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-white text-zinc-800">
+              <div class="w-6 h-6 rounded-full border-2 border-zinc-300 text-zinc-400 flex items-center justify-center text-xs font-bold shrink-0">A</div>
+              <span>Challenge the validity of previous circadian rhythm models</span>
+            </div>
+            <!-- Đáp án đúng mà học viên đã chọn -->
+            <div class="w-full flex items-center gap-3 p-3 rounded-xl border border-emerald-500 bg-emerald-50/40 text-emerald-950 font-semibold shadow-2xs">
+              <div class="w-6 h-6 rounded-full border-2 border-emerald-500 bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                &check;
+              </div>
+              <div class="flex-1">
+                <span>Explain the biological mechanism connecting retinal sensors to the brain</span>
+                <span class="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng &bull; Bạn đã chọn)</span>
+              </div>
+            </div>
+            <div class="w-full flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-white text-zinc-800">
+              <div class="w-6 h-6 rounded-full border-2 border-zinc-300 text-zinc-400 flex items-center justify-center text-xs font-bold shrink-0">C</div>
+              <span>Advocate for stricter urban street lighting regulations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 10: Multiple Choice Multi-select -->
+    <article id="type-reading-10" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 10 &bull; Type ID: 4</span>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice Multi-select &bull; Kết Quả Trắc Nghiệm Chọn Nhiều</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả LongRevert: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">Hiện trạng LongRevert: Cần hoàn thiện hiển thị phân tách điểm số khi học viên chỉ đúng 1 trong 2 đáp án (ví dụ được 0.5 điểm hoặc 1 điểm theo thang chuẩn).</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="font-bold text-zinc-900">Questions 26-27: Choose TWO letters, A-E. (Kết quả: Đúng 1/2)</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+            <div class="p-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold flex items-center justify-between">
+              <span>&check; A. Solar cycle synchronization</span>
+              <span class="text-xs text-emerald-700 font-bold">(Đúng)</span>
+            </div>
+            <div class="p-2.5 rounded-lg border border-red-400 bg-red-50 text-red-950 flex items-center justify-between">
+              <span>&times; B. Pharmacological timing accuracy</span>
+              <span class="text-xs text-red-600 font-semibold">(Sai)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 11: Matching Headings -->
+    <article id="type-reading-11" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 11 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Headings &bull; Kết Quả Nối Tiêu Đề Đoạn Văn</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Dropdown nối tiêu đề La Mã: Hiển thị tiêu đề chuẩn xác của từng đoạn kèm liên kết đối chiếu chứng cứ văn bản.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="font-bold text-zinc-900">18. Paragraph A:</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">
+              i. The anatomical locus of the biological pacemaker
+            </span>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="font-bold text-zinc-900">19. Paragraph B:</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">
+              ii. Adverse impacts of nocturnal illumination on health
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 12: Matching Information -->
+    <article id="type-reading-12" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 12 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Information &bull; Kết Quả Tìm Thông Tin Trong Đoạn</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Hiển thị ký tự đoạn văn (Paragraph A, B, C...) kèm đoạn trích dẫn chứng cứ đối chiếu trực quan.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200">
+            <span class="text-zinc-800">20. Mention of financial losses incurred due to employee sleep deficits</span>
+            <span class="px-3 py-1 rounded bg-emerald-100 text-emerald-900 font-bold">Paragraph C</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 13: Matching Features -->
+    <article id="type-reading-13" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 13 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Features &bull; Kết Quả Nối Tác Giả / Nhân Vật</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Hiển thị tên nhà nghiên cứu tương ứng kèm giải thích đối chiếu quan điểm trong bài đọc.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200">
+            <span class="text-zinc-800">22. Identified the melanopsin photoreceptor cells in the human retina</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">C. Prof. Russell Foster</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 14: Matching Sentence Endings -->
+    <article id="type-reading-14" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 14 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Sentence Endings &bull; Kết Quả Nối Vế Câu</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Nối vế đầu câu với vế sau hoàn chỉnh kèm đối soát ngữ pháp và ngữ nghĩa.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200">
+            <span class="text-zinc-800">23. Chronic deprivation of slow-wave sleep typically</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">A. precipitates persistent cognitive decline.</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 15: True / False / Not Given (Trích xuất TrueFalseButtonGroup.tsx) -->
+    <article id="type-reading-15" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 15 &bull; Type ID: 21</span>
+            <h3 class="text-base font-bold text-zinc-900">True / False / Not Given &bull; Kết Quả Xác Định Tính Xác Thực</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 font-bold">+1.0 Điểm</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Trích xuất từ <code>TrueFalseButtonGroup.tsx</code> trên LongRevert: Cụm 3 nút Segmented Control hiển thị rõ màu phân định (nút đúng sáng xanh lá <code>bg-emerald-600 text-white</code>, nút sai sáng đỏ nếu học viên chọn sai, các nút khác mờ màu xám).</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <p class="font-bold text-zinc-900">24. Natural sunlight exposure directly influences human metabolic rhythms.</p>
+            <span class="text-emerald-700 font-bold">&check; Đáp án chính xác</span>
+          </div>
+          <div class="inline-flex rounded-lg border border-zinc-200 bg-zinc-100 p-1 text-xs font-bold">
+            <span class="px-4 py-1.5 rounded-md bg-emerald-600 text-white shadow-xs">TRUE (Đúng)</span>
+            <span class="px-4 py-1.5 rounded-md text-zinc-400">FALSE</span>
+            <span class="px-4 py-1.5 rounded-md text-zinc-400">NOT GIVEN</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 16: Yes / No / Not Given -->
+    <article id="type-reading-16" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 16 &bull; Type ID: 22</span>
+            <h3 class="text-base font-bold text-zinc-900">Yes / No / Not Given &bull; Kết Quả Xác Định Quan Điểm Tác Giả</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Trích xuất từ <code>TrueFalseButtonGroup.tsx</code>: Bộ 3 nút YES, NO, NOT GIVEN hiển thị trực quan kết quả đánh giá quan điểm tác giả.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <p class="font-bold text-zinc-900">25. Modern urban societies should mandate restrictions on commercial outdoor displays past midnight.</p>
+            <span class="text-emerald-700 font-bold">&check; Đáp án chính xác</span>
+          </div>
+          <div class="inline-flex rounded-lg border border-zinc-200 bg-zinc-100 p-1 text-xs font-bold">
+            <span class="px-4 py-1.5 rounded-md bg-emerald-600 text-white shadow-xs">YES (Đúng)</span>
+            <span class="px-4 py-1.5 rounded-md text-zinc-400">NO</span>
+            <span class="px-4 py-1.5 rounded-md text-zinc-400">NOT GIVEN</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-zinc-200 py-6 mt-12 text-center text-xs text-zinc-500">
+    MoonLab IELTS Grader &bull; Thư Viện Kết Quả 16 Dạng Bài IELTS Reading (Trích Xuất Mã Nguồn LongRevert)
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      }
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      } else {
+        filterGallery('all');
+      }
+    });
+
+    function filterGallery(targetId) {
+      const articles = document.querySelectorAll('main > article');
+      const tabs = document.querySelectorAll('.filter-tab');
+      const label = document.getElementById('active-filter-label');
+
+      tabs.forEach(tab => {
+        tab.classList.remove('bg-zinc-900', 'text-white', 'font-bold');
+        tab.classList.add('bg-zinc-100', 'text-zinc-700', 'font-medium');
+      });
+
+      if (targetId === 'all') {
+        articles.forEach(art => art.classList.remove('hidden'));
+        const allTab = document.getElementById('tab-all');
+        if (allTab) {
+          allTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          allTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+        }
+        if (label) {
+          label.textContent = 'Hiển thị: Tất Cả (16 Dạng Bài)';
+          label.className = 'px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200';
+        }
+      } else {
+        articles.forEach(art => {
+          if (art.id === targetId) {
+            art.classList.remove('hidden');
+          } else {
+            art.classList.add('hidden');
+          }
+        });
+        const targetTab = document.getElementById(`tab-${targetId}`);
+        if (targetTab) {
+          targetTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          targetTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+          if (label) {
+            label.textContent = `Chế độ Focus: ${targetTab.textContent.trim()}`;
+            label.className = 'px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-800 font-bold border border-blue-200';
+          }
+        }
+      }
+    }
+
+    function toggleExplanation(id) {
+      const el = document.getElementById(`exp-${id}`);
+      const chevron = document.getElementById(`chevron-${id}`);
+      if (!el) return;
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        if (chevron) chevron.innerHTML = '<span>Thu gọn</span> &uarr;';
+      } else {
+        el.classList.add('hidden');
+        if (chevron) chevron.innerHTML = '<span>Mở rộng</span> &darr;';
+      }
+    }
+  </script>
+</body>
+</html>

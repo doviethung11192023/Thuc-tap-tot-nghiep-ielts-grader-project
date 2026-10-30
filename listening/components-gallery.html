@@ -42,11 +42,12 @@
           </a>
           <div>
             <h1 class="text-base font-bold text-zinc-900 leading-tight">Thư Viện 12 Dạng Bài IELTS Listening</h1>
-            <p class="text-xs text-zinc-500 font-medium">Đối chiếu thực trạng mã nguồn LongRevert và bản thiết kế chuẩn hóa</p>
+            <p class="text-xs text-zinc-500 font-medium">Bản đối chiếu trực quan 100% dạng bài: Hiện trạng LongRevert và Đề xuất Chuẩn hóa</p>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
+          <a href="results-gallery.html" class="px-3 py-1.5 text-xs font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors flex items-center gap-1"><span>Xem Màn Kết Quả &rarr;</span></a>
           <a href="workspace-exam.html" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-red-100 rounded-lg transition-colors">
             Vào Phòng Thi Listening &rarr;
           </a>
@@ -58,25 +59,53 @@
     </div>
   </header>
 
+  <!-- Thanh Lọc Chế Độ Xem (Focus Mode & Filter Tabs) -->
+  <nav class="bg-white border-b border-zinc-200 sticky top-16 z-30 py-2.5 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 text-xs max-w-4xl" id="filter-tabs">
+        <span class="text-zinc-500 font-semibold mr-1 shrink-0">Chọn dạng:</span>
+        <button onclick="filterGallery('all')" id="tab-all" class="filter-tab px-3 py-1 rounded-full bg-zinc-900 text-white font-bold transition-all shrink-0">
+          Tất Cả (12 Dạng)
+        </button>
+        <button onclick="filterGallery('type-listening-1')" id="tab-type-listening-1" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">17. Form</button>
+        <button onclick="filterGallery('type-listening-2')" id="tab-type-listening-2" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">18. Bảng Sec 4</button>
+        <button onclick="filterGallery('type-listening-3')" id="tab-type-listening-3" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">19. Ghi Chú</button>
+        <button onclick="filterGallery('type-listening-4')" id="tab-type-listening-4" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">20. Điền Câu</button>
+        <button onclick="filterGallery('type-listening-5')" id="tab-type-listening-5" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">21. Tóm Tắt</button>
+        <button onclick="filterGallery('type-listening-6')" id="tab-type-listening-6" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">22. Trả Lời Ngắn</button>
+        <button onclick="filterGallery('type-listening-7')" id="tab-type-listening-7" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">23. Trắc Nghiệm Đơn</button>
+        <button onclick="filterGallery('type-listening-8')" id="tab-type-listening-8" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">24. Trắc Nghiệm Nhiều</button>
+        <button onclick="filterGallery('type-listening-9')" id="tab-type-listening-9" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">25. Nối Ý Kiến</button>
+        <button onclick="filterGallery('type-listening-10')" id="tab-type-listening-10" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">26. Bản Đồ Kéo Thả</button>
+        <button onclick="filterGallery('type-listening-11')" id="tab-type-listening-11" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">27. Quy Trình Nghe</button>
+        <button onclick="filterGallery('type-listening-12')" id="tab-type-listening-12" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">28. Phân Loại</button>
+      </div>
+
+      <div class="text-xs text-zinc-500 font-medium flex items-center gap-2">
+        <span id="active-filter-label" class="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200">Hiển thị: Tất cả</span>
+      </div>
+    </div>
+  </nav>
+
   <!-- Banner Giới Thiệu -->
-  <section class="bg-white border-b border-zinc-200 py-6">
+  <section class="bg-white border-b border-zinc-200 py-5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
           Kỹ Năng Nghe (Listening)
         </span>
-        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chi Tiết Rà Soát Thực Trạng 12 Dạng Bài Listening</h2>
+        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chi Tiết Rà Soát Thực Trạng Đầy Đủ 12 Dạng Bài Listening</h2>
         <p class="mt-1 text-xs text-zinc-600 leading-relaxed">
-          Tập trung vào ba điểm nghẽn kỹ thuật then chốt của kỹ năng nghe: Mất định dạng phân cột của dạng bảng Section 4, thiếu bộ giới hạn chọn cho trắc nghiệm nhiều đáp án, và cơ chế kéo thả điểm ghim bản đồ Section 2/3.
+          Tập trung vào ba điểm nghẽn kỹ thuật then chốt: Mất định dạng phân cột của dạng bảng Section 4, thiếu bộ giới hạn chọn cho trắc nghiệm nhiều đáp án, và cơ chế kéo thả điểm ghim bản đồ Section 2/3.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Danh Sách Khối Dạng Bài Trọng Điểm -->
+  <!-- Danh Sách 12 Khối Dạng Bài Listening -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
 
-    <!-- Dạng 1: Form Completion (Section 1) -->
+    <!-- STT 17: Form Completion -->
     <article id="type-listening-1" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
       <div class="bg-amber-50/60 border-b border-amber-200 p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -117,7 +146,7 @@
       </div>
     </article>
 
-    <!-- Dạng 2: Table Completion (Section 4) -->
+    <!-- STT 18: Table Completion (Section 4) -->
     <article id="type-listening-2" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
       <div class="bg-rose-50/70 border-b border-rose-200 p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -133,7 +162,6 @@
         <p class="text-xs text-rose-900 mt-2">
           Điểm nghẽn nghiêm trọng: Tại phòng thi Listening của LongRevert, component <code>CleanListeningTableRenderer</code> không được gọi, thay vào đó là <code>InlineFillBlankRenderer</code> làm bảng mất hoàn toàn cấu trúc cột.
         </p>
-        <!-- Switcher -->
         <div class="mt-4 flex items-center gap-2 text-xs">
           <span class="text-zinc-600 font-medium">Chế độ hiển thị:</span>
           <button onclick="toggleView('listening-2', 'current')" id="btn-listening-2-current" class="px-3 py-1 rounded-md border border-zinc-300 bg-white text-zinc-700 font-semibold shadow-2xs">
@@ -145,7 +173,6 @@
         </div>
       </div>
 
-      <!-- Demo LongRevert -->
       <div id="view-listening-2-current" class="p-6 hidden">
         <div class="p-4 rounded-xl border border-rose-300 bg-rose-50/40 text-xs font-mono text-zinc-700 space-y-1">
           <div class="text-[11px] font-bold text-rose-700 mb-2 font-sans">&bull; Hiện trạng thực tế: Thí sinh phải tự đoán cột vì bảng bị nén thành văn bản thô:</div>
@@ -153,24 +180,29 @@
         </div>
       </div>
 
-      <!-- Demo Chuẩn Hóa -->
       <div id="view-listening-2-standard" class="p-6">
         <div class="overflow-x-auto rounded-xl border border-zinc-200 shadow-2xs">
           <table class="min-w-full divide-y divide-zinc-200 text-xs">
             <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase">
               <tr>
-                <th class="px-4 py-3">Mã Sản Phẩm</th>
-                <th class="px-4 py-3">Giá Bán</th>
-                <th class="px-4 py-3">Chi Nhánh</th>
-                <th class="px-4 py-3">Mô Tả Sự Cố</th>
+                <th class="px-4 py-3">Loại Sự Cố</th>
+                <th class="px-4 py-3">Mã Thiết Bị</th>
+                <th class="px-4 py-3">Chi Phí Thay Thế</th>
+                <th class="px-4 py-3">Đơn Vị Tiếp Nhận</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-zinc-200 bg-white">
               <tr>
-                <td class="px-4 py-3 font-mono font-bold">R242</td>
-                <td class="px-4 py-3">£ <input type="text" placeholder="Câu 31" class="px-2 py-0.5 border border-zinc-300 rounded w-20 font-bold"></td>
-                <td class="px-4 py-3"><input type="text" placeholder="Câu 32" class="px-2 py-0.5 border border-zinc-300 rounded w-28 font-bold"></td>
-                <td class="px-4 py-3 text-zinc-600">Bị rò rỉ dung dịch sau khi sử dụng</td>
+                <td class="px-4 py-3 font-semibold text-zinc-900">Bỏng nhiệt bo mạch</td>
+                <td class="px-4 py-3 font-mono">MOD-8820</td>
+                <td class="px-4 py-3">&pound; <input type="text" placeholder="Câu 31" class="border border-zinc-300 rounded px-2 py-0.5 w-16 text-center font-bold"></td>
+                <td class="px-4 py-3"><input type="text" placeholder="Câu 32" class="border border-zinc-300 rounded px-2 py-0.5 w-28 font-bold"> Branch</td>
+              </tr>
+              <tr class="bg-zinc-50/50">
+                <td class="px-4 py-3 font-semibold text-zinc-900">Nứt vỏ ngoài</td>
+                <td class="px-4 py-3 font-mono"><input type="text" placeholder="Câu 33" class="border border-zinc-300 rounded px-2 py-0.5 w-24 text-center font-bold"></td>
+                <td class="px-4 py-3">&pound; 45.00</td>
+                <td class="px-4 py-3 text-zinc-600">Central Service</td>
               </tr>
             </tbody>
           </table>
@@ -178,13 +210,165 @@
       </div>
     </article>
 
-    <!-- Dạng 8: Multiple Choice Multi-select (Part 2 & 3) -->
+    <!-- STT 19: Note Completion (Section 4) -->
+    <article id="type-listening-3" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 19 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Note Completion &bull; Điền dàn ý bài thuyết trình học thuật</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Dàn ý bài thuyết trình Section 4 dạng phân cấp thụt lề có các ô điền từ inline.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-800 space-y-2">
+          <h4 class="font-bold text-zinc-900">Early Innovations in Oceanic Navigation:</h4>
+          <ul class="list-disc pl-5 space-y-1.5 leading-relaxed">
+            <li>Ancient voyagers navigated primarily by observing constellations and 
+              <input type="text" placeholder="Câu 34..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-28 text-center bg-white"> patterns.
+            </li>
+            <li>Introduction of the magnetic compass reduced dependence on favorable 
+              <input type="text" placeholder="Câu 35..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-28 text-center bg-white"> conditions.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 20: Sentence Completion -->
+    <article id="type-listening-4" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 20 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Sentence Completion &bull; Điền từ hoàn thành câu nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Ô input inline xuất hiện trực tiếp trong luồng câu thoại của người nói.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs text-zinc-800">
+          <p>
+            1. The local historical archives are situated next to the 
+            <input type="text" placeholder="Nhập từ..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-32 text-center bg-white"> 
+            fountain on Victoria Street.
+          </p>
+          <p>
+            2. Visitors are requested to hand in all heavy 
+            <input type="text" placeholder="Nhập từ..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-32 text-center bg-white"> 
+            at the security cloakroom.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 21: Summary Completion -->
+    <article id="type-listening-5" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 21 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Summary Completion &bull; Điền đoạn tóm tắt bài nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Tóm tắt bài nghe thành một đoạn văn ngắn gọn chứa các ô đục lỗ inline.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs leading-loose text-zinc-800">
+          The guide emphasized that the construction project was initially commissioned by a wealthy 
+          <input type="text" placeholder="Câu 24..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-28 text-center bg-white"> 
+          in the late nineteenth century, primarily to protect commercial shipping from unexpected 
+          <input type="text" placeholder="Câu 25..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-28 text-center bg-white"> 
+          along the treacherous coastline.
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 22: Short-answer Questions -->
+    <article id="type-listening-6" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 22 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Short-answer Questions &bull; Trả lời câu hỏi ngắn</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Nhập text ngắn giới hạn không quá 2 từ hoặc 1 số (NO MORE THAN TWO WORDS AND/OR A NUMBER).</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="font-medium text-zinc-800">What time does the ferry departure schedule begin on Saturdays?</span>
+            <input type="text" placeholder="Nhập giờ..." class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 w-36 text-center">
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="font-medium text-zinc-800">Which document must international tourists present for discount tickets?</span>
+            <input type="text" placeholder="Tối đa 2 từ..." class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 w-36 text-center">
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 23: Multiple Choice (Single) -->
+    <article id="type-listening-7" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 23 &bull; Type ID: 2</span>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice (Single) &bull; Trắc nghiệm nghe 1 đáp án A, B, C</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Trắc nghiệm nghe chuẩn IELTS Listening Section 2 và 3 với đúng 3 lựa chọn (A, B, C) sử dụng Radio Button.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs text-zinc-800">
+          <p class="font-bold text-zinc-900">11. Why was the community recycling center relocated?</p>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-white hover:border-primary cursor-pointer">
+              <input type="radio" name="demo-l-mc-single" class="w-4 h-4 text-primary">
+              <span>A. To make space for a new residential development</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-primary bg-red-50/20 cursor-pointer">
+              <input type="radio" name="demo-l-mc-single" checked class="w-4 h-4 text-primary">
+              <span class="font-semibold text-primary">B. To facilitate easier heavy-vehicle road access</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-white hover:border-primary cursor-pointer">
+              <input type="radio" name="demo-l-mc-single" class="w-4 h-4 text-primary">
+              <span>C. Due to complaints regarding ambient noise levels</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 24: Multiple Choice (Multi-select) -->
     <article id="type-listening-8" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
       <div class="bg-rose-50/70 border-b border-rose-200 p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 24 &bull; Type ID: 4 hoặc 8</span>
-            <h3 class="text-base font-bold text-zinc-900">Multiple Choice Multi-select &bull; Trắc nghiệm nghe chọn nhiều</h3>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice Multi-select &bull; Trắc nghiệm nghe chọn 2 trong 5</h3>
           </div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Hạn chế trọng yếu</span>
@@ -192,65 +376,189 @@
           </div>
         </div>
         <p class="text-xs text-rose-900 mt-2">
-          Hạn chế: Tương tự như Reading, giao diện phòng thi gán nhầm vào SingleChoiceRenderer khiến thí sinh chỉ tick chọn được 1 câu và mất điểm các câu còn lại.
+          Điểm nghẽn kỹ thuật: Tại giao diện phòng thi của LongRevert, component không cho phép tích chọn nhiều ô checkbox, thí sinh chỉ ghi nhận 1 phương án duy nhất.
         </p>
+        <div class="mt-4 flex items-center gap-2 text-xs">
+          <span class="text-zinc-600 font-medium">Chế độ hiển thị:</span>
+          <button onclick="toggleView('listening-8', 'current')" id="btn-listening-8-current" class="px-3 py-1 rounded-md border border-zinc-300 bg-white text-zinc-700 font-semibold shadow-2xs">
+            Hiện Trạng LongRevert (Chỉ Chọn Được 1)
+          </button>
+          <button onclick="toggleView('listening-8', 'standard')" id="btn-listening-8-standard" class="px-3 py-1 rounded-md bg-primary text-white font-semibold shadow-2xs">
+            Chuẩn Hóa Đề Xuất (Bộ Đếm Khóa Khi Đủ 2/2)
+          </button>
+        </div>
       </div>
 
-      <div class="p-6">
+      <div id="view-listening-8-current" class="p-6 hidden">
+        <div class="p-4 rounded-xl border border-rose-300 bg-rose-50/40 text-xs space-y-2">
+          <div class="text-[11px] font-bold text-rose-700 mb-1">&bull; Lỗi giao diện: Nút radio không cho phép tích 2 đáp án:</div>
+          <label class="flex items-center gap-2 p-2 bg-white rounded border border-zinc-200">
+            <input type="radio" name="demo-faulty-l-mcq">
+            <span>A. Guided architecture tour included</span>
+          </label>
+          <label class="flex items-center gap-2 p-2 bg-white rounded border border-zinc-200">
+            <input type="radio" name="demo-faulty-l-mcq">
+            <span>B. Free admission for children under twelve</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="view-listening-8-standard" class="p-6">
         <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 checkbox-group-limiter" data-max-selection="2">
           <div class="flex items-center justify-between border-b border-zinc-200 pb-2">
-            <h4 class="text-xs font-bold text-zinc-900">Questions 23-24: Which TWO sales strategies are recommended for chocolate in Germany?</h4>
-            <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 selection-counter">0/2</span>
+            <h4 class="text-xs font-bold text-zinc-900">Questions 21-22: Choose TWO benefits offered by the campus society.</h4>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 selection-counter">0/2</span>
           </div>
-          <div class="space-y-2 text-xs pt-1">
-            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary">
               <input type="checkbox" value="A" class="w-4 h-4 rounded text-primary">
-              <span>A. Locate stores near primary schools</span>
+              <span>A. Discounted printing and bindery services</span>
             </label>
-            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary">
               <input type="checkbox" value="B" class="w-4 h-4 rounded text-primary">
-              <span>B. Change product placement on supermarket shelves</span>
+              <span>B. Reserved access to private study cubicles</span>
             </label>
-            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary">
               <input type="checkbox" value="C" class="w-4 h-4 rounded text-primary">
-              <span>C. Provide complimentary gift vouchers</span>
+              <span>C. Free admission to weekly guest lectures</span>
             </label>
-            <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-zinc-200 cursor-pointer hover:border-primary">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-zinc-200 bg-white cursor-pointer hover:border-primary">
               <input type="checkbox" value="D" class="w-4 h-4 rounded text-primary">
-              <span>D. Make Schmutzig the second cheapest brand</span>
+              <span>D. Priority registration for academic workshops</span>
             </label>
           </div>
         </div>
       </div>
     </article>
 
-    <!-- Dạng 10: Map / Plan / Diagram Labelling (Kéo Thả Type 35) -->
+    <!-- STT 25: Matching Information / Opinions -->
+    <article id="type-listening-9" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 25 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Information / Opinions &bull; Nối ý kiến người nói</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Ghép nối người nói (Jack, Susan, Dr. Higgins) với ý kiến nhận định trong đoạn hội thoại Section 3.</p>
+      </div>
+      <div class="p-6 space-y-3">
+        <div class="bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-xs">
+          <span class="font-bold text-zinc-900 mr-2">Speakers:</span>
+          <span class="mr-3"><strong>A.</strong> Jack</span>
+          <span class="mr-3"><strong>B.</strong> Susan</span>
+          <span><strong>C.</strong> Dr. Higgins</span>
+        </div>
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="text-zinc-800">23. Believes that the primary trial methodology lacked sufficient control variables</span>
+            <select class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 bg-zinc-50">
+              <option value="A" selected>A. Jack</option>
+              <option value="B">B. Susan</option>
+              <option value="C">C. Dr. Higgins</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 26: Map / Plan / Diagram Labelling -->
     <article id="type-listening-10" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
       <div class="bg-rose-50/70 border-b border-rose-200 p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 26 &bull; Type ID: 35</span>
-            <h3 class="text-base font-bold text-zinc-900">Map / Plan / Diagram Labelling &bull; Kéo thả điểm ghim bản đồ</h3>
+            <h3 class="text-base font-bold text-zinc-900">Map / Plan / Diagram Labelling &bull; Bản đồ kéo thả tọa độ</h3>
           </div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Hạn chế trọng yếu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Phòng thi: 🔴 Chưa hoàn thiện</span>
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Kết quả: 🔴 Chưa có</span>
           </div>
         </div>
         <p class="text-xs text-rose-900 mt-2">
-          Đặc tả kỹ thuật: Dữ liệu JSON có trường map_data và tọa độ x, y. Giao diện chuẩn là thao tác kéo thẻ đáp án (A - F) từ panel bên phải và thả vào điểm ghim tròn trên sơ đồ.
+          Hiện trạng LongRevert: Chưa có cơ chế kéo thả thẻ đáp án vào các điểm ghim tọa độ. Đã chuẩn hóa cơ chế Kéo Thả (Drag &amp; Drop) và Click-to-Place trong workspace.
         </p>
       </div>
 
       <div class="p-6">
-        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 flex items-center justify-between">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h4 class="text-xs font-bold text-zinc-900">Bản đồ thư viện Adam Smith (Cambridge Test 4)</h4>
-            <p class="text-[11px] text-zinc-500">Đã hiện thực hóa hoàn chỉnh cơ chế kéo thả trực tiếp trên phòng thi</p>
+            <h4 class="text-xs font-bold text-zinc-900">Mẫu Đề Thi Thực Tế: Sơ Đồ Mặt Bằng Thư Viện (Test 25866 Part 3)</h4>
+            <p class="text-xs text-zinc-500 mt-1">Bao gồm 6 điểm ghim tọa độ tương tác (Questions 21-26) kèm 6 thẻ kéo A-F.</p>
           </div>
-          <a href="workspace-exam.html#question-21" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-colors">
-            Trải Nghiệm Thao Tác Kéo Thả &rarr;
+          <a href="workspace-exam.html#question-21" class="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-colors shrink-0">
+            Mở Giao Diện Kéo Thả Tương Tác &rarr;
           </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 27: Flow-chart Completion -->
+    <article id="type-listening-11" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 27 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Flow-chart Completion &bull; Hoàn thành quy trình nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Phòng thi: 🟡 Cần tối ưu</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">
+          Hiện trạng LongRevert: Văn bản ngắt dòng theo chuỗi nhưng thiếu mũi tên chỉ hướng luồng nghe.
+        </p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2 text-xs text-zinc-800">
+          <div class="p-2.5 bg-white border border-zinc-200 rounded-lg">
+            <strong>Stage 1:</strong> Submit preliminary research proposal to faculty supervisor.
+          </div>
+          <div class="text-center font-bold text-zinc-400">&darr; [Thiếu mũi tên đồ họa]</div>
+          <div class="p-2.5 bg-white border border-zinc-200 rounded-lg">
+            <strong>Stage 2:</strong> Await official ethics committee 
+            <input type="text" placeholder="Câu 29..." class="mx-1 px-2 py-0.5 border-b-2 border-zinc-300 font-bold text-zinc-900 w-28 text-center"> within two weeks.
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 28: Categorisation / Classification -->
+    <article id="type-listening-12" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 28 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Categorisation / Classification &bull; Phân loại thông tin</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Phòng thi: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đặc thù kỹ thuật: Phân chia các đối tượng vào các nhóm phân loại cố định thông qua Select Dropdown.</p>
+      </div>
+      <div class="p-6 space-y-3">
+        <div class="bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-xs">
+          <span class="font-bold text-zinc-900 mr-2">Categories:</span>
+          <span class="mr-3"><strong>A.</strong> Domestic Waste Only</span>
+          <span class="mr-3"><strong>B.</strong> Hazardous Industrial Waste</span>
+          <span><strong>C.</strong> Both Waste Types</span>
+        </div>
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs">
+          <div class="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-white">
+            <span class="text-zinc-800">Lithium-ion battery packs</span>
+            <select class="border border-zinc-300 rounded px-2.5 py-1 font-bold text-zinc-900 bg-zinc-50">
+              <option value="A">A. Domestic Waste Only</option>
+              <option value="B" selected>B. Hazardous Industrial Waste</option>
+              <option value="C">C. Both Waste Types</option>
+            </select>
+          </div>
         </div>
       </div>
     </article>
@@ -267,7 +575,62 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       IELTSProto.initCheckboxLimiter();
+
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      }
     });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      } else {
+        filterGallery('all');
+      }
+    });
+
+    function filterGallery(targetId) {
+      const articles = document.querySelectorAll('main > article');
+      const tabs = document.querySelectorAll('.filter-tab');
+      const label = document.getElementById('active-filter-label');
+
+      tabs.forEach(tab => {
+        tab.classList.remove('bg-zinc-900', 'text-white', 'font-bold');
+        tab.classList.add('bg-zinc-100', 'text-zinc-700', 'font-medium');
+      });
+
+      if (targetId === 'all') {
+        articles.forEach(art => art.classList.remove('hidden'));
+        const allTab = document.getElementById('tab-all');
+        if (allTab) {
+          allTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          allTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+        }
+        if (label) {
+          label.textContent = 'Hiển thị: Tất Cả (12 Dạng Bài)';
+          label.className = 'px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200';
+        }
+      } else {
+        articles.forEach(art => {
+          if (art.id === targetId) {
+            art.classList.remove('hidden');
+          } else {
+            art.classList.add('hidden');
+          }
+        });
+        const targetTab = document.getElementById(`tab-${targetId}`);
+        if (targetTab) {
+          targetTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          targetTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+          if (label) {
+            label.textContent = `Chế độ Focus: ${targetTab.textContent.trim()}`;
+            label.className = 'px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200';
+          }
+        }
+      }
+    }
 
     function toggleView(typeKey, targetView) {
       const currentEl = document.getElementById(`view-${typeKey}-current`);

@@ -198,6 +198,246 @@
     </div>
   </section>
 
+  <!-- Bảng Tổng Hợp Ánh Xạ Kiến Trúc Type ID -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <div class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-200">
+            Kiến Trúc Dữ Liệu Cốt Lõi
+          </span>
+          <h3 class="mt-1.5 text-base font-bold text-zinc-900">Bảng Tổng Hợp Ánh Xạ: 28 Dạng Bài IELTS &rarr; 7 Base Exercise Type IDs</h3>
+          <p class="text-xs text-zinc-500 mt-0.5">
+            Giải thích nguyên lý: Vì sao nhiều dạng bài sư phạm IELTS lại có chung một mã Type ID trong cơ sở dữ liệu.
+          </p>
+        </div>
+        <div class="inline-flex rounded-lg border border-zinc-200 bg-white p-1 text-xs">
+          <button id="schema-btn-reading" class="px-3 py-1 font-semibold rounded-md bg-primary text-white transition-colors" onclick="toggleSchemaView('reading')">Reading (7 Type IDs)</button>
+          <button id="schema-btn-listening" class="px-3 py-1 font-semibold rounded-md text-zinc-600 hover:text-zinc-900 transition-colors" onclick="toggleSchemaView('listening')">Listening (6 Type IDs)</button>
+        </div>
+      </div>
+
+      <!-- Bảng Ánh Xạ Reading -->
+      <div id="schema-view-reading" class="p-5 overflow-x-auto">
+        <table class="min-w-full divide-y divide-zinc-200 text-left text-xs">
+          <thead class="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2.5 w-24 text-center font-mono">Type ID</th>
+              <th class="px-3 py-2.5 w-48">Tên Hằng Số Enum</th>
+              <th class="px-3 py-2.5 w-64">Các Dạng Bài IELTS Áp Dụng</th>
+              <th class="px-3 py-2.5 w-52">Cấu Trúc Dữ Liệu (Payload)</th>
+              <th class="px-3 py-2.5">Lý Do Gom Nhóm Kiến Trúc</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200 bg-white leading-relaxed">
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 1</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">SUMMARY_SENTENCE_COMPLETION</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                  <li><strong>STT 01:</strong> Sentence Completion</li>
+                  <li><strong>STT 02:</strong> Summary Completion (Không từ gợi ý)</li>
+                  <li><strong>STT 03:</strong> Summary Completion (Có từ gợi ý)</li>
+                  <li><strong>STT 04:</strong> Note Completion</li>
+                  <li><strong>STT 06:</strong> Flow-chart Completion</li>
+                  <li><strong>STT 07:</strong> Diagram Label Completion</li>
+                  <li><strong>STT 08:</strong> Short-answer Questions</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">body có slot {{...}}</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Tất cả 7 dạng bài này có chung bản chất kỹ thuật: một chuỗi văn bản chứa các vị trí đục lỗ regex để render thành ô input nhập liệu. Không cần tách riêng từng type engine.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 2</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">SINGLE_CHOICE</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 09:</strong> Single Choice Multiple Choice</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">answers: [A, B, C, D]</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Trắc nghiệm 1 đáp án duy nhất trong nhóm. Sử dụng cơ chế nút radio tiêu chuẩn.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 4</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">MULTIPLE_CHOICE</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 10:</strong> Multiple Choice Multi-select</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">answers: 5-7 options</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Trắc nghiệm chọn nhiều đáp án (chọn 2 trong 5 hoặc 3 trong 7). Cần Checkbox Group có bộ đếm và khóa khi đủ số lượng.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 7</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">MATCHING_HEADINGS</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                  <li><strong>STT 11:</strong> Matching Headings</li>
+                  <li><strong>STT 12:</strong> Matching Information</li>
+                  <li><strong>STT 13:</strong> Matching Features</li>
+                  <li><strong>STT 14:</strong> Matching Sentence Endings</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">options: [i, ii...] hoặc [A, B...]</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Cùng dùng chung động cơ ghép nối (Matching): Render dropdown box chứa các phương án chung để thí sinh chọn cho từng câu hỏi.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 21</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">TRUE_FALSE_NOT_GIVEN</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 15:</strong> True / False / Not Given</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">['TRUE', 'FALSE', 'NOT GIVEN']</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Xác định tính xác thực của thông tin. Dùng cụm 3 nút Segmented Control để tối ưu tốc độ chọn.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 22</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">YES_NO_NOT_GIVEN</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 16:</strong> Yes / No / Not Given</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">['YES', 'NO', 'NOT GIVEN']</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Xác định quan điểm / khẳng định của tác giả. Cấu trúc UI tương đương Type 21.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 34</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">TABLE_COMPLETION</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 05:</strong> Table Completion</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">table_data: { rows, cells }</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Bắt buộc phải render qua động cơ TableGrid kẻ viền lưới 2 chiều, không được ép vào InlineFillBlank để tránh vỡ cấu trúc cột.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bảng Ánh Xạ Listening -->
+      <div id="schema-view-listening" class="p-5 overflow-x-auto hidden">
+        <table class="min-w-full divide-y divide-zinc-200 text-left text-xs">
+          <thead class="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2.5 w-24 text-center font-mono">Type ID</th>
+              <th class="px-3 py-2.5 w-48">Tên Hằng Số Enum</th>
+              <th class="px-3 py-2.5 w-64">Các Dạng Bài IELTS Áp Dụng</th>
+              <th class="px-3 py-2.5 w-52">Cấu Trúc Dữ Liệu (Payload)</th>
+              <th class="px-3 py-2.5">Lý Do Gom Nhóm Kiến Trúc</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200 bg-white leading-relaxed">
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 1</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">NOTE_FORM_COMPLETION</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                  <li><strong>STT 17:</strong> Form Completion (Dạng text)</li>
+                  <li><strong>STT 19:</strong> Note Completion</li>
+                  <li><strong>STT 20:</strong> Sentence Completion</li>
+                  <li><strong>STT 21:</strong> Summary Completion</li>
+                  <li><strong>STT 22:</strong> Short-answer Questions</li>
+                  <li><strong>STT 27:</strong> Flow-chart Completion</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">body có slot {{...}}</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Gom toàn bộ các dạng bài nghe đục lỗ văn bản vào một động cơ xử lý chung.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 2</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">SINGLE_CHOICE</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 23:</strong> Multiple Choice (Single - 3 options)</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">answers: [A, B, C]</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Trắc nghiệm nghe 1 đáp án trong 3 lựa chọn tiêu chuẩn IELTS Listening Section 2 và 3.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 4 / 8</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">MULTIPLE_CHOICE</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 24:</strong> Multiple Choice (Multi-select)</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">answers: 5-7 options</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Trắc nghiệm nghe chọn 2 trong 5 hoặc 3 trong 7. (Mã 8 là biến thể định danh trong một số đề Listening).
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 7</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">MATCHING</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                  <li><strong>STT 25:</strong> Matching Information / Opinions</li>
+                  <li><strong>STT 28:</strong> Categorisation / Classification</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">options: [A, B, C...]</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Ghép nối thông tin người nói hoặc phân loại dữ liệu theo danh sách lựa chọn chung.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 34</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">FORM_TABLE_COMPLETION</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                  <li><strong>STT 17:</strong> Form Completion (Dạng bảng 2 cột)</li>
+                  <li><strong>STT 18:</strong> Table Completion (Bảng Section 4)</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">table_data: { rows, cells }</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Bảng biểu thông tin tổng hợp. Cần render bằng TableGrid để đảm bảo liên kết dữ liệu giữa các cột.
+              </td>
+            </tr>
+            <tr class="hover:bg-zinc-50/50">
+              <td class="px-3 py-3 text-center"><span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-900">Type 35</span></td>
+              <td class="px-3 py-3 font-mono font-semibold text-zinc-700">MAP_DIAGRAM_LABELING</td>
+              <td class="px-3 py-3 font-medium text-zinc-900">
+                <ul class="list-disc pl-4 text-[11px]">
+                  <li><strong>STT 26:</strong> Map / Plan / Diagram Labelling</li>
+                </ul>
+              </td>
+              <td class="px-3 py-3 font-mono text-[11px] text-zinc-600">map_data có tọa độ (x, y)</td>
+              <td class="px-3 py-3 text-zinc-600">
+                Bản đồ mặt bằng tương tác: Cho phép kéo thả thẻ đáp án A-F vào các điểm ghim tọa độ trực tiếp trên ảnh.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- Khu Vực Ma Trận Đánh Giá Chi Tiết -->
   <main id="matrix-section" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="sm:flex sm:items-center sm:justify-between pb-6 border-b border-zinc-200">
@@ -231,12 +471,12 @@
             <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-6 w-12 text-center">STT</th>
             <th scope="col" class="px-3 py-3.5 w-24">Kỹ Năng</th>
             <th scope="col" class="px-3 py-3.5">Tên Dạng Bài IELTS</th>
-            <th scope="col" class="px-3 py-3.5 w-28 font-mono text-center">Exercise ID</th>
+            <th scope="col" class="px-3 py-3.5 w-32 font-mono text-center">Exercise Type ID</th>
             <th scope="col" class="px-3 py-3.5">Component LongRevert</th>
             <th scope="col" class="px-3 py-3.5 text-center">Phòng Thi</th>
             <th scope="col" class="px-3 py-3.5 text-center">Kết Quả</th>
             <th scope="col" class="px-3 py-3.5">Nhận Định Kỹ Thuật</th>
-            <th scope="col" class="py-3.5 pl-3 pr-4 sm:pr-6 text-right">Chi Tiết</th>
+            <th scope="col" class="py-3.5 pl-3 pr-4 sm:pr-6 text-right">Xem Demo Trực Tiếp</th>
           </tr>
         </thead>
         <tbody id="matrix-table-body" class="divide-y divide-zinc-200 bg-white">
@@ -558,13 +798,41 @@
             ${row.notes}
           </td>
           <td class="py-3.5 pl-3 pr-4 sm:pr-6 text-right whitespace-nowrap">
-            <a href="${row.link}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold text-primary hover:bg-primary-light transition-colors">
-              Xem Demo &rarr;
-            </a>
+            <div class="inline-flex items-center gap-1.5 justify-end">
+              <a href="${row.link}" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors" title="Xem demo giao diện làm bài thi">
+                Phòng Thi &rarr;
+              </a>
+              <a href="${row.skill === 'reading' ? 'reading/results-gallery.html#type-reading-' + row.stt : 'listening/results-gallery.html#type-listening-' + (row.stt - 16)}" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold text-primary bg-primary-light hover:bg-red-100 transition-colors" title="Xem demo giao diện kết quả và lời giải">
+                Kết Quả &rarr;
+              </a>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function toggleSchemaView(skill) {
+      const viewReading = document.getElementById('schema-view-reading');
+      const viewListening = document.getElementById('schema-view-listening');
+      const btnReading = document.getElementById('schema-btn-reading');
+      const btnListening = document.getElementById('schema-btn-listening');
+
+      if (skill === 'reading') {
+        viewReading.classList.remove('hidden');
+        viewListening.classList.add('hidden');
+        btnReading.classList.add('bg-primary', 'text-white');
+        btnReading.classList.remove('text-zinc-600');
+        btnListening.classList.remove('bg-primary', 'text-white');
+        btnListening.classList.add('text-zinc-600');
+      } else {
+        viewReading.classList.add('hidden');
+        viewListening.classList.remove('hidden');
+        btnListening.classList.add('bg-primary', 'text-white');
+        btnListening.classList.remove('text-zinc-600');
+        btnReading.classList.remove('bg-primary', 'text-white');
+        btnReading.classList.add('text-zinc-600');
+      }
     }
 
     // Kết xuất ban đầu

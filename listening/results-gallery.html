@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-zinc-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Kết Quả & Lời Giải 12 Dạng Bài IELTS Listening - Trích Xuất LongRevert</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#932120',
+              hover: '#7a1a19',
+              light: '#fdf2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full font-sans text-zinc-900 antialiased flex flex-col">
+
+  <!-- Header Điều Hướng -->
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-40 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <a href="../index.html" class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-sm hover:bg-primary-hover transition-colors">
+            M
+          </a>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-bold text-zinc-900 leading-tight">Thư Viện Kết Quả 12 Dạng Bài IELTS Listening</h1>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">Trích xuất CleanListeningDetailView</span>
+            </div>
+            <p class="text-xs text-zinc-500 font-medium">Bóc tách trực tiếp từ component CleanListeningDetailView &amp; CleanListeningTableRenderer trên LongRevert</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="components-gallery.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors flex items-center gap-1">
+            <span>&larr; Xem Phòng Thi (Exam)</span>
+          </a>
+          <a href="workspace-review.html" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-red-100 rounded-lg transition-colors">
+            Màn Kết Quả Full &rarr;
+          </a>
+          <a href="../index.html" class="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
+            Bảng Điều Phối
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Thanh Lọc Chế Độ Xem (Focus Mode & Filter Tabs) -->
+  <nav class="bg-white border-b border-zinc-200 sticky top-16 z-30 py-2.5 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 text-xs max-w-4xl" id="filter-tabs">
+        <span class="text-zinc-500 font-semibold mr-1 shrink-0">Chọn dạng:</span>
+        <button onclick="filterGallery('all')" id="tab-all" class="filter-tab px-3 py-1 rounded-full bg-zinc-900 text-white font-bold transition-all shrink-0">
+          Tất Cả (12 Dạng)
+        </button>
+        <button onclick="filterGallery('type-listening-1')" id="tab-type-listening-1" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">17. Form</button>
+        <button onclick="filterGallery('type-listening-2')" id="tab-type-listening-2" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">18. Bảng Sec 4</button>
+        <button onclick="filterGallery('type-listening-3')" id="tab-type-listening-3" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">19. Ghi Chú</button>
+        <button onclick="filterGallery('type-listening-4')" id="tab-type-listening-4" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">20. Điền Câu</button>
+        <button onclick="filterGallery('type-listening-5')" id="tab-type-listening-5" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">21. Tóm Tắt</button>
+        <button onclick="filterGallery('type-listening-6')" id="tab-type-listening-6" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">22. Trả Lời Ngắn</button>
+        <button onclick="filterGallery('type-listening-7')" id="tab-type-listening-7" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">23. Trắc Nghiệm Đơn</button>
+        <button onclick="filterGallery('type-listening-8')" id="tab-type-listening-8" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">24. Trắc Nghiệm Nhiều</button>
+        <button onclick="filterGallery('type-listening-9')" id="tab-type-listening-9" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">25. Nối Ý Kiến</button>
+        <button onclick="filterGallery('type-listening-10')" id="tab-type-listening-10" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">26. Bản Đồ Kéo Thả</button>
+        <button onclick="filterGallery('type-listening-11')" id="tab-type-listening-11" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">27. Quy Trình Nghe</button>
+        <button onclick="filterGallery('type-listening-12')" id="tab-type-listening-12" class="filter-tab px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-medium transition-all shrink-0">28. Phân Loại</button>
+      </div>
+
+      <div class="text-xs text-zinc-500 font-medium flex items-center gap-2">
+        <span id="active-filter-label" class="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200">Hiển thị: Tất cả</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Banner Giới Thiệu Chuẩn Trích Xuất LongRevert -->
+  <section class="bg-white border-b border-zinc-200 py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+          Quy Chuẩn Đối Chuẩn Mã Nguồn LongRevert
+        </span>
+        <h2 class="mt-2 text-xl font-bold text-zinc-900">Chi Tiết Giao Diện Kết Quả &amp; Audio Script 12 Dạng Bài Listening</h2>
+        <p class="mt-1 text-xs text-zinc-600 leading-relaxed">
+          Tất cả các khối bên dưới được sao chép trực tiếp từ component <code>CleanListeningDetailView.tsx</code> và <code>CleanListeningTableRenderer.tsx</code> trên nhánh <code>LongRevert</code>. Bao gồm nút Jump to Audio Timestamp, câu thoại trích dẫn bằng chứng, và đối soát đáp án song song.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Danh Sách 12 Khối Kết Quả Listening -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- STT 17: Form Completion (Section 1) -->
+    <article id="type-listening-1" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 17 &bull; Type ID: 34 hoặc 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Form Completion &bull; Kết Quả Biểu Mẫu Khách Hàng Section 1</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 font-bold">+1.0 Điểm</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Biểu mẫu Section 1: Đối soát đáp án học viên điền trong form kèm nút nhảy mốc âm thanh Section 1.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="max-w-xl mx-auto rounded-xl border border-zinc-200 bg-white p-5 shadow-2xs space-y-3 text-xs">
+          <div class="border-b border-zinc-200 pb-2 flex items-center justify-between">
+            <h4 class="font-bold uppercase tracking-wider text-zinc-900">PACK &amp; SEND CUSTOMER INQUIRY FORM</h4>
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-bold text-[11px]">[▶ 00:45 - 01:10]</span>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between py-1 border-b border-zinc-100">
+              <span class="text-zinc-600 font-medium">Customer Full Name:</span>
+              <span class="font-bold text-zinc-900">Peter Wisrough</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-zinc-100">
+              <span class="text-zinc-600 font-medium">Street Address:</span>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">14 Main Street</span>
+                <span class="text-emerald-700 font-bold">&check; Đúng</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 18: Table Completion (Section 4) -->
+    <article id="type-listening-2" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 18 &bull; Type ID: 34</span>
+            <h3 class="text-base font-bold text-zinc-900">Table Completion (Section 4) &bull; Kết Quả Bảng Sự Cố Thiết Bị</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Trích xuất trực tiếp từ <code>CleanListeningTableRenderer.tsx</code> trên LongRevert: Màn kết quả Section 4 hiển thị bảng kẻ khung hoàn chỉnh, ô đúng xanh lá và ô sai gạch ngang đỏ.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-2xs">
+          <div class="bg-zinc-50 border-b border-zinc-200 px-5 py-3 flex items-center justify-between">
+            <h4 class="font-bold text-sm text-zinc-900 uppercase">Product Incident Report (Section 4)</h4>
+            <span class="text-xs text-zinc-500 font-medium">Bấm vào ô để xem mốc âm thanh và lời giải</span>
+          </div>
+          <div class="p-4 overflow-x-auto">
+            <table class="w-full border-collapse text-xs md:text-sm">
+              <thead class="bg-zinc-100 text-zinc-700 font-bold uppercase text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3 text-left">Loại Sự Cố</th>
+                  <th class="py-2.5 px-3 text-left">Mã Thiết Bị</th>
+                  <th class="py-2.5 px-3 text-left">Chi Phí Thay Thế</th>
+                  <th class="py-2.5 px-3 text-left">Đơn Vị Tiếp Nhận</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200">
+                <tr>
+                  <td class="py-3 px-3 font-semibold text-zinc-900">Bỏng nhiệt bo mạch</td>
+                  <td class="py-3 px-3 font-mono">MOD-8820</td>
+                  <td class="py-3 px-3">
+                    &pound; 
+                    <div class="inline-flex items-center gap-1.5 p-1 px-2 rounded-lg border bg-emerald-50/70 border-emerald-300 text-emerald-950 mx-1">
+                      <span class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">31</span>
+                      <span class="font-bold text-emerald-800 text-xs">85.00</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="inline-flex items-center gap-1.5 p-1 px-2 rounded-lg border bg-red-50/70 border-red-300 text-red-950 mx-1">
+                      <span class="w-4 h-4 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[10px]">32</span>
+                      <span class="line-through text-red-600 font-semibold text-xs">West</span>
+                      <span class="text-emerald-700 font-bold text-xs">Eastern</span>
+                    </div>
+                    Branch
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 19: Note Completion (Section 4) -->
+    <article id="type-listening-3" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 19 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Note Completion &bull; Kết Quả Điền Dàn Ý Section 4</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Dàn ý bài giảng học thuật: Các ô đục lỗ hiển thị kết quả đúng/sai kèm mốc giây tương ứng trong bài nghe.</p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-zinc-900">Early History of Maritime Navigation:</h4>
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-bold text-[11px]">[▶ 24:12 - 25:30]</span>
+          </div>
+          <ul class="list-disc pl-5 space-y-1.5 leading-relaxed text-zinc-700">
+            <li>
+              Ancient voyagers navigated by observing 
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">constellations</span>
+              (Câu 34 &bull; Đúng).
+            </li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 20: Sentence Completion -->
+    <article id="type-listening-4" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 20 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Sentence Completion &bull; Kết Quả Điền Từ Câu Nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đối soát câu nghe đơn lẻ kèm đoạn thoại Audio Script trích dẫn chứng cứ.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <p class="text-zinc-800">
+            1. The local historical archives are situated next to the 
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">ornamental</span> 
+            fountain on Victoria Street.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 21: Summary Completion -->
+    <article id="type-listening-5" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 21 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Summary Completion &bull; Kết Quả Điền Đoạn Tóm Tắt Nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Đoạn văn tóm tắt nội dung bài nghe hiển thị ô nhập đối soát đúng/sai.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs leading-loose">
+          The guide emphasized that the construction project was initially commissioned by a wealthy 
+          <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">merchant</span> 
+          (Câu 24) in the late nineteenth century.
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 22: Short-answer Questions -->
+    <article id="type-listening-6" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 22 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Short-answer Questions &bull; Kết Quả Trả Lời Ngắn Nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Giới hạn không quá 2 từ hoặc 1 số (NO MORE THAN TWO WORDS AND/OR A NUMBER).</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-zinc-800">What time does the ferry departure schedule begin on Saturdays?</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">08:15 am</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 23: Multiple Choice (Single) -->
+    <article id="type-listening-7" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 23 &bull; Type ID: 2</span>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice (Single) &bull; Kết Quả Trắc Nghiệm Nghe 1 Đáp Án</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Card 3 lựa chọn (A, B, C) chuẩn IELTS Listening Section 2/3: Nút radio xanh lá tại đáp án đúng.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <p class="font-bold text-zinc-900">11. Why was the community recycling center relocated?</p>
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-bold text-[11px]">[▶ 06:12 - 06:40]</span>
+          </div>
+          <div class="space-y-1.5 pt-1">
+            <div class="p-2 rounded-lg border border-zinc-200 bg-white text-zinc-600">A. To make space for a residential development</div>
+            <div class="p-2 rounded-lg border border-emerald-500 bg-emerald-50/40 text-emerald-950 font-bold flex items-center justify-between">
+              <span>&check; B. To facilitate easier heavy-vehicle road access</span>
+              <span class="text-xs text-emerald-700 font-semibold">(Đáp án chuẩn &bull; Bạn đã chọn)</span>
+            </div>
+            <div class="p-2 rounded-lg border border-zinc-200 bg-white text-zinc-600">C. Due to complaints regarding ambient noise levels</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 24: Multiple Choice (Multi-select) -->
+    <article id="type-listening-8" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 24 &bull; Type ID: 4 hoặc 8</span>
+            <h3 class="text-base font-bold text-zinc-900">Multiple Choice Multi-select &bull; Kết Quả Trắc Nghiệm Nghe Chọn 2/5</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả LongRevert: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">Hiện trạng LongRevert: Cần tối ưu phân tách kết quả khi thí sinh đúng 1/2 câu để đồng bộ với thang điểm nghe.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <div class="font-bold text-zinc-900">Questions 21-22: Choose TWO benefits offered by the campus society.</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+            <div class="p-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold">
+              &check; A. Discounted printing and bindery services (Đúng)
+            </div>
+            <div class="p-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold">
+              &check; C. Free admission to weekly guest lectures (Đúng)
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 25: Matching Opinions -->
+    <article id="type-listening-9" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 25 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Matching Information / Opinions &bull; Kết Quả Nối Ý Kiến Người Nói</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Nối tên nhân vật (Jack, Susan, Dr. Higgins) với nhận định trong cuộc thảo luận Section 3.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center justify-between p-2.5 rounded-lg border border-zinc-200">
+            <span class="text-zinc-800">23. Believes that the primary trial methodology lacked sufficient control variables</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">A. Jack</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 26: Map Labelling (Type 35) - PHẢN ÁNH THỰC TRẠNG CHƯA CÓ TRÊN LONGREVERT -->
+    <article id="type-listening-10" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-rose-50/70 border-b border-rose-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-rose-100 text-rose-900 font-mono text-xs font-bold">STT: 26 &bull; Type ID: 35</span>
+            <h3 class="text-base font-bold text-zinc-900">Map / Plan / Diagram Labelling &bull; Kết Quả Chấm Điểm Bản Đồ</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Kết quả LongRevert: 🔴 Chưa có</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 font-bold">Chuẩn hóa đề xuất</span>
+          </div>
+        </div>
+        <p class="text-xs text-rose-900 mt-2">
+          <strong>Kiểm toán thực trạng LongRevert:</strong> Theo tài liệu Hienthidangbai.md (Mục 3, STT 10) và mã nguồn hiện tại, <code>LongRevert</code> hoàn toàn <strong>CHƯA CÓ</strong> màn hình hiển thị kết quả chấm điểm cho dạng bản đồ Type 35. Dưới đây là bản thiết kế chuẩn hóa đề xuất hiển thị điểm ghim xanh (đúng) và đỏ (sai kèm đáp án chuẩn).
+        </p>
+      </div>
+
+      <div class="p-6">
+        <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-zinc-900">Bản Đồ Kết Quả Thư Viện Cambridge Test 4 (Chấm Điểm Pin Tọa Độ)</h4>
+            <a href="workspace-review.html" class="text-primary hover:underline font-bold text-xs">Mở Màn Kết Quả Full &rarr;</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div class="p-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-950 flex items-center justify-between">
+              <span>Pin 21: Food Service</span>
+              <span class="font-bold text-emerald-700">&check; C (Đúng)</span>
+            </div>
+            <div class="p-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-950 flex items-center justify-between">
+              <span>Pin 22: Satellite Station</span>
+              <span class="font-bold text-emerald-700">&check; F (Đúng)</span>
+            </div>
+            <div class="p-2 rounded-lg border border-red-400 bg-red-50 text-red-950 flex items-center justify-between">
+              <span>Pin 23: Periodicals</span>
+              <span class="font-bold text-red-700">&times; B &rarr; Đúng: D</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 27: Flow-chart Completion -->
+    <article id="type-listening-11" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-amber-50/60 border-b border-amber-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold">STT: 27 &bull; Type ID: 1</span>
+            <h3 class="text-base font-bold text-zinc-900">Flow-chart Completion &bull; Kết Quả Quy Trình Nghe</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Kết quả LongRevert: 🟡 Cần tối ưu</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-900 mt-2">Hiện trạng LongRevert: Văn bản ngắt dòng tuần tự, thiếu mũi tên định hướng luồng nghe.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 space-y-2 text-xs">
+          <p><strong>Stage 1:</strong> Submit preliminary proposal to supervisor &bull; <span class="text-emerald-700 font-bold">&check; Đã hoàn thành</span></p>
+          <div class="text-zinc-400 font-bold">&darr; [Hiện trạng LongRevert: text ngắt dòng]</div>
+          <p><strong>Stage 2:</strong> Await ethics committee 
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">approval</span> (Câu 29 &bull; Đúng).
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- STT 28: Categorisation / Classification -->
+    <article id="type-listening-12" class="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
+      <div class="bg-zinc-50 border-b border-zinc-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded bg-zinc-200 text-zinc-800 font-mono text-xs font-bold">STT: 28 &bull; Type ID: 7</span>
+            <h3 class="text-base font-bold text-zinc-900">Categorisation / Classification &bull; Kết Quả Phân Loại Thông Tin</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kết quả LongRevert: 🟢 Ổn định</span>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-600 mt-2">Hiển thị nhóm phân loại tương ứng (A. Domestic Waste, B. Hazardous Waste) cho từng đối tượng.</p>
+      </div>
+      <div class="p-6">
+        <div class="p-4 bg-white rounded-xl border border-zinc-200 text-xs">
+          <div class="flex items-center justify-between p-2.5 rounded-lg border border-zinc-200">
+            <span class="text-zinc-800">Lithium-ion battery packs</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-300">B. Hazardous Industrial Waste</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-zinc-200 py-6 mt-12 text-center text-xs text-zinc-500">
+    MoonLab IELTS Grader &bull; Thư Viện Kết Quả 12 Dạng Bài IELTS Listening (Trích Xuất Mã Nguồn LongRevert)
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      }
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && document.getElementById(hash)) {
+        filterGallery(hash);
+      } else {
+        filterGallery('all');
+      }
+    });
+
+    function filterGallery(targetId) {
+      const articles = document.querySelectorAll('main > article');
+      const tabs = document.querySelectorAll('.filter-tab');
+      const label = document.getElementById('active-filter-label');
+
+      tabs.forEach(tab => {
+        tab.classList.remove('bg-zinc-900', 'text-white', 'font-bold');
+        tab.classList.add('bg-zinc-100', 'text-zinc-700', 'font-medium');
+      });
+
+      if (targetId === 'all') {
+        articles.forEach(art => art.classList.remove('hidden'));
+        const allTab = document.getElementById('tab-all');
+        if (allTab) {
+          allTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          allTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+        }
+        if (label) {
+          label.textContent = 'Hiển thị: Tất Cả (12 Dạng Bài)';
+          label.className = 'px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-semibold border border-zinc-200';
+        }
+      } else {
+        articles.forEach(art => {
+          if (art.id === targetId) {
+            art.classList.remove('hidden');
+          } else {
+            art.classList.add('hidden');
+          }
+        });
+        const targetTab = document.getElementById(`tab-${targetId}`);
+        if (targetTab) {
+          targetTab.classList.add('bg-zinc-900', 'text-white', 'font-bold');
+          targetTab.classList.remove('bg-zinc-100', 'text-zinc-700', 'font-medium');
+          if (label) {
+            label.textContent = `Chế độ Focus: ${targetTab.textContent.trim()}`;
+            label.className = 'px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200';
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
