@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Màn Hình Kết Quả IELTS Reading - Đối Soát Lời Giải Chi Tiết 4 Bước</title>
+  <title>Chi Tiết Kết Quả IELTS Reading - MoonLab IELTS Grader</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Tailwind CSS Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -30,186 +30,438 @@
     }
   </script>
 </head>
-<body class="h-full font-sans text-zinc-900 antialiased flex flex-col overflow-hidden">
+<body class="h-full font-sans text-zinc-900 antialiased flex flex-col overflow-hidden bg-zinc-100">
 
-  <!-- Header Điều Hướng -->
-  <header class="h-14 bg-white border-b border-zinc-200 px-4 flex items-center justify-between shrink-0 shadow-2xs z-30">
+  <!-- 1. Top Bar: MoonLab Branding Chuẩn 100% CleanReadingDetailView.tsx -->
+  <header class="bg-white border-b border-zinc-200 px-5 py-2.5 h-14 flex items-center justify-between shadow-2xs shrink-0 z-20">
+    <!-- Left: Back Button & MoonLab Logo -->
     <div class="flex items-center gap-3">
-      <a href="../index.html" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-primary transition-colors">
+      <a 
+        href="workspace-summary.html" 
+        class="w-9 h-9 flex items-center justify-center hover:bg-zinc-100 rounded-xl transition-colors text-zinc-600 hover:text-zinc-900 border border-zinc-200"
+        title="Quay lại màn hình tóm tắt"
+      >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        <span>Bảng Điều Phối</span>
       </a>
-      <span class="h-4 w-px bg-zinc-200"></span>
+
+      <!-- Logo MoonLab Hiện Đại Chuẩn LongRevert -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-base shadow-xs">
+          M
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-base tracking-tight text-zinc-900 leading-none">
+            MoonLab
+          </span>
+          <span class="text-[10px] text-zinc-400 font-medium tracking-wider">
+            IELTS GRADER
+          </span>
+        </div>
+      </div>
+
+      <span class="h-4 w-px bg-zinc-200 mx-1"></span>
       <div>
-        <h2 class="text-xs font-bold text-zinc-900">Báo Cáo Kết Quả Thi &bull; Reading Test 1</h2>
-        <span class="text-[10px] text-zinc-500 font-medium">Đối chiếu lời giải 4 bước và liên kết dẫn chứng văn bản hai chiều</span>
+        <h2 class="text-xs font-bold text-zinc-800">Recent Actual Test - Reading Test 1 &bull; Lời Giải 4 Bước</h2>
+        <span class="text-[10px] text-zinc-400 font-medium">Bản đối soát dữ liệu thật clean-dataset</span>
       </div>
     </div>
 
-    <!-- Cụm Thống Kê Nhanh -->
+    <!-- Right: Retake Button & Status Badge -->
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2">
         <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
-          Band 7.5
+          Band 4.0
         </span>
-        <span class="text-xs font-medium text-zinc-600">
-          Chính xác: <strong class="text-zinc-900 font-bold">31 / 40</strong> (77.5%)
+        <span class="text-xs font-semibold text-zinc-600">
+          Chính xác: <strong class="text-zinc-900 font-bold">10 / 40</strong> (25%)
         </span>
       </div>
 
-      <a href="workspace-exam.html" class="px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition-colors">
-        Làm Lại Đề Thi
+      <a 
+        href="workspace-exam.html"
+        class="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-blue-200 hover:border-blue-400 text-blue-700 bg-blue-50/50 hover:bg-blue-100/60 font-semibold text-xs transition-all shadow-2xs"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Làm lại đề thi</span>
       </a>
     </div>
   </header>
 
-  <!-- Thẻ Thống Kê & Bộ Lọc Trạng Thái Câu Hỏi -->
-  <div class="bg-white border-b border-zinc-200 px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0 text-xs">
+  <!-- 2. Sub-Bar: Bộ Lọc Trạng Thái & Hướng Dẫn Dẫn Chứng -->
+  <div class="bg-white border-b border-zinc-200 px-6 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0 text-xs">
     <div class="flex items-center gap-2">
-      <span class="font-bold text-zinc-700">Lọc Theo Trạng Thái:</span>
+      <span class="font-bold text-zinc-600">Bộ lọc câu hỏi:</span>
       <button class="px-2.5 py-1 rounded-md bg-zinc-900 text-white font-bold">Tất Cả (40)</button>
-      <button class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 hover:bg-emerald-100">Đúng (31)</button>
-      <button class="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 font-semibold border border-rose-200 hover:bg-rose-100">Sai (7)</button>
-      <button class="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-semibold hover:bg-zinc-200">Chưa Làm (2)</button>
+      <button class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 hover:bg-emerald-100">Đúng (10)</button>
+      <button class="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 font-semibold border border-rose-200 hover:bg-rose-100">Sai (30)</button>
+      <button class="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-semibold hover:bg-zinc-200">Chưa Làm (0)</button>
     </div>
 
     <div class="text-[11px] text-zinc-500 flex items-center gap-1.5">
-      <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-      <span>Nhấp vào nút <strong class="text-amber-800 font-semibold">[Xem Dẫn Chứng]</strong> để tự động cuộn và đánh dấu trên bài đọc</span>
+      <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+      <span>Nhấp vào nút <strong class="text-amber-800 font-semibold">[Xem Vị Trí Trong Bài Đọc]</strong> để tự động cuộn và đánh dấu trên bài đọc</span>
     </div>
   </div>
 
-  <!-- Không Gian Hai Cột Xem Lại -->
+  <!-- 3. Không Gian Hai Cột Xem Lại (Split Review) -->
   <div id="split-review-container" class="flex-1 flex overflow-hidden relative">
 
-    <!-- Cột Trái: Văn Bản Bài Đọc (Có Highlight Dẫn Chứng) -->
-    <div id="review-left-pane" class="w-1/2 border-r border-zinc-200 bg-white overflow-y-auto px-8 py-6 select-text">
-      <div id="passage-content-container" class="max-w-2xl mx-auto space-y-6 text-zinc-800 leading-relaxed text-sm">
+    <!-- Cột Trái: Văn Bản Bài Đọc (Passage) -->
+    <div id="review-left-pane" class="w-1/2 border-r border-zinc-200 bg-white flex flex-col h-full relative">
+      <div id="passage-scroll-area" class="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 pb-20 select-text">
         <div class="border-b border-zinc-200 pb-3">
           <span class="text-xs font-bold text-primary uppercase tracking-wider">Reading Passage 1</span>
-          <h1 class="text-xl font-black text-zinc-900 mt-1">Circadian Rhythms and the Melatonin Cycle</h1>
+          <h1 class="text-xl font-black text-zinc-900 mt-1">Dealing with Different Sleep Patterns</h1>
         </div>
 
-        <div class="space-y-4">
-          <p id="para-A">
-            <strong class="text-zinc-900 font-bold mr-1">Paragraph A:</strong>
-            Circadian rhythms are biological oscillations with an endogenous frequency approximating twenty-four hours. These rhythms are coordinated by a primary circadian pacemaker situated within the suprachiasmatic nucleus (SCN) of the anterior hypothalamus in mammalian brains. Exposure to environmental photic stimuli synchronizes the internal cellular clock to astronomical solar cycles, a physiological adaptation enabling terrestrial organisms to anticipate environmental variations.
-          </p>
-          <p id="para-B">
-            <strong class="text-zinc-900 font-bold mr-1">Paragraph B:</strong>
-            Central to neuroendocrine regulation is the hormone melatonin (N-acetyl-5-methoxytryptamine), synthesized predominantly within the pineal gland during periods of darkness. Photic transmission proceeds from retinal ganglion cells via the retinohypothalamic tract to the SCN, which subsequently suppresses norepinephrine-mediated pineal activity. Consequently, serum melatonin concentrations exhibit significant nocturnal elevations, functioning as an internal biochemical indicator of temporal diurnal position.
-          </p>
-          <p id="para-C">
-            <strong class="text-zinc-900 font-bold mr-1">Paragraph C:</strong>
-            Researchers have examined pharmaceutical interventions targeted at circadian desynchrony, such as phase shifts induced by rapid transmeridian travel. Controlled administration of exogenous melatonin facilitates phase advances when ingested prior to habitual bedtime, effectively re-entraining circadian misalignment. However, clinicians emphasize that pharmacotherapy must be precisely scheduled relative to individual phase-response curves, as inappropriate timing may exacerbate existing phase delays.
-          </p>
-          <p id="para-D">
-            <strong class="text-zinc-900 font-bold mr-1">Paragraph D:</strong>
-            The architecture of non-rapid eye movement (NREM) and rapid eye movement (REM) cycles demonstrates progressive homeostatic regulation across nocturnal sleep periods. Slow-wave activity predominates early sleep cycles, serving critical functions in metabolic clearance and neuroplastic synaptic consolidation. Disruption of these sequential phases frequently produces cognitive deficits, impaired sustained attention, and immunological alterations.
-          </p>
+        <div id="passage-content-container" class="space-y-4 text-zinc-800 leading-relaxed font-serif text-[16px] transition-all">
+          <div id="para-A" data-evidence-text="Sleep medicine is a relatively young field in the UK" class="p-3.5 rounded-xl transition-all duration-300 flex gap-3 hover:bg-zinc-50">
+            <strong class="text-zinc-900 font-bold mr-1 shrink-0 font-sans">[A]</strong>
+            <p>
+              Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s. In the last decade a number of centers have sprouted, often led by chest physicians and ENT (Ear, Nose and Throat) surgeons with an interest in obstructive sleep apnoea, forcing neurologists and neurophysiologists to wake up and contribute to the non-respiratory aspect of this neglected subject.
+            </p>
+          </div>
+
+          <div id="para-B" data-evidence-text="stages 3 and 4 which are considered deep sleep with high arousal threshold" class="p-3.5 rounded-xl transition-all duration-300 flex gap-3 hover:bg-zinc-50">
+            <strong class="text-zinc-900 font-bold mr-1 shrink-0 font-sans">[B]</strong>
+            <p>
+              Within sleep, two states are recognized &mdash; non rapid eye movement (NREM) and rapid eye movement (REM). These alternate cyclically through the night with a cycle time of 90 minutes. NREM sleep evolved with the homeothermic state and is divided into four stages: stage 1 and 2 which are considered light sleep, and <span class="bg-amber-100/60 font-medium">stages 3 and 4 which are considered deep sleep with high arousal threshold</span>.
+            </p>
+          </div>
+
+          <div id="para-C" data-evidence-text="patients act out their dream, often resulting in injury" class="p-3.5 rounded-xl transition-all duration-300 flex gap-3 hover:bg-zinc-50">
+            <strong class="text-zinc-900 font-bold mr-1 shrink-0 font-sans">[C]</strong>
+            <p>
+              REM is ontogenetically primitive with EEG activity closer to wake state, intermittent bursts of REMs and muscle atonia interrupted by phasic burst producing asynchronous twitching. The atonia of REM sleep prevents acting out of dreams and is lost in REM behavior disorder when dreams content becomes violent and <span class="bg-amber-100/60 font-medium">patients act out their dream, often resulting in injury</span>.
+            </p>
+          </div>
+
+          <div id="para-D" data-evidence-text="In the newborn, 50 percent of total sleep time is occupied by REM sleep" class="p-3.5 rounded-xl transition-all duration-300 flex gap-3 hover:bg-zinc-50">
+            <strong class="text-zinc-900 font-bold mr-1 shrink-0 font-sans">[D]</strong>
+            <p>
+              In the newborn, 50 percent of total sleep time is occupied by REM sleep, progressively shrinking to 25 percent in the adult, the first block of REM sleep occurring about 90 minutes after sleep onset. In general, children born prematurely have a tendency to be awake more at night in the first year and breast-fed babies wake more frequently.
+            </p>
+          </div>
+
+          <div id="para-E" data-evidence-text="the elderly who are more susceptible to perturbation in their sleep/wake schedule" class="p-3.5 rounded-xl transition-all duration-300 flex gap-3 hover:bg-zinc-50">
+            <strong class="text-zinc-900 font-bold mr-1 shrink-0 font-sans">[E]</strong>
+            <p>
+              The primary biological circadian pacemaker is situated within the suprachiasmatic nucleus (SCN) of the anterior hypothalamus in mammalian brains. In contrast <span class="bg-amber-100/60 font-medium">the elderly who are more susceptible to perturbation in their sleep/wake schedule</span> can develop advanced sleep phase syndrome with sleep onset occurring early in the evening.
+            </p>
+          </div>
         </div>
+      </div>
+
+      <!-- Bottom Passage Tabs with Passages Score -->
+      <div class="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-sm border-t border-zinc-200 p-2.5 flex gap-2 z-10 shadow-xs">
+        <button class="flex-1 py-2 px-3 text-xs md:text-sm font-bold rounded-xl transition-all flex items-center justify-between bg-blue-600 text-white shadow-md">
+          <span>Passage 1</span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/20 text-white">4/14 Questions</span>
+        </button>
+        <button class="flex-1 py-2 px-3 text-xs md:text-sm font-bold rounded-xl transition-all flex items-center justify-between bg-zinc-100 text-zinc-600 hover:bg-zinc-200">
+          <span>Passage 2</span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-700">3/13 Questions</span>
+        </button>
+        <button class="flex-1 py-2 px-3 text-xs md:text-sm font-bold rounded-xl transition-all flex items-center justify-between bg-zinc-100 text-zinc-600 hover:bg-zinc-200">
+          <span>Passage 3</span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-700">3/13 Questions</span>
+        </button>
       </div>
     </div>
 
     <!-- Thanh Trượt Phân Tách -->
-    <div id="review-splitter-handle" class="w-2.5 bg-zinc-200 hover:bg-primary/80 active:bg-primary cursor-col-resize transition-colors flex items-center justify-center shrink-0 z-20 group">
+    <div id="review-splitter-handle" class="w-2.5 bg-zinc-200 hover:bg-blue-600 active:bg-blue-600 cursor-col-resize transition-colors flex items-center justify-center shrink-0 z-20 group">
       <div class="h-8 w-1 bg-zinc-400 group-hover:bg-white rounded-full"></div>
     </div>
 
-    <!-- Cột Phải: Thẻ Câu Hỏi & Lời Giải 4 Bước -->
+    <!-- Cột Phải: Thẻ Câu Hỏi & Accordion Lời Giải 4 Bước -->
     <div id="review-right-pane" class="w-1/2 bg-zinc-50 overflow-y-auto px-6 py-6 space-y-6">
 
-      <!-- Câu 1: Trạng Thái Đúng (Green) -->
-      <div class="bg-white rounded-2xl border-2 border-emerald-500 shadow-2xs overflow-hidden">
-        <div class="bg-emerald-50/70 border-b border-emerald-100 px-5 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs">&check;</span>
-            <span class="text-xs font-bold text-emerald-950">Câu 1 &bull; Chính Xác</span>
+      <!-- ================= CÂU 1 (SAI - RED) ================= -->
+      <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+        <!-- Question Header & Prompt -->
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-red-600 text-white ring-2 ring-red-100">
+            1
           </div>
-          <span class="text-[11px] font-bold text-emerald-800 bg-white px-2.5 py-0.5 rounded border border-emerald-200">+1.0 Điểm</span>
+          <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+            Sleep medicine has been a recognized specialty in the UK since the early 1900s.
+          </div>
         </div>
 
-        <div class="p-5 space-y-4 text-xs">
+        <!-- Answer Comparison Box -->
+        <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-xs">
           <div>
-            <span class="text-zinc-500 font-medium">Nội dung câu hỏi:</span>
-            <p class="font-bold text-zinc-900 mt-0.5">The primary biological pacemaker is located within the anterior [ Câu 1: ... ]</p>
+            <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
+            <span class="font-bold text-red-600 text-sm">FALSE (Chọn nhầm)</span>
           </div>
-
-          <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
-            <div>
-              <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
-              <span class="font-bold text-emerald-700 text-sm">A. hypothalamus</span>
-            </div>
-            <div>
-              <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
-              <span class="font-bold text-zinc-900 text-sm">A. hypothalamus</span>
-            </div>
+          <div>
+            <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
+            <span class="font-bold text-emerald-700 text-sm">FALSE</span>
           </div>
+        </div>
 
-          <!-- Accordion Lời Giải 4 Bước Cố Định -->
-          <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white">
-            <div class="bg-zinc-50 px-4 py-2.5 font-bold text-zinc-800 flex items-center justify-between border-b border-zinc-200">
-              <span class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Phân Tích Chi Tiết 4 Bước
-              </span>
-              <button onclick="IELTSProto.highlightEvidenceInPassage('para-A', 'suprachiasmatic nucleus (SCN) of the anterior hypothalamus in mammalian brains')" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2.5 py-1 rounded transition-colors text-[11px] flex items-center gap-1">
-                <span>Xem Dẫn Chứng Đoạn A</span> &rarr;
+        <!-- Accordion Giải Thích 4 Bước Chuẩn CleanQuestionDropdownExplanation.tsx -->
+        <div class="explanation-accordion-box mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+          <button 
+            type="button" 
+            onclick="IELTSProto.toggleExplanationAccordion(this)" 
+            class="w-full px-4 py-2.5 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100"
+          >
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              </div>
+              <span class="font-semibold text-sm text-blue-900">Giải thích đáp án</span>
+            </div>
+            <svg class="w-4 h-4 text-blue-600 transition-transform duration-200 accordion-chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div class="explanation-accordion-body p-4 space-y-4 text-xs">
+            <!-- 2 Tabs: Giải thích chi tiết & Vị trí trong bài -->
+            <div class="flex items-center gap-2 border-b border-blue-200 pb-2">
+              <button 
+                onclick="IELTSProto.switchExplanationTab(this, 'explanation')"
+                class="tab-btn-explanation px-3 py-1 font-bold rounded-lg bg-white text-blue-900 shadow-2xs transition-colors"
+              >
+                Giải thích chi tiết
+              </button>
+              <button 
+                onclick="IELTSProto.switchExplanationTab(this, 'location')"
+                class="tab-btn-location px-3 py-1 font-semibold rounded-lg text-blue-600 hover:bg-blue-100/50 transition-colors"
+              >
+                Vị trí trong bài
               </button>
             </div>
-            <div class="p-4 space-y-3 text-xs leading-relaxed text-zinc-700">
-              <p><strong>Bước 1 (Xác định từ khóa):</strong> <em>primary biological pacemaker</em>, <em>located within the anterior</em>.</p>
-              <p><strong>Bước 2 (Định vị dẫn chứng):</strong> Đoạn A, dòng 3: &ldquo;...coordinated by a primary circadian pacemaker situated within the suprachiasmatic nucleus (SCN) of the anterior hypothalamus...&rdquo;</p>
-              <p><strong>Bước 3 (Phân tích đối soát):</strong> <em>primary biological pacemaker</em> đồng nghĩa với <em>primary circadian pacemaker</em>; <em>located within</em> đồng nghĩa với <em>situated within</em>.</p>
-              <p><strong>Bước 4 (Kết luận):</strong> Cụm từ cần điền sau <em>anterior</em> là <em>hypothalamus</em> (phương án A).</p>
+
+            <!-- Tab Content 1: Giải thích chi tiết -->
+            <div class="tab-content-explanation space-y-4">
+              <!-- Prompt với từ khóa nét đứt xanh lá -->
+              <div class="p-3 rounded-lg bg-white border border-blue-100 leading-relaxed">
+                Sleep medicine has been a 
+                <span class="border border-dashed border-emerald-500 bg-emerald-50 text-emerald-950 rounded px-1.5 py-0.5 font-bold">recognized specialty</span> 
+                in the UK since the 
+                <span class="border border-dashed border-emerald-500 bg-emerald-50 text-emerald-950 rounded px-1.5 py-0.5 font-bold">early 1900s</span>.
+              </div>
+
+              <!-- Bảng Keyword Mapping 2 Cột Chuẩn LongRevert -->
+              <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                <div class="bg-zinc-50 px-3.5 py-2 border-b border-zinc-200 font-bold text-zinc-700 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                  <span>Bảng đối chiếu từ khóa (Keyword Mapping)</span>
+                </div>
+                <div class="divide-y divide-zinc-100 text-xs">
+                  <div class="grid grid-cols-2 p-2.5 gap-2">
+                    <span class="text-zinc-600 font-medium">early 1900s (thế kỷ 20)</span>
+                    <span class="font-bold text-blue-700">until the 1980s (thập niên 80)</span>
+                  </div>
+                  <div class="grid grid-cols-2 p-2.5 gap-2 bg-zinc-50/50">
+                    <span class="text-zinc-600 font-medium">recognized specialty</span>
+                    <span class="font-bold text-blue-700">young field / neglected subject</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4 Bước Phân Tích -->
+              <div class="space-y-2.5 border-l-2 border-blue-500 pl-3">
+                <p><strong>Bước 1 (Phân tích câu hỏi):</strong> Câu hỏi khẳng định y học giấc ngủ là chuyên khoa được công nhận từ đầu những năm 1900.</p>
+                <p><strong>Bước 2 (Định vị dẫn chứng):</strong> Đoạn A, dòng 1: &ldquo;Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s.&rdquo;</p>
+                <p><strong>Bước 3 (Đối chiếu ngữ nghĩa):</strong> Bài đọc nhấn mạnh đây là ngành non trẻ (young field) và chỉ có vài trung tâm cho đến thập niên 1980, trái ngược hoàn toàn mốc &ldquo;early 1900s&rdquo;.</p>
+                <p><strong>Bước 4 (Kết luận):</strong> Thông tin mâu thuẫn trực tiếp với bài đọc &rarr; <strong>Đáp án: FALSE</strong>.</p>
+              </div>
+            </div>
+
+            <!-- Tab Content 2: Vị trí trong bài -->
+            <div class="tab-content-location hidden space-y-3">
+              <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-amber-950 font-medium leading-relaxed">
+                &ldquo;Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s.&rdquo; (Đoạn A)
+              </div>
+              <button 
+                type="button" 
+                onclick="IELTSProto.highlightEvidenceInPassage('para-A', 'Sleep medicine is a relatively young field in the UK, with only a couple of centers until the 1980s')" 
+                class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>Xem vị trí trong bài đọc &rarr;</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Câu 2: Trạng Thái Sai (Red) -->
-      <div class="bg-white rounded-2xl border-2 border-rose-500 shadow-2xs overflow-hidden">
-        <div class="bg-rose-50/70 border-b border-rose-100 px-5 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center text-xs">&times;</span>
-            <span class="text-xs font-bold text-rose-950">Câu 2 &bull; Chưa Chính Xác</span>
+      <!-- ================= CÂU 2 (ĐÚNG - GREEN) ================= -->
+      <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+        <!-- Question Header & Prompt -->
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-emerald-600 text-white ring-2 ring-emerald-100">
+            2
           </div>
-          <span class="text-[11px] font-bold text-rose-800 bg-white px-2.5 py-0.5 rounded border border-rose-200">0.0 Điểm</span>
+          <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+            NREM sleep stages 3 and 4 are characterized by high arousal thresholds.
+          </div>
         </div>
 
-        <div class="p-5 space-y-4 text-xs">
+        <!-- Answer Comparison Box -->
+        <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-xs">
           <div>
-            <span class="text-zinc-500 font-medium">Nội dung câu hỏi:</span>
-            <p class="font-bold text-zinc-900 mt-0.5">The hormone melatonin is secreted mainly during periods of [ Câu 2: ... ]</p>
+            <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
+            <span class="font-bold text-emerald-700 text-sm">TRUE</span>
           </div>
-
-          <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
-            <div>
-              <span class="text-zinc-500 block">Lựa chọn của bạn:</span>
-              <span class="font-bold text-rose-700 text-sm line-through">B. nocturnal</span>
-            </div>
-            <div>
-              <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
-              <span class="font-bold text-emerald-700 text-sm">C. darkness</span>
-            </div>
+          <div>
+            <span class="text-zinc-500 block">Đáp án chuẩn xác:</span>
+            <span class="font-bold text-emerald-700 text-sm">TRUE</span>
           </div>
+        </div>
 
-          <!-- Accordion Lời Giải 4 Bước -->
-          <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white">
-            <div class="bg-zinc-50 px-4 py-2.5 font-bold text-zinc-800 flex items-center justify-between border-b border-zinc-200">
-              <span class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Phân Tích Chi Tiết 4 Bước
-              </span>
-              <button onclick="IELTSProto.highlightEvidenceInPassage('para-B', 'synthesized predominantly within the pineal gland during periods of darkness')" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2.5 py-1 rounded transition-colors text-[11px] flex items-center gap-1">
-                <span>Xem Dẫn Chứng Đoạn B</span> &rarr;
+        <!-- Accordion Giải Thích 4 Bước -->
+        <div class="explanation-accordion-box mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+          <button 
+            type="button" 
+            onclick="IELTSProto.toggleExplanationAccordion(this)" 
+            class="w-full px-4 py-2.5 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100"
+          >
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              </div>
+              <span class="font-semibold text-sm text-blue-900">Giải thích đáp án</span>
+            </div>
+            <svg class="w-4 h-4 text-blue-600 transition-transform duration-200 accordion-chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div class="explanation-accordion-body p-4 space-y-4 text-xs">
+            <div class="flex items-center gap-2 border-b border-blue-200 pb-2">
+              <button 
+                onclick="IELTSProto.switchExplanationTab(this, 'explanation')"
+                class="tab-btn-explanation px-3 py-1 font-bold rounded-lg bg-white text-blue-900 shadow-2xs transition-colors"
+              >
+                Giải thích chi tiết
+              </button>
+              <button 
+                onclick="IELTSProto.switchExplanationTab(this, 'location')"
+                class="tab-btn-location px-3 py-1 font-semibold rounded-lg text-blue-600 hover:bg-blue-100/50 transition-colors"
+              >
+                Vị trí trong bài
               </button>
             </div>
-            <div class="p-4 space-y-3 text-xs leading-relaxed text-zinc-700">
-              <p><strong>Bước 1 (Xác định từ khóa):</strong> <em>melatonin</em>, <em>secreted mainly during periods of</em>.</p>
-              <p><strong>Bước 2 (Định vị dẫn chứng):</strong> Đoạn B, dòng 2: &ldquo;...synthesized predominantly within the pineal gland during periods of darkness.&rdquo;</p>
-              <p><strong>Bước 3 (Phân tích bẫy ngôn ngữ):</strong> Từ <em>nocturnal</em> là tính từ đi cùng <em>elevations</em> ở cuối đoạn B, không đi cùng cấu trúc giới từ <em>during periods of [danh từ]</em>.</p>
-              <p><strong>Bước 4 (Kết luận):</strong> Danh từ chính xác là <em>darkness</em> (phương án C).</p>
+
+            <div class="tab-content-explanation space-y-4">
+              <div class="p-3 rounded-lg bg-white border border-blue-100 leading-relaxed">
+                NREM sleep 
+                <span class="border border-dashed border-emerald-500 bg-emerald-50 text-emerald-950 rounded px-1.5 py-0.5 font-bold">stages 3 and 4</span> 
+                are characterized by 
+                <span class="border border-dashed border-emerald-500 bg-emerald-50 text-emerald-950 rounded px-1.5 py-0.5 font-bold">high arousal threshold</span>.
+              </div>
+
+              <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                <div class="bg-zinc-50 px-3.5 py-2 border-b border-zinc-200 font-bold text-zinc-700 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                  <span>Bảng đối chiếu từ khóa (Keyword Mapping)</span>
+                </div>
+                <div class="divide-y divide-zinc-100 text-xs">
+                  <div class="grid grid-cols-2 p-2.5 gap-2">
+                    <span class="text-zinc-600 font-medium">stages 3 and 4</span>
+                    <span class="font-bold text-blue-700">stages 3 and 4 (giữ nguyên)</span>
+                  </div>
+                  <div class="grid grid-cols-2 p-2.5 gap-2 bg-zinc-50/50">
+                    <span class="text-zinc-600 font-medium">high arousal threshold</span>
+                    <span class="font-bold text-blue-700">high arousal threshold (trùng khớp 100%)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 border-l-2 border-blue-500 pl-3">
+                <p><strong>Bước 1:</strong> Xác định cụm từ khóa &ldquo;NREM stages 3 and 4&rdquo; và &ldquo;high arousal threshold&rdquo;.</p>
+                <p><strong>Bước 2:</strong> Định vị tại Đoạn B, câu cuối: &ldquo;...and stages 3 and 4 which are considered deep sleep with high arousal threshold.&rdquo;</p>
+                <p><strong>Bước 3:</strong> Ý nghĩa câu hỏi hoàn toàn trùng khớp với phát biểu trong đoạn văn.</p>
+                <p><strong>Bước 4:</strong> Kết luận chính xác &rarr; <strong>Đáp án: TRUE</strong>.</p>
+              </div>
+            </div>
+
+            <div class="tab-content-location hidden space-y-3">
+              <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-amber-950 font-medium leading-relaxed">
+                &ldquo;...and stages 3 and 4 which are considered deep sleep with high arousal threshold.&rdquo; (Đoạn B)
+              </div>
+              <button 
+                type="button" 
+                onclick="IELTSProto.highlightEvidenceInPassage('para-B', 'stages 3 and 4 which are considered deep sleep with high arousal threshold')" 
+                class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>Xem vị trí trong bài đọc &rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= CÂU 11: SUMMARY COMPLETION (WORDLIST A-G) ================= -->
+      <div class="p-4 bg-white rounded-xl border border-zinc-200 shadow-2xs space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-red-600 text-white ring-2 ring-red-100">
+            11
+          </div>
+          <div class="flex-1 text-sm md:text-base font-semibold text-zinc-900 leading-relaxed">
+            <span class="text-zinc-600 font-normal">Đáp án câu 11 (Summary with Wordlist):</span>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="px-2.5 py-1 rounded-md text-sm font-bold border border-red-400 bg-red-50 text-red-800">
+                F (Bạn đã điền)
+              </span>
+              <span class="text-xs text-emerald-700 font-medium">
+                (Đáp án đúng: <span class="font-bold underline">K (elders)</span>)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="explanation-accordion-box mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+          <button 
+            type="button" 
+            onclick="IELTSProto.toggleExplanationAccordion(this)" 
+            class="w-full px-4 py-2.5 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100"
+          >
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              </div>
+              <span class="font-semibold text-sm text-blue-900">Giải thích chi tiết 4 bước</span>
+            </div>
+            <svg class="w-4 h-4 text-blue-600 transition-transform duration-200 accordion-chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div class="explanation-accordion-body p-4 space-y-4 text-xs">
+            <div class="tab-content-explanation space-y-4">
+              <div class="border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                <div class="bg-zinc-50 px-3.5 py-2 border-b border-zinc-200 font-bold text-zinc-700 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                  <span>Bảng đối chiếu từ khóa (Keyword Mapping)</span>
+                </div>
+                <div class="divide-y divide-zinc-100 text-xs">
+                  <div class="grid grid-cols-2 p-2.5 gap-2">
+                    <span class="text-zinc-600 font-medium">elders (từ vựng Wordlist)</span>
+                    <span class="font-bold text-blue-700">the elderly (Đoạn E)</span>
+                  </div>
+                  <div class="grid grid-cols-2 p-2.5 gap-2 bg-zinc-50/50">
+                    <span class="text-zinc-600 font-medium">more susceptible to sleep early</span>
+                    <span class="font-bold text-blue-700">sleep onset occurring early in the evening</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 border-l-2 border-blue-500 pl-3">
+                <p><strong>Bước 1:</strong> Xác định chỗ trống cần một danh từ số nhiều chỉ đối tượng người (&ldquo;[noun] are more susceptible...&rdquo;).</p>
+                <p><strong>Bước 2:</strong> Định vị tại Đoạn E: &ldquo;In contrast the elderly who are more susceptible to perturbation in their sleep/wake schedule can develop advanced sleep phase syndrome with sleep onset occurring early in the evening.&rdquo;</p>
+                <p><strong>Bước 3:</strong> Cụm từ &ldquo;the elderly&rdquo; trong bài đọc được Paraphrase sang &ldquo;elders&rdquo; trong bảng Wordlist (Ký tự K).</p>
+                <p><strong>Bước 4:</strong> Đáp án chính xác là <strong>K (elders)</strong>.</p>
+              </div>
+
+              <button 
+                type="button" 
+                onclick="IELTSProto.highlightEvidenceInPassage('para-E', 'the elderly who are more susceptible to perturbation in their sleep/wake schedule')" 
+                class="px-3.5 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs flex items-center gap-1.5 transition-colors"
+              >
+                <span>Xem Dẫn Chứng Đoạn E</span> &rarr;
+              </button>
             </div>
           </div>
         </div>
@@ -223,6 +475,7 @@
   <script src="../assets/js/common.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Khởi tạo thanh kéo chia tỷ lệ hai cột (30% - 70%)
       initSplitter('split-review-container', 'review-left-pane', 'review-splitter-handle', 'review-right-pane');
     });
   </script>
