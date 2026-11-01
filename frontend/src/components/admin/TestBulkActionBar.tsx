@@ -1,19 +1,23 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, Archive, FileText, X } from "lucide-react";
+import { CheckCircle2, Archive, FileText, X, FolderKanban } from "lucide-react";
 import type { ContentStatus } from "@/types/exam";
 
 interface TestBulkActionBarProps {
   selectedCount: number;
   onBulkStatus: (status: ContentStatus) => void;
   onClearSelection: () => void;
+  testSets?: { id: string; name: string }[];
+  onBulkAssignSet?: (setId: string | null) => void;
 }
 
 export function TestBulkActionBar({
   selectedCount,
   onBulkStatus,
   onClearSelection,
+  testSets,
+  onBulkAssignSet,
 }: TestBulkActionBarProps) {
   if (selectedCount === 0) return null;
 
@@ -49,6 +53,28 @@ export function TestBulkActionBar({
         >
           <Archive className="w-3.5 h-3.5" /> Lưu trữ
         </button>
+
+        {testSets && testSets.length > 0 && onBulkAssignSet && (
+          <div className="flex items-center gap-1.5 border-l border-zinc-700 pl-2">
+            <FolderKanban className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "__none__") onBulkAssignSet(null);
+                else if (val) onBulkAssignSet(val);
+                e.target.value = "";
+              }}
+              className="bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#932120] font-medium"
+            >
+              <option value="" disabled>Gán vào Bộ Đề...</option>
+              {testSets.map((ts) => (
+                <option key={ts.id} value={ts.id}>{ts.name}</option>
+              ))}
+              <option value="__none__">-- Gỡ khỏi bộ đề --</option>
+            </select>
+          </div>
+        )}
 
         <button
           onClick={onClearSelection}

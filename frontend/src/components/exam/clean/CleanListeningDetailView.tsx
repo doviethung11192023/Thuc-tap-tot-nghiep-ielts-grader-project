@@ -29,42 +29,30 @@ export function CleanListeningDetailView({
   const [duration, setDuration] = useState<number>(0);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(1);
   const [activeQuestionNumber, setActiveQuestionNumber] = useState<number>(1);
   const [highlightedEvidenceText, setHighlightedEvidenceText] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-
   const rawSections = data.sections || [];
   const rawQuestions = data.questions || [];
   const rawGroups = data.exercise_groups || [];
 
-  const filteredSections = useMemo(() => {
-    if (!selectedParts?.length) return rawSections;
+  const { filteredSections, filteredQuestions, filteredExerciseGroups } = useMemo(() => {
+    if (!selectedParts?.length) return { filteredSections: rawSections, filteredQuestions: rawQuestions, filteredExerciseGroups: rawGroups };
     const partNums = selectedParts.map(Number);
-    const res = rawSections.filter((s) => partNums.includes(s.section_number));
-    return res.length > 0 ? res : rawSections;
-  }, [rawSections, selectedParts]);
-
-  const filteredQuestions = useMemo(() => {
-    if (!selectedParts?.length) return rawQuestions;
-    const partNums = selectedParts.map(Number);
-    const res = rawQuestions.filter((q) => partNums.includes(q.section_number));
-    return res.length > 0 ? res : rawQuestions;
-  }, [rawQuestions, selectedParts]);
-
-  const filteredExerciseGroups = useMemo(() => {
-    if (!selectedParts?.length) return rawGroups;
-    const partNums = selectedParts.map(Number);
-    const res = rawGroups.filter((g) => partNums.includes(g.section_number));
-    return res.length > 0 ? res : rawGroups;
-  }, [rawGroups, selectedParts]);
+    const s = rawSections.filter((sec) => partNums.includes(sec.section_number));
+    const q = rawQuestions.filter((que) => partNums.includes(que.section_number));
+    const g = rawGroups.filter((grp) => partNums.includes(grp.section_number));
+    return {
+      filteredSections: s.length > 0 ? s : rawSections,
+      filteredQuestions: q.length > 0 ? q : rawQuestions,
+      filteredExerciseGroups: g.length > 0 ? g : rawGroups,
+    };
+  }, [rawSections, rawQuestions, rawGroups, selectedParts]);
 
   const currentSection = filteredSections[activeSectionIndex] || filteredSections[0] || {
-    section_number: 1,
-    title: 'Part 1',
-    audio_url: '',
-    duration_seconds: 450,
-    transcript_utterances: []
+    section_number: 1, title: 'Part 1', audio_url: '', duration_seconds: 450, transcript_utterances: []
   };
 
   const currentSectionQuestions = filteredQuestions.filter(q => q.section_number === currentSection.section_number);
@@ -72,8 +60,7 @@ export function CleanListeningDetailView({
 
   const getSectionScoreText = (sectionNum: number) => {
     const qList = filteredQuestions.filter(q => q.section_number === sectionNum);
-    const correctCount = qList.filter(q => q.is_correct).length;
-    return `${correctCount}/${qList.length} Questions`;
+    return `${qList.filter(q => q.is_correct).length}/${qList.length} Questions`;
   };
 
   useEffect(() => {
@@ -106,6 +93,17 @@ export function CleanListeningDetailView({
     if (audioRef.current) audioRef.current.currentTime = time;
   };
 
+  const handleVolumeChange = (newVol: number) => {
+    setVolume(newVol);
+    if (audioRef.current) {
+      audioRef.current.volume = newVol;
+      if (newVol > 0 && isMuted) {
+        audioRef.current.muted = false;
+        setIsMuted(false);
+      }
+    }
+  };
+
   const handlePlayAtTime = (seconds: number) => {
     if (!audioRef.current) return;
     audioRef.current.currentTime = seconds;
@@ -119,9 +117,7 @@ export function CleanListeningDetailView({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
-    return <CleanListeningDetailSkeleton />;
-  }
+  if (loading) return <CleanListeningDetailSkeleton />;
 
   const calculatedCorrectCount = filteredQuestions.filter(q => q.is_correct).length;
 
@@ -138,6 +134,8 @@ export function CleanListeningDetailView({
         fallbackDuration={currentSection.duration_seconds}
         playbackRate={playbackRate}
         isMuted={isMuted}
+        volume={volume}
+        onVolumeChange={handleVolumeChange}
         onTogglePlay={togglePlay}
         onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration || currentSection.duration_seconds)}

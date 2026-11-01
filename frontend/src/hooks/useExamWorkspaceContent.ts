@@ -43,20 +43,20 @@ export function useExamWorkspaceContent(
         return;
       }
 
-      // Chạy song song nạp đề và khởi tạo phiên thi
-      const contentPromise = cached ? Promise.resolve(cached) : prefetchExamContent(testId);
-      const attemptPromise = startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill).catch((e) => {
-        console.warn("Could not start attempt session:", e);
-        return null;
-      });
+      // Khởi tạo phiên thi trong nền (không làm nghẽn hiển thị đề bài)
+      startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
+        .then((attemptRes) => {
+          if (mounted && attemptRes?.attempt_id) {
+            setAttemptId(attemptRes.attempt_id);
+          }
+        })
+        .catch((e) => {
+          console.warn("Could not start attempt session in background:", e);
+        });
 
+      // Tải và hiển thị nội dung đề thi ngay lập tức
       try {
-        const [contentData, attemptRes] = await Promise.all([contentPromise, attemptPromise]);
-
-        if (mounted && attemptRes?.attempt_id) {
-          setAttemptId(attemptRes.attempt_id);
-        }
-
+        const contentData = cached ? cached : await prefetchExamContent(testId);
         if (mounted && contentData && !cached) {
           if (skill === "reading") {
             const mapped = mapToReadingTestData(contentData);

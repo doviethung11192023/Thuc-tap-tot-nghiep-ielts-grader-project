@@ -13,25 +13,6 @@ from app.schemas.exam_content import (
 
 router = APIRouter()
 
-# --- Test Sets (Bộ Đề Thi) ---
-@router.get("/test-sets")
-async def list_test_sets(current_user: User = Depends(require_admin)):
-    """Danh sách các bộ đề thi (Cambridge, Actual Tests...)."""
-    res = supabase.table("test_sets").select("*").order("created_at", desc=True).execute()
-    return {"meta": {"code": 200}, "data": res.data or []}
-
-@router.post("/test-sets", status_code=status.HTTP_201_CREATED)
-async def create_test_set(
-    data: TestSetCreate,
-    current_user: User = Depends(require_admin)
-):
-    """Tạo bộ đề thi mới."""
-    payload = {"name": data.name.strip(), "created_by": str(current_user.id)}
-    res = supabase.table("test_sets").insert(payload).execute()
-    if not res.data:
-        raise HTTPException(status_code=500, detail="Không thể tạo bộ đề thi")
-    return {"meta": {"code": 201, "message": "Tạo bộ đề thành công"}, "data": res.data[0]}
-
 # --- Tests (Bài Thi) ---
 @router.get("/tests")
 async def list_tests(
@@ -44,9 +25,10 @@ async def list_tests(
     difficulty: Optional[str] = None,
     sort_by: Optional[str] = Query("newest"),
     search: Optional[str] = None,
+    test_format: Optional[str] = None,
     current_user: User = Depends(require_admin)
 ):
-    """Danh sách bài thi phân trang, lọc theo kỹ năng, độ khó, trạng thái, bộ đề và sắp xếp."""
+    """Danh sách bài thi phân trang, lọc theo kỹ năng, độ khó, trạng thái, bộ đề, định dạng (full/exercise)."""
     offset = (page - 1) * limit
     query = supabase.table("tests").select("*, test_sets(id, name)", count="exact")
 
@@ -56,6 +38,11 @@ async def list_tests(
     if test_set_id: query = query.eq("test_set_id", test_set_id)
     if difficulty: query = query.eq("difficulty", difficulty)
     if search and search.strip(): query = query.ilike("title", f"%{search.strip()}%")
+    if test_format == "full":
+        query = query.or_("source_name.is.null,source_name.neq.micro_exercise")
+    elif test_format == "exercise":
+        query = query.eq("source_name", "micro_exercise")
+
 
     if sort_by == "oldest": query = query.order("created_at", desc=False)
     elif sort_by == "title_asc": query = query.order("title", desc=False)

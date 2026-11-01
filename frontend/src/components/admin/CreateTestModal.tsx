@@ -11,6 +11,8 @@ interface CreateTestModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
+  defaultFormat?: "full" | "exercise";
+  defaultSkill?: SkillType;
 }
 
 const PLACEHOLDERS: Record<SkillType, string> = {
@@ -21,19 +23,20 @@ const PLACEHOLDERS: Record<SkillType, string> = {
 };
 
 const DEFAULT_SECTIONS: Record<SkillType, string[]> = {
-  writing: ["Writing Task 1 (Biểu đồ / Bản đồ / Quy trình)", "Writing Task 2 (Bài luận 250+ từ)"],
-  speaking: ["Part 1 - Phỏng vấn cá nhân", "Part 2 - Cue Card", "Part 3 - Thảo luận 2 chiều"],
+  writing: ["Writing Task 1 (Biểu đồ / Bản đồ)", "Writing Task 2 (Bài luận 250+ từ)"],
+  speaking: ["Part 1 - Phỏng vấn", "Part 2 - Cue Card", "Part 3 - Thảo luận"],
   reading: ["Reading Passage 1", "Reading Passage 2", "Reading Passage 3"],
   listening: ["Listening Section 1", "Listening Section 2", "Listening Section 3", "Listening Section 4"],
 };
 
-export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalProps) {
+export function CreateTestModal({ isOpen, onClose, onCreated, defaultFormat = "full", defaultSkill = "reading" }: CreateTestModalProps) {
   const router = useRouter();
+  const [testFormat, setTestFormat] = useState<"full" | "exercise">(defaultFormat);
   const [title, setTitle] = useState("");
-  const [skill, setSkill] = useState<SkillType>("reading");
+  const [skill, setSkill] = useState<SkillType>(defaultSkill);
   const [difficulty, setDifficulty] = useState<TestDifficulty>("medium");
   const [testSetId, setTestSetId] = useState<string>("");
-  const [durationMin, setDurationMin] = useState<number>(60);
+  const [durationMin, setDurationMin] = useState<number>(defaultFormat === "exercise" ? 12 : 60);
   const [allowedMode, setAllowedMode] = useState<AllowedMode>("both");
   const [testSets, setTestSets] = useState<TestSet[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,15 +44,19 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
 
   useEffect(() => {
     if (isOpen) {
+      setTestFormat(defaultFormat);
+      setSkill(defaultSkill);
+      setDurationMin(defaultFormat === "exercise" ? 12 : defaultSkill === "speaking" ? 15 : defaultSkill === "listening" ? 30 : 60);
       getTestSets().then(setTestSets).catch(() => {});
     }
-  }, [isOpen]);
+  }, [isOpen, defaultFormat, defaultSkill]);
 
   if (!isOpen) return null;
 
   const handleSkillChange = (newSkill: SkillType) => {
     setSkill(newSkill);
-    if (newSkill === "speaking") setDurationMin(15);
+    if (testFormat === "exercise") setDurationMin(12);
+    else if (newSkill === "speaking") setDurationMin(15);
     else if (newSkill === "listening") setDurationMin(30);
     else setDurationMin(60);
   };
@@ -67,13 +74,18 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
         title: title.trim(),
         skill,
         difficulty,
-        test_set_id: testSetId || undefined,
+        test_set_id: testFormat === "exercise" ? undefined : testSetId || undefined,
         duration_min: durationMin,
         allowed_mode: allowedMode,
-        status: "draft"
+        status: "draft",
+        source_name: testFormat === "exercise" ? "micro_exercise" : undefined,
       });
 
-      const sectionsToCreate = DEFAULT_SECTIONS[skill] || [];
+      const defaultSecs = DEFAULT_SECTIONS[skill] || [];
+      const sectionsToCreate = testFormat === "exercise"
+        ? [`${skill.charAt(0).toUpperCase() + skill.slice(1)} - Bài tập luyện dạng chuyên sâu`]
+        : defaultSecs;
+
       for (let i = 0; i < sectionsToCreate.length; i++) {
         try {
           await createSection(res.id, { order_no: i + 1, title: sectionsToCreate[i] });
@@ -90,25 +102,50 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
     }
   };
 
+  const placeholderText = testFormat === "exercise"
+    ? `VD: Luyện dạng ${skill.toUpperCase()} - Dạng bài chuyên sâu`
+    : PLACEHOLDERS[skill];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-zinc-200">
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+        <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#932120]/10 flex items-center justify-center text-[#932120]">
               <PlusCircle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-900">Tạo Đề Thi Mới</h3>
-              <p className="text-[11px] text-zinc-500">Soạn đề Reading, Listening, Writing hoặc Speaking</p>
+              <h3 className="text-base font-bold text-zinc-900">Tạo Nội Dung Thi Mới</h3>
+              <p className="text-[11px] text-zinc-500">Đề thi chuẩn hoặc bài tập luyện dạng</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 p-1 rounded-lg">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 p-1 rounded-lg cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-3.5 space-y-3.5">
+          <div className="grid grid-cols-2 gap-1.5 p-1 bg-zinc-100 rounded-xl">
+            <button
+              type="button"
+              onClick={() => { setTestFormat("full"); setDurationMin(skill === "speaking" ? 15 : skill === "listening" ? 30 : 60); }}
+              className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                testFormat === "full" ? "bg-white text-zinc-900 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              Đề đầy đủ (Full Test)
+            </button>
+            <button
+              type="button"
+              onClick={() => { setTestFormat("exercise"); setDurationMin(12); }}
+              className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                testFormat === "exercise" ? "bg-white text-[#932120] shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              Luyện dạng (Micro)
+            </button>
+          </div>
+
           <CreateTestFields
             skill={skill}
             onSkillChange={handleSkillChange}
@@ -116,7 +153,7 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
             onDurationChange={setDurationMin}
             title={title}
             onTitleChange={setTitle}
-            placeholder={PLACEHOLDERS[skill]}
+            placeholder={placeholderText}
             difficulty={difficulty}
             onDifficultyChange={setDifficulty}
             allowedMode={allowedMode}
@@ -126,27 +163,14 @@ export function CreateTestModal({ isOpen, onClose, onCreated }: CreateTestModalP
             testSets={testSets}
           />
 
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
-              {error}
-            </div>
-          )}
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium">{error}</div>}
 
           <div className="pt-2 border-t border-zinc-100 flex items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-zinc-300 rounded-xl text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
-            >
+            <button type="button" onClick={onClose} className="px-4 py-2 border border-zinc-300 rounded-xl text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer">
               Hủy
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 bg-[#932120] text-white rounded-xl text-xs font-bold hover:bg-[#7a1a19] transition-colors flex items-center gap-2 shadow-sm"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Tiếp tục soạn đề
+            <button type="submit" disabled={loading} className="px-5 py-2 bg-[#932120] text-white rounded-xl text-xs font-bold hover:bg-[#7a1a19] transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Tiếp tục soạn đề
             </button>
           </div>
         </form>

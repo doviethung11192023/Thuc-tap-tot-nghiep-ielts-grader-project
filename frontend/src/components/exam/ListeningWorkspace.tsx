@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ListeningTestData } from '@/mocks/exam-listening';
 import { ExitConfirmModal } from './ExitConfirmModal';
@@ -9,6 +9,7 @@ import { GradingProgressOverlay } from './GradingProgressOverlay';
 import { ListeningWorkspaceHeader } from './listening/ListeningWorkspaceHeader';
 import { ListeningAudioBar } from './listening/ListeningAudioBar';
 import { ListeningQuestionsPane } from './listening/ListeningQuestionsPane';
+import { useListeningPlayer } from '@/hooks/useListeningPlayer';
 
 interface ListeningWorkspaceProps {
   testData: ListeningTestData;
@@ -20,10 +21,6 @@ interface ListeningWorkspaceProps {
 export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: ListeningWorkspaceProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
@@ -40,9 +37,13 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
   const currentSection = availableSections[activeSection] || availableSections[0];
   const allQuestions = useMemo(() => availableSections.flatMap(s => s.question_groups.flatMap(g => g.questions)), [availableSections]);
 
+  const player = useListeningPlayer({
+    audioUrl: currentSection?.audio_url,
+    defaultDuration: currentSection?.duration_seconds || 450,
+  });
+
   const initialExamSeconds = Math.max(1, availableSections.length) * 8 * 60;
   const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -64,28 +65,12 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
     return () => { if (interval) clearInterval(interval); };
   }, [mode, onSubmit, userAnswers]);
 
-  useEffect(() => {
-    if (isPlaying) {
-      timerRef.current = setInterval(() => {
-        setCurrentTime(prev => {
-          const maxSecs = currentSection?.duration_seconds || 450;
-          if (prev >= maxSecs) { setIsPlaying(false); return maxSecs; }
-          return prev + 1;
-        });
-      }, 1000 / playbackSpeed);
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isPlaying, playbackSpeed, currentSection?.duration_seconds]);
-
   const handleQuestionPaletteClick = (qNumber: number) => {
     const targetIdx = availableSections.findIndex(s => 
       s.question_groups.some((g: any) => g.questions.some((item: any) => item.question_number === qNumber))
     );
     if (targetIdx !== -1 && targetIdx !== activeSection) {
       setActiveSection(targetIdx);
-      setCurrentTime(0);
     }
   };
 
@@ -130,16 +115,22 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
       />
 
       <ListeningAudioBar
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(prev => !prev)}
-        currentTime={currentTime}
-        durationSeconds={currentSection?.duration_seconds || 450}
-        onRewind5s={() => setCurrentTime(prev => Math.max(0, prev - 5))}
-        playbackSpeed={playbackSpeed}
-        onSpeedChange={setPlaybackSpeed}
-        isMuted={isMuted}
-        onToggleMute={() => setIsMuted(prev => !prev)}
+        audioRef={player.audioRef}
+        audioUrl={currentSection?.audio_url}
+        isPlaying={player.isPlaying}
+        onTogglePlay={player.togglePlay}
+        currentTime={player.currentTime}
+        durationSeconds={player.duration}
+        onRewind5s={() => player.rewind(5)}
+        playbackSpeed={player.playbackSpeed}
+        onSpeedChange={player.changeSpeed}
+        isMuted={player.isMuted}
+        onToggleMute={player.toggleMute}
         mode={mode}
+        volume={player.volume}
+        onVolumeChange={player.changeVolume}
+        onSeek={player.seek}
+        audioEventHandlers={player.audioEventHandlers}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -150,7 +141,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
           allQuestions={allQuestions}
           answeredCount={answeredCount}
           userAnswers={userAnswers}
-          onSectionChange={(idx) => { setActiveSection(idx); setCurrentTime(0); }}
+          onSectionChange={(idx) => setActiveSection(idx)}
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onQuestionClick={handleQuestionPaletteClick}
         />

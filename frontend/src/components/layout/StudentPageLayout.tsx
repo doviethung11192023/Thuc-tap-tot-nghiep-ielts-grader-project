@@ -84,16 +84,12 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
             )}
             {user?.role === 'expert' && (
               <div className="mb-6">
-                <Link href="/expert/profile" className="flex items-center gap-3 px-4 py-3 text-purple-800 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors font-bold shadow-sm">
-                  <BookOpen className="w-5 h-5 text-purple-700" />
+                <Link href="/expert/profile" className="flex items-center gap-3 px-4 py-3 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-bold shadow-sm">
+                  <BookOpen className="w-5 h-5 text-amber-700" />
                   Cổng Chuyên gia
                 </Link>
               </div>
             )}
-            <Link href="/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/dashboard') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <LayoutDashboard className={`w-5 h-5 ${isActive('/dashboard') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Dashboard
-            </Link>
             {/* --- [MÃ MỚI BỞI AGENT: Thêm link cho 2 trang mới] --- */}
             <Link href="/learning-profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/learning-profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
               <LayoutDashboard className={`w-5 h-5 ${isActive('/learning-profile') ? 'text-red-200' : 'text-zinc-400'}`} />
@@ -136,7 +132,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 py-8 px-4 sm:px-0 md:pl-8">
         --------------------------- */}
         {/* --- [MÃ MỚI BỞI AGENT] --- */}
-        <main className={`flex-1 flex flex-col ${isWorkspace ? 'p-0 w-full max-w-full overflow-hidden' : 'py-8 px-4 sm:px-0 md:pl-8'}`}>
+        <main className={`flex-1 min-w-0 flex flex-col w-full ${isWorkspace ? 'p-0 max-w-full overflow-hidden' : 'py-8 px-4 sm:px-0 md:pl-8'}`}>
         {/* --------------------------- */}
           {children}
         </main>

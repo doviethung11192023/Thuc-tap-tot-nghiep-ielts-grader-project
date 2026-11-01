@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight, Search } from "lucide-react";
+import { Home, ChevronRight, Search, Loader2, AlertCircle } from "lucide-react";
 import { useExamCollectionDetail } from "@/hooks/useExamCollection";
 import { ExamCollectionHeader } from "@/components/exam/student-practice/ExamCollectionHeader";
 import { ExamCollectionTestRow } from "@/components/exam/student-practice/ExamCollectionTestRow";
@@ -12,12 +12,38 @@ export default function ExamCollectionDetailPage() {
   const params = useParams();
   const setId = params?.setId as string;
 
-  const { collection } = useExamCollectionDetail(setId);
+  const { collection, loading } = useExamCollectionDetail(setId);
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "not_started">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTests = collection.tests.filter((test) => {
-    const isCompleted = test.skills.some((s) => s.status === "completed");
+  if (loading) {
+    return (
+      <div className="py-24 text-center">
+        <Loader2 className="w-9 h-9 animate-spin mx-auto text-[#932120] mb-3" />
+        <p className="text-xs text-zinc-500 font-semibold">Đang tải danh sách bài thi trong bộ đề...</p>
+      </div>
+    );
+  }
+
+  if (!collection) {
+    return (
+      <div className="py-20 text-center space-y-3">
+        <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
+        <h2 className="text-lg font-bold text-zinc-900">Không tìm thấy bộ đề thi</h2>
+        <p className="text-xs text-zinc-500">Bộ đề thi này có thể đã bị xóa hoặc không còn tồn tại.</p>
+        <Link
+          href="/test-practice"
+          className="inline-flex px-4 py-2 bg-[#932120] text-white rounded-xl text-xs font-bold hover:bg-[#7a1a19] transition-colors"
+        >
+          Quay lại Test Practice
+        </Link>
+      </div>
+    );
+  }
+
+  const testsList = collection.tests || [];
+  const filteredTests = testsList.filter((test) => {
+    const isCompleted = (test.skills || []).some((s) => s.status === "completed");
     if (filterStatus === "completed" && !isCompleted) return false;
     if (filterStatus === "not_started" && isCompleted) return false;
     if (searchQuery && !test.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -40,7 +66,7 @@ export default function ExamCollectionDetailPage() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-zinc-200">
           <h2 className="text-lg font-black text-zinc-900 tracking-tight">
-            Danh sách đề
+            Danh sách đề ({filteredTests.length})
           </h2>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -85,13 +111,19 @@ export default function ExamCollectionDetailPage() {
         </div>
 
         <div className="space-y-3.5">
-          {filteredTests.map((test) => (
-            <ExamCollectionTestRow
-              key={test.id}
-              test={test}
-              collectionId={collection.id}
-            />
-          ))}
+          {filteredTests.length === 0 ? (
+            <div className="bg-white p-8 rounded-2xl border border-zinc-200 text-center text-xs text-zinc-500">
+              Không có bài thi nào khớp với bộ lọc hiện tại.
+            </div>
+          ) : (
+            filteredTests.map((test) => (
+              <ExamCollectionTestRow
+                key={test.id}
+                test={test}
+                collectionId={collection.id}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

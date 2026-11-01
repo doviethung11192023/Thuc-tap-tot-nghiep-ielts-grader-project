@@ -16,17 +16,18 @@ interface QuestionGroupModalProps {
 
 const QUESTION_TYPES_BY_SKILL: Record<string, { value: string; label: string }[]> = {
   reading: [
-    { value: "multiple_choice", label: "Multiple Choice (Trắc nghiệm)" },
-    { value: "true_false_not_given", label: "True / False / Not Given" },
-    { value: "matching", label: "Matching (Nối tiêu đề / Thông tin)" },
-    { value: "completion", label: "Completion (Điền từ vào chỗ trống)" },
+    { value: "multiple_choice", label: "Multiple Choice (Trắc nghiệm A/B/C/D)" },
+    { value: "true_false_not_given", label: "True / False / Not Given (Thực tế khách quan)" },
+    { value: "yes_no_not_given", label: "Yes / No / Not Given (Quan điểm tác giả)" },
+    { value: "completion", label: "Summary / Sentence Completion (Điền từ)" },
+    { value: "matching", label: "Matching Headings (Nối tiêu đề đoạn văn)" },
     { value: "short_answer", label: "Short Answer (Câu trả lời ngắn)" },
   ],
   listening: [
-    { value: "multiple_choice", label: "Multiple Choice (Trắc nghiệm)" },
-    { value: "completion", label: "Form / Table / Note Completion" },
+    { value: "completion", label: "Form / Note / Table Completion (Điền từ/số)" },
+    { value: "multiple_choice", label: "Multiple Choice (Trắc nghiệm A/B/C)" },
     { value: "matching", label: "Matching / Classification" },
-    { value: "short_answer", label: "Map / Diagram Labelling" },
+    { value: "short_answer", label: "Map / Diagram Labelling (Sơ đồ / Bản đồ)" },
   ],
   writing: [
     { value: "writing_task1", label: "Writing Task 1 (Biểu đồ / Bản đồ / Quy trình)" },

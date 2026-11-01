@@ -12,6 +12,25 @@ interface CacheEntry {
 
 const listCache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 60 * 1000; // 60s
+const STORAGE_PREFIX = "moonlab_cache_tests_";
+
+function getCachedEntry(cacheKey: string): CacheEntry | null {
+  const inMem = listCache.get(cacheKey);
+  if (inMem) return inMem;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = sessionStorage.getItem(`${STORAGE_PREFIX}${cacheKey}`);
+      if (stored) {
+        const parsed = JSON.parse(stored) as CacheEntry;
+        if (parsed?.items && typeof parsed?.total === "number") {
+          listCache.set(cacheKey, parsed);
+          return parsed;
+        }
+      }
+    } catch {}
+  }
+  return null;
+}
 
 export function useStudentPublishedTests(initialLimit: number = 12) {
   const [page, setPage] = useState<number>(1);
@@ -19,23 +38,30 @@ export function useStudentPublishedTests(initialLimit: number = 12) {
   const [skill, setSkill] = useState<string>("All");
   const [difficulty, setDifficulty] = useState<string>("All");
   const [search, setSearch] = useState<string>("");
-  const [tests, setTests] = useState<PublishedTestItem[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
+
+  const defaultKey = `1_${initialLimit}_All_All_`;
+  const initialCached = getCachedEntry(defaultKey);
+
+  const [tests, setTests] = useState<PublishedTestItem[]>(() => initialCached?.items || []);
+  const [total, setTotal] = useState<number>(() => initialCached?.total || 0);
+  const [loading, setLoading] = useState<boolean>(() => !initialCached);
 
   const fetchTests = useCallback(async () => {
-    const cacheKey = `${page}_${limit}_${skill}_${difficulty}_${search}`;
-    const cached = listCache.get(cacheKey);
+    const cacheKey = `${page}_${limit}_${skill}_${difficulty}_${search.trim()}`;
+    const cached = getCachedEntry(cacheKey);
 
-    // Stale-While-Revalidate: Nếu có cache còn mới, hiển thị ngay tức thì 0ms
-    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    // Stale-While-Revalidate: Hiển thị ngay 0ms nếu có cache
+    if (cached) {
       setTests(cached.items);
       setTotal(cached.total);
       setLoading(false);
-      return;
+      // Nếu cache còn mới thì không cần fetch lại
+      if (Date.now() - cached.ts < CACHE_TTL_MS) {
+        return;
+      }
+    } else {
+      setLoading(true);
     }
-
-    if (!cached) setLoading(true);
 
     try {
       const data = await getStudentPublishedTests({
@@ -47,8 +73,15 @@ export function useStudentPublishedTests(initialLimit: number = 12) {
       });
       const items = data.items || [];
       const totalCount = data.total || 0;
+      const entry: CacheEntry = { items, total: totalCount, ts: Date.now() };
 
-      listCache.set(cacheKey, { items, total: totalCount, ts: Date.now() });
+      listCache.set(cacheKey, entry);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(`${STORAGE_PREFIX}${cacheKey}`, JSON.stringify(entry));
+        } catch {}
+      }
+
       setTests(items);
       setTotal(totalCount);
     } catch (err) {

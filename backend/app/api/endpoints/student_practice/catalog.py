@@ -81,10 +81,19 @@ async def get_exam_collection_detail(set_id: str, current_user: Optional[User] =
         test_set = {"id": "standalone-tests", "name": "Đề Thi Thực Chiến Độc Lập"}
         t_res = supabase.table("tests").select("id, title, skill, duration_min, status, created_at").is_("test_set_id", "null").eq("status", "published").order("created_at").execute()
     else:
-        s_res = supabase.table("test_sets").select("*").eq("id", set_id).execute()
-        if not s_res.data:
-            # Fallback if set_id is a slug like 'recent-actual-test' or legacy ID
+        is_valid_uuid = False
+        try:
+            import uuid
+            uuid.UUID(set_id)
+            is_valid_uuid = True
+        except Exception:
+            pass
+
+        if is_valid_uuid:
+            s_res = supabase.table("test_sets").select("*").eq("id", set_id).execute()
+        else:
             s_res = supabase.table("test_sets").select("*").order("created_at").limit(1).execute()
+
         if not s_res.data:
             raise HTTPException(status_code=404, detail="Bộ đề thi không tồn tại")
         test_set = s_res.data[0]

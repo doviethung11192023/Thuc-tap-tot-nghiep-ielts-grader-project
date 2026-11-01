@@ -28,7 +28,25 @@ export default function TestPracticePage() {
     loading,
   } = useStudentPublishedTests(12);
 
-  const [activeTab, setActiveTab] = useState<"explore" | "by-type">("explore");
+  const [activeTab, setActiveTab] = useState<"explore" | "by-type">(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = sessionStorage.getItem("moonlab_practice_active_tab");
+        if (saved === "explore" || saved === "by-type") return saved;
+      } catch {}
+    }
+    return "explore";
+  });
+
+  const handleTabChange = (tab: "explore" | "by-type") => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("moonlab_practice_active_tab", tab);
+      } catch {}
+    }
+  };
+
   const [activeTestPrep, setActiveTestPrep] = useState<{
     id: string;
     title: string;
@@ -62,8 +80,8 @@ export default function TestPracticePage() {
         <div className="flex space-x-1.5 bg-zinc-100 p-1 rounded-xl w-fit border border-zinc-200">
           <button
             id="btn-tab-explore"
-            onClick={() => setActiveTab("explore")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+            onClick={() => handleTabChange("explore")}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "explore"
                 ? "bg-white text-[#932120] shadow-xs"
                 : "text-zinc-600 hover:text-zinc-900"
@@ -74,8 +92,8 @@ export default function TestPracticePage() {
           </button>
           <button
             id="btn-tab-skills"
-            onClick={() => setActiveTab("by-type")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+            onClick={() => handleTabChange("by-type")}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "by-type"
                 ? "bg-white text-[#932120] shadow-xs"
                 : "text-zinc-600 hover:text-zinc-900"

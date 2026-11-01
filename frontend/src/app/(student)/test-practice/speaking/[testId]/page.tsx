@@ -1,9 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { SpeakingWorkspace } from '@/components/exam/SpeakingWorkspace';
+import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { startTestAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
 
@@ -36,12 +36,7 @@ export default function SpeakingWorkspacePage() {
   };
 
   if (loading || !speakingData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[75vh] gap-3 text-zinc-600">
-        <Loader2 className="w-8 h-8 animate-spin text-[#932120]" />
-        <p className="text-sm font-bold text-zinc-700">Đang tải nội dung đề thi Speaking thực tế...</p>
-      </div>
-    );
+    return <ExamWorkspaceSkeleton skill="speaking" />;
   }
 
   return (

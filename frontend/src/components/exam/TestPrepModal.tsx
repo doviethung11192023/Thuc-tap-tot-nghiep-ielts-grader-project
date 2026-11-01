@@ -38,7 +38,10 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
   };
 
   const handlePreviewResults = () => {
-    router.push(`/test-practice/${skill.toLowerCase()}/${testId}?view=result`);
+    const s = skill.toLowerCase();
+    const partsParam = selectedParts.join(',');
+    const partsQuery = partsParam ? `?parts=${partsParam}` : '';
+    router.push(`/test-practice/${s}/${testId}/detail${partsQuery}`);
   };
 
   const getSkillIcon = () => {

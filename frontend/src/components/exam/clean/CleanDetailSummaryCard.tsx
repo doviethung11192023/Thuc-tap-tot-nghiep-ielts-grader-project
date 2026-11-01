@@ -33,24 +33,9 @@ export function CleanDetailSummaryCard({
         {parts.map((part, idx) => {
           const match = part.match(/^\{\{(\d+)\}\}$/);
           if (!match) {
-            if (part.includes('•') || part.includes('\uFFFD')) {
-              const subParts = part.split(/([•\uFFFD])/g);
-              return (
-                <span key={idx}>
-                  {subParts.map((sub, sIdx) => {
-                    if (sub === '•' || sub === '\uFFFD') {
-                      return (
-                        <span key={sIdx} className="text-[#932120] font-bold mx-1.5 inline-block">
-                          •
-                        </span>
-                      );
-                    }
-                    return <span key={sIdx}>{sub}</span>;
-                  })}
-                </span>
-              );
-            }
-            return <span key={idx}>{part}</span>;
+            // Loại bỏ các ký tự dấu chấm tròn / bullet lỗi font (•, \uFFFD) để đoạn văn liền mạch, tự nhiên
+            const cleaned = part.replace(/[•\uFFFD]/g, '').replace(/\s{2,}/g, ' ');
+            return <span key={idx}>{cleaned}</span>;
           }
 
           const qNum = Number(match[1]);

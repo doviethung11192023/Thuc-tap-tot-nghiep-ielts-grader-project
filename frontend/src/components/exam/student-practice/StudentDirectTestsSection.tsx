@@ -126,8 +126,25 @@ export function StudentDirectTestsSection({
         </div>
       </div>
 
-      {/* Grid bài thi với Smart Prefetch */}
-      {tests.length > 0 ? (
+      {/* Grid bài thi với Smart Prefetch & Skeleton */}
+      {loading && tests.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
+          {[1, 2, 3, 4, 5, 6].map((idx) => (
+            <div key={idx} className="bg-white rounded-2xl border border-zinc-200 p-4 space-y-3 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="h-5 bg-zinc-200 rounded-md w-16" />
+                <div className="h-4 bg-zinc-100 rounded w-12" />
+              </div>
+              <div className="h-4 bg-zinc-200 rounded w-3/4" />
+              <div className="h-3 bg-zinc-100 rounded w-1/2" />
+              <div className="pt-2 border-t border-zinc-100 flex items-center justify-between">
+                <div className="h-3 bg-zinc-100 rounded w-14" />
+                <div className="h-3 bg-zinc-200 rounded w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : tests.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
           {tests.map((test) => (
             <DirectTestCard key={test.id} test={test} onOpenTestPrep={onOpenTestPrep} />

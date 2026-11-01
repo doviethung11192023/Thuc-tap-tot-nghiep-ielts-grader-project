@@ -14,6 +14,7 @@ export interface ListTestsParams {
   difficulty?: string;
   sort_by?: string;
   search?: string;
+  test_format?: "full" | "exercise";
 }
 
 export async function getTests(params?: ListTestsParams) {
@@ -40,10 +41,12 @@ export async function createTest(payload: {
   duration_min?: number;
   difficulty?: TestDifficulty;
   origin?: string;
+  source_name?: string;
 }) {
   const res = await apiClient.post("/api/v1/admin/tests", payload);
   return res.data.data;
 }
+
 
 export async function updateTest(testId: string, payload: Partial<TestItem>) {
   const res = await apiClient.put(`/api/v1/admin/tests/${testId}`, payload);
@@ -65,10 +68,13 @@ export async function deleteTest(testId: string) {
 }
 
 export async function getTestSets(): Promise<TestSet[]> {
-  const res = await apiClient.get<{ meta: { code: number }; data: TestSet[] }>(
-    "/api/v1/admin/test-sets"
-  );
-  return res.data.data;
+  try {
+    const res = await apiClient.get<any>("/api/v1/admin/test-sets");
+    const d = res.data?.data;
+    if (Array.isArray(d)) return d;
+    if (d && Array.isArray(d.items)) return d.items;
+  } catch {}
+  return [];
 }
 
 export async function createTestSet(name: string): Promise<TestSet> {

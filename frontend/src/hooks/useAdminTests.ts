@@ -15,7 +15,7 @@ interface CacheEntry {
 }
 const testsCacheMap = new Map<string, CacheEntry>();
 
-export function useAdminTests() {
+export function useAdminTests(testFormat: "full" | "exercise" = "full") {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [skill, setSkill] = useState<SkillType | undefined>(undefined);
@@ -29,7 +29,7 @@ export function useAdminTests() {
   const [testSets, setTestSets] = useState<TestSet[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const cacheKey = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+  const cacheKey = `${testFormat}_${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
   const initialCached = testsCacheMap.get(cacheKey);
 
   const [tests, setTests] = useState<TestItem[]>(() => initialCached?.items || []);
@@ -44,13 +44,14 @@ export function useAdminTests() {
 
   const fetchTests = useCallback(
     async (isSilent = false) => {
-      const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+      const key = `${testFormat}_${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
       if (!testsCacheMap.has(key) && !isSilent) setLoading(true);
       else setIsRefreshing(true);
 
       try {
         const data = await getTests({
-          page, limit, skill, status, test_set_id: testSetId, difficulty, allowed_mode: allowedMode, sort_by: sortBy, search: search.trim() || undefined
+          page, limit, skill, status, test_set_id: testSetId, difficulty, allowed_mode: allowedMode, sort_by: sortBy, search: search.trim() || undefined,
+          test_format: testFormat
         });
         setTests(data.items);
         setTotal(data.total);
@@ -62,11 +63,12 @@ export function useAdminTests() {
         setIsRefreshing(false);
       }
     },
-    [page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]
+    [testFormat, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]
   );
 
+
   useEffect(() => {
-    const key = `${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
+    const key = `${testFormat}_${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
     const cached = testsCacheMap.get(key);
     if (cached) {
       setTests(cached.items);
@@ -75,7 +77,8 @@ export function useAdminTests() {
     } else {
       fetchTests(false);
     }
-  }, [fetchTests, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]);
+  }, [fetchTests, testFormat, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]);
+
 
   const handleTabClick = (newSkill: SkillType | undefined) => {
     startTransition(() => {

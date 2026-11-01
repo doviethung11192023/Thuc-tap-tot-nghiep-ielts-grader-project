@@ -1,9 +1,23 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
+from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from app.core.security import get_current_user, User
 from app.db.supabase import supabase
+from app.services.learning_profile_aggregator import (
+    compute_learning_profile_overview,
+    compute_learning_profile_test_practice
+)
 
 router = APIRouter()
+
+class GoalUpdateRequest(BaseModel):
+    input_band: Optional[float] = None
+    target_overall: Optional[float] = None
+    target_listening: Optional[float] = None
+    target_reading: Optional[float] = None
+    target_writing: Optional[float] = None
+    target_speaking: Optional[float] = None
+    test_date: Optional[str] = None
 
 @router.get("/history")
 async def get_student_history(
@@ -14,7 +28,10 @@ async def get_student_history(
 ):
     """Lấy danh sách lịch sử các lần làm bài thi của học viên phân trang."""
     offset = (page - 1) * limit
-    query = supabase.table("test_attempts").select("id, test_id, skill, mode, status, band, raw_score, started_at, submitted_at, tests(title, duration_min)", count="exact").eq("user_id", current_user.id).order("started_at", desc=True)
+    query = supabase.table("test_attempts").select(
+        "id, test_id, skill, mode, status, band, raw_score, started_at, submitted_at, tests(title, duration_min)",
+        count="exact"
+    ).eq("user_id", current_user.id).order("started_at", desc=True)
 
     if skill and skill.lower() != "all":
         query = query.eq("skill", skill.lower())
@@ -48,33 +65,51 @@ async def get_student_history(
 
 @router.get("/learning-profile")
 async def get_student_learning_profile(current_user: User = Depends(get_current_user)):
-    """Lấy số liệu hồ sơ năng lực học tập: Radar chart 4 kỹ năng, mục tiêu, độ chính xác."""
-    # 1. Lấy tiến độ hiện tại từ user_progress
-    prog_res = supabase.table("user_progress").select("*").eq("user_id", current_user.id).execute()
-    prog = prog_res.data[0] if prog_res.data else {}
-
-    # 2. Lấy mục tiêu từ learner_goals
-    goal_res = supabase.table("learner_goals").select("*").eq("user_id", current_user.id).execute()
-    goals = goal_res.data[0] if goal_res.data else {}
-
-    skills_data = [
-        {"skill": "Listening", "current": float(prog.get("band_listening") or 6.0), "target": float(goals.get("target_listening") or 7.0)},
-        {"skill": "Reading", "current": float(prog.get("band_reading") or 6.5), "target": float(goals.get("target_reading") or 7.5)},
-        {"skill": "Writing", "current": float(prog.get("band_writing") or 5.5), "target": float(goals.get("target_writing") or 6.5)},
-        {"skill": "Speaking", "current": float(prog.get("band_speaking") or 6.0), "target": float(goals.get("target_speaking") or 7.0)},
-    ]
-
-    # 3. Thống kê số bài thi đã hoàn thành
-    count_res = supabase.table("test_attempts").select("id", count="exact").eq("user_id", current_user.id).eq("status", "scored").execute()
-    total_completed = count_res.count if hasattr(count_res, 'count') and count_res.count is not None else len(count_res.data or [])
-
+    """Lấy toàn bộ số liệu thực tế hồ sơ năng lực học viên: KPIs, mục tiêu, Radar, Donut, Heatmap."""
+    profile_data = compute_learning_profile_overview(current_user.id)
     return {
         "meta": {"code": 200},
-        "data": {
-            "overall_band": float(prog.get("band_overall") or 6.0),
-            "target_overall": float(goals.get("target_overall") or 7.0),
-            "total_completed_tests": total_completed,
-            "radar_data": skills_data,
-            "test_date": goals.get("test_date")
-        }
+        "data": profile_data
+    }
+
+@router.get("/learning-profile/test-practice")
+async def get_learning_profile_test_practice(current_user: User = Depends(get_current_user)):
+    """Lấy toàn bộ số liệu thực tế cho Tab Test Practice: Điểm 4 kỹ năng, Line Chart 30 bài, Dạng bài, Lịch sử."""
+    practice_data = compute_learning_profile_test_practice(current_user.id)
+    return {
+        "meta": {"code": 200},
+        "data": practice_data
+    }
+
+@router.put("/learning-profile/goals")
+async def update_student_goals(req: GoalUpdateRequest, current_user: User = Depends(get_current_user)):
+    """Cập nhật mục tiêu điểm số và ngày thi dự kiến của học viên."""
+    payload = {}
+    if req.target_overall is not None:
+        payload["target_overall"] = req.target_overall
+    if req.target_listening is not None:
+        payload["target_listening"] = req.target_listening
+    if req.target_reading is not None:
+        payload["target_reading"] = req.target_reading
+    if req.target_writing is not None:
+        payload["target_writing"] = req.target_writing
+    if req.target_speaking is not None:
+        payload["target_speaking"] = req.target_speaking
+    if req.test_date is not None:
+        payload["test_date"] = req.test_date
+
+    existing = supabase.table("learner_goals").select("user_id").eq("user_id", current_user.id).execute()
+    if existing.data:
+        res = supabase.table("learner_goals").update(payload).eq("user_id", current_user.id).execute()
+    else:
+        payload["user_id"] = current_user.id
+        res = supabase.table("learner_goals").insert(payload).execute()
+
+    from app.services.learning_profile.common import _cache
+    _cache.pop(f"overview_{current_user.id}", None)
+    _cache.pop(f"practice_{current_user.id}", None)
+
+    return {
+        "meta": {"code": 200, "message": "Cập nhật mục tiêu thành công"},
+        "data": res.data[0] if res.data else payload
     }

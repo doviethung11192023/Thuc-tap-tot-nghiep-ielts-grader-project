@@ -28,13 +28,13 @@ export async function getStudentExamCollections(): Promise<ExamCollection[]> {
     const res = await apiClient.get<{ meta: { code: number }; data: ExamCollection[] }>(
       "/api/v1/test-practice/sets"
     );
-    if (res.data?.data && res.data.data.length > 0) {
+    if (res.data?.data && Array.isArray(res.data.data)) {
       return res.data.data;
     }
   } catch (err) {
-    console.warn("Lỗi khi tải bộ đề thi từ backend, sử dụng dữ liệu mặc định:", err);
+    console.warn("Lỗi khi tải bộ đề thi từ backend:", err);
   }
-  return mockExamCollections;
+  return [];
 }
 
 export async function getStudentExamCollectionDetail(setId: string): Promise<ExamCollection | null> {
@@ -46,9 +46,9 @@ export async function getStudentExamCollectionDetail(setId: string): Promise<Exa
       return res.data.data;
     }
   } catch (err) {
-    console.warn(`Lỗi khi tải chi tiết bộ đề ${setId}, sử dụng dữ liệu fallback:`, err);
+    console.warn(`Lỗi khi tải chi tiết bộ đề ${setId}:`, err);
   }
-  return mockExamCollections.find((c) => c.id === setId) || mockExamCollections[0] || null;
+  return null;
 }
 
 export async function startTestAttempt(testId: string, mode: "practice" | "mock" = "practice", skill?: string) {
@@ -134,3 +134,48 @@ export async function getStudentLearningProfile() {
   );
   return res.data.data;
 }
+
+export interface PracticeExerciseItem {
+  id: string;
+  title: string;
+  type: string;
+  raw_type: string;
+  skill: string;
+  difficulty: string;
+  question_count: number;
+  estimated_minutes: number;
+  test_id: string;
+  section_id: string;
+  part_number: number;
+  instructions: string;
+}
+
+export interface QuestionTypeSummaryItem {
+  key: string;
+  name: string;
+  count: number;
+  accuracy: number;
+}
+
+export async function getSkillExercises(params: {
+  skill?: string;
+  question_type?: string;
+  difficulty?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const res = await apiClient.get<{
+    meta: { code: number };
+    data: { items: PracticeExerciseItem[]; total: number; page: number; limit: number };
+  }>("/api/v1/test-practice/exercises", { params });
+  return res.data?.data || { items: [], total: 0, page: 1, limit: 12 };
+}
+
+export async function getQuestionTypesSummary(skill: string = "reading") {
+  const res = await apiClient.get<{
+    meta: { code: number };
+    data: QuestionTypeSummaryItem[];
+  }>("/api/v1/test-practice/question-types-summary", { params: { skill } });
+  return res.data?.data || [];
+}
+

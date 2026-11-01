@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Loader2, Save } from "lucide-react";
 import { createQuestion, updateQuestion } from "@/services/admin-content";
-import { QuestionOptionsEditor } from "@/components/admin/QuestionOptionsEditor";
 import { SpeakingQuestionFields } from "@/components/admin/SpeakingQuestionFields";
 import { QuestionAnswerKeyEditor } from "@/components/admin/QuestionAnswerKeyEditor";
 import type { Question, SkillType } from "@/types/exam";
@@ -75,7 +74,7 @@ export function QuestionEditorModal({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim()) {
+    if (!prompt.trim() && !questionType.includes("completion")) {
       setError("Vui lòng nhập nội dung câu hỏi");
       return;
     }
@@ -85,7 +84,7 @@ export function QuestionEditorModal({
     const answersList = acceptedAnswers.split(",").map((a) => a.trim()).filter(Boolean);
     const payload: any = {
       number: Number(number),
-      prompt: prompt.trim(),
+      prompt: prompt.trim() || `Câu hỏi số ${number}`,
       options: options.length > 0 ? options : undefined,
       max_words: maxWords ? Number(maxWords) : undefined,
       prompt_audio_key: promptAudioKey.trim() || undefined,
@@ -117,10 +116,15 @@ export function QuestionEditorModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-zinc-200 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-          <h3 className="text-base font-bold text-zinc-900">
-            {questionToEdit ? `Chỉnh Sửa Câu Hỏi #${questionToEdit.number}` : `Thêm Câu Hỏi Mới (#${number})`}
-          </h3>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 p-1 rounded-lg">
+          <div>
+            <h3 className="text-base font-bold text-zinc-900">
+              {questionToEdit ? `Chỉnh Sửa Câu Hỏi #${questionToEdit.number}` : `Thêm Câu Hỏi Mới (#${number})`}
+            </h3>
+            <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+              Dạng bài: <strong className="text-[#932120]">{questionType}</strong> • Kỹ năng: <strong>{skill}</strong>
+            </span>
+          </div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 p-1 rounded-lg cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -145,29 +149,34 @@ export function QuestionEditorModal({
               />
             </div>
             <div className="col-span-3">
-              <label className="block font-semibold text-zinc-700 mb-1">Nội dung câu hỏi / Yêu cầu:</label>
+              <label className="block font-semibold text-zinc-700 mb-1">Nội dung câu hỏi / Câu văn / Yêu cầu:</label>
               <input
                 type="text"
                 required
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="VD: What is the main idea of paragraph 2?"
+                placeholder="VD: In paragraph 2, the author suggests that... hoặc Nhãn vị trí cần điền"
                 className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#932120]"
               />
             </div>
           </div>
 
-          {(questionType === "multiple_choice" || options.length > 0) && (
-            <QuestionOptionsEditor options={options} onChange={setOptions} />
-          )}
-
+          {/* Smart Answer Key Editor chuyên biệt cho từng dạng bài */}
           <QuestionAnswerKeyEditor
+            skill={skill}
+            questionType={questionType}
+            prompt={prompt}
+            onPromptChange={setPrompt}
             acceptedAnswers={acceptedAnswers}
-            evidence={evidence}
-            explanation={explanation}
             onAcceptedAnswersChange={setAcceptedAnswers}
+            options={options}
+            onOptionsChange={setOptions}
+            evidence={evidence}
             onEvidenceChange={setEvidence}
+            explanation={explanation}
             onExplanationChange={setExplanation}
+            maxWords={maxWords}
+            onMaxWordsChange={setMaxWords}
           />
 
           {skill === "speaking" && (
@@ -181,34 +190,21 @@ export function QuestionEditorModal({
             />
           )}
 
-          {skill === "writing" && (
-            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl space-y-2">
-              <label className="block font-semibold text-zinc-700">Số từ tối thiểu (Word limit):</label>
-              <input
-                type="number"
-                value={maxWords ?? ""}
-                onChange={(e) => setMaxWords(e.target.value ? parseInt(e.target.value) : undefined)}
-                placeholder="VD: 150 cho Task 1 hoặc 250 cho Task 2"
-                className="w-full px-3 py-1.5 border border-zinc-300 rounded-lg bg-white"
-              />
-            </div>
-          )}
-
-          <div className="pt-3 border-t border-zinc-100 flex items-center justify-end gap-2.5">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-zinc-300 rounded-xl text-zinc-700 font-semibold hover:bg-zinc-50"
+              className="px-4 py-2 border border-zinc-300 rounded-xl text-zinc-700 font-bold hover:bg-zinc-50 cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-[#932120] text-white rounded-xl font-bold hover:bg-[#7a1a19] transition-colors flex items-center gap-2 shadow-sm"
+              className="px-5 py-2 bg-[#932120] text-white rounded-xl font-bold hover:bg-[#7a1a19] transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {questionToEdit ? "Lưu Thay Đổi" : "Tạo Câu Hỏi"}
+              <span>{questionToEdit ? "Lưu Thay Đổi" : "Tạo Câu Hỏi"}</span>
             </button>
           </div>
         </form>

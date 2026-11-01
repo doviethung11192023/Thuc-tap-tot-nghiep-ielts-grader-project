@@ -6,7 +6,8 @@ from app.api.endpoints.admin_content import (
     questions as admin_questions,
     media as admin_media,
     core as admin_core,
-    ingest as admin_ingest
+    ingest as admin_ingest,
+    test_sets as admin_test_sets
 )
 from app.api.endpoints.student_practice import student_practice_router
 
@@ -21,6 +22,7 @@ api_router.include_router(admin_questions.router, prefix="/admin", tags=["Admin 
 api_router.include_router(admin_media.router, prefix="/admin", tags=["Admin Media"])
 api_router.include_router(admin_core.router, prefix="/admin", tags=["Admin Core"])
 api_router.include_router(admin_ingest.router, prefix="/admin", tags=["Admin Ingestion"])
+api_router.include_router(admin_test_sets.router, prefix="/admin", tags=["Admin Test Sets"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(expert.router, prefix="/expert", tags=["Expert"])
 api_router.include_router(student_practice_router, tags=["Student Practice"])
