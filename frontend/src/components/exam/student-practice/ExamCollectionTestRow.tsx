@@ -50,26 +50,52 @@ export function ExamCollectionTestRow({ test, collectionId }: ExamCollectionTest
 
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
             {test.skills.map((s) => {
-              const score = s.latestBandScore;
+              const allBands = (s.attempts || []).map((a) => a.bandScore).filter((b) => b !== undefined && b !== null);
+              const highestScore = s.highestBandScore !== undefined && s.highestBandScore !== null
+                ? s.highestBandScore
+                : allBands.length > 0 ? Math.max(...allBands) : s.latestBandScore;
+
+              const isCompleted = s.status === "completed";
+              const hasScore = highestScore !== undefined && highestScore !== null;
+              const hasPositiveScore = hasScore && highestScore > 0;
+
               return (
                 <span
                   key={s.skill}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold ${
-                    s.status === "completed"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
+                    hasPositiveScore
+                      ? "bg-emerald-50 text-emerald-900 border border-emerald-300 shadow-2xs"
+                      : isCompleted
+                      ? "bg-zinc-100 text-zinc-700 border border-zinc-200"
                       : s.status === "draft"
                       ? "bg-amber-50 text-amber-700 border border-amber-200"
                       : "bg-zinc-100 text-zinc-600"
                   }`}
                 >
-                  {score !== undefined && score !== null && (
-                    <strong className="font-black text-emerald-800">{score.toFixed(1)}</strong>
+                  {hasScore && (
+                    <span className="flex items-center gap-1.5" title="Điểm cao nhất đạt được trong tất cả các lần làm">
+                      {hasPositiveScore ? (
+                        <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
+                          <span className="text-xs">🏆</span>
+                          <span className="text-[10px] font-black uppercase text-emerald-700 tracking-tight">Cao nhất:</span>
+                          <strong className="font-black text-xs text-emerald-800">
+                            {highestScore.toFixed(1)}
+                          </strong>
+                        </span>
+                      ) : (
+                        <span className="bg-white px-1.5 py-0.5 rounded-md border border-zinc-200 text-xs font-bold text-zinc-500">
+                          {highestScore.toFixed(1)}
+                        </span>
+                      )}
+                    </span>
                   )}
-                  {s.skill === "Listening" && <Headphones className="w-3 h-3" />}
-                  {s.skill === "Reading" && <BookOpen className="w-3 h-3" />}
-                  {s.skill === "Writing" && <PenTool className="w-3 h-3" />}
-                  {s.skill === "Speaking" && <Mic className="w-3 h-3" />}
-                  <span>{s.skill}</span>
+                  <span className="flex items-center gap-1">
+                    {s.skill === "Listening" && <Headphones className="w-3.5 h-3.5 text-zinc-500" />}
+                    {s.skill === "Reading" && <BookOpen className="w-3.5 h-3.5 text-zinc-500" />}
+                    {s.skill === "Writing" && <PenTool className="w-3.5 h-3.5 text-zinc-500" />}
+                    {s.skill === "Speaking" && <Mic className="w-3.5 h-3.5 text-zinc-500" />}
+                    <span className="font-bold">{s.skill}</span>
+                  </span>
                 </span>
               );
             })}

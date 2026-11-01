@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
       } else if (userRole === 'expert') {
         router.push('/expert/profile');
       } else {
-        router.push('/history');
+        router.push('/learning-profile');
       }
     } catch (err: any) {
       console.error(err);

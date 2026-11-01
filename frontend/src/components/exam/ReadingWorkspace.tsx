@@ -14,10 +14,11 @@ interface ReadingWorkspaceProps {
   testData: ReadingTestData;
   mode: 'exam' | 'practice';
   selectedParts?: string[];
+  returnUrl?: string;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
 }
 
-export function ReadingWorkspace({ testData, mode, selectedParts, onSubmit }: ReadingWorkspaceProps) {
+export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onSubmit }: ReadingWorkspaceProps) {
   const router = useRouter();
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
@@ -158,7 +159,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, onSubmit }: Re
         onContinue={() => setIsExitModalOpen(false)}
         onExitDiscard={() => {
           setIsExitModalOpen(false);
-          router.push('/test-practice');
+          router.push(returnUrl || '/test-practice');
         }}
         onSaveDraftAndExit={() => {
           try {
@@ -168,7 +169,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, onSubmit }: Re
             console.error("Failed to save draft:", e);
           }
           setIsExitModalOpen(false);
-          router.push('/test-practice');
+          router.push(returnUrl || '/test-practice');
         }}
       />
 

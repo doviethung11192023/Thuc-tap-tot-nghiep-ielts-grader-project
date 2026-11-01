@@ -25,6 +25,7 @@ export default function SkillSummaryResultPage() {
   const testId = params?.testId as string;
   const attemptId = searchParams.get('attemptId') || undefined;
   const partsParam = searchParams.get('parts') || '';
+  const returnUrl = searchParams.get('returnUrl') || '';
 
   const isReading = skill === 'reading';
   const { data: cleanData, loading } = useAttemptSummary(attemptId, skill);
@@ -34,6 +35,7 @@ export default function SkillSummaryResultPage() {
       <WritingSummaryResult 
         testId={testId} 
         attemptId={attemptId}
+        returnUrl={returnUrl || undefined}
         testTitle="IELTS Academic Writing - Task 1 & Task 2"
       />
     );
@@ -44,6 +46,7 @@ export default function SkillSummaryResultPage() {
       <SpeakingSummaryResult 
         testId={testId} 
         attemptId={attemptId}
+        returnUrl={returnUrl || undefined}
         testTitle="Full Test 1: Saying thank you, Wild animals and Politeness"
       />
     );
@@ -165,14 +168,14 @@ export default function SkillSummaryResultPage() {
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Link
-            href="/test-practice"
+            href={returnUrl || "/test-practice"}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Về danh sách đề</span>
+            <span>Quay lại</span>
           </Link>
           <Link
-            href={`/test-practice/${skill}/${testId}`}
+            href={`/test-practice/${skill}/${testId}${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
           >
             <RotateCcw className="w-4 h-4" />
@@ -182,7 +185,7 @@ export default function SkillSummaryResultPage() {
 
         <Link
           id={`btn-view-detailed-${skill}-result`}
-          href={`/test-practice/${skill}/${testId}/detail?${[attemptId ? `attemptId=${attemptId}` : '', partsParam ? `parts=${partsParam}` : ''].filter(Boolean).join('&')}`}
+          href={`/test-practice/${skill}/${testId}/detail?${[attemptId ? `attemptId=${attemptId}` : '', partsParam ? `parts=${partsParam}` : '', returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : ''].filter(Boolean).join('&')}`}
           className="w-full sm:w-auto h-10 px-6 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-95"
         >
           <FileSearch className="w-4 h-4" />

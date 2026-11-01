@@ -101,6 +101,7 @@ export default function TestSkillsListPage() {
             skillItem={skillItem}
             testId={test.id}
             testTitle={test.title}
+            returnUrl={`/test-practice/set/${setId}/test/${testId}`}
             onOpenPrepModal={(skill) =>
               setActivePrepModal({
                 skill,
@@ -117,6 +118,7 @@ export default function TestSkillsListPage() {
           testId={activePrepModal.testId}
           testTitle={activePrepModal.title}
           skill={activePrepModal.skill}
+          returnUrl={`/test-practice/set/${setId}/test/${testId}`}
           onClose={() => setActivePrepModal(null)}
         />
       )}

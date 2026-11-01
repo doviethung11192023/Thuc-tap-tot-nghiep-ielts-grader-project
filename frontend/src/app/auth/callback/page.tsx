@@ -48,7 +48,7 @@ function CallbackContent() {
         } else if (userData?.role === 'expert') {
           router.push('/expert/profile');
         } else {
-          router.push('/history');
+          router.push('/learning-profile');
         }
         
       } catch (err: any) {

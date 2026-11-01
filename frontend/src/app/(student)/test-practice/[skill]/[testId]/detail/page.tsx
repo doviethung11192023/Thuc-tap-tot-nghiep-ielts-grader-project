@@ -17,20 +17,25 @@ export default function SkillDetailedResultPage() {
   const testId = params?.testId as string;
   const attemptId = searchParams.get('attemptId') || undefined;
   const parts = searchParams.get('parts')?.split(',') || undefined;
+  const returnUrl = searchParams.get('returnUrl') || undefined;
 
   // Nút thoát / mũi tên quay lại góc trên bên trái: Trở về trang Bảng kết quả tổng quan
   const handleBack = () => {
     const query = [
       attemptId ? `attemptId=${attemptId}` : '',
-      parts ? `parts=${parts.join(',')}` : ''
+      parts ? `parts=${parts.join(',')}` : '',
+      returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : ''
     ].filter(Boolean).join('&');
     router.push(`/test-practice/${skill}/${testId}/summary${query ? `?${query}` : ''}`);
   };
 
   // Nút làm lại: Quay lại phòng thi làm lại từ đầu
   const handleRetake = () => {
-    const partsQuery = parts ? `?parts=${parts.join(',')}` : '';
-    router.push(`/test-practice/${skill}/${testId}${partsQuery}`);
+    const query = [
+      parts ? `parts=${parts.join(',')}` : '',
+      returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : ''
+    ].filter(Boolean).join('&');
+    router.push(`/test-practice/${skill}/${testId}${query ? `?${query}` : ''}`);
   };
 
   if (skill === 'writing') {
@@ -38,6 +43,7 @@ export default function SkillDetailedResultPage() {
       <WritingResultsView
         essayText={mockWritingExamDataset.sample_student_submission}
         onRetake={handleRetake}
+        returnUrl={returnUrl}
       />
     );
   }

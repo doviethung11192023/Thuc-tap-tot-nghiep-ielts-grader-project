@@ -14,10 +14,12 @@ export default function SpeakingWorkspacePage() {
 
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'exam';
+  const returnUrl = searchParams.get('returnUrl') || '';
 
   const { loading, attemptId, speakingData } = useExamWorkspaceContent(testId, 'speaking', mode);
 
   const handleSubmit = async () => {
+    const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
     try {
       let currentAttemptId = attemptId;
       if (!currentAttemptId) {
@@ -26,13 +28,16 @@ export default function SpeakingWorkspacePage() {
       }
       if (currentAttemptId) {
         await submitSpeakingAttempt(currentAttemptId, {});
-        router.push(`/test-practice/speaking/${testId}/summary?attemptId=${currentAttemptId}`);
+        router.push(`/test-practice/speaking/${testId}/summary?attemptId=${currentAttemptId}${returnQuery}`);
         return;
       }
     } catch (err) {
       console.warn("Could not submit speaking attempt to backend, proceeding with fallback summary:", err);
     }
-    router.push(`/test-practice/speaking/${testId}/summary`);
+    const fallbackPath = returnUrl 
+      ? `/test-practice/speaking/${testId}/summary?returnUrl=${encodeURIComponent(returnUrl)}`
+      : `/test-practice/speaking/${testId}/summary`;
+    router.push(fallbackPath);
   };
 
   if (loading || !speakingData) {
@@ -43,6 +48,7 @@ export default function SpeakingWorkspacePage() {
     <SpeakingWorkspace
       testData={speakingData}
       mode={mode}
+      returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}
     />
   );

@@ -15,10 +15,12 @@ export default function ReadingWorkspacePage() {
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3'];
+  const returnUrl = searchParams.get('returnUrl') || '';
 
   const { loading, attemptId, readingData } = useExamWorkspaceContent(testId, 'reading', mode);
 
   const handleSubmit = async (answers: Record<number, string | string[]>) => {
+    const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
     try {
       let currentAttemptId = attemptId;
       if (!currentAttemptId) {
@@ -28,13 +30,13 @@ export default function ReadingWorkspacePage() {
       const partNums = parts.map(Number);
       if (currentAttemptId) {
         await submitReadingListeningAnswers(currentAttemptId, { answers, parts: partNums });
-        router.push(`/test-practice/reading/${testId}/summary?attemptId=${currentAttemptId}&parts=${parts.join(',')}`);
+        router.push(`/test-practice/reading/${testId}/summary?attemptId=${currentAttemptId}&parts=${parts.join(',')}${returnQuery}`);
         return;
       }
     } catch (err) {
       console.warn("Could not submit reading attempt to backend, proceeding with fallback summary:", err);
     }
-    router.push(`/test-practice/reading/${testId}/summary?parts=${parts.join(',')}`);
+    router.push(`/test-practice/reading/${testId}/summary?parts=${parts.join(',')}${returnQuery}`);
   };
 
   if (loading || !readingData) {
@@ -46,6 +48,7 @@ export default function ReadingWorkspacePage() {
       testData={readingData}
       mode={mode}
       selectedParts={parts}
+      returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}
     />
   );

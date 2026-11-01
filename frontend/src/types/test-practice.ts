@@ -42,6 +42,7 @@ export interface SkillDetailInTest {
   draftTime?: string;
   hasVirtualRoom?: boolean;
   latestBandScore?: number;
+  highestBandScore?: number;
   attempts: SkillAttemptHistory[];
 }
 

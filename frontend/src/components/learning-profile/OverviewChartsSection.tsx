@@ -1,8 +1,20 @@
 "use client";
 
 import React from "react";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip } from "recharts";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+} from "recharts";
 import type { SkillScore, DonutItem } from "@/types/learning-profile";
+import { RadarScoreTooltip } from "./RadarScoreTooltip";
 
 interface OverviewChartsSectionProps {
   radarData: SkillScore[];
@@ -11,28 +23,85 @@ interface OverviewChartsSectionProps {
 }
 
 export function OverviewChartsSection({ radarData, donutData, totalTests }: OverviewChartsSectionProps) {
+  const scoreMap: Record<string, { score: number; count?: number }> = {};
+  for (const item of radarData) {
+    scoreMap[item.skill.toLowerCase()] = { score: item.score, count: (item as any).count };
+  }
+
+  const overallScore = scoreMap["overview"]?.score ?? 4.5;
+
+  const chartData = [
+    { skill: "Overall", score: overallScore, count: scoreMap["overview"]?.count },
+    { skill: "Listening", score: scoreMap["listening"]?.score ?? 5.0, count: scoreMap["listening"]?.count },
+    { skill: "Reading", score: scoreMap["reading"]?.score ?? 5.0, count: scoreMap["reading"]?.count },
+    { skill: "Speaking", score: scoreMap["speaking"]?.score ?? 5.0, count: scoreMap["speaking"]?.count },
+    { skill: "Writing", score: scoreMap["writing"]?.score ?? 5.0, count: scoreMap["writing"]?.count },
+  ];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-      {/* Radar Chart */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-zinc-200/90 shadow-2xs">
-        <div className="mb-4">
+      {/* Radar Chart (Prep style: Overall ở trên, 4 kỹ năng có điểm số trực quan + hover tooltip) */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-zinc-200/90 shadow-2xs flex flex-col justify-between">
+        <div className="mb-2">
           <h3 className="font-black text-zinc-900 text-sm tracking-tight">Điểm trung bình theo kỹ năng</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">Dựa trên kết quả bài thi Test Practice thực tế</p>
+          <p className="text-xs text-zinc-500 mt-0.5">Dựa trên kết quả bài thi Test Practice & Writing thực tế</p>
         </div>
+
+        {/* Overall Score Header */}
+        <div className="text-center my-1">
+          <div className="text-2xl font-black text-[#2563eb] tracking-tight">{overallScore.toFixed(1)}</div>
+          <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Overall</div>
+        </div>
+
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-              <PolarGrid stroke="#e4e4e7" />
-              <PolarAngleAxis dataKey="skill" tick={{ fill: "#52525b", fontSize: 12, fontWeight: 700 }} />
-              <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
+            <RadarChart cx="50%" cy="50%" outerRadius="75%" data={chartData}>
+              <PolarGrid stroke="#e4e4e7" strokeDasharray="3 3" />
+              <PolarAngleAxis
+                dataKey="skill"
+                tick={(props: any) => {
+                  const { x, y, payload } = props;
+                  const skillName = payload.value;
+                  const found = chartData.find((d) => d.skill === skillName);
+                  const val = found?.score ?? 0;
+                  if (skillName === "Overall") return <g />;
+
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={0}
+                        y={-6}
+                        textAnchor="middle"
+                        fill="#2563eb"
+                        fontSize={12}
+                        fontWeight={800}
+                      >
+                        {val.toFixed(1)}
+                      </text>
+                      <text
+                        x={0}
+                        y={8}
+                        textAnchor="middle"
+                        fill="#71717a"
+                        fontSize={10}
+                        fontWeight={600}
+                      >
+                        {skillName}
+                      </text>
+                    </g>
+                  );
+                }}
+              />
+              <PolarRadiusAxis domain={[0, 9]} tick={false} axisLine={false} />
               <Radar
-                name="Score"
+                name="Band"
                 dataKey="score"
                 stroke="#2563eb"
                 strokeWidth={2.5}
                 fill="#3b82f6"
                 fillOpacity={0.2}
               />
+              <RechartsTooltip content={<RadarScoreTooltip />} />
             </RadarChart>
           </ResponsiveContainer>
         </div>

@@ -13,7 +13,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       if (!user) {
         router.push('/login');
       } else if (user.role !== 'admin') {
-        router.push('/history');
+        router.push('/learning-profile');
       }
     }
   }, [user, loading, router]);

@@ -21,6 +21,7 @@ interface WritingSummaryResultProps {
   testId: string;
   testTitle?: string;
   attemptId?: string;
+  returnUrl?: string;
   overallBand?: number;
   scores?: {
     tr: number;
@@ -40,6 +41,7 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
   testId,
   testTitle = 'Writing Academic Test',
   attemptId,
+  returnUrl,
   overallBand = 6.5,
   scores = { tr: 6.5, cc: 6.0, lr: 7.0, gra: 6.5 },
   stats = { timeSpent: '54 phút 20 giây', task1WordCount: 172, task2WordCount: 284 },
@@ -152,14 +154,14 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Link
-            href="/test-practice"
+            href={returnUrl || "/test-practice"}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Về danh sách đề</span>
+            <span>Quay lại</span>
           </Link>
           <Link
-            href={`/test-practice/writing/${testId}`}
+            href={`/test-practice/writing/${testId}${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
           >
             <RotateCcw className="w-4 h-4" />
@@ -170,7 +172,7 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
         {/* NÚT CHUYỂN SANG NGHIỆP VỤ XEM KẾT QUẢ CHI TIẾT */}
         <Link
           id="btn-view-detailed-writing-result"
-          href={`/test-practice/writing/${testId}/detail${attemptId ? `?attemptId=${attemptId}` : ''}`}
+          href={`/test-practice/writing/${testId}/detail?${[attemptId ? `attemptId=${attemptId}` : '', returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : ''].filter(Boolean).join('&')}`}
           className="w-full sm:w-auto h-10 px-6 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-95"
         >
           <FileSearch className="w-4 h-4" />

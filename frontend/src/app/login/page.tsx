@@ -60,7 +60,7 @@ export default function LoginPage() {
         } else if (userData?.role === 'expert') {
           router.push('/expert/profile');
         } else {
-          router.push('/history');
+          router.push('/learning-profile');
         }
 
       }

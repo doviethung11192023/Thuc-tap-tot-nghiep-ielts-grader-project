@@ -5,9 +5,16 @@ export type NotificationType = 'grading_pending' | 'grading_complete' | 'grading
 
 export interface AppNotification {
   id: string;
-  essay_id: string;
+  essay_id?: string;
+  attempt_id?: string;
+  title?: string;
+  topic_title?: string;
+  task_type?: string;
+  skill?: string;
+  band_score?: number;
   message: string;
   type: NotificationType;
+  action_url?: string;
   read: boolean;
   created_at: string;
 }
@@ -21,7 +28,37 @@ interface NotificationState {
   clearAll: () => void;
   removeNotification: (id: string) => void;
   getUnreadCount: () => number;
-  handleGradingResult: (essayId: string, status: 'completed' | 'failed') => void;
+  handleGradingResult: (essayId: string, status: 'completed' | 'failed', meta?: { title?: string; band?: number; message?: string }) => void;
+}
+
+export function sanitizeNotification(n: AppNotification): AppNotification {
+  let title = n.title || n.topic_title;
+  let message = n.message || '';
+  const hashMatch = message.match(/#([a-f0-9]{6,})/i);
+
+  if (hashMatch) {
+    const rawId = hashMatch[1];
+    if (n.type === 'grading_complete') {
+      title = title || 'Bài viết IELTS Writing Task 2';
+      message = 'Bài viết đã được AI hoàn tất phân tích 4 tiêu chí (TR, CC, LR, GRA). Bấm để xem kết quả chi tiết.';
+      if (!n.action_url) n.action_url = `/results/${n.essay_id || rawId}`;
+    } else if (n.type === 'grading_failed') {
+      title = title || 'Bài viết IELTS Writing Task 2';
+      message = 'Quá trình chấm bài bị gián đoạn hoặc gặp lỗi xử lý. Bấm để kiểm tra lịch sử hoặc gửi lại.';
+      if (!n.action_url) n.action_url = `/history`;
+    }
+  }
+
+  if (!title) {
+    title = n.skill ? `Bài thi ${n.skill}` : 'Bài viết IELTS Writing Task 2';
+  }
+
+  return {
+    ...n,
+    title,
+    message,
+    action_url: n.action_url || (n.essay_id ? `/results/${n.essay_id}` : '/history')
+  };
 }
 
 export const useNotificationStore = create<NotificationState>()(
@@ -29,27 +66,26 @@ export const useNotificationStore = create<NotificationState>()(
     (set, get) => ({
       notifications: [],
       addNotification: (notification) => {
-        const newNotification: AppNotification = {
+        const item: AppNotification = sanitizeNotification({
           ...notification,
           id: crypto.randomUUID(),
           read: false,
           created_at: new Date().toISOString(),
-        };
+        });
         set((state) => {
-          // Prevent exact duplicates for pending (if we call it multiple times)
-          if (notification.type === 'grading_pending') {
+          if (item.type === 'grading_pending' && item.essay_id) {
             const exists = state.notifications.some(
-              (n) => n.essay_id === notification.essay_id && n.type === 'grading_pending'
+              (n) => n.essay_id === item.essay_id && n.type === 'grading_pending'
             );
             if (exists) return state;
           }
-          return { notifications: [newNotification, ...state.notifications] };
+          return { notifications: [item, ...state.notifications] };
         });
       },
       updateNotificationStatus: (essayId, updates) => {
         set((state) => ({
           notifications: state.notifications.map((n) => 
-            n.essay_id === essayId ? { ...n, ...updates } : n
+            n.essay_id === essayId ? sanitizeNotification({ ...n, ...updates }) : n
           )
         }));
       },
@@ -76,31 +112,36 @@ export const useNotificationStore = create<NotificationState>()(
       getUnreadCount: () => {
         return get().notifications.filter((n) => !n.read).length;
       },
-      handleGradingResult: (essayId, status) => {
+      handleGradingResult: (essayId, status, meta) => {
         set((state) => {
           const type = status === 'completed' ? 'grading_complete' : 'grading_failed';
-          const message = status === 'completed' 
-            ? `Bài viết #${essayId.split('-')[0]} đã được chấm xong!` 
-            : `Đã có lỗi xảy ra khi chấm bài viết #${essayId.split('-')[0]}.`;
-          
+          const title = meta?.title || 'Bài viết IELTS Writing Task 2';
+          const message = status === 'completed'
+            ? (meta?.band 
+                ? `Đạt Band ${meta.band.toFixed(1)} • AI đã chấm xong và chữa lỗi chi tiết toàn bài.`
+                : 'Bài viết đã được AI hoàn tất phân tích 4 tiêu chí (TR, CC, LR, GRA). Bấm để xem kết quả chi tiết.')
+            : (meta?.message || 'Quá trình chấm bài bị gián đoạn hoặc gặp lỗi xử lý. Bấm để gửi lại bài.');
+
           const hasPending = state.notifications.some(n => n.essay_id === essayId && n.type === 'grading_pending');
-          
+          const action_url = `/results/${essayId}`;
+
           if (hasPending) {
-            // Replace the pending notification with the completed/failed one
             return {
               notifications: state.notifications.map(n => 
                 (n.essay_id === essayId && n.type === 'grading_pending') 
-                  ? { ...n, type, message, read: false, created_at: new Date().toISOString() }
+                  ? { ...n, type, title, message, action_url, band_score: meta?.band, read: false, created_at: new Date().toISOString() }
                   : n
               )
             };
           } else {
-            // Add a brand new notification
             const newNotification: AppNotification = {
               id: crypto.randomUUID(),
               essay_id: essayId,
+              title,
               message,
               type,
+              band_score: meta?.band,
+              action_url,
               read: false,
               created_at: new Date().toISOString(),
             };
@@ -110,8 +151,8 @@ export const useNotificationStore = create<NotificationState>()(
       },
     }),
     {
-      name: 'ielts-grader-notifications', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), 
+      name: 'ielts-grader-notifications',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

@@ -13,12 +13,14 @@ interface SpeakingSummaryResultProps {
   testId?: string;
   attemptId?: string;
   testTitle?: string;
+  returnUrl?: string;
   onRetake?: () => void;
 }
 
 export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
   testId = 'speaking-test-1',
   attemptId,
+  returnUrl,
   onRetake,
 }) => {
   const router = useRouter();
@@ -27,7 +29,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
   const [activeTab, setActiveTab] = useState<'overall' | 'fc' | 'lr' | 'gra' | 'pr'>('overall');
 
   const handleNavigateToDetail = () => {
-    router.push(`/test-practice/speaking/${testId}/detail`);
+    router.push(`/test-practice/speaking/${testId}/detail${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`);
   };
 
   return (
@@ -35,7 +37,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
       {/* Top Header Bar */}
       <header className="w-full max-w-5xl mx-auto px-4 py-4 flex items-center justify-between text-white">
         <Link
-          href={`/test-practice/speaking/${testId}`}
+          href={returnUrl || `/test-practice/speaking/${testId}`}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
           title="Quay lại"
         >
@@ -48,7 +50,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
 
         <div className="flex items-center gap-2">
           <Link
-            href="/test-practice"
+            href={returnUrl || "/test-practice"}
             className="px-4 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-bold text-xs transition-colors"
           >
             Hoàn thành

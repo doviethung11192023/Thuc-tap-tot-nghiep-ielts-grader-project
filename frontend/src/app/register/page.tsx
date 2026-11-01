@@ -45,7 +45,7 @@ export default function RegisterPage() {
         if (data.session) {
           // Auto login if email confirmation is disabled
           toast.success('Đăng ký thành công!');
-          router.push('/history');
+          router.push('/learning-profile');
         } else {
           // Show check email screen
           setIsSuccess(true);

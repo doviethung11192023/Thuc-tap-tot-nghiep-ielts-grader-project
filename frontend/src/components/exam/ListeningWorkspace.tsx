@@ -15,10 +15,11 @@ interface ListeningWorkspaceProps {
   testData: ListeningTestData;
   mode: 'exam' | 'practice';
   selectedParts?: string[];
+  returnUrl?: string;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
 }
 
-export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: ListeningWorkspaceProps) {
+export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onSubmit }: ListeningWorkspaceProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
@@ -100,7 +101,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
       alert("💾 Đã lưu nháp tiến độ bài làm Listening thành công!");
     } catch (e) { console.error("Save draft error:", e); }
     setIsExitModalOpen(false);
-    router.push('/test-practice');
+    router.push(returnUrl || '/test-practice');
   };
 
   return (
@@ -151,7 +152,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, onSubmit }: 
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={() => { setIsExitModalOpen(false); router.push('/test-practice'); }}
+        onExitDiscard={() => { setIsExitModalOpen(false); router.push(returnUrl || '/test-practice'); }}
         onSaveDraftAndExit={handleSaveDraft}
       />
 

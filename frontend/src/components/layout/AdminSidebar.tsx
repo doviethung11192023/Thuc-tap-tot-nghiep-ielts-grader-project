@@ -100,7 +100,7 @@ export function AdminSidebar({
         {/* Student Experience Bridge */}
         <div className="my-4 border-t border-white/10 pt-4">
           <Link
-            href="/history"
+            href="/learning-profile"
             onClick={onCloseMobile}
             title={isCollapsed ? "Trải nghiệm Học viên" : undefined}
             className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white hover:text-[#932120] transition-all shadow-xs group ${

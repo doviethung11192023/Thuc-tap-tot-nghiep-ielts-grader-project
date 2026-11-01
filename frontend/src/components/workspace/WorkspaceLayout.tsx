@@ -78,8 +78,10 @@ export function WorkspaceLayout() {
       // 3. Add pending notification
       useNotificationStore.getState().addNotification({
         essay_id: data.essay_id,
-        message: "Bài viết đang được AI phân tích...",
-        type: 'grading_pending'
+        title: "Bài viết IELTS Writing Task 2",
+        message: "Bài viết đang được AI phân tích 4 tiêu chí chuẩn Cambridge...",
+        type: 'grading_pending',
+        action_url: `/results/${data.essay_id}`
       });
     } catch (err) {
       console.error(err);

@@ -18,78 +18,80 @@ export interface WritingExamDataInput {
 interface WritingWorkspaceProps {
   testData?: WritingExamDataInput;
   mode?: 'exam' | 'practice';
-  onSubmit: (submissionText: string) => void;
+  parts?: string;
+  returnUrl?: string;
+  onSubmit: (submissionText: string, task1Text?: string, task2Text?: string) => void;
 }
 
-export function WritingWorkspace({ testData, mode = 'exam', onSubmit }: WritingWorkspaceProps) {
+export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onSubmit }: WritingWorkspaceProps) {
   const router = useRouter();
   const activeDataset = testData || mockWritingExamDataset;
+  const draftKey = `ielts_writing_draft_${activeDataset.test_id || 'default'}`;
+
   const [activeTab, setActiveTab] = useState<'timed' | 'paste'>('timed');
-  const [activeTaskNum, setActiveTaskNum] = useState<1 | 2>(2);
-  const [essayText, setEssayText] = useState<string>(activeDataset.sample_student_submission || "");
+  const [activeTaskNum, setActiveTaskNum] = useState<1 | 2>(() => parts === '2' ? 2 : 1);
+  const [taskEssays, setTaskEssays] = useState<Record<1 | 2, string>>({ 1: '', 2: '' });
   const [autoSaveTime, setAutoSaveTime] = useState<string>('Vừa xong');
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
 
-  const initialSeconds = mode === 'exam' ? 3600 : 0;
+  const initialSeconds = mode === 'exam' ? (parts === '2' ? 2400 : parts === '1' ? 1200 : 3600) : 0;
   const [timerSeconds, setTimerSeconds] = useState<number>(initialSeconds);
 
   const currentTask = activeTaskNum === 1 ? activeDataset.task1 : activeDataset.task2;
-  const wordCount = essayText.trim() ? essayText.trim().split(/\s+/).length : 0;
+  const currentEssayText = taskEssays[activeTaskNum] || '';
+  const wordCount = currentEssayText.trim() ? currentEssayText.trim().split(/\s+/).length : 0;
   const isWordCountMet = wordCount >= currentTask.min_words;
 
-  useEffect(() => {
-    if (mode === 'practice') {
-      try {
-        const savedDraft = localStorage.getItem('ielts_writing_draft_mock');
-        if (savedDraft) setEssayText(savedDraft);
-      } catch (e) { console.error(e); }
-    }
-  }, [mode]);
+  // Xóa nháp mock cũ rò rỉ nếu có
+  useEffect(() => { try { localStorage.removeItem('ielts_writing_draft_mock'); } catch (_) {} }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (mode === 'exam') {
-      interval = setInterval(() => {
+    if (mode !== 'practice') return;
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const p = JSON.parse(saved);
+        setTaskEssays(typeof p === 'object' && p ? { 1: p[1] || '', 2: p[2] || '' } : { 1: '', 2: String(p) });
+      }
+    } catch {}
+  }, [mode, draftKey]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (mode === 'exam') {
         setTimerSeconds(prev => {
           if (prev <= 1) {
-            clearInterval(interval!);
-            onSubmit(essayText);
+            clearInterval(interval);
+            onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]);
             return 0;
           }
           return prev - 1;
         });
-      }, 1000);
-    } else {
-      interval = setInterval(() => {
+      } else {
         setTimerSeconds(prev => prev + 1);
-      }, 1000);
-    }
-    return () => { if (interval) clearInterval(interval); };
-  }, [mode, onSubmit, essayText]);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, onSubmit, taskEssays]);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const now = new Date();
-      setAutoSaveTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setAutoSaveTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     }, 15000);
     return () => clearInterval(timer);
   }, []);
 
-  const formatDisplayTime = (totalSecs: number) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const formatDisplayTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
-  const handleExitDiscard = () => {
-    setIsExitModalOpen(false);
-    router.push('/test-practice');
-  };
-
+  const handleExitDiscard = () => { setIsExitModalOpen(false); router.push(returnUrl || '/test-practice'); };
   const handleSaveDraftAndExit = () => {
-    try { localStorage.setItem('ielts_writing_draft_mock', essayText); } catch (e) { console.error(e); }
+    try { localStorage.setItem(draftKey, JSON.stringify(taskEssays)); alert("💾 Đã lưu nháp tiến độ bài làm Writing thành công!"); } catch (e) { console.error(e); }
     setIsExitModalOpen(false);
-    router.push('/test-practice');
+    router.push(returnUrl || '/test-practice');
+  };
+  const handleSubmitAll = () => {
+    try { localStorage.removeItem(draftKey); } catch (_) {}
+    onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]);
   };
 
   return (
@@ -142,11 +144,11 @@ export function WritingWorkspace({ testData, mode = 'exam', onSubmit }: WritingW
           <div className="flex items-center gap-2 bg-red-50 text-[#932120] border border-red-100 h-9 px-3.5 rounded-xl text-sm font-bold shadow-xs">
             <Clock className="w-4 h-4 text-[#932120]" />
             <span>{formatDisplayTime(timerSeconds)}</span>
-            {mode === 'exam' && <span className="text-xs text-red-400 font-normal">/ 60:00</span>}
+            {mode === 'exam' && <span className="text-xs text-red-400 font-normal">/ {parts === '2' ? '40:00' : parts === '1' ? '20:00' : '60:00'}</span>}
           </div>
 
           <button
-            onClick={() => onSubmit(essayText)}
+            onClick={handleSubmitAll}
             className="flex items-center gap-2 bg-[#932120] text-white h-9 px-5 rounded-xl text-sm font-bold hover:bg-[#7a1a19] shadow-xs transition-all active:scale-95"
           >
             <Send className="w-4 h-4" /> Nộp bài
@@ -176,9 +178,9 @@ export function WritingWorkspace({ testData, mode = 'exam', onSubmit }: WritingW
 
           <div className="flex-1 p-6 md:p-8 flex flex-col">
             <textarea
-              value={essayText}
-              onChange={(e) => setEssayText(e.target.value)}
-              placeholder="Nhập bài luận IELTS Writing của bạn tại đây..."
+              value={currentEssayText}
+              onChange={(e) => setTaskEssays(prev => ({ ...prev, [activeTaskNum]: e.target.value }))}
+              placeholder={`Nhập bài luận IELTS Writing Task ${activeTaskNum} của bạn tại đây...`}
               className="w-full flex-1 resize-none outline-none text-zinc-800 leading-relaxed font-serif text-lg custom-scrollbar bg-transparent placeholder:text-zinc-400"
               spellCheck={false}
             />
@@ -187,11 +189,8 @@ export function WritingWorkspace({ testData, mode = 'exam', onSubmit }: WritingW
       </div>
 
       <ExitConfirmModal
-        isOpen={isExitModalOpen}
-        mode={mode}
-        onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={handleExitDiscard}
-        onSaveDraftAndExit={handleSaveDraftAndExit}
+        isOpen={isExitModalOpen} mode={mode} onContinue={() => setIsExitModalOpen(false)}
+        onExitDiscard={handleExitDiscard} onSaveDraftAndExit={handleSaveDraftAndExit}
       />
     </div>
   );

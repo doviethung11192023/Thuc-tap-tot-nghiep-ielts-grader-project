@@ -29,16 +29,21 @@ export function useGradingNotifications() {
           const essayId = payload.new.id;
 
           if (newStatus === 'completed') {
-            handleGradingResult(essayId, 'completed');
+            handleGradingResult(essayId, 'completed', {
+              title: 'Bài viết IELTS Writing Task 2'
+            });
             
-            toast.success('🎉 Bài viết của bạn đã được chấm xong! Bấm vào 🔔 để xem kết quả.', {
+            toast.success('🎉 Bài viết của bạn đã được chấm xong! Bấm vào 🔔 để xem nhận xét chi tiết.', {
               duration: 5000,
               icon: '🎉',
             });
           } else if (newStatus === 'failed') {
-            handleGradingResult(essayId, 'failed');
+            handleGradingResult(essayId, 'failed', {
+              title: 'Bài viết IELTS Writing Task 2',
+              message: 'Quá trình chấm điểm gặp sự cố kỹ thuật. Bấm để kiểm tra hoặc gửi lại bài.'
+            });
             
-            toast.error('❌ Rất tiếc, có lỗi xảy ra khi chấm bài. Vui lòng thử lại sau.');
+            toast.error('❌ Rất tiếc, có lỗi xảy ra khi chấm bài. Bấm vào 🔔 để kiểm tra.');
           }
         }
       )

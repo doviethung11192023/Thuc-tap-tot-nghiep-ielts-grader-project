@@ -15,10 +15,11 @@ import { ExitConfirmModal } from './ExitConfirmModal';
 interface SpeakingWorkspaceProps {
   testData?: MockSpeakingExamDataset;
   mode?: 'exam' | 'practice';
+  returnUrl?: string;
   onSubmit: () => void;
 }
 
-export function SpeakingWorkspace({ testData, mode = 'exam', onSubmit }: SpeakingWorkspaceProps) {
+export function SpeakingWorkspace({ testData, mode = 'exam', returnUrl, onSubmit }: SpeakingWorkspaceProps) {
   const router = useRouter();
   const exam = testData || mockSpeakingExamDataset;
 
@@ -177,7 +178,7 @@ export function SpeakingWorkspace({ testData, mode = 'exam', onSubmit }: Speakin
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={() => router.push('/test-practice')}
+        onExitDiscard={() => router.push(returnUrl || '/test-practice')}
       />
     </div>
   );

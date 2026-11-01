@@ -115,6 +115,8 @@ async def get_exam_collection_detail(set_id: str, current_user: Optional[User] =
         tid = t["id"]
         attempts = user_attempts_by_test.get(tid, [])
         scored_attempts = [a for a in attempts if a.get("status") == "scored" and a.get("band") is not None]
+        all_bands = [float(a["band"]) for a in scored_attempts if a.get("band") is not None]
+        highest_band = max(all_bands) if all_bands else None
         latest_band = scored_attempts[0]["band"] if scored_attempts else None
 
         status = "not_started"
@@ -132,6 +134,7 @@ async def get_exam_collection_detail(set_id: str, current_user: Optional[User] =
                     "skill": t["skill"].capitalize(),
                     "status": status,
                     "latestBandScore": float(latest_band) if latest_band is not None else None,
+                    "highestBandScore": float(highest_band) if highest_band is not None else None,
                     "hasVirtualRoom": t["skill"] == "speaking",
                     "attempts": [
                         {

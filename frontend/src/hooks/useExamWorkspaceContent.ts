@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { startTestAttempt } from "@/services/student-test-practice";
 import { getExamContentCache, prefetchExamContent } from "@/services/exam-content-cache";
 import {
@@ -33,6 +33,7 @@ export function useExamWorkspaceContent(
   const [listeningData, setListeningData] = useState<ListeningTestData>(initL || mockListeningFullTest);
   const [writingData, setWritingData] = useState<typeof mockWritingExamDataset>((initW as any) || mockWritingExamDataset);
   const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset>(initS || mockSpeakingExamDataset);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -43,16 +44,19 @@ export function useExamWorkspaceContent(
         return;
       }
 
-      // Khởi tạo phiên thi trong nền (không làm nghẽn hiển thị đề bài)
-      startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
-        .then((attemptRes) => {
-          if (mounted && attemptRes?.attempt_id) {
-            setAttemptId(attemptRes.attempt_id);
-          }
-        })
-        .catch((e) => {
-          console.warn("Could not start attempt session in background:", e);
-        });
+      // Khởi tạo phiên thi trong nền 1 lần duy nhất, tránh duplicate do React StrictMode
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
+          .then((attemptRes) => {
+            if (mounted && attemptRes?.attempt_id) {
+              setAttemptId(attemptRes.attempt_id);
+            }
+          })
+          .catch((e) => {
+            console.warn("Could not start attempt session in background:", e);
+          });
+      }
 
       // Tải và hiển thị nội dung đề thi ngay lập tức
       try {

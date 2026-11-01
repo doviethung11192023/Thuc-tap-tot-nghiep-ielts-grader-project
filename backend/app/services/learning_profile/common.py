@@ -30,7 +30,7 @@ def get_user_essays(user_id: str) -> List[Dict[str, Any]]:
     """Lấy danh sách các bài viết tự do của học viên kèm kết quả chấm."""
     res = supabase.table("essays").select(
         "id, topic_id, status, submitted_at, topics(title), evaluation_results(overall_band)"
-    ).eq("user_id", user_id).order("submitted_at", desc=True).limit(10).execute()
+    ).eq("user_id", user_id).order("submitted_at", desc=True).limit(100).execute()
     return res.data or []
 
 def get_learner_goal(user_id: str) -> Dict[str, Any]:
@@ -61,3 +61,59 @@ def get_vietnamese_month_abbr(dt: datetime) -> str:
     """Trả về tên tháng viết tắt tiếng Anh/Việt tương ứng (Aug, Sep, Oct...)."""
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     return months[dt.month - 1]
+
+def compute_daily_active_minutes(attempts: List[Dict[str, Any]], essays: List[Dict[str, Any]]) -> Dict[str, int]:
+    """
+    Tính toán thời lượng học tập và luyện đề thực tế theo từng ngày.
+    Sử dụng thuật toán gom nhóm phiên học tập thực tế (Session Clustering) với ngưỡng nghỉ 30 phút giữa các phiên,
+    loại bỏ hoàn toàn tình trạng click nhiều lần làm nhân khống số phút.
+    """
+    events_by_date: Dict[str, List[datetime]] = {}
+    for a in attempts:
+        for k in ["started_at", "submitted_at"]:
+            val = a.get(k)
+            if val:
+                try:
+                    ds = str(val)[:10]
+                    dt = datetime.fromisoformat(val)
+                    events_by_date.setdefault(ds, []).append(dt)
+                except Exception:
+                    pass
+    for e in essays:
+        val = e.get("submitted_at")
+        if val:
+            try:
+                ds = str(val)[:10]
+                dt = datetime.fromisoformat(val)
+                events_by_date.setdefault(ds, []).append(dt)
+            except Exception:
+                pass
+
+    daily_minutes: Dict[str, int] = {}
+    for ds, times in events_by_date.items():
+        times.sort()
+        sessions = []
+        if not times:
+            continue
+        cur_start = times[0]
+        cur_end = times[0]
+        for t in times[1:]:
+            if (t - cur_end).total_seconds() <= 30 * 60:
+                cur_end = t
+            else:
+                sessions.append((cur_start, cur_end))
+                cur_start = t
+                cur_end = t
+        sessions.append((cur_start, cur_end))
+
+        total_day_min = 0
+        for s_start, s_end in sessions:
+            diff_min = round((s_end - s_start).total_seconds() / 60)
+            session_min = max(5, diff_min)
+            total_day_min += session_min
+
+        # Không vượt quá giới hạn thể lực học tập hợp lý trong 1 ngày (12 tiếng = 720 phút)
+        daily_minutes[ds] = min(total_day_min, 720)
+
+    return daily_minutes
+

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, LayoutDashboard, Library, User, LogOut } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Library, User, LogOut, PenTool } from 'lucide-react';
 import { AuthGuard } from '@/components/guards/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -49,6 +49,14 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
               </span>
             </div>
             <div className="flex items-center gap-4">
+              <Link
+                href="/exam"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#932120] hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-2xs"
+                title="Luyện viết tự do IELTS Task 1 & Task 2"
+              >
+                <PenTool className="w-3.5 h-3.5" />
+                <span>Chấm bài tự do</span>
+              </Link>
               <span className="text-sm font-medium hidden md:block">Student Portal</span>
               <NotificationBell />
               <Link 
@@ -100,14 +108,7 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
               Test Practice
             </Link>
             {/* --------------------------- */}
-            <Link href="/topics" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/topics') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <Library className={`w-5 h-5 ${isActive('/topics') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Ngân hàng đề thi
-            </Link>
-            <Link href="/history" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/history') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <BookOpen className={`w-5 h-5 ${isActive('/history') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Lịch sử làm bài
-            </Link>
+
             <Link href="/profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
               <User className={`w-5 h-5 ${isActive('/profile') ? 'text-red-200' : 'text-zinc-400'}`} />
               Hồ sơ cá nhân

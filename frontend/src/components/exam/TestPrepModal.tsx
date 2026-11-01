@@ -9,13 +9,19 @@ interface TestPrepModalProps {
   testId: string;
   testTitle: string;
   skill: 'Reading' | 'Listening' | 'Writing' | 'Speaking';
+  returnUrl?: string;
   onClose: () => void;
 }
 
-export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepModalProps) {
+export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: TestPrepModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<'exam' | 'practice'>('practice');
-  const [selectedParts, setSelectedParts] = useState<number[]>([1, 2, 3]);
+  const getAllParts = (s: string) => s === 'Listening' ? [1, 2, 3, 4] : s === 'Reading' ? [1, 2, 3] : [1, 2];
+  const [selectedParts, setSelectedParts] = useState<number[]>(() => getAllParts(skill));
+
+  useEffect(() => {
+    setSelectedParts(getAllParts(skill));
+  }, [skill]);
 
   // Nạp ngầm trước đề thi ngay khi thí sinh mở modal để khi bấm "Vào phòng thi" là mở tức thì 0s
   useEffect(() => {
@@ -31,17 +37,21 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
   const handleStart = () => {
     const s = skill.toLowerCase();
     const partsParam = selectedParts.join(',');
-    const path = s === 'writing' || s === 'speaking'
+    const base = s === 'speaking'
       ? `/test-practice/${s}/${testId}?mode=${mode}`
       : `/test-practice/${s}/${testId}?mode=${mode}&parts=${partsParam}`;
+    const path = returnUrl ? `${base}&returnUrl=${encodeURIComponent(returnUrl)}` : base;
     router.push(path);
   };
 
   const handlePreviewResults = () => {
     const s = skill.toLowerCase();
     const partsParam = selectedParts.join(',');
-    const partsQuery = partsParam ? `?parts=${partsParam}` : '';
-    router.push(`/test-practice/${s}/${testId}/detail${partsQuery}`);
+    const query = [
+      partsParam ? `parts=${partsParam}` : '',
+      returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : ''
+    ].filter(Boolean).join('&');
+    router.push(`/test-practice/${s}/${testId}/detail${query ? `?${query}` : ''}`);
   };
 
   const getSkillIcon = () => {
@@ -88,7 +98,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
               <button
                 onClick={() => {
                   setMode('exam');
-                  setSelectedParts(skill === 'Reading' ? [1, 2, 3] : skill === 'Listening' ? [1, 2, 3, 4] : [1, 2]);
+                  setSelectedParts(getAllParts(skill));
                 }}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
                   mode === 'exam' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
@@ -100,7 +110,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
             </div>
           </div>
 
-          {(skill === 'Reading' || skill === 'Listening') && (
+          {(skill === 'Reading' || skill === 'Listening' || skill === 'Writing') && (
             <div className="space-y-3 pt-2">
               <label className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#932120]" /> Chọn phần muốn làm
@@ -110,14 +120,14 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
                 <div className="bg-red-50/70 border border-red-200 rounded-xl p-3.5 flex items-center justify-between text-xs text-red-950">
                   <div className="flex items-center gap-2 font-medium">
                     <span className="w-2 h-2 rounded-full bg-[#932120]"></span>
-                    <span><strong>Chế độ phòng thi:</strong> Mặc định làm toàn bộ {skill === 'Reading' ? '3 Passages' : '4 Sections'}</span>
+                    <span><strong>Chế độ phòng thi:</strong> Mặc định làm toàn bộ {skill === 'Reading' ? '3 Passages' : skill === 'Listening' ? '4 Sections' : '2 Tasks (Task 1 & Task 2)'}</span>
                   </div>
                   <span className="font-bold text-[#932120] bg-white px-2 py-0.5 rounded border border-red-200 uppercase text-[10px]">Full Test</span>
                 </div>
               ) : (
                 <>
                   <div className="flex gap-2">
-                    {(skill === 'Reading' ? [1, 2, 3] : [1, 2, 3, 4]).map(part => (
+                    {(skill === 'Reading' ? [1, 2, 3] : skill === 'Listening' ? [1, 2, 3, 4] : [1, 2]).map(part => (
                       <button
                         key={part}
                         onClick={() => togglePart(part)}
@@ -127,7 +137,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
                             : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
                         }`}
                       >
-                        {skill === 'Reading' ? `Passage ${part}` : `Sec ${part}`}
+                        {skill === 'Reading' ? `Passage ${part}` : skill === 'Listening' ? `Sec ${part}` : `Task ${part}`}
                       </button>
                     ))}
                   </div>
@@ -144,7 +154,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
             <p>
               Thời gian {mode === 'exam' ? 'giới hạn' : 'khuyến nghị'}:{' '}
               <strong className="font-bold">
-                {skill === 'Writing' ? '60 phút' : skill === 'Speaking' ? '14 phút' : skill === 'Listening' ? '30 phút' : `${selectedParts.length * 20} phút`}
+                {skill === 'Writing' ? (selectedParts.length === 1 && selectedParts[0] === 2 ? '40 phút' : selectedParts.length === 1 && selectedParts[0] === 1 ? '20 phút' : '60 phút') : skill === 'Speaking' ? '14 phút' : skill === 'Listening' ? '30 phút' : `${selectedParts.length * 20} phút`}
               </strong>
             </p>
           </div>
@@ -168,7 +178,7 @@ export function TestPrepModal({ testId, testTitle, skill, onClose }: TestPrepMod
             </button>
             <button 
               onClick={handleStart}
-              disabled={(skill === 'Reading' || skill === 'Listening') && selectedParts.length === 0}
+              disabled={(skill === 'Reading' || skill === 'Listening' || skill === 'Writing') && selectedParts.length === 0}
               className="px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
             >
               Vào phòng thi
