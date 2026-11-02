@@ -15,9 +15,16 @@ if hasattr(sys.stdout, "reconfigure"):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Setup ARQ Redis Pool
-    app.state.redis = await create_pool(RedisSettings.from_dsn(settings.REDIS_URL))
-    print("[ARQ] Cau hinh thanh cong ARQ Redis Pool!")
+    # Setup ARQ Redis Pool (Redis is only a cache → fall back to a no-op cache when it is down)
+    try:
+        redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
+        redis_settings.conn_retries = 1
+        app.state.redis = await create_pool(redis_settings)
+        print("[ARQ] Cau hinh thanh cong ARQ Redis Pool!")
+    except Exception as e:
+        from app.core.null_redis_cache import NullRedisCache
+        app.state.redis = NullRedisCache()
+        print(f"[ARQ] Khong ket noi duoc Redis ({e}) -> chay khong cache")
     yield
     # Teardown
     await app.state.redis.close()
