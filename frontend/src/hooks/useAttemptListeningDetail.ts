@@ -8,7 +8,7 @@ import {
   CleanListeningQuestion,
   CleanListeningUtterance
 } from "@/mocks/clean-dataset/listening-test-1-clean";
-import { extractKeywordsFromExplanation } from "@/utils/explanation-parser";
+import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/utils/explanation-parser";
 
 function parseUtterances(passageText?: string): CleanListeningUtterance[] {
   if (!passageText) return [];
@@ -70,7 +70,13 @@ export function useAttemptListeningDetail(attemptId?: string) {
 
         const exercise_groups: CleanListeningExerciseGroup[] = rawSections.flatMap((s: any, sIdx: number) =>
           (s.question_groups || []).map((g: any, gIdx: number) => {
+            const templateText = g.content?.template || "";
             const groupQuestions = (g.questions || []).map((q: any) => {
+              const pText =
+                (q.prompt && !q.prompt.toLowerCase().startsWith('question') && !q.prompt.toLowerCase().startsWith('câu'))
+                  ? q.prompt
+                  : (extractSentenceForBlank(templateText, q.number) || q.prompt || `Question ${q.number}`);
+
               const keywords =
                 q.keywords_mapping && q.keywords_mapping.length > 0
                   ? q.keywords_mapping
@@ -81,7 +87,7 @@ export function useAttemptListeningDetail(attemptId?: string) {
                 question_number: q.number,
                 section_number: s.order_no || sIdx + 1,
                 question_type: g.question_type || 1,
-                prompt: q.prompt || `Question ${q.number}`,
+                prompt: pText,
                 options: Array.isArray(q.options) ? q.options : [],
                 user_answer: q.user_answer || "",
                 correct_answer: q.correct_answer || "",
@@ -101,7 +107,9 @@ export function useAttemptListeningDetail(attemptId?: string) {
               section_number: s.order_no || sIdx + 1,
               type: g.question_type || 1,
               title: g.instructions || `Questions ${qStart} - ${qEnd}`,
-              content: g.content?.template || g.instructions || "",
+              content: templateText || g.instructions || "",
+              template: templateText || undefined,
+              options_pool: g.content?.options_pool || undefined,
               table_data: g.content?.table_data || undefined,
               question_start: qStart,
               question_end: qEnd

@@ -15,6 +15,7 @@ import { PracticeTimelineSection } from "@/components/exam/history/PracticeTimel
 export default function TestPracticeHistoryPage() {
   const [data, setData] = useState<PracticeHistorySummaryData | null>(() => getCachedPracticeHistory());
   const [loading, setLoading] = useState<boolean>(!getCachedPracticeHistory());
+  const [statusFilter, setStatusFilter] = useState<"all" | "scored" | "in_progress">("all");
   const [isPending, startTransition] = useTransition();
 
   const loadData = async (force = false) => {
@@ -39,7 +40,7 @@ export default function TestPracticeHistoryPage() {
     <div className="min-h-screen bg-zinc-50/70 pb-20">
       {/* Top sticky navigation bar */}
       <div className="bg-white border-b border-zinc-200/80 sticky top-0 z-30 shadow-2xs backdrop-blur-md bg-white/95">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/test-practice"
@@ -72,11 +73,11 @@ export default function TestPracticeHistoryPage() {
         </div>
       </div>
 
-      {/* Main Body Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      {/* Main Content Layout - Full Width Fluid Container */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Thống kê điểm số (Radar + Question type accuracy) */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6">
             <div className="flex items-center gap-2">
               <BarChart2 className="w-5 h-5 text-[#932120]" />
               <div>
@@ -96,23 +97,63 @@ export default function TestPracticeHistoryPage() {
           </div>
 
           {/* Right Column: Timeline Lịch sử Test Practice */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-bold text-zinc-900">Chi tiết các lượt luyện đề</h2>
                 <p className="text-xs text-zinc-500">
                   Tổng số: {data?.total_attempts || 0} lần làm bài được ghi nhận
                 </p>
               </div>
+
+              {/* Status Filter Tabs */}
+              <div className="inline-flex items-center gap-1 p-1 bg-zinc-100 rounded-2xl border border-zinc-200/80 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("all")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "all" ? "bg-white text-zinc-900 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Tất cả
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("scored")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "scored" ? "bg-white text-emerald-800 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Đã hoàn thành
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("in_progress")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "in_progress" ? "bg-white text-amber-800 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Đang làm dở
+                </button>
+              </div>
             </div>
 
             <PracticeTimelineSection
-              groups={data?.timeline_groups || {}}
+              groups={React.useMemo(() => {
+                if (!data?.timeline_groups) return {};
+                if (statusFilter === "all") return data.timeline_groups;
+                const filtered: Record<string, typeof data.timeline_groups[string]> = {};
+                for (const [m, items] of Object.entries(data.timeline_groups)) {
+                  const mItems = items.filter((it) => it.status === statusFilter);
+                  if (mItems.length > 0) filtered[m] = mItems;
+                }
+                return filtered;
+              }, [data?.timeline_groups, statusFilter])}
               loading={loading && !data}
             />
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

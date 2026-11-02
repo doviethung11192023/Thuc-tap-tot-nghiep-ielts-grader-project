@@ -50,6 +50,8 @@ export interface CleanListeningExerciseGroup {
   type: string | number;
   title: string;
   content: string;
+  template?: string;
+  options_pool?: Array<{ key: string; text: string }>;
   table_data?: any;
   question_start: number;
   question_end: number;

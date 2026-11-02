@@ -6,6 +6,7 @@ import { CleanListeningScoreCard } from './CleanListeningScoreCard';
 import { CleanListeningTableRenderer } from './CleanListeningTableRenderer';
 import { CleanQuestionItemRenderer } from './CleanQuestionItemRenderer';
 import { CleanGroupDropdownExplanation } from './CleanGroupDropdownExplanation';
+import { CleanDetailSummaryCard } from './CleanDetailSummaryCard';
 
 interface CleanListeningExerciseGroupsPaneProps {
   userName?: string;
@@ -81,11 +82,21 @@ export function CleanListeningExerciseGroupsPane({
               </div>
             ) : (
               <div className="space-y-4">
+                {/* LS-03: Render đoạn văn ghi chú gốc (Complete the notes) nếu group có template */}
+                {group.template && (
+                  <CleanDetailSummaryCard
+                    template={group.template}
+                    questions={groupQuestions as any}
+                    onSelectQuestion={onSelectQuestion}
+                  />
+                )}
+
                 <div className="space-y-3">
                   {groupQuestions.map(q => (
                     <CleanQuestionItemRenderer
                       key={q.id}
                       question={q}
+                      optionsPool={group.options_pool}
                       onSelectEvidence={onSelectEvidenceText}
                       defaultExpanded={false}
                     />

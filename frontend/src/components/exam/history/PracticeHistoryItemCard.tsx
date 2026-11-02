@@ -34,10 +34,9 @@ export function PracticeHistoryItemCard({ item }: PracticeHistoryItemCardProps) 
     }
   };
 
-  const isScored = item.status === "scored" || item.band > 0;
-  const scoreDisplay = isScored ? item.band.toFixed(1) : "--";
+  const isScored = item.status === "scored";
 
-  const targetUrl = item.status === "scored"
+  const targetUrl = isScored
     ? `/test-practice/${item.skill.toLowerCase()}/${item.test_id}/summary?attemptId=${item.id}&returnUrl=${encodeURIComponent('/test-practice/history')}`
     : `/test-practice/${item.skill.toLowerCase()}/${item.test_id}`;
 
@@ -47,13 +46,21 @@ export function PracticeHistoryItemCard({ item }: PracticeHistoryItemCardProps) 
       className="group block bg-white rounded-3xl border border-zinc-200/90 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all"
     >
       <div className="flex items-start sm:items-center gap-4">
-        {/* Score Pill Left (Giống hình số 4: 75.0 hoặc 3.5 nền xanh lá) */}
-        <div className={`w-14 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 shadow-xs transition-colors ${
+        {/* Score Pill Left */}
+        <div className={`w-14 h-12 rounded-2xl flex flex-col items-center justify-center font-black shrink-0 shadow-xs transition-colors ${
           item.band >= 5.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
           item.band > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-          'bg-zinc-100 text-zinc-500 border border-zinc-200'
+          isScored ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+          'bg-amber-50 text-amber-800 border border-amber-200 text-xs'
         }`}>
-          {scoreDisplay}
+          {isScored ? (
+            <>
+              <span className="text-sm font-black leading-tight">{item.band.toFixed(1)}</span>
+              <span className="text-[9px] font-bold uppercase opacity-75">Band</span>
+            </>
+          ) : (
+            <span className="text-[11px] font-bold">Đang làm</span>
+          )}
         </div>
 
         {/* Center Details */}

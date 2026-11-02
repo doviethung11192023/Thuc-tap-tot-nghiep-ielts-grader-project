@@ -84,13 +84,11 @@ export function extractKeywordsFromExplanation(explanation?: string): ExtractedK
 export function extractCoreReasoning(explanation?: string): string {
   if (!explanation) return '';
 
-  // Tìm dòng có Answer: hoặc kết luận chính ở Step 4
   const answerMatch = explanation.match(/(?:✅\s*)?\*\*Answer:[^*]+\*\*\s*—\s*([^\n]+)/i);
   if (answerMatch && answerMatch[1]) {
     return answerMatch[1].trim();
   }
 
-  // Fallback: Tìm đoạn văn trong Step 4
   const step4Match = explanation.match(/Step 4[^\n]*\n([\s\S]*?)(?=\n###|\n\n\n|$)/i);
   if (step4Match) {
     const paragraphs = step4Match[1]
@@ -107,19 +105,29 @@ export function extractCoreReasoning(explanation?: string): string {
 
 /**
  * Trích xuất câu/mục ngữ cảnh bao quanh ô trống {{qNum}} từ đoạn tóm tắt hoặc ghi chú template
+ * (RD-04: Đã loại bỏ mã HTML trước khi trích xuất để tránh rò rỉ </td>, <tr>)
  */
 export function extractSentenceForBlank(template?: string, qNum?: number): string {
   if (!template || !qNum) return '';
 
-  // Phân tách theo dấu chấm câu (. ! ?), xuống dòng (\n \r), hoặc ký tự gạch đầu dòng (•, \u2022, \uFFFD, ;, |)
-  const regex = new RegExp(`([^.!?\\n\\r•\\uFFFD;]*\\{\\{${qNum}\\}\\}[^.!?\\n\\r•\\uFFFD;]*)`, 'i');
-  const match = template.match(regex);
+  // 1. Chuẩn hóa HTML: thay thế các thẻ đóng khối thành ngắt dòng, sau đó loại bỏ toàn bộ tag HTML
+  let cleaned = template
+    .replace(/<\/(?:td|th|tr|p|div|li)>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\r\n/g, '\n');
+
+  // 2. Phân tách theo dấu chấm câu (. ! ?), xuống dòng (\n), hoặc ký tự gạch đầu dòng (•, \u2022, \uFFFD, ;, |)
+  const regex = new RegExp(`([^.!?\\n•\\uFFFD;|]*\\{\\{${qNum}\\}\\}[^.!?\\n•\\uFFFD;|]*)`, 'i');
+  const match = cleaned.match(regex);
   if (!match) return '';
 
   let clause = match[1].trim();
 
-  // Tinh chỉnh nếu clause bị dính phần trước do thiếu dấu chấm
-  // Ví dụ: "The necessary conditions to win or close A {{25}} Learns" -> "A {{25}} Learns"
+  // 3. Tẩy sạch bất kỳ ký tự rác HTML còn sót lại ở hai đầu câu (như '> hoặc '<)
+  clause = clause.replace(/^[>'"\s]+|[<'"\s]+$/g, '').trim();
+
+  // 4. Tinh chỉnh nếu clause bị dính phần trước do thiếu dấu chấm
   const startPattern = new RegExp(`(?:^|[\\s])((?:A|An|The|[A-Z][a-z]+)\\s*\\{\\{${qNum}\\}\\}[^.!?•;]*)`);
   const prefixMatch = clause.match(startPattern);
   if (prefixMatch && prefixMatch[1]) {

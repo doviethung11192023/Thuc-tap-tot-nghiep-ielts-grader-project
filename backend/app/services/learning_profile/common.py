@@ -19,6 +19,26 @@ def set_to_cache(key: str, data: Any, ttl_seconds: int = 30) -> None:
     now = datetime.now(timezone.utc).timestamp()
     _cache[key] = (data, now + ttl_seconds)
 
+def round_to_ielts_band(score: Optional[float]) -> float:
+    """
+    Làm tròn điểm theo quy tắc chuẩn kỳ thi IELTS quốc tế của Cambridge / IDP / BC:
+    - Điểm IELTS chỉ có bước nhảy 0.5 (vd: 5.0, 5.5, 6.0, 6.5, 7.0, 7.5...).
+    - Phần thập phân < 0.25 -> làm tròn xuống .0 (vd: 6.1 -> 6.0, 6.2 -> 6.0).
+    - Phần thập phân >= 0.25 và < 0.75 -> làm tròn thành .5 (vd: 6.25 -> 6.5, 6.675 -> 6.5, 6.7 -> 6.5).
+    - Phần thập phân >= 0.75 -> làm tròn lên band nguyên kế tiếp .0 (vd: 2.75 -> 3.0, 6.75 -> 7.0, 6.8 -> 7.0).
+    """
+    if score is None or score <= 0:
+        return 0.0
+    whole = int(score)
+    rem = round(score - whole, 4)
+    if rem < 0.25:
+        return float(whole)
+    elif rem < 0.75:
+        return float(whole) + 0.5
+    else:
+        return float(whole) + 1.0
+
+
 def get_user_attempts(user_id: str) -> List[Dict[str, Any]]:
     """Lấy danh sách các lần làm bài thi của học viên kèm thông tin bài thi."""
     res = supabase.table("test_attempts").select(
