@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from app.core.security import get_current_user, User
 from app.db.supabase import supabase
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_practice.practice_history import abandon_attempt, list_history
 from app.services.learning_profile_aggregator import (
     compute_learning_profile_overview,
     compute_learning_profile_test_practice
@@ -29,6 +31,8 @@ async def get_student_history(
     current_user: User = Depends(get_current_user)
 ):
     """Lấy danh sách lịch sử các lần làm bài thi của học viên phân trang theo chuẩn IELTS."""
+    if is_v2_enabled():
+        return {"meta": {"code": 200}, "data": list_history(current_user.id, page, limit, skill, status)}
     offset = (page - 1) * limit
     query = supabase.table("test_attempts").select(
         "id, test_id, skill, mode, status, band, raw_score, started_at, submitted_at, tests(title, duration_min)",
@@ -75,6 +79,13 @@ async def get_student_history(
 @router.delete("/history/{attempt_id}")
 async def delete_student_attempt(attempt_id: str, current_user: User = Depends(get_current_user)):
     """Xóa một bài thi hoặc bản nháp khỏi lịch sử."""
+    if is_v2_enabled():
+        abandon_attempt(current_user.id, attempt_id)
+        return {"meta": {"code": 200, "message": "Đã huỷ bài làm dở"}}
+    # Chỉ xoá bài của chính mình (trước đây xoá attempt_answers của bất kỳ attempt nào: IDOR)
+    owned = supabase.table("test_attempts").select("id").eq("id", attempt_id).eq("user_id", current_user.id).execute()
+    if not owned.data:
+        raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
     supabase.table("attempt_answers").delete().eq("attempt_id", attempt_id).execute()
     supabase.table("test_attempts").delete().eq("id", attempt_id).eq("user_id", current_user.id).execute()
 

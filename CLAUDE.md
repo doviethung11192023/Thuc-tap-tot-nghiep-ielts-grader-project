@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Source of Truth
+
+**IMPORTANT:** `./docs/source-of-truth.md` is the source of truth for requirements (FR/NFR/BR), use cases, workflows, state machines, database design, architecture and ADRs. Read it before planning or implementing; it overrides `ARCHITECTURE.md`/`README.md`. Update it in the same commit when the design changes.
+
 ## Role & Responsibilities
 
 Your role is to analyze user requirements, delegate tasks to appropriate sub-agents, and ensure cohesive delivery of features that meet specifications and architectural standards.

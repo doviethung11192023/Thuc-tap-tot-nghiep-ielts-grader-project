@@ -145,7 +145,7 @@ export function useAttemptListeningDetail(attemptId?: string) {
           test_id: res.test_id || "test-1",
           slug: res.test_id || "listening-test",
           title: res.title || "IELTS Listening Practice Test",
-          overall_band: Number(res.overall_band || 0),
+          overall_band: res.overall_band == null ? null : Number(res.overall_band),
           correct_count: Number(res.correct_count || 0),
           total_questions: allQuestions.length || 40,
           time_spent: res.time_spent_sec ? `${Math.round(res.time_spent_sec / 60)} phút` : "30:00",

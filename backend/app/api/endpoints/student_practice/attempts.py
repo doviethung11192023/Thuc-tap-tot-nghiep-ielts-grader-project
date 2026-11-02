@@ -7,6 +7,9 @@ from datetime import datetime, timedelta, timezone
 from app.core.security import get_optional_user, User
 from app.db.supabase import supabase
 from app.services.test_tree_formatter import format_anti_cheat_sections, format_student_test_content
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_practice.practice_attempt_lifecycle import get_owned_attempt, load_test_for_start, start_attempt
+from app.services.v2_practice.practice_test_content import V2_SKILLS, load_v2_test_content
 
 router = APIRouter()
 
@@ -23,11 +26,9 @@ def _is_uuid(val: str) -> bool:
         return False
 
 def _resolve_user_id(current_user: Optional[User]) -> str:
+    # Không bao giờ mượn tài khoản khác khi chưa đăng nhập (trước đây lấy user đầu tiên trong DB)
     if current_user and current_user.id:
         return str(current_user.id)
-    u_res = supabase.table("users").select("id").limit(1).execute()
-    if u_res.data:
-        return str(u_res.data[0]["id"])
     raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để làm bài thi")
 
 @router.post("/attempts/start", status_code=status.HTTP_201_CREATED)
@@ -56,6 +57,17 @@ async def start_test_attempt(req: StartAttemptRequest, current_user: Optional[Us
     if not t_res or not t_res.data:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
     test_info = t_res.data[0]
+
+    if test_info["skill"] in V2_SKILLS and is_v2_enabled():
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để làm bài thi")
+        test_v2 = load_test_for_start(test_info["id"])
+        if not test_v2:
+            raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
+        mode = req.mode if req.mode in ("practice", "mock") else "practice"
+        data = start_attempt(str(current_user.id), test_v2, mode)
+        return {"meta": {"code": 201, "message": "Bắt đầu bài thi thành công"}, "data": data}
+
     if test_info.get("status") != "published":
         raise HTTPException(status_code=400, detail="Bài thi chưa được xuất bản")
 
@@ -94,7 +106,16 @@ async def start_test_attempt(req: StartAttemptRequest, current_user: Optional[Us
 @router.get("/attempts/{attempt_id}/content")
 async def get_attempt_exam_content(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Lấy nội dung đề thi đã lọc bỏ đáp án đúng (Anti-Cheat Content Delivery Single Query)."""
-    att_res = supabase.table("test_attempts").select("""
+    if is_v2_enabled() and _is_uuid(attempt_id):
+        is_admin = bool(current_user and current_user.role == "admin")
+        attempt_v2 = get_owned_attempt(attempt_id, current_user.id if current_user else None, is_admin)
+        if attempt_v2 and attempt_v2["skill"] in V2_SKILLS:
+            content = load_v2_test_content(attempt_v2["test_id"], attempt_v2["skill"]) or {"sections": []}
+            return {"meta": {"code": 200}, "data": {
+                **content, "attempt_id": attempt_v2["id"], "mode": attempt_v2["mode"],
+                "started_at": attempt_v2["started_at"], "deadline_at": attempt_v2.get("deadline_at")}}
+
+    att_res =supabase.table("test_attempts").select("""
         id, user_id, test_id, skill, mode, started_at, deadline_at,
         tests(
             id, title, skill, duration_min, origin,
@@ -189,7 +210,13 @@ async def get_test_exam_content_direct(test_id: str, skill: Optional[str] = None
             """).eq("id", fb.data[0]["id"]).execute()
     if not test_res or not test_res.data:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
-    
+
+    if test_res.data[0].get("skill") in V2_SKILLS and is_v2_enabled():
+        formatted = load_v2_test_content(test_res.data[0]["id"], test_res.data[0]["skill"])
+        if formatted:
+            _TEST_CONTENT_CACHE[cache_key] = {"cached_at": now_ts, "data": formatted}
+            return {"meta": {"code": 200}, "data": formatted}
+
     formatted = format_student_test_content(test_res.data[0])
     _TEST_CONTENT_CACHE[cache_key] = {"cached_at": now_ts, "data": formatted}
     return {"meta": {"code": 200}, "data": formatted}

@@ -5,7 +5,7 @@ import React from 'react';
 interface CleanListeningScoreCardProps {
   userName?: string;
   submittedAt: string;
-  overallBand: number;
+  overallBand: number | null;
   correctCount: number;
   totalQuestions: number;
 }
@@ -37,7 +37,7 @@ export function CleanListeningScoreCard({
             Điểm
           </div>
           <div className="text-xl font-black text-blue-600">
-            {overallBand.toFixed(1)}
+            {overallBand == null ? '—' : overallBand.toFixed(1)}
           </div>
         </div>
 

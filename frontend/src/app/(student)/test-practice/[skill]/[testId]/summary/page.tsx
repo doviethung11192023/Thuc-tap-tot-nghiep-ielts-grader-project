@@ -91,11 +91,12 @@ export default function SkillSummaryResultPage() {
               Band Score
             </span>
             <span className="text-5xl font-black text-[#932120] tracking-tight my-1">
-              {bandScore.toFixed(1)}
+              {bandScore == null ? '—' : bandScore.toFixed(1)}
             </span>
             <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               {correctCount}/{totalQuestions} câu đúng
+              {bandScore == null && <span className="text-zinc-500 font-medium">· band chỉ tính khi làm đủ 40 câu</span>}
             </span>
           </div>
         </div>

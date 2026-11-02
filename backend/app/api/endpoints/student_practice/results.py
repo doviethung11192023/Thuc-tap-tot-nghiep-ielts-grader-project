@@ -3,13 +3,31 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
 from app.db.supabase import supabase
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_practice.practice_attempt_lifecycle import get_owned_attempt
+from app.services.v2_writing.writing_result_views import build_attempt_summary
+from app.services.v2_listening_reading.lr_result_views import build_lr_detail, build_lr_summary
+
+
+def _v2_attempt(attempt_id: str, current_user: Optional[User]):
+    """Attempt v2 của chính người xem (admin xem được mọi bài); không có → None."""
+    if not is_v2_enabled():
+        return None
+    is_admin = bool(current_user and current_user.role == "admin")
+    return get_owned_attempt(attempt_id, current_user.id if current_user else None, is_admin)
 
 router = APIRouter()
 
 @router.get("/attempts/{attempt_id}/summary")
 async def get_attempt_summary(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Lấy kết quả tóm tắt sau khi nộp bài: Band score, số câu đúng, dạng bài."""
-    att_res = supabase.table("test_attempts").select("*, tests(id, title, skill, duration_min)").eq("id", attempt_id).execute()
+    attempt_v2 = _v2_attempt(attempt_id, current_user)
+    if attempt_v2 and attempt_v2["skill"] == "writing":
+        return {"meta": {"code": 200}, "data": build_attempt_summary(attempt_v2)}
+    if attempt_v2 and attempt_v2["skill"] in ("reading", "listening"):
+        return {"meta": {"code": 200}, "data": build_lr_summary(attempt_v2)}
+
+    att_res =supabase.table("test_attempts").select("*, tests(id, title, skill, duration_min)").eq("id", attempt_id).execute()
     if not att_res.data:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
     attempt = att_res.data[0]
@@ -63,6 +81,9 @@ async def get_attempt_summary(attempt_id: str, current_user: Optional[User] = De
 @router.get("/attempts/{attempt_id}/detail")
 async def get_attempt_detail_with_explanations(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Mở khóa đáp án đúng, lời giải 4 bước và dẫn chứng sau khi đã nộp bài."""
+    attempt_v2 = _v2_attempt(attempt_id, current_user)
+    if attempt_v2 and attempt_v2["skill"] in ("reading", "listening"):
+        return {"meta": {"code": 200}, "data": build_lr_detail(attempt_v2)}
     att_res = supabase.table("test_attempts").select("*, tests(id, title, skill)").eq("id", attempt_id).execute()
     if not att_res.data:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")

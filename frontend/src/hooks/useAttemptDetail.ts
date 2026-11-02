@@ -22,7 +22,7 @@ export interface DetailExerciseGroup {
 
 export interface AttemptDetailData {
   title: string;
-  overall_band: number;
+  overall_band: number | null; // null khi chưa đủ 40 câu (BR-03)
   correct_count: number;
   passages: DetailPassage[];
   questions: CleanReadingQuestion[];
@@ -105,7 +105,7 @@ export function useAttemptDetail(attemptId?: string) {
 
         setData({
           title: res.title || "IELTS Practice Test",
-          overall_band: Number(res.overall_band || 0),
+          overall_band: res.overall_band == null ? null : Number(res.overall_band),
           correct_count: Number(res.correct_count || 0),
           passages: passages.length > 0 ? passages : cleanReadingTest1Data.passages,
           questions: questions.length > 0 ? questions : cleanReadingTest1Data.questions,

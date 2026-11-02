@@ -11,7 +11,7 @@ import { CleanDetailSummaryCard } from './CleanDetailSummaryCard';
 interface CleanListeningExerciseGroupsPaneProps {
   userName?: string;
   submittedAt: string;
-  overallBand: number;
+  overallBand: number | null;
   correctCount: number;
   totalQuestions: number;
   currentExerciseGroups: CleanListeningExerciseGroup[];

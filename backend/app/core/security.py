@@ -14,6 +14,18 @@ class User(BaseModel):
     is_active: bool = True
     is_activated: bool = True
 
+def _verified_sub(token: str) -> str | None:
+    """sub của access token Supabase sau khi kiểm chữ ký + hạn + audience; sai → None."""
+    secret = (settings.SUPABASE_JWT_SECRET or "").strip()
+    if not secret:
+        return None
+    try:
+        payload = jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
+    except JWTError:
+        return None
+    return payload.get("sub") if payload.get("role") == "authenticated" else None
+
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
     token = credentials.credentials
     if not token:
@@ -32,17 +44,25 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         except Exception:
             pass
 
-        # Fallback decode payload nếu network request tới GoTrue gặp sự cố mạng tạm thời
+        # Fallback khi GoTrue không trả lời: chỉ chấp nhận token có CHỮ KÝ hợp lệ (HS256, JWT secret
+        # của project) và đúng audience. Không bao giờ dùng claims chưa kiểm chữ ký (token giả mạo).
         if not user_id:
-            try:
-                payload = jwt.get_unverified_claims(token)
-                user_id = payload.get("sub")
-            except Exception:
-                pass
+            user_id = _verified_sub(token)
 
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
         
+        from app.services.v2_practice import is_v2_enabled, v2db
+        if is_v2_enabled():
+            # v2: role learner|expert|admin; API giữ tên cũ "student" cho learner
+            p = v2db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
+            if not p.data:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                    detail="User profile not found in database. Account may not be fully initialized.")
+            role = p.data[0]["role"]
+            return User(id=p.data[0]["id"], role="student" if role == "learner" else role,
+                        is_active=p.data[0]["is_active"], is_activated=True)
+
         res = supabase.table("users").select("*").eq("id", user_id).execute()
         if res.data:
             u = res.data[0]

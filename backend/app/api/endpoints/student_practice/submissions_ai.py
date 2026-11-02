@@ -6,6 +6,10 @@ from datetime import datetime, timezone
 from app.core.security import get_optional_user, User
 from app.db.supabase import supabase
 from app.worker.tasks import evaluate_essay_task
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_practice.practice_attempt_lifecycle import get_owned_attempt
+from app.services.v2_writing.writing_attempt_service import submit_writing
+from app.services.v2_writing.writing_grading_service import grade_writing_task
 
 router = APIRouter()
 
@@ -27,7 +31,29 @@ async def submit_writing_attempt(
     current_user: Optional[User] = Depends(get_optional_user)
 ):
     """Nộp bài Writing (Task 1 & Task 2) và kích hoạt pipeline AI chấm điểm."""
-    att_res = supabase.table("test_attempts").select("*").eq("id", attempt_id).execute()
+    if is_v2_enabled():
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để nộp bài")
+        attempt_v2 = get_owned_attempt(attempt_id, current_user.id)      # chỉ chủ bài được nộp
+        if not attempt_v2 or attempt_v2["skill"] != "writing":
+            raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
+        sub = submit_writing(attempt_v2, req.task1_text, req.task2_text, req.essay_text)
+        for job in sub["jobs"]:
+            background_tasks.add_task(grade_writing_task, None, sub["evaluation_id"], job["run_id"],
+                                      job["essay_id"], job["task_no"])
+        return {
+            "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
+            "data": {
+                "attempt_id": attempt_id,
+                "essay_id": sub["jobs"][-1]["essay_id"],
+                "essay_ids": {f"task{j['task_no']}": j["essay_id"] for j in sub["jobs"]},
+                "word_count": sum(j["word_count"] for j in sub["jobs"]),
+                "status": "scoring",
+                "submitted_at": sub["submitted_at"],
+            },
+        }
+
+    att_res =supabase.table("test_attempts").select("*").eq("id", attempt_id).execute()
     if not att_res.data:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
     attempt = att_res.data[0]

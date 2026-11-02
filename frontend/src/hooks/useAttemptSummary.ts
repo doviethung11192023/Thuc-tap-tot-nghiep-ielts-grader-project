@@ -5,7 +5,7 @@ import { cleanListeningTest1Data } from "@/mocks/clean-dataset/listening-test-1-
 
 export interface CleanSummaryData {
   title: string;
-  overall_band: number;
+  overall_band: number | null; // null: chưa đủ 40 câu nên không quy ra band (BR-03)
   correct_count: number;
   total_questions: number;
   time_spent: string;
@@ -53,7 +53,7 @@ export function useAttemptSummary(attemptId: string | undefined, skill: string) 
         if (!mounted || !res) return;
         setData({
           title: res.title || defaultData.title,
-          overall_band: Number(res.overall_band ?? defaultData.overall_band),
+          overall_band: res.overall_band == null ? null : Number(res.overall_band),
           correct_count: Number(res.correct_count ?? defaultData.correct_count),
           total_questions: Number(res.total_questions || defaultData.total_questions),
           time_spent: res.time_spent_sec ? `${Math.round(res.time_spent_sec / 60)} phút` : defaultData.time_spent,

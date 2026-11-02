@@ -5,6 +5,9 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from app.core.security import get_optional_user, User
 from app.db.supabase import supabase
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_practice.practice_attempt_lifecycle import get_owned_attempt
+from app.services.v2_listening_reading.lr_grading_service import submit_lr
 
 router = APIRouter()
 
@@ -45,6 +48,15 @@ async def submit_reading_listening_answers(
     current_user: Optional[User] = Depends(get_optional_user)
 ):
     """Nộp bài Reading hoặc Listening và tự động chấm điểm theo thang điểm Cambridge."""
+    if is_v2_enabled():
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để nộp bài")
+        attempt_v2 = get_owned_attempt(attempt_id, current_user.id)       # chỉ chủ bài được nộp
+        if attempt_v2:
+            if attempt_v2["skill"] not in ("reading", "listening"):
+                raise HTTPException(status_code=400, detail="Chức năng này chỉ áp dụng cho Reading và Listening")
+            data = submit_lr(attempt_v2, req.answers, req.parts, req.time_spent_sec)
+            return {"meta": {"code": 200, "message": "Nộp bài và chấm điểm thành công"}, "data": data}
     att_res = supabase.table("test_attempts").select("*").eq("id", attempt_id).execute()
     if not att_res.data:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")

@@ -3,6 +3,8 @@ from app.schemas.essay import EssayCreate, EvaluationResponse, EssayDetail
 from app.core.security import get_current_user, User
 from app.db.supabase import supabase
 from app.worker.tasks import evaluate_essay_task
+from app.services.v2_practice import is_v2_enabled
+from app.services.v2_writing.writing_result_views import build_essay_result
 import uuid
 from datetime import datetime
 import json
@@ -58,7 +60,13 @@ async def submit_essay(request: Request, essay: EssayCreate, background_tasks: B
 
 @router.get("/{essay_id}/results")
 async def get_evaluation_results(essay_id: str, current_user: User = Depends(get_current_user)):
-    essay_res = supabase.table("essays").select("*").eq("id", essay_id).execute()
+    if is_v2_enabled():
+        data = build_essay_result(essay_id, current_user.id, current_user.role == "admin")
+        if data is None:
+            raise HTTPException(status_code=404, detail="Essay not found")
+        return {"meta": {"code": 200, "message": "Success"}, "data": data}
+
+    essay_res =supabase.table("essays").select("*").eq("id", essay_id).execute()
     if not essay_res.data:
         raise HTTPException(status_code=404, detail="Essay not found")
         

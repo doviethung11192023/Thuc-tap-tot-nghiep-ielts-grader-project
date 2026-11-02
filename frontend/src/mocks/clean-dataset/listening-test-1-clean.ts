@@ -73,7 +73,7 @@ export interface CleanListeningTestData {
   test_id: string;
   slug: string;
   title: string;
-  overall_band: number;
+  overall_band: number | null; // null khi chưa đủ 40 câu (BR-03)
   correct_count: number;
   total_questions: number;
   time_spent: string;

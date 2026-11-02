@@ -93,7 +93,9 @@ coverage.xml
 
 # Project specific data (optional)
 data/
-docs/
+# docs/ cá nhân không commit, trừ tài liệu gốc mà CLAUDE.md trỏ tới
+docs/*
+!docs/source-of-truth.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)
