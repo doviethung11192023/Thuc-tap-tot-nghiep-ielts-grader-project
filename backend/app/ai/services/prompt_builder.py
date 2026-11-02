@@ -8,7 +8,9 @@ from schemas.tool_output import (
     LexicalStatsResult,
 )
 from schemas.task_type import TaskTypeResult
-from services.langfuse.prompt_manager import PromptManager, CompiledPrompt
+from functools import lru_cache
+
+from services.langfuse.prompt_manager import PromptManager, CompiledPrompt, WritingTask
 from utils.essay_formatter import format_annotated_essay, format_indexed_essay
 
 
@@ -48,49 +50,77 @@ def _build_grammar(findings: list[GrammarFinding]) -> dict:
     }
 
 
+# Prepended to the title for the shared CC / LR / GRA prompts (written for Task 2)
+# so the examiners apply Task 1 conventions.
+TASK1_CONTEXT_HEADER = (
+    "[IELTS ACADEMIC WRITING TASK 1 — a report describing visual information. "
+    "Minimum 150 words. An overview replaces the conclusion; no opinion is expected. "
+    "Apply the band descriptors in the context of a Task 1 report.]"
+)
+
+MIN_WORDS: dict[str, int] = {"task1": 150, "task2": 250}
+
+
+@lru_cache(maxsize=1)
+def get_prompt_manager() -> PromptManager:
+    """Created lazily so importing this module never touches Langfuse."""
+    return PromptManager()
+
+
+def task1_title(title: str) -> str:
+    return f"{TASK1_CONTEXT_HEADER}\n\n{title}".strip()
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
-
-_prompt_manager = PromptManager()
-
 
 def build_criterion_prompts(
     processed: ProcessedEssay,
     task_type: TaskTypeResult,
     grammar_findings: list[GrammarFinding],
     lex_result: LexicalStatsResult,
+    task: WritingTask = "task2",
+    visual_description: str = "",
 ) -> CriterionPrompts:
     """
     Build one CompiledPrompt per criterion by assembling variables
     and calling PromptManager.get_agent_prompt().
+
+    Task 1: TA uses the dedicated `TA_TASK1` prompt (+ visual description);
+    CC / LR / GRA reuse the Task 2 prompts with a Task 1 context header.
     """
+    pm = get_prompt_manager()
     annotated_essay = format_annotated_essay(processed)
     indexed_essay = format_indexed_essay(processed)
-    shared = {"word_count": processed.word_count}
+    shared = {"word_count": processed.word_count, "task": task}
+    title = task1_title(processed.title) if task == "task1" else processed.title
+
+    ta_extra = {"visual_description": visual_description} if task == "task1" else {}
 
     return CriterionPrompts(
-        ta=_prompt_manager.get_agent_prompt(
+        ta=pm.get_agent_prompt(
             "ta",
             title=processed.title,
             essay=annotated_essay,
             task_type_knowledge=f"# TASK TYPE\n{task_type.task_type}\n\n{task_type.description}",
+            **ta_extra,
             **shared,
         ),
-        cc=_prompt_manager.get_agent_prompt(
+        cc=pm.get_agent_prompt(
             "cc",
-            title=processed.title,
+            title=title,
             essay=annotated_essay,
             **shared,
         ),
-        lr=_prompt_manager.get_agent_prompt(
+        lr=pm.get_agent_prompt(
             "lr",
-            title=processed.title,
+            title=title,
             essay=indexed_essay,
             lexical_stats=_build_lexical_stats(lex_result),
             **shared,
         ),
-        gra=_prompt_manager.get_agent_prompt(
+        gra=pm.get_agent_prompt(
             "gra",
-            title=processed.title,
+            title=title,
             essay=indexed_essay,
             grammar=_build_grammar(grammar_findings),
             **shared,

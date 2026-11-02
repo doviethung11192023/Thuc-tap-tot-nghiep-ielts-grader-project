@@ -22,9 +22,13 @@ result.html
 test_visualization.html
 *.ipynb
 
-# Data files lớn (không cần thiết cho API)
+# Data files & logs
 data/
+logs/*.log
+*.log
 
-# Dev tools
+# Dev scripts & tests
+scripts/
+tests/
 .pytest_cache/
 .ruff_cache/

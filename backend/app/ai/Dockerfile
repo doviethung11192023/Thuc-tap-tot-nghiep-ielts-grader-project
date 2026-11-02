@@ -42,4 +42,4 @@ ENV PORT=8000
 EXPOSE $PORT
 
 # Start FastAPI server (no ngrok on Railway — Railway provides the public URL)
-CMD ["sh", "-c", "uvicorn serve:app --host 0.0.0.0 --port $PORT --log-level info"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT --log-level info"]
