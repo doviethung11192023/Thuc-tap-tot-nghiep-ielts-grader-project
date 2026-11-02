@@ -15,6 +15,7 @@ import { PracticeTimelineSection } from "@/components/exam/history/PracticeTimel
 export default function TestPracticeHistoryPage() {
   const [data, setData] = useState<PracticeHistorySummaryData | null>(() => getCachedPracticeHistory());
   const [loading, setLoading] = useState<boolean>(!getCachedPracticeHistory());
+  const [statusFilter, setStatusFilter] = useState<"all" | "scored" | "in_progress">("all");
   const [isPending, startTransition] = useTransition();
 
   const loadData = async (force = false) => {
@@ -97,17 +98,57 @@ export default function TestPracticeHistoryPage() {
 
           {/* Right Column: Timeline Lịch sử Test Practice */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-bold text-zinc-900">Chi tiết các lượt luyện đề</h2>
                 <p className="text-xs text-zinc-500">
                   Tổng số: {data?.total_attempts || 0} lần làm bài được ghi nhận
                 </p>
               </div>
+
+              {/* Status Filter Tabs */}
+              <div className="inline-flex items-center gap-1 p-1 bg-zinc-100 rounded-2xl border border-zinc-200/80 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("all")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "all" ? "bg-white text-zinc-900 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Tất cả
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("scored")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "scored" ? "bg-white text-emerald-800 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Đã hoàn thành
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("in_progress")}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    statusFilter === "in_progress" ? "bg-white text-amber-800 shadow-2xs" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Đang làm dở
+                </button>
+              </div>
             </div>
 
             <PracticeTimelineSection
-              groups={data?.timeline_groups || {}}
+              groups={React.useMemo(() => {
+                if (!data?.timeline_groups) return {};
+                if (statusFilter === "all") return data.timeline_groups;
+                const filtered: Record<string, typeof data.timeline_groups[string]> = {};
+                for (const [m, items] of Object.entries(data.timeline_groups)) {
+                  const mItems = items.filter((it) => it.status === statusFilter);
+                  if (mItems.length > 0) filtered[m] = mItems;
+                }
+                return filtered;
+              }, [data?.timeline_groups, statusFilter])}
               loading={loading && !data}
             />
           </div>

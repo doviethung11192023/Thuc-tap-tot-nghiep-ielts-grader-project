@@ -14,6 +14,17 @@ interface CleanListeningTranscriptPaneProps {
   onPlayAtTime: (seconds: number) => void;
 }
 
+// LS-02: Chuẩn hóa text để so khớp dẫn chứng chính xác, không bị lỗi do ngoặc kép hoặc dấu câu
+function cleanTextForMatching(str: string): string {
+  return (str || '')
+    .replace(/^[^:]+:\s*/, '')
+    .replace(/["'“”‘’«»]/g, '')
+    .replace(/[.,!?;:]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 export function CleanListeningTranscriptPane({
   currentSection,
   currentSectionQuestions,
@@ -77,9 +88,17 @@ export function CleanListeningTranscriptPane({
         {currentSection.transcript_utterances && currentSection.transcript_utterances.length > 0 ? (
           currentSection.transcript_utterances.map((u) => {
             const badge = getSpeakerBadge(u.role || u.speaker_name);
-            const matchingQuestions = currentSectionQuestions.filter(q =>
-              q.evidence_text && u.text.toLowerCase().includes(q.evidence_text.slice(0, 25).toLowerCase())
-            );
+            const cleanUtterance = cleanTextForMatching(u.text);
+            const matchingQuestions = currentSectionQuestions.filter(q => {
+              if (!q.evidence_text) return false;
+              const cleanEvidence = cleanTextForMatching(q.evidence_text);
+              if (!cleanEvidence) return false;
+              if (cleanUtterance.includes(cleanEvidence) || cleanEvidence.includes(cleanUtterance)) return true;
+              if (cleanEvidence.length >= 15 && cleanUtterance.includes(cleanEvidence.slice(0, 20))) return true;
+              const words = cleanEvidence.split(' ').filter(w => w.length > 2);
+              if (words.length >= 3 && cleanUtterance.includes(words.slice(0, 3).join(' '))) return true;
+              return false;
+            });
             const isCurrentActive = matchingQuestions.some(q => q.question_number === activeQuestionNumber);
 
             return (
@@ -105,24 +124,27 @@ export function CleanListeningTranscriptPane({
               return (
                 <div
                   key={q.id}
-                  className={`p-3.5 rounded-xl border transition-all ${
-                    isActive ? 'border-amber-400 bg-amber-50/60 ring-1 ring-amber-300' : 'border-blue-200 bg-blue-50/50'
+                  id={isActive ? "active-listening-evidence" : undefined}
+                  className={`p-3.5 rounded-xl border text-xs sm:text-sm transition-all ${
+                    isActive
+                      ? "border-amber-400 bg-amber-50/70 shadow-sm"
+                      : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-blue-900">
-                      📍 Vị trí câu {q.question_number}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-blue-900">
+                      Dẫn chứng Câu {q.question_number}
                     </span>
                     <button
                       type="button"
-                      onClick={() => onPlayAtTime(Math.max(0, (q.question_number - 1) * 35))}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold cursor-pointer"
+                      onClick={() => onPlayAtTime(0)}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-100/80 hover:bg-blue-200 px-2 py-0.5 rounded cursor-pointer"
                     >
-                      <Play className="w-3 h-3" />
-                      <span>Phát</span>
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Nghe</span>
                     </button>
                   </div>
-                  <p className="text-sm italic text-zinc-800 border-l-2 border-blue-400 pl-3">
+                  <p className="text-zinc-700 leading-relaxed italic">
                     "{q.evidence_text}"
                   </p>
                 </div>

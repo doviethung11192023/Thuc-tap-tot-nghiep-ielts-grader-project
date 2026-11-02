@@ -27,14 +27,35 @@ export function CleanReadingDetailPassagePane({
   passageScrollRef,
   highlightedEvidence,
 }: CleanReadingDetailPassagePaneProps) {
-  // Tự động phân tách đoạn văn từ content nếu chưa có mảng paragraphs
+  // RD-06 & RD-08: Phân tách đoạn văn chuẩn xác và loại bỏ tiêu đề dính liền
   const effectiveParagraphs = useMemo(() => {
     if (paragraphs && paragraphs.length > 0) return paragraphs;
-    return (content || "")
-      .split(/\n\s*\n/)
-      .map((text, idx) => ({ id: `para_${idx + 1}`, text: text.trim() }))
+    const raw = (content || "").trim();
+    if (!raw) return [];
+
+    let chunks = raw.split(/\r?\n\s*\r?\n/).map((t) => t.trim()).filter(Boolean);
+
+    // RD-06: Fallback nếu không có double newlines mà chỉ có single newline
+    if (chunks.length <= 1 && raw.includes("\n")) {
+      chunks = raw.split(/\r?\n/).map((t) => t.trim()).filter(Boolean);
+    }
+
+    return chunks
+      .map((text, idx) => {
+        let cleaned = text;
+
+        // RD-08: Xóa tiêu đề bị gộp dính ở đầu đoạn A
+        if (idx === 0 && title) {
+          const normTitle = title.trim();
+          if (normTitle && cleaned.toLowerCase().startsWith(normTitle.toLowerCase())) {
+            cleaned = cleaned.slice(normTitle.length).trim();
+          }
+        }
+
+        return { id: `para_${idx + 1}`, text: cleaned };
+      })
       .filter((p) => p.text.length > 0);
-  }, [paragraphs, content]);
+  }, [paragraphs, content, title]);
 
   // Tự động cuộn đến điểm highlight khi highlightedEvidence thay đổi
   useEffect(() => {

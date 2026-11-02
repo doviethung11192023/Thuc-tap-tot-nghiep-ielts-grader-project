@@ -6,6 +6,24 @@ interface CleanExplanationStepsProps {
   explanation4Steps?: string;
 }
 
+// RD-07: Hỗ trợ parse Markdown in đậm **text** và in nghiêng _text_
+function renderFormattedText(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*|_[^_]+_)/g);
+  return (
+    <>
+      {parts.map((part, idx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={idx} className="font-bold text-zinc-900">{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith('_') && part.endsWith('_')) {
+          return <em key={idx} className="italic text-zinc-600 font-medium">{part.slice(1, -1)}</em>;
+        }
+        return <span key={idx}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function renderTable(tableLines: string[], keyPrefix: number) {
   const parsedRows = tableLines
     .map((line) => line.split('|').map((c) => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1))
@@ -22,7 +40,7 @@ function renderTable(tableLines: string[], keyPrefix: number) {
           <tr>
             {headers.map((h, i) => (
               <th key={i} className="p-2.5 text-left border-r border-zinc-200 last:border-r-0">
-                {h.replace(/\*\*/g, '')}
+                {renderFormattedText(h)}
               </th>
             ))}
           </tr>
@@ -32,7 +50,7 @@ function renderTable(tableLines: string[], keyPrefix: number) {
             <tr key={rIdx} className="hover:bg-zinc-50/60 transition-colors">
               {row.map((cell, cIdx) => (
                 <td key={cIdx} className="p-2.5 border-r border-zinc-200 last:border-r-0 align-top leading-relaxed">
-                  {cell.replace(/\*\*/g, '')}
+                  {renderFormattedText(cell)}
                 </td>
               ))}
             </tr>
@@ -57,7 +75,18 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
         const title = lines[0] || '';
         const bodyLines = lines.slice(1);
 
-        // Group lines into table blocks and normal lines
+        // LS-05: Tiền xử lý gộp các ký tự bullet • đứng riêng một dòng vào dòng nội dung phía sau
+        const preprocessedLines: string[] = [];
+        for (let i = 0; i < bodyLines.length; i++) {
+          const cur = bodyLines[i].trim();
+          if ((cur === '•' || cur === '-' || cur === '*') && i + 1 < bodyLines.length) {
+            preprocessedLines.push(`• ${bodyLines[i + 1].trim()}`);
+            i++;
+          } else {
+            preprocessedLines.push(bodyLines[i]);
+          }
+        }
+
         const elements: React.ReactNode[] = [];
         let tableBuffer: string[] = [];
 
@@ -68,7 +97,7 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
           }
         };
 
-        bodyLines.forEach((line, lIdx) => {
+        preprocessedLines.forEach((line, lIdx) => {
           const trimmed = line.trim();
           if (!trimmed) {
             flushTable();
@@ -86,31 +115,32 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
             elements.push(
               <div
                 key={lIdx}
-                className="my-1.5 p-2.5 rounded-lg border-l-4 border-blue-500 bg-blue-50/60 text-blue-950 italic text-xs sm:text-sm"
+                className="my-1.5 p-2.5 rounded-lg border-l-4 border-blue-500 bg-blue-50/60 text-blue-950 text-xs sm:text-sm"
               >
-                {trimmed.replace(/^>\s*/, '').replace(/\*\*/g, '')}
+                {renderFormattedText(trimmed.replace(/^>\s*/, ''))}
               </div>
             );
-          } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+          } else if (trimmed.startsWith('•') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            const bulletContent = trimmed.replace(/^([•\-*]\s*)/, '');
             elements.push(
               <div key={lIdx} className="flex items-start gap-1.5 pl-2 text-zinc-800 text-xs sm:text-sm">
-                <span className="text-blue-500 font-bold">•</span>
-                <span>{trimmed.replace(/^[-*]\s*/, '').replace(/\*\*/g, '')}</span>
+                <span className="text-blue-500 font-bold shrink-0">•</span>
+                <span>{renderFormattedText(bulletContent)}</span>
               </div>
             );
           } else if (trimmed.includes('✅') || trimmed.includes('Answer:')) {
             elements.push(
               <div
                 key={lIdx}
-                className="font-bold text-emerald-800 bg-emerald-50/80 border border-emerald-200 p-2 rounded-lg text-xs sm:text-sm"
+                className="font-bold text-emerald-800 bg-emerald-50/80 border border-emerald-200 p-2.5 rounded-lg text-xs sm:text-sm leading-relaxed"
               >
-                {trimmed.replace(/\*\*/g, '')}
+                {renderFormattedText(trimmed)}
               </div>
             );
           } else {
             elements.push(
-              <p key={lIdx} className="leading-normal text-xs sm:text-sm">
-                {trimmed.replace(/\*\*/g, '')}
+              <p key={lIdx} className="leading-relaxed text-xs sm:text-sm">
+                {renderFormattedText(trimmed)}
               </p>
             );
           }

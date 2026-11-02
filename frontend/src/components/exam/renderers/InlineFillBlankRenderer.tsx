@@ -98,7 +98,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   const parts = group.template.split(/({{\d+}})/g);
 
   return (
-    <div className="text-zinc-800 leading-relaxed text-sm md:text-base">
+    <div className="text-zinc-800 leading-relaxed text-sm md:text-base whitespace-pre-wrap">
       {wordlistCard}
       {parts.map((part, index) => {
         const match = part.match(/{{(\d+)}}/);

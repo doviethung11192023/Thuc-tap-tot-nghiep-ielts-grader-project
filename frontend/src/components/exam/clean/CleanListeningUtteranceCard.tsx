@@ -29,11 +29,13 @@ export function CleanListeningUtteranceCard({
 }: CleanListeningUtteranceCardProps) {
   const hasEvidence = matchingQuestions.length > 0;
 
+  // LS-02: Thuật toán tìm và highlight câu dẫn chứng an toàn, không bị trượt do dấu ngoặc kép hoặc prefix
   const renderText = () => {
     if (!isCurrentActive) return <span>{utterance.text}</span>;
 
     const activeQ = currentSectionQuestions.find(q => q.question_number === activeQuestionNumber);
-    const target = (highlightedEvidenceText || activeQ?.evidence_text || '').trim().replace(/^["']|["']$/g, '');
+    let target = (highlightedEvidenceText || activeQ?.evidence_text || '').trim();
+    target = target.replace(/^[^:]+:\s*/, '').replace(/^["'“”‘’«»]+|["'“”‘’«»]+$/g, '').trim();
     if (!target) return <span>{utterance.text}</span>;
 
     const lowerText = utterance.text.toLowerCase();
@@ -41,10 +43,30 @@ export function CleanListeningUtteranceCard({
     let matchIdx = lowerText.indexOf(lowerTarget);
     let matchLen = target.length;
 
-    if (matchIdx === -1 && target.length > 25) {
-      const shortTarget = target.slice(0, 25).toLowerCase();
+    // 1. Thử bỏ các loại dấu ngoặc kép bên trong
+    if (matchIdx === -1) {
+      const strippedTarget = target.replace(/["'“”‘’]/g, '').trim().toLowerCase();
+      matchIdx = lowerText.indexOf(strippedTarget);
+      if (matchIdx !== -1) {
+        matchLen = strippedTarget.length;
+      }
+    }
+
+    // 2. Thử tiền tố 20 ký tự đầu tiên
+    if (matchIdx === -1 && target.length > 20) {
+      const shortTarget = target.slice(0, 20).toLowerCase();
       matchIdx = lowerText.indexOf(shortTarget);
-      if (matchIdx !== -1) matchLen = 25;
+      if (matchIdx !== -1) matchLen = 20;
+    }
+
+    // 3. Thử 3 từ đầu tiên
+    if (matchIdx === -1) {
+      const words = target.split(/\s+/).filter(w => w.length > 2);
+      if (words.length >= 3) {
+        const phrase = words.slice(0, 3).join(' ').toLowerCase();
+        matchIdx = lowerText.indexOf(phrase);
+        if (matchIdx !== -1) matchLen = phrase.length;
+      }
     }
 
     if (matchIdx === -1) return <span>{utterance.text}</span>;
@@ -70,61 +92,69 @@ export function CleanListeningUtteranceCard({
     );
   };
 
+  const displayTime = utterance.time_formatted || "00:00";
+  const startSec = utterance.start_seconds || 0;
+
   return (
     <div
       data-utterance-text={utterance.text}
-      className={`p-3.5 rounded-2xl border transition-all ${
+      className={`p-4 rounded-xl border transition-all ${
         isCurrentActive
-          ? 'border-amber-400 bg-amber-50/40 ring-1 ring-amber-300 shadow-xs'
+          ? 'border-amber-400 bg-amber-50/40 shadow-xs'
           : hasEvidence
-          ? 'border-blue-300 bg-blue-50/30'
-          : 'border-zinc-200/80 bg-zinc-50/40 hover:bg-zinc-50'
+          ? 'border-zinc-200 bg-white hover:border-zinc-300'
+          : 'border-zinc-100 bg-white/70'
       }`}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${badge.avatarBg}`}>
+          <span
+            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${badge.avatarBg}`}
+          >
             {badge.label[0]}
-          </div>
-          <span className="font-bold text-xs text-zinc-800">
-            {utterance.speaker_name || badge.label}
+          </span>
+          <span className="font-bold text-xs text-zinc-900">{badge.label}</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.bg}`}
+          >
+            {badge.label}
           </span>
         </div>
 
         <button
           type="button"
-          onClick={() => onPlayAtTime(utterance.start_seconds)}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-blue-600 hover:text-white text-zinc-700 text-xs font-bold transition-all border border-zinc-200 cursor-pointer"
-          title={`Phát từ giây ${utterance.time_formatted}`}
+          onClick={() => onPlayAtTime(startSec)}
+          title={`Phát âm thanh từ ${displayTime}`}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-mono font-medium transition-colors cursor-pointer"
         >
-          <Play className="w-3 h-3 ml-0.5" />
-          <span>{utterance.time_formatted}</span>
+          <Play className="w-3 h-3 text-zinc-600 fill-current" />
+          <span>{displayTime}</span>
         </button>
       </div>
 
-      <div className="text-xs sm:text-sm text-zinc-800 leading-relaxed pl-8">
-        {hasEvidence && (
-          <div className="flex items-center gap-1.5 mb-1.5 text-blue-900 font-bold text-xs">
-            <span className="text-red-500">📍</span>
-            <span>Chứng cứ cho câu: </span>
-            {matchingQuestions.map(mq => (
-              <button
-                key={mq.id}
-                type="button"
-                onClick={() => onSelectQuestion(mq.question_number)}
-                className={`cursor-pointer underline text-xs font-bold transition-colors ${
-                  mq.question_number === activeQuestionNumber
-                    ? 'text-amber-700 font-extrabold bg-amber-100 px-1.5 py-0.5 rounded'
-                    : 'text-blue-700 hover:text-blue-900'
-                }`}
-              >
-                ({mq.question_number})
-              </button>
-            ))}
-          </div>
-        )}
-        <p>{renderText()}</p>
+      <div className="text-zinc-700 text-xs sm:text-sm leading-relaxed pl-8">
+        {renderText()}
       </div>
+
+      {hasEvidence && (
+        <div className="mt-2.5 pl-8 flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-semibold text-zinc-400">Dẫn chứng:</span>
+          {matchingQuestions.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => onSelectQuestion(q.question_number)}
+              className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                q.question_number === activeQuestionNumber
+                  ? 'bg-amber-500 text-white shadow-2xs'
+                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+              }`}
+            >
+              Câu {q.question_number}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -17,14 +17,13 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
 
   const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
   
-  // --- [MÃ MỚI BỞI AGENT] ---
+  // RD-05: Ẩn Header & Sidebar trong phòng thi và màn hình kết quả Test Practice
   const isWorkspace = 
     pathname?.includes('/test-practice/reading/') || 
     pathname?.includes('/test-practice/listening/') || 
     pathname?.includes('/test-practice/writing/') || 
     pathname?.includes('/test-practice/speaking/') ||
     pathname?.startsWith('/results/');
-  // ---------------------------
 
   const handleLogout = async () => {
     await signOut();
@@ -35,109 +34,95 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
-      {/* Top Navigation */}
-      <header className="bg-[#932120] text-white shadow-md sticky top-0 z-50">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="bg-white p-1.5 rounded-md">
-                <BookOpen className="w-6 h-6 text-[#932120]" />
-              </div>
-              <span className="font-bold text-lg tracking-wider">
-                MoonLab
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/exam"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#932120] hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-2xs"
-                title="Luyện viết tự do IELTS Task 1 & Task 2"
-              >
-                <PenTool className="w-3.5 h-3.5" />
-                <span>Chấm bài tự do</span>
-              </Link>
-              <span className="text-sm font-medium hidden md:block">Student Portal</span>
-              <NotificationBell />
-              <Link 
-                href="/profile"
-                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-xs font-bold text-white border border-white/30 transition-colors"
-                title={user?.full_name || user?.email || 'Hồ sơ cá nhân'}
-              >
-                {initials}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className={`flex-1 flex w-full mx-auto ${isWorkspace ? 'p-1.5 sm:p-2 overflow-hidden' : 'sm:px-6 lg:px-8'}`}>
-        {/* Sidebar */}
-        {/* --- [MÃ GỐC BỊ THAY THẾ] ---
-        <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200">
-        --------------------------- */}
-        {/* --- [MÃ MỚI BỞI AGENT] --- */}
+      <div className={`min-h-screen bg-zinc-50 font-sans flex flex-col ${isWorkspace ? 'h-screen overflow-hidden' : ''}`}>
+        {/* Top Navigation: Ẩn trong Workspace phòng thi */}
         {!isWorkspace && (
-          <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200 shrink-0">
-        {/* --------------------------- */}
-
-          <nav className="space-y-2">
-            {user?.role === 'admin' && (
-              <div className="mb-6">
-                <Link href="/admin/statistics" className="flex items-center gap-3 px-4 py-3 text-[#932120] bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors font-bold shadow-sm">
-                  <LayoutDashboard className="w-5 h-5" />
-                  Về trang Quản trị
-                </Link>
+          <header className="bg-[#932120] text-white shadow-md sticky top-0 z-50">
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-1.5 rounded-md">
+                    <BookOpen className="w-6 h-6 text-[#932120]" />
+                  </div>
+                  <span className="font-bold text-lg tracking-wider">
+                    MoonLab
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href="/exam"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#932120] hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-2xs"
+                    title="Luyện viết tự do IELTS Task 1 & Task 2"
+                  >
+                    <PenTool className="w-3.5 h-3.5" />
+                    <span>Chấm bài tự do</span>
+                  </Link>
+                  <span className="text-sm font-medium hidden md:block">Student Portal</span>
+                  <NotificationBell />
+                  <Link 
+                    href="/profile"
+                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-xs font-bold text-white border border-white/30 transition-colors"
+                    title={user?.full_name || user?.email || 'Hồ sơ cá nhân'}
+                  >
+                    {initials}
+                  </Link>
+                </div>
               </div>
-            )}
-            {user?.role === 'expert' && (
-              <div className="mb-6">
-                <Link href="/expert/profile" className="flex items-center gap-3 px-4 py-3 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-bold shadow-sm">
-                  <BookOpen className="w-5 h-5 text-amber-700" />
-                  Cổng Chuyên gia
-                </Link>
-              </div>
-            )}
-            {/* --- [MÃ MỚI BỞI AGENT: Thêm link cho 2 trang mới] --- */}
-            <Link href="/learning-profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/learning-profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <LayoutDashboard className={`w-5 h-5 ${isActive('/learning-profile') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Learning Profile
-            </Link>
-            <Link href="/test-practice" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/test-practice') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <Library className={`w-5 h-5 ${isActive('/test-practice') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Test Practice
-            </Link>
-            {/* --------------------------- */}
-
-            <Link href="/profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-              <User className={`w-5 h-5 ${isActive('/profile') ? 'text-red-200' : 'text-zinc-400'}`} />
-              Hồ sơ cá nhân
-            </Link>
-          </nav>
-          <div className="mt-8 pt-8 border-t border-zinc-200">
-            <button 
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium text-left"
-            >
-              <LogOut className="w-5 h-5" />
-              Đăng xuất
-            </button>
-          </div>
-        </aside>
+            </div>
+          </header>
         )}
-        {/* --- [MÃ MỚI BỞI AGENT: Đóng ngoặc điều kiện aside] --- */}
-        {/* --------------------------- */}
 
-        {/* Main Content */}
-        {/* --- [MÃ GỐC BỊ THAY THẾ] ---
-        <main className="flex-1 py-8 px-4 sm:px-0 md:pl-8">
-        --------------------------- */}
-        {/* --- [MÃ MỚI BỞI AGENT] --- */}
-        <main className={`flex-1 min-w-0 flex flex-col w-full ${isWorkspace ? 'p-0 max-w-full overflow-hidden' : 'py-8 px-4 sm:px-0 md:pl-8'}`}>
-        {/* --------------------------- */}
-          {children}
-        </main>
-      </div>
+        <div className={`flex-1 flex w-full mx-auto ${isWorkspace ? 'p-0 overflow-hidden' : 'sm:px-6 lg:px-8'}`}>
+          {/* Sidebar: Ẩn trong Workspace phòng thi */}
+          {!isWorkspace && (
+            <aside className="w-64 py-8 hidden md:block pr-8 border-r border-zinc-200 shrink-0">
+              <nav className="space-y-2">
+                {user?.role === 'admin' && (
+                  <div className="mb-6">
+                    <Link href="/admin/statistics" className="flex items-center gap-3 px-4 py-3 text-[#932120] bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors font-bold shadow-sm">
+                      <LayoutDashboard className="w-5 h-5" />
+                      Về trang Quản trị
+                    </Link>
+                  </div>
+                )}
+                {user?.role === 'expert' && (
+                  <div className="mb-6">
+                    <Link href="/expert/profile" className="flex items-center gap-3 px-4 py-3 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-bold shadow-sm">
+                      <BookOpen className="w-5 h-5 text-amber-700" />
+                      Cổng Chuyên gia
+                    </Link>
+                  </div>
+                )}
+                <Link href="/learning-profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/learning-profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+                  <LayoutDashboard className={`w-5 h-5 ${isActive('/learning-profile') ? 'text-red-200' : 'text-zinc-400'}`} />
+                  Learning Profile
+                </Link>
+                <Link href="/test-practice" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/test-practice') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+                  <Library className={`w-5 h-5 ${isActive('/test-practice') ? 'text-red-200' : 'text-zinc-400'}`} />
+                  Test Practice
+                </Link>
+                <Link href="/profile" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${isActive('/profile') ? 'bg-[#932120] text-white shadow-md' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+                  <User className={`w-5 h-5 ${isActive('/profile') ? 'text-red-200' : 'text-zinc-400'}`} />
+                  Hồ sơ cá nhân
+                </Link>
+              </nav>
+              <div className="mt-8 pt-8 border-t border-zinc-200">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium text-left"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Đăng xuất
+                </button>
+              </div>
+            </aside>
+          )}
+
+          {/* Main Content */}
+          <main className={`flex-1 min-w-0 flex flex-col w-full ${isWorkspace ? 'p-0 max-w-full overflow-hidden' : 'py-8 px-4 sm:px-0 md:pl-8'}`}>
+            {children}
+          </main>
+        </div>
       </div>
     </AuthGuard>
   );

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import type { PracticeHistoryItem } from "@/types/learning-profile";
 
 interface PracticeHistoryTimelineProps {
@@ -35,7 +35,14 @@ export function PracticeHistoryTimeline({ history }: PracticeHistoryTimelineProp
             year: "numeric"
           }) : "Gần đây";
 
-          const resultHref = item.id ? `/results/${item.id}` : "/history";
+          const skillLower = (item.skill || "").toLowerCase();
+          const isTestPractice = skillLower === "reading" || skillLower === "listening" || skillLower === "speaking" || !!item.test_id;
+
+          const resultHref = isTestPractice && item.test_id
+            ? `/test-practice/${skillLower}/${item.test_id}/summary?attemptId=${item.id}&returnUrl=${encodeURIComponent('/learning-profile?tab=test-practice')}`
+            : item.id
+            ? `/results/${item.id}`
+            : "/history";
 
           return (
             <div key={item.id} className="relative group">
