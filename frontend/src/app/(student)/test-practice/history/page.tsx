@@ -40,7 +40,7 @@ export default function TestPracticeHistoryPage() {
     <div className="min-h-screen bg-zinc-50/70 pb-20">
       {/* Top sticky navigation bar */}
       <div className="bg-white border-b border-zinc-200/80 sticky top-0 z-30 shadow-2xs backdrop-blur-md bg-white/95">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/test-practice"
@@ -73,11 +73,11 @@ export default function TestPracticeHistoryPage() {
         </div>
       </div>
 
-      {/* Main Body Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      {/* Main Content Layout - Full Width Fluid Container */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Thống kê điểm số (Radar + Question type accuracy) */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6">
             <div className="flex items-center gap-2">
               <BarChart2 className="w-5 h-5 text-[#932120]" />
               <div>
@@ -97,7 +97,7 @@ export default function TestPracticeHistoryPage() {
           </div>
 
           {/* Right Column: Timeline Lịch sử Test Practice */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-bold text-zinc-900">Chi tiết các lượt luyện đề</h2>
@@ -153,7 +153,7 @@ export default function TestPracticeHistoryPage() {
             />
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

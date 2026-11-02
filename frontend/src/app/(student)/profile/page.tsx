@@ -292,7 +292,7 @@ export default function ProfilePage() {
   const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-zinc-900">Hồ sơ cá nhân</h1>
         <p className="text-zinc-500 mt-1">Quản lý thông tin tài khoản, mục tiêu IELTS và xem tổng quan thành tích</p>
