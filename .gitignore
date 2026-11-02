@@ -94,3 +94,11 @@ coverage.xml
 # Project specific data (optional)
 data/
 docs/
+
+# ==========================================
+# LOCAL DATA & TOOLING (không commit)
+# ==========================================
+# Dataset crawl (đề + đáp án) — bản dùng chung đã nằm trên Cloudflare R2: dataset/writing/
+dataset_clean/
+# Cấu hình MCP server cá nhân của Claude Code
+.mcp.json

@@ -1,8 +1,13 @@
 .env
-__pycache__
-.pytest_cache
-.venv
-data
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+data/
+
+# Runtime logs
+logs/*.log
+*.log
 
 # Test/debug outputs
 test_final_output.json
@@ -11,3 +16,4 @@ raw_llm.json
 result.html
 test_visualization.html
 *.ipynb
+

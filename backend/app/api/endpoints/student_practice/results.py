@@ -41,22 +41,24 @@ async def get_attempt_summary(attempt_id: str, current_user: Optional[User] = De
         for k, v in type_stats.items()
     ]
 
-    return {
-        "meta": {"code": 200},
-        "data": {
-            "attempt_id": attempt["id"],
-            "test_id": attempt["test_id"],
-            "title": test_info.get("title") or "IELTS Practice Test",
-            "skill": attempt["skill"],
-            "mode": attempt["mode"],
-            "status": attempt["status"],
-            "overall_band": float(attempt.get("band") or 0.0),
-            "correct_count": attempt.get("raw_score") or 0,
-            "total_questions": len(answers),
-            "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"),
-            "task_formats_result": formats_result
-        }
+    data = {
+        "attempt_id": attempt["id"],
+        "test_id": attempt["test_id"],
+        "title": test_info.get("title") or "IELTS Practice Test",
+        "skill": attempt["skill"],
+        "mode": attempt["mode"],
+        "status": attempt["status"],
+        "overall_band": float(attempt.get("band") or 0.0),
+        "correct_count": attempt.get("raw_score") or 0,
+        "total_questions": len(answers),
+        "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"),
+        "task_formats_result": formats_result
     }
+    if attempt["skill"] == "writing":
+        # Per-task AI grading status + scores (frontend polls until grading_done)
+        from app.services.writing_attempt_summary import build_writing_summary
+        data["writing"] = build_writing_summary(attempt_id)
+    return {"meta": {"code": 200}, "data": data}
 
 @router.get("/attempts/{attempt_id}/detail")
 async def get_attempt_detail_with_explanations(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):

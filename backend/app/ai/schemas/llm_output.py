@@ -32,10 +32,10 @@ class AllAgentOutputs:
         Average of four criteria, rounded to nearest 0.5
         (per IELTS half-band rounding rule).
         """
-        import math
+        from utils.band_rounding import round_overall_band
         avg = (self.ta.band + self.cc.band + self.lr.band + self.gra.band) / 4
         # IELTS rule: x.25 -> x.5, x.75 -> x+1
-        return math.floor(avg * 2 + 0.5) / 2
+        return round_overall_band(avg)
 
     def model_dump(self):
         data = asdict(self)

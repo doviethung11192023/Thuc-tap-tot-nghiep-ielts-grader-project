@@ -4,9 +4,13 @@ using few-shot LLM prompting.
 """
 from __future__ import annotations
 import json
-from openai import OpenAI
+import logging
+
 from settings.config import get_settings
 from schemas.task_type import TaskTypeResult
+from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence
+
+logger = logging.getLogger(__name__)
 
 _TASK_TYPES = {
     "Opinion": """# Trigger
@@ -135,24 +139,31 @@ def _build_messages(title: str) -> list[dict]:
     messages.append({"role": "user", "content": title})
     return messages
 
-def _get_client() -> OpenAI:
-    settings = get_settings()
-    # Use Qwen via OpenAI-compatible API (or Gemini with openai compat)
-    return OpenAI(
-        api_key=settings.qwen_api_key,
-        base_url=settings.default_base_url,
-    )
-
 def classify_task_type(title: str) -> TaskTypeResult:
-    """Classify the IELTS title into one of 6 task types."""
-    client = _get_client()
-    response = client.chat.completions.create(
-        model=get_settings().default_llm_model,
-        messages=_build_messages(title),
-        temperature=0.0,
-        response_format={"type": "json_object"},
-    )
-    data = json.loads(response.choices[0].message.content)
+    """Classify the IELTS Task 2 title into one of 6 task types.
+
+    An empty title (e.g. prompt not found upstream) or any LLM/JSON failure
+    falls back to "Opinion" instead of failing the whole grading request.
+    """
+    default = TaskTypeResult(task_type="Opinion", description=_TASK_TYPES["Opinion"])
+    if not title or not title.strip():
+        logger.warning("Empty task title — skipping classifier, defaulting to Opinion")
+        return default
+
+    try:
+        response = get_sync_llm_client().chat.completions.create(
+            model=get_settings().default_llm_model,
+            messages=_build_messages(title),
+            temperature=0.0,
+            max_tokens=50,
+            response_format={"type": "json_object"},
+            extra_body=llm_extra_body(),
+        )
+        data = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}"))
+    except Exception as e:
+        logger.warning("Task type classifier failed (%s) — defaulting to Opinion", e)
+        return default
+
     task_type = data.get("task_type", "Opinion")
     description = _TASK_TYPES.get(task_type, _TASK_TYPES["Opinion"])
     return TaskTypeResult(task_type=task_type, description=description)

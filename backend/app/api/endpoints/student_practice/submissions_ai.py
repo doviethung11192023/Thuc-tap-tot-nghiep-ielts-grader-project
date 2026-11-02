@@ -34,30 +34,33 @@ async def submit_writing_attempt(
     if current_user and str(attempt["user_id"]) != str(current_user.id) and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Không có quyền nộp bài cho phiên này")
 
-    essay_content = req.essay_text or ""
-    if not essay_content and (req.task1_text or req.task2_text):
-        parts = []
-        if req.task1_text:
-            parts.append(f"--- TASK 1 ---\n{req.task1_text.strip()}")
-        if req.task2_text:
-            parts.append(f"--- TASK 2 ---\n{req.task2_text.strip()}")
-        essay_content = "\n\n".join(parts)
+    # Mỗi task là một dòng essays riêng (task_no = 1 | 2) để AI chấm đúng đề Task 1 / Task 2.
+    # Không có task1_text/task2_text → giữ hành vi cũ: một essay từ essay_text (task_no = None).
+    task_texts = [(no, (text or "").strip()) for no, text in ((1, req.task1_text), (2, req.task2_text))]
+    task_texts = [(no, text) for no, text in task_texts if text]
+    if not task_texts:
+        legacy_text = (req.essay_text or "").strip()
+        if not legacy_text:
+            raise HTTPException(status_code=400, detail="Bài viết trống")
+        task_texts = [(None, legacy_text)]
 
-    word_count = len(essay_content.split())
     now_utc = datetime.now(timezone.utc).isoformat()
+    user_id = str(current_user.id) if current_user else str(attempt["user_id"])
 
-    # Lưu bài thi vào bảng essays
-    essay_payload = {
-        "user_id": str(current_user.id) if current_user else str(attempt["user_id"]),
-        "content": essay_content,
-        "word_count": word_count,
-        "status": "pending",
-        "attempt_id": attempt_id
-    }
-    e_res = supabase.table("essays").insert(essay_payload).execute()
-    if not e_res.data:
-        raise HTTPException(status_code=500, detail="Không thể lưu bài thi viết")
-    essay_id = e_res.data[0]["id"]
+    essays_created = []  # [(task_no, essay_id, word_count)]
+    for task_no, text in task_texts:
+        word_count = len(text.split())
+        e_res = supabase.table("essays").insert({
+            "user_id": user_id,
+            "content": text,
+            "word_count": word_count,
+            "status": "pending",
+            "attempt_id": attempt_id,
+            "task_id": str(uuid.uuid4()),
+        }).execute()
+        if not e_res.data:
+            raise HTTPException(status_code=500, detail="Không thể lưu bài thi viết")
+        essays_created.append((task_no, e_res.data[0]["id"], word_count))
 
     # Cập nhật trạng thái test_attempts
     supabase.table("test_attempts").update({
@@ -65,17 +68,20 @@ async def submit_writing_attempt(
         "submitted_at": now_utc
     }).eq("id", attempt_id).execute()
 
-    # Kích hoạt background AI evaluation
-    job_id = str(uuid.uuid4())
-    background_tasks.add_task(evaluate_essay_task, None, essay_id)
-    supabase.table("essays").update({"task_id": job_id}).eq("id", essay_id).execute()
+    # Kích hoạt background AI evaluation cho từng task
+    for task_no, essay_id, _ in essays_created:
+        background_tasks.add_task(evaluate_essay_task, None, essay_id, task_no)
+
+    # essay_id chính: Task 2 nếu có, ngược lại là essay duy nhất
+    primary_essay_id = essays_created[-1][1]
 
     return {
         "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
         "data": {
             "attempt_id": attempt_id,
-            "essay_id": essay_id,
-            "word_count": word_count,
+            "essay_id": primary_essay_id,
+            "essay_ids": {f"task{no}" if no else "essay": eid for no, eid, _ in essays_created},
+            "word_count": sum(wc for _, _, wc in essays_created),
             "status": "scoring",
             "submitted_at": now_utc
         }
