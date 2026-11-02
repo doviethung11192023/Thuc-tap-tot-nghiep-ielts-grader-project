@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # Override the model configured on the Langfuse REWRITE prompts (empty → use Langfuse config).
     rewrite_llm_model: str = ""
     # Vision model used to read Writing Task 1 charts/diagrams.
-    vision_llm_model: str = "qwen3-vl-plus"
+    vision_llm_model: str = "qwen3.7-plus"  # natively multimodal; counts map/diagram elements more reliably than qwen3-vl-plus
     vision_max_tokens: int = 1_500
     # Per-request timeout (seconds) for every LLM call.
     llm_timeout_seconds: float = 180.0

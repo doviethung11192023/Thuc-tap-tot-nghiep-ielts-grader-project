@@ -93,3 +93,20 @@ def test_numbers_from_chart_or_original_are_allowed():
     ]
     drop_unsupported_numbers(annos, "Car: 45% (2000), 55% (2010), 48% (2020)")
     assert [a["corrected_text"] for a in annos] == ["peaked at 55% in 2010", "Bicycle use showed", "roughly 1200 people"]
+
+
+def test_overlapping_annotation_is_merged_not_lost():
+    essay = "In the centre, there is six offices and a canteen."
+    raw = [
+        {"type": "error", "category": "TR", "title": "Data", "original_text": essay, "corrected_text": "x", "explanation": "Wrong count."},
+        {"type": "error", "category": "GRA", "title": "Agreement", "original_text": "there is six offices", "corrected_text": "there are six offices", "explanation": "Use 'are'."},
+    ]
+    kept = locate_and_dedupe(raw, essay)
+    assert len(kept) == 1
+    assert "Also (GRA) Agreement: Use 'are'." in kept[0]["explanation"]
+
+
+def test_number_words_count_as_numbers():
+    annos = [_anno("there are six offices", "there are eight offices")]
+    drop_unsupported_numbers(annos, "Offices: 6")
+    assert annos[0]["corrected_text"] == ""

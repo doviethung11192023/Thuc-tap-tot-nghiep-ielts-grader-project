@@ -49,6 +49,8 @@ class ChartDescription:
     overview: str = ""
     key_features: list[str] = field(default_factory=list)
     data_points: list[str] = field(default_factory=list)
+    # Elements the vision model could not read reliably → graders must not penalise them
+    uncertain: list[str] = field(default_factory=list)
 
     def to_prompt_text(self) -> str:
         """Plain-text block injected into the Task 1 prompts as `visual_description`."""
@@ -64,6 +66,9 @@ class ChartDescription:
         if self.data_points:
             lines.append("Data points:")
             lines += [f"- {item}" for item in self.data_points]
+        if self.uncertain:
+            lines.append("Uncertain (could not be read reliably — do NOT penalise the candidate on these):")
+            lines += [f"- {item}" for item in self.uncertain]
         return "\n".join(lines)
 
     def to_dict(self) -> dict:
@@ -73,6 +78,7 @@ class ChartDescription:
             "overview": self.overview,
             "key_features": self.key_features,
             "data_points": self.data_points,
+            "uncertain": self.uncertain,
         }
 
 
@@ -126,6 +132,7 @@ def _parse_description(raw_text: str) -> ChartDescription:
         overview=str(data.get("overview", "")).strip(),
         key_features=_as_str_list(data.get("key_features")),
         data_points=_as_str_list(data.get("data_points")),
+        uncertain=_as_str_list(data.get("uncertain")),
     )
 
 

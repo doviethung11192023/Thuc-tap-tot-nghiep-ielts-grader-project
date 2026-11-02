@@ -106,8 +106,15 @@ def snap_to_word_boundaries(essay: str, start: int, end: int) -> tuple[int, int]
     return start, end
 
 
-def _overlaps(start: int, end: int, kept: list[dict]) -> bool:
-    return any(start < k["position_end"] and k["position_start"] < end for k in kept)
+def _first_overlap(start: int, end: int, kept: list[dict]) -> dict | None:
+    return next((k for k in kept if start < k["position_end"] and k["position_start"] < end), None)
+
+
+def _merge_into(winner: dict, loser: dict) -> None:
+    """Keep the feedback of an overlapping annotation that cannot be highlighted on its own
+    (e.g. a GRA error inside a sentence already flagged for TR)."""
+    note = f"Also ({loser['category']}) {loser['title']}: {loser['explanation']}".strip()
+    winner["explanation"] = f"{winner['explanation']}\n\n{note}".strip()
 
 
 def locate_and_dedupe(raw_annotations: list, essay_raw: str) -> list[dict]:
@@ -137,8 +144,11 @@ def locate_and_dedupe(raw_annotations: list, essay_raw: str) -> list[dict]:
     located.sort(key=lambda a: (TYPE_PRIORITY[a["type"]], a["position_start"]))
     kept: list[dict] = []
     for anno in located:
-        if not _overlaps(anno["position_start"], anno["position_end"], kept):
+        winner = _first_overlap(anno["position_start"], anno["position_end"], kept)
+        if winner is None:
             kept.append(anno)
+        elif anno["type"] != "strength":
+            _merge_into(winner, anno)
     kept.sort(key=lambda a: a["position_start"])
     return kept
 
@@ -156,8 +166,20 @@ def apply_corrections(essay_raw: str, annotations: list[dict]) -> str:
 _NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)*")
 
 
+_NUMBER_WORDS = {
+    w: str(i) for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+        "fifteen sixteen seventeen eighteen nineteen twenty".split()
+    )
+}
+_NUMBER_WORD_RE = re.compile(r"\b(" + "|".join(_NUMBER_WORDS) + r")\b", re.IGNORECASE)
+
+
 def _numbers(text: str) -> set[str]:
-    return {n.replace(",", "") for n in _NUMBER_RE.findall(text or "")}
+    """Digits plus number words up to twenty ("six offices" ≡ "6 offices")."""
+    found = {n.replace(",", "") for n in _NUMBER_RE.findall(text or "")}
+    found |= {_NUMBER_WORDS[w.lower()] for w in _NUMBER_WORD_RE.findall(text or "")}
+    return found
 
 
 def drop_unsupported_numbers(annotations: list[dict], reference_text: str) -> list[dict]:
