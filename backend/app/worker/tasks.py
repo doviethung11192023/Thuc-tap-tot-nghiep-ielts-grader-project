@@ -54,31 +54,116 @@ def align_annotation_coordinates(content: str, original_text: str, hint_start: i
         
     return real_start, real_end
 
-async def evaluate_essay_task(ctx, essay_id: str):
+def _resolve_image_url(image_key):
+    """image_key là URL tuyệt đối (dataset) hoặc key trên Cloudflare R2 → URL công khai, hoặc None."""
+    if not image_key:
+        return None
+    if image_key.startswith(("http://", "https://", "data:image/")):
+        return image_key
+    from app.services.r2_storage import r2_storage
+    url = r2_storage.get_file_url(image_key)
+    return url if url.startswith(("http://", "https://")) else None
+
+
+def _load_writing_task_prompt(attempt_id: str, task_no: int):
+    """Đề bài + ảnh của Writing Task {task_no} trong bài test của attempt → (prompt, image_url)."""
+    att = supabase.table("test_attempts").select("test_id").eq("id", attempt_id).execute()
+    if not att.data:
+        return "", None
+    sec = supabase.table("test_sections").select("id, passage_text") \
+        .eq("test_id", att.data[0]["test_id"]).eq("order_no", task_no).limit(1).execute()
+    if not sec.data:
+        return "", None
+    grp = supabase.table("question_groups").select("id, image_key") \
+        .eq("section_id", sec.data[0]["id"]).order("order_no").limit(1).execute()
+    prompt, image_key = "", None
+    if grp.data:
+        image_key = grp.data[0].get("image_key")
+        q = supabase.table("questions").select("prompt") \
+            .eq("group_id", grp.data[0]["id"]).order("number").limit(1).execute()
+        if q.data:
+            prompt = q.data[0].get("prompt") or ""
+    return (prompt or sec.data[0].get("passage_text") or ""), _resolve_image_url(image_key)
+
+
+def _finalize_writing_attempt(attempt_id: str):
+    """Khi mọi essay của attempt đã chấm xong → band tổng (T1 + 2·T2)/3 làm tròn 0.5 → test_attempts."""
+    import math
+    essays = supabase.table("essays").select("id, status").eq("attempt_id", attempt_id).execute().data or []
+    if not essays or any(e["status"] in ("pending", "evaluating") for e in essays):
+        return
+    done_ids = [e["id"] for e in essays if e["status"] == "completed"]
+    now_utc = datetime.now(timezone.utc).isoformat()
+    if not done_ids:
+        supabase.table("test_attempts").update({"status": "scoring_failed"}).eq("id", attempt_id).execute()
+        return
+    results = supabase.table("evaluation_results").select("overall_band, raw_ai_response") \
+        .in_("essay_id", done_ids).execute().data or []
+    bands = {}
+    for r in results:
+        task = (r.get("raw_ai_response") or {}).get("task_type", "task2")
+        bands[task] = float(r.get("overall_band") or 0)
+    if "task1" in bands and "task2" in bands:
+        raw = (bands["task1"] + 2 * bands["task2"]) / 3
+    else:
+        raw = sum(bands.values()) / max(len(bands), 1)
+    band = math.floor(raw * 2 + 0.5) / 2
+    supabase.table("test_attempts").update({
+        "status": "scored", "band": band, "band_source": "ai", "scored_at": now_utc,
+    }).eq("id", attempt_id).execute()
+    print(f"✅ [Worker] Attempt {attempt_id} -> SCORED (band {band}, tasks {sorted(bands)})")
+
+
+async def evaluate_essay_task(ctx, essay_id: str, task_no: int | None = None):
     """
-    Background task để mô phỏng tiến trình chấm bài IELTS (AI Pipeline)
+    Background task chấm bài IELTS Writing qua AI Engine.
+    task_no (1 | 2): bài thi theo attempt → lấy đề Task tương ứng từ bài test; None → luồng cũ (topic).
     """
-    print(f"🔧 [Worker] Bắt đầu chấm bài cho Essay ID: {essay_id}")
-    
+    print(f"🔧 [Worker] Bắt đầu chấm bài cho Essay ID: {essay_id} (task_no={task_no})")
+
     # 1. Chuyển trạng thái sang EVALUATING
     supabase.table("essays").update({"status": "evaluating"}).eq("id", essay_id).execute()
     print(f"🔧 [Worker] Đã cập nhật trạng thái -> EVALUATING")
 
     # 2. Lấy nội dung gốc của học viên và thông tin đề bài
-    essay_res = supabase.table("essays").select("content, topic_id").eq("id", essay_id).execute()
+    essay_res = supabase.table("essays").select("content, topic_id, attempt_id").eq("id", essay_id).execute()
     if not essay_res.data:
         print(f"❌ [Worker] Không tìm thấy bài viết {essay_id}")
         supabase.table("essays").update({"status": "failed"}).eq("id", essay_id).execute()
         return {"status": "failed", "error": "Essay not found"}
-        
+
     student_content = essay_res.data[0].get("content", "")
     topic_id = essay_res.data[0].get("topic_id")
-    
+    attempt_id = essay_res.data[0].get("attempt_id")
+
     topic_title = ""
-    if topic_id:
+    image_url = None
+    if attempt_id and task_no:
+        try:
+            topic_title, image_url = _load_writing_task_prompt(attempt_id, task_no)
+        except Exception as e:
+            print(f"⚠️ [Worker] Không lấy được đề Task {task_no}: {e}")
+    elif topic_id:
         topic_res = supabase.table("topics").select("title").eq("id", topic_id).execute()
         if topic_res.data:
             topic_title = topic_res.data[0].get("title", "")
+
+    try:
+        return await _grade_and_store(essay_id, student_content, topic_title, task_no, image_url)
+    except Exception as e:
+        print(f"❌ [Worker] Lỗi xử lý kết quả chấm {essay_id}: {e}")
+        supabase.table("essays").update({"status": "failed"}).eq("id", essay_id).execute()
+        return {"status": "failed", "error": str(e)}
+    finally:
+        if attempt_id:
+            try:
+                _finalize_writing_attempt(attempt_id)
+            except Exception as e:
+                print(f"⚠️ [Worker] Không cập nhật được attempt {attempt_id}: {e}")
+
+
+async def _grade_and_store(essay_id: str, student_content: str, topic_title: str, task_no, image_url):
+    """Gọi AI Engine (retry) → lưu evaluation_results, essay_annotations, log → COMPLETED."""
 
     # 3. Gọi API đến AI Engine thật với cơ chế Retry
     print(f"🧠 [AI Engine] Đang gọi API chấm điểm...")
@@ -91,6 +176,9 @@ async def evaluate_essay_task(ctx, essay_id: str):
         "title": topic_title,
         "essay": student_content
     }
+    if task_no:
+        payload["task_type"] = f"task{task_no}"
+        payload["image_url"] = image_url
     headers = {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true"
