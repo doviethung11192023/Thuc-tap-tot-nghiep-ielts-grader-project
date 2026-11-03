@@ -20,7 +20,7 @@ class DatasetImporter:
         self.stats = {
             "test_sets_created": 0, "tests_created": 0, "tests_skipped_existing": 0,
             "sections_created": 0, "question_groups_created": 0, "questions_created": 0,
-            "topics_created": 0, "errors": []
+            "topics_created": 0, "errors": [], "warnings": []
         }
 
     def run(self, limit: Optional[int] = None, rl: bool = True, writing: bool = True, speaking: bool = True, selected_tests: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
@@ -31,6 +31,9 @@ class DatasetImporter:
                     self.admin_id = adm.data[0]["id"]
 
             test_set_id = None   # bộ đề Mock chỉ có 1 đề/kỹ năng (FR-36): đề nhập vào là đề độc lập
+            from app.services.dataset_scanner import scan_dataset
+            self.stats["duplicate_titles"] = {f"{t['title'].lower()[:280]}|{t['skill']}"
+                                               for t in scan_dataset(str(self.root))["tests"] if t.get("duplicate_title")}
             if selected_tests:
                 self._import_selected(test_set_id, selected_tests)
             else:
@@ -43,6 +46,8 @@ class DatasetImporter:
                     import_speaking_tests(self.root, self.admin_id, test_set_id, limit, self.stats, self.only_pending, self.progress_callback, self.default_difficulty)
         except Exception as e:
             self.stats["errors"].append(f"Global import error: {str(e)}")
+        self.stats.pop("duplicate_titles", None)   # trường nội bộ, không trả ra ngoài
+        self.stats.pop("_new_tests", None)
         return self.stats
 
     def _import_rl(self, test_set_id: str, limit: Optional[int] = None):
@@ -65,7 +70,18 @@ class DatasetImporter:
         rl_ans_dir = self.dap_an_dir / "listening_reading" / "445_Recent_Actual_Test"
         for item in selected_tests:
             try:
-                skill, p = str(item.get("skill", "")).lower(), Path(item["path"])
+                skill = str(item.get("skill", "")).lower()
+                label = item.get("title") or item.get("path") or "?"
+                if skill not in ("reading", "listening", "writing", "speaking"):
+                    self.stats["errors"].append(f"Mục '{label}': skill không hợp lệ ('{skill}')")
+                    continue
+                if not item.get("path"):
+                    self.stats["errors"].append(f"Mục '{label}': thiếu đường dẫn path")
+                    continue
+                p = Path(item["path"])
+                if not p.exists():
+                    self.stats["errors"].append(f"Mục '{label}': không tìm thấy file {p}")
+                    continue
                 diff = item.get("difficulty") or self.default_difficulty
                 if skill in ("reading", "listening"):
                     ans_file = "reading_loi_giai_chi_tiet_4_buoc.json" if skill == "reading" else "listening_loi_giai_chi_tiet_4_buoc.json"
@@ -84,9 +100,10 @@ class DatasetImporter:
         w_dir = self.de_bai_dir / "writing"
         if not w_dir.exists():
             return
-        w_files = list(w_dir.glob("**/*.json"))
+        w_files = [f for f in w_dir.glob("**/*.json") if not f.name.lower().startswith("tong_quan")]   # file tổng quan bộ đề không phải đề bài
         if limit:
             w_files = w_files[:limit * 2]
+        existing_topics = {t["title"].strip().lower() for t in (db().table("topics").select("title").execute().data or [])}
         for wf in w_files:
             try:
                 with open(wf, "r", encoding="utf-8") as f:
@@ -96,6 +113,9 @@ class DatasetImporter:
                 prompt = data.get("content") or data.get("prompt") or data.get("description")
                 if not prompt:
                     continue
+                if title[:200].strip().lower() in existing_topics:
+                    continue   # đã có chủ đề cùng tiêu đề
+                existing_topics.add(title[:200].strip().lower())
                 task_type = "task1" if "task 1" in title.lower() or "task1" in wf.stem.lower() else "task2"
                 db().table("topics").insert({
                     "title": title[:200], "description": title, "prompt_content": prompt,

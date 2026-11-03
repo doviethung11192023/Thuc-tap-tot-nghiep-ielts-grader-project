@@ -7,7 +7,6 @@ import {
   BookOpen, 
   Users, 
   Library, 
-  Activity, 
   BarChart, 
   LogOut, 
   FileText,
@@ -41,7 +40,6 @@ export function AdminSidebar({
     { href: "/admin/topics", label: "Chủ đề Writing", icon: Library },
     { href: "/admin/users", label: "Quản lý Học viên", icon: Users },
     { href: "/admin/settings", label: "Dữ liệu Lõi & Cài đặt", icon: Sliders },
-    { href: "/admin/logs", label: "Hệ thống Logs", icon: Activity },
   ];
 
   const sidebarContent = (

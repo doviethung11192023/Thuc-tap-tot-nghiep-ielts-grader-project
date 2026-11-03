@@ -73,8 +73,11 @@ def list_tests(page: int, limit: int, filters: dict[str, Any], sort_by: Optional
 
 def create_test(admin_id: str, data: dict[str, Any]) -> dict[str, Any]:
     status = data.get("status") or "draft"
-    row = db().table("tests").insert({**_payload(data), "status": "draft", "author_id": admin_id,
-                                      "author_role": "admin"}).execute().data[0]
+    try:
+        row = db().table("tests").insert({**_payload(data), "status": "draft", "author_id": admin_id,
+                                          "author_role": "admin"}).execute().data[0]
+    except Exception as e:   # FR-36 (UNIQUE test_set_id+skill), khoá ngoại bộ đề, kiểu số: trả 409/400 thay vì 500
+        raise db_error(e)
     write_audit(admin_id, "create_test", "tests", row["id"], after={"title": row["title"], "skill": row["skill"]})
     if status == "published":
         return set_status(admin_id, row["id"], "published")
@@ -120,7 +123,10 @@ def delete_test(admin_id: str, test_id: str) -> None:
     try:
         db().table("tests").delete().eq("id", test_id).execute()
     except Exception as e:
-        raise db_error(e)
+        err = db_error(e)
+        if err.status_code == 409 and "BR-10" in str(err.detail):
+            err.detail = "Đề đã xuất bản hoặc lưu trữ không xoá được (BR-10)"
+        raise err
     write_audit(admin_id, "delete_test", "tests", test_id)
 
 

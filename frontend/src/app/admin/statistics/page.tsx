@@ -47,12 +47,12 @@ export default function AdminStatisticsPage() {
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Giám sát hiệu suất, độ ổn định và chi phí vận hành mô hình AI IELTS Grader</p>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <select className="bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-zinc-700 focus:outline-none focus:border-[#932120] shadow-xs">
+          <select disabled title="Chưa hỗ trợ: số liệu hiện là toàn thời gian" className="bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-zinc-700 focus:outline-none focus:border-[#932120] shadow-xs">
             <option>Hôm nay</option>
             <option>7 ngày qua</option>
             <option>Tháng này</option>
           </select>
-          <button className="bg-[#932120] text-white px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-[#7a1a19] transition-all text-xs sm:text-sm whitespace-nowrap">
+          <button disabled title="Chưa hỗ trợ xuất báo cáo" className="bg-[#932120] text-white px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-[#7a1a19] transition-all text-xs sm:text-sm whitespace-nowrap">
             Xuất Báo Cáo
           </button>
         </div>
@@ -60,7 +60,7 @@ export default function AdminStatisticsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
         <KpiCard title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-blue-600" />} subtext="Total registered users" />
-        <KpiCard title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Total graded essays" />
+        <KpiCard title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Bài Writing trong đề + bài chấm tự do" />
         <KpiCard title="Essays Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Essays submitted today" />
         <KpiCard title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext="Evaluation error rate" />
         <KpiCard title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Average evaluation time" />

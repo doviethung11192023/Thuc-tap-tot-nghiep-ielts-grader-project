@@ -19,6 +19,7 @@ def process_single_rl_exam(
     progress_callback = None,
     difficulty: Optional[str] = "medium"
 ):
+    test_id = None
     try:
         with open(json_path, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
@@ -54,13 +55,15 @@ def process_single_rl_exam(
                 questions = []
                 for pq in parsed_qs:
                     accepted, expl, evidence = _answer_key(explanations_map.get(pq["raw_id"]))
+                    if not accepted:
+                        stats.setdefault("warnings", []).append(f"'{title}' câu {pq['number']}: không có đáp án trong file lời giải, để trống")
                     questions.append({"number": pq["number"], "prompt": pq["prompt"], "options": pq["options"],
-                                      "answer_key": {"accepted_answers": accepted, "explanation": expl, "evidence": evidence}})
+                                      "answer_key": {"accepted_answers": accepted, "explanation": expl, "evidence": evidence} if accepted else None})
                 import_writer.add_group(section_id, {"order_no": ex_idx, "question_type": q_type,
                                                      "instructions": grp_title, "image_key": img_key,
                                                      "content": content_meta, "questions": questions}, stats)
-        import_writer.publish(test_id, admin_id, title, stats)
     except Exception as e:
+        import_writer.abort(test_id, stats)
         stats["errors"].append(f"Error processing {json_path.name}: {str(e)}")
 
 
@@ -79,4 +82,4 @@ def _answer_key(ev_item):
                     accepted.append(raw_ans)
             if not evidence:
                 evidence = ae.get("evidence_quote") or (ae.get("evidence_items", [{}])[0].get("evidence_text") if ae.get("evidence_items") else None)
-    return accepted or ["N/A"], expl, evidence
+    return accepted, expl, evidence

@@ -19,6 +19,7 @@ import logging
 import time
 
 from schemas.input import EssayInput
+from settings.config import get_settings
 from schemas.task_type import TaskTypeResult
 from services.chart_describer import describe_chart
 from services.langfuse.prompt_manager import PromptFetchError, WritingTask
@@ -111,6 +112,7 @@ async def run_grading_pipeline(
     )
 
     final_json["task_subtype"] = task_type_result.task_type
+    final_json["model"] = get_settings().default_llm_model  # backend ghi vào grading_runs.model (FR-30)
     if visual is not None:
         final_json["visual_analysis"] = visual.to_dict()
 

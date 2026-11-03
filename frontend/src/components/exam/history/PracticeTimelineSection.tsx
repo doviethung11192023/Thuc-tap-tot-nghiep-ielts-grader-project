@@ -8,9 +8,10 @@ import { Calendar, Inbox } from "lucide-react";
 interface PracticeTimelineSectionProps {
   groups: Record<string, TimelineHistoryItem[]>;
   loading?: boolean;
+  onDeleteItem?: (attemptId: string) => void;
 }
 
-export function PracticeTimelineSection({ groups, loading }: PracticeTimelineSectionProps) {
+export function PracticeTimelineSection({ groups, loading, onDeleteItem }: PracticeTimelineSectionProps) {
   const monthKeys = Object.keys(groups);
 
   if (loading) {
@@ -61,7 +62,7 @@ export function PracticeTimelineSection({ groups, loading }: PracticeTimelineSec
                     aria-hidden="true"
                     className="absolute -left-[27px] top-6 w-3 h-3 rounded-full bg-blue-600 border-2 border-white shadow-2xs z-10"
                   />
-                  <PracticeHistoryItemCard item={item} />
+                  <PracticeHistoryItemCard item={item} onDelete={onDeleteItem} />
                 </div>
               ))}
             </div>

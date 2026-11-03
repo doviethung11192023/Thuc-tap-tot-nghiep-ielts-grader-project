@@ -16,10 +16,12 @@ interface SpeakingWorkspaceProps {
   testData?: MockSpeakingExamDataset;
   mode?: 'exam' | 'practice';
   returnUrl?: string;
+  /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
+  onAbandon?: () => Promise<unknown> | void;
   onSubmit: () => void;
 }
 
-export function SpeakingWorkspace({ testData, mode = 'exam', returnUrl, onSubmit }: SpeakingWorkspaceProps) {
+export function SpeakingWorkspace({ testData, mode = 'exam', returnUrl, onAbandon, onSubmit }: SpeakingWorkspaceProps) {
   const router = useRouter();
   const exam = testData || mockSpeakingExamDataset;
 
@@ -178,7 +180,7 @@ export function SpeakingWorkspace({ testData, mode = 'exam', returnUrl, onSubmit
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={() => router.push(returnUrl || '/test-practice')}
+        onExitDiscard={async () => { if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); }}
       />
     </div>
   );

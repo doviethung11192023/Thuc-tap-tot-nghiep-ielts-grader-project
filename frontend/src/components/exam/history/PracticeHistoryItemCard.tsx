@@ -2,14 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
-import { BookOpen, Headphones, PenTool, Mic, Clock, ChevronRight } from "lucide-react";
+import { BookOpen, Headphones, PenTool, Mic, Clock, ChevronRight, Trash2 } from "lucide-react";
 import type { TimelineHistoryItem } from "@/services/practice-history-cache";
 
 interface PracticeHistoryItemCardProps {
   item: TimelineHistoryItem;
+  /** Chỉ truyền cho bài luyện tập đang làm dở: xoá hẳn bài đó. */
+  onDelete?: (attemptId: string) => void;
 }
 
-export function PracticeHistoryItemCard({ item }: PracticeHistoryItemCardProps) {
+export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemCardProps) {
   const formatDateTime = (raw: string) => {
     try {
       const d = new Date(raw);
@@ -77,6 +79,21 @@ export function PracticeHistoryItemCard({ item }: PracticeHistoryItemCardProps) 
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
                 Đang làm
               </span>
+            )}
+            {item.status === "in_progress" && item.mode === "practice" && onDelete && (
+              <button
+                type="button"
+                title="Xoá bài luyện tập làm dở"
+                aria-label="Xoá bài luyện tập làm dở"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (window.confirm("Xoá bài luyện tập làm dở này? Bài làm sẽ bị xoá hẳn.")) onDelete(item.id);
+                }}
+                className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-red-700 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
 

@@ -8,6 +8,7 @@ import {
   getCachedPracticeHistory,
   PracticeHistorySummaryData,
 } from "@/services/practice-history-cache";
+import { discardAttempt } from "@/services/student-test-practice";
 import { PracticeHistoryRadarCard } from "@/components/exam/history/PracticeHistoryRadarCard";
 import { PracticeQuestionTypeAccuracyCard } from "@/components/exam/history/PracticeQuestionTypeAccuracyCard";
 import { PracticeTimelineSection } from "@/components/exam/history/PracticeTimelineSection";
@@ -35,6 +36,22 @@ export default function TestPracticeHistoryPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Xoá bài luyện tập làm dở rồi nạp lại lịch sử (bỏ qua cache)
+  const handleDeleteItem = async (attemptId: string) => {
+    if (!(await discardAttempt(attemptId))) return;
+    // Ẩn ngay bài vừa xoá, rồi nạp lại số liệu thật (refetch mất vài giây)
+    setData((prev) => {
+      if (!prev) return prev;
+      const groups: typeof prev.timeline_groups = {};
+      for (const [month, items] of Object.entries(prev.timeline_groups)) {
+        const kept = items.filter((it) => it.id !== attemptId);
+        if (kept.length > 0) groups[month] = kept;
+      }
+      return { ...prev, timeline_groups: groups };
+    });
+    await loadData(true);
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50/70 pb-20">
@@ -150,6 +167,7 @@ export default function TestPracticeHistoryPage() {
                 return filtered;
               }, [data?.timeline_groups, statusFilter])}
               loading={loading && !data}
+              onDeleteItem={handleDeleteItem}
             />
           </div>
         </div>

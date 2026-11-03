@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { SpeakingWorkspace } from '@/components/exam/SpeakingWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
-import { startTestAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
+import { discardAttempt, startTestAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
 
 export default function SpeakingWorkspacePage() {
   const router = useRouter();
@@ -48,6 +48,7 @@ export default function SpeakingWorkspacePage() {
     <SpeakingWorkspace
       testData={speakingData}
       mode={mode}
+      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
       returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}
     />

@@ -17,9 +17,11 @@ def import_single_speaking_test(
 ):
     _, de_bai_dir, dap_an_dir = resolve_dataset_paths(str(root_path))
     sp_de_bai_dir = de_bai_dir / "speaking"
+    test_id = None
     try:
         de_bai_file = t_dir / "de_bai.json"
         if not de_bai_file.exists():
+            stats["errors"].append(f"Không tìm thấy file đề: {de_bai_file}")
             return
 
         with open(de_bai_file, "r", encoding="utf-8") as f:
@@ -45,8 +47,8 @@ def import_single_speaking_test(
                                "answer_time_sec": q.get("limit_time")}
                               for i, q in enumerate(part.get("questions", []), 1)],
             }, stats)
-        import_writer.publish(test_id, admin_id, title, stats)
     except Exception as e:
+        import_writer.abort(test_id, stats)
         stats["errors"].append(f"Error importing speaking test {t_dir.name}: {str(e)}")
 
 def import_speaking_tests(root_path: Path, admin_id: str, test_set_id: str, limit: Optional[int], stats: Dict[str, Any], only_pending: bool = True, progress_callback = None, difficulty: Optional[str] = "medium"):

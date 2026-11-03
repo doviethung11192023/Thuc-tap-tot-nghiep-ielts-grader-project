@@ -262,7 +262,8 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 **Máy trạng thái.** Tên trạng thái trùng enum trong DB; Core API chỉ được thực hiện các chuyển trạng thái liệt kê dưới đây.
 
 - **attempts.status:** `in_progress` → `submitted` (Learner nộp hoặc hết giờ) → L/R: `scored`; W/S: `grading` → `scored`, hoặc `waiting_expert` (Mock có yêu cầu Expert) → `scored` (Expert nộp). Nhánh phụ:
-  - `in_progress` → `abandoned` (Learner huỷ)
+  - `in_progress` → `abandoned`: **chỉ Mock (thi thử)**; Learner thoát phòng thi giữa chừng thì tính là bỏ dở. Dòng giữ lại, ẩn khỏi lịch sử
+  - Practice (luyện tập) `in_progress` mà Learner xoá thì **xoá hẳn dòng attempt** (và `attempt_sections`, `answers` theo); không có trạng thái `abandoned`. Bài đã nộp không xoá được (409)
   - `grading` → `grading_failed` (lỗi sau 3 lần thử, báo Admin) → `grading` (Admin chạy lại)
   - Speaking im lặng toàn bộ → `no_speech`
   - Practice có điểm Expert về sau: kết quả Expert thành chính thức, trạng thái giữ `scored`.
@@ -594,10 +595,14 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 **Hành vi thay đổi do schema buộc phải vậy:**
 - Đề published/archived không sửa được (luật "đề đã xuất bản không được sửa") → API trả 409.
+- Lỗi ràng buộc DB khi soạn đề trả 409 hoặc 400 kèm lý do thay vì 500: tạo đề cùng kỹ năng trong một bộ Mock (FR-36), xoá bộ còn đề archived (BR-10). `POST /attempts/start` trả thêm `server_time`; đồng hồ thi thử ở frontend không được dài hơn hạn `deadline_at` của server (BR-07: nộp trễ quá 30 s bị từ chối).
+- Nạp đề từ dataset (`/admin/ingest/*`): thư mục mặc định là `dataset_clean/` ở gốc repo (đổi bằng biến môi trường `DATASET_ROOT`); thư mục không tồn tại → 404. Importer chạy trong luồng riêng (không làm đứng API khác). `success = true` chỉ khi không có lỗi; lỗi giữa chừng thì đề nháp vừa tạo được dọn (chạy lại được); file không tồn tại, `skill` lạ, thiếu `path` được báo lỗi rõ ràng. Câu không có đáp án trong file lời giải để trống (không gán `N/A`). Tiêu đề trùng trong dataset được báo cảnh báo (chống trùng vẫn theo tiêu đề và kỹ năng, vì bảng `tests` chưa có cột khoá nguồn). Nạp hàng loạt không còn ghi file tổng quan bộ đề vào `topics` và không thêm chủ đề trùng. Đề nạp xong luôn ở trạng thái **nháp** (UC-30); Admin rà soát rồi tự xuất bản ở trình soạn đề, nên Learner chưa thấy đề cho tới lúc đó. Lượt chấm AI thành công ghi `grading_runs.model` (lấy từ AI engine); `trace_id` vẫn trống vì AI engine chưa có Langfuse tracing. Thẻ "Total Essays" ở thống kê Admin là tổng bài Writing trong đề cộng bài chấm tự do.
+- Bảng quy đổi band: `band` phải là bội số của 0.5 (422); khoảng chồng lấn hoặc trùng 409; xoá dòng không tồn tại 404. Cài đặt hệ thống: nhận giá trị JSON bất kỳ (kể cả số); khoá không tồn tại 404. Chủ đề: `description` tuỳ chọn.
+- Admin đổi đề, bộ đề, câu hỏi hoặc bảng quy đổi thành công thì cache RAM phía Learner (danh mục, nội dung đề, bài tập theo dạng) được xoá ngay.
 - Importer không còn gán `test_set`; bộ Mock (UNIQUE(test_set_id, skill)) tạo riêng: 5 bộ "IELTS Recent Actual Tests – Mock Set 1..5".
 - Speaking nộp bài không còn band giả 6.5: trạng thái `grading` hoặc `no_speech`.
 - Đáp án mẫu Writing/Speaking từ dataset không được lưu.
-- L/R chỉ có band khi đủ 40 câu (luật "band chỉ tính khi đủ 40 câu"); ngược lại `overall_band: null`, frontend hiện "—". "Xoá" lịch sử chỉ huỷ bài chưa nộp; xem attempt của người khác → 404.
+- L/R chỉ có band khi đủ 40 câu (luật "band chỉ tính khi đủ 40 câu"); ngược lại `overall_band: null`, frontend hiện "—". `DELETE /student/history/{id}` chỉ áp dụng cho bài chưa nộp: Practice đang dở → xoá hẳn; Mock đang dở (thoát phòng thi) → `abandoned`; bài đã nộp → 409. Frontend gọi endpoint này khi thoát phòng thi Mock và có nút xoá cho bài Practice dở ở trang lịch sử. Xem attempt của người khác → 404.
 - Admin cũ `n22dccn050@…`, `test1@gmail.com` thành Learner; attempt của Expert và 53 essay không có attempt không được chuyển.
 - Cột `is_activated` bỏ: "đã kích hoạt" = có `last_sign_in_at` trong Supabase Auth.
 

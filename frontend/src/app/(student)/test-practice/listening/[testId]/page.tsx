@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ListeningWorkspace } from '@/components/exam/ListeningWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
-import { startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
+import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
 
 export default function ListeningWorkspacePage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function ListeningWorkspacePage() {
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3', '4'];
   const returnUrl = searchParams.get('returnUrl') || '';
 
-  const { loading, attemptId, listeningData } = useExamWorkspaceContent(testId, 'listening', mode);
+  const { loading, attemptId, deadlineMs, listeningData } = useExamWorkspaceContent(testId, 'listening', mode);
 
   const handleSubmit = async (answers: Record<number, string | string[]>) => {
     const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
@@ -47,6 +47,8 @@ export default function ListeningWorkspacePage() {
     <ListeningWorkspace
       testData={listeningData}
       mode={mode}
+      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
+      deadlineMs={mode === 'exam' ? deadlineMs : null}
       selectedParts={parts}
       returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}

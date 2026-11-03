@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from collections import Counter
+from fastapi import HTTPException
 from app.db.supabase import db
 from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
 
@@ -84,7 +86,9 @@ def _scan_subject_tests(de_bai_dir: Path, skill: str, dur: int, existing: set, s
             })
 
 def scan_dataset(root_path: Optional[str] = None) -> Dict[str, Any]:
-    _, de_bai_dir, _ = resolve_dataset_paths(root_path)
+    root, de_bai_dir, _ = resolve_dataset_paths(root_path)
+    if not root.exists() or not root.is_dir():
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy thư mục dataset: {root}")
     existing_set = set()
     try:
         res = db().table("tests").select("title, skill").execute()
@@ -101,6 +105,10 @@ def scan_dataset(root_path: Optional[str] = None) -> Dict[str, Any]:
     _scan_subject_tests(de_bai_dir, "writing", 60, existing_set, summary, pending_samples, all_tests)
     _scan_subject_tests(de_bai_dir, "speaking", 15, existing_set, summary, pending_samples, all_tests)
 
+    # Chống trùng của importer chỉ theo (tiêu đề, kỹ năng): đánh dấu các đề cùng tiêu đề để không bị bỏ qua âm thầm
+    counts = Counter((t["title"].lower()[:280], t["skill"]) for t in all_tests)
+    for t in all_tests:
+        t["duplicate_title"] = counts[(t["title"].lower()[:280], t["skill"])] > 1
     return {
         "total_found": sum(s["total"] for s in summary.values()),
         "total_imported": sum(s["imported"] for s in summary.values()),

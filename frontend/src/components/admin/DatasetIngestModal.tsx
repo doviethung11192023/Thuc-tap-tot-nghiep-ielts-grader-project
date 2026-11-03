@@ -37,13 +37,8 @@ export function DatasetIngestModal({ isOpen, onClose, onSuccess }: DatasetIngest
       scanDataset()
         .then((data) => {
           setScanData(data);
-          const pending = data.tests.filter((t) => !t.is_imported).map((t) => t.id);
-          if (pending.length > 0) {
-            setSelectedIds(new Set(pending.slice(0, 10)));
-          } else {
-            setForceOverwrite(true);
-            setSelectedIds(new Set(data.tests.slice(0, 10).map((t) => t.id)));
-          }
+          // Không chọn sẵn đề nào: Admin tự chọn đề cần nạp (đề nạp xong ở dạng nháp)
+          setSelectedIds(new Set());
         })
         .catch((err) => console.error("Failed to scan dataset:", err))
         .finally(() => setIsScanning(false));

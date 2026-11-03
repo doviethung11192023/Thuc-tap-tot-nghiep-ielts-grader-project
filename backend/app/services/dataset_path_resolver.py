@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from typing import Optional, Tuple
 
-DEFAULT_DATASET_ROOT = r"C:\Users\Admin\Downloads\dataset_clean"
+# Mặc định: dataset_clean/ ở gốc repo; đổi bằng biến môi trường DATASET_ROOT
+DEFAULT_DATASET_ROOT = os.environ.get("DATASET_ROOT") or str(Path(__file__).resolve().parents[3] / "dataset_clean")
 
 def resolve_dataset_paths(root_path: Optional[str] = None) -> Tuple[Path, Path, Path]:
     """

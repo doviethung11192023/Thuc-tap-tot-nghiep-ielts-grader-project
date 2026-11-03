@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 from app.schemas.exam_content import SkillType
@@ -9,6 +9,13 @@ class BandConversionCreate(BaseModel):
     raw_max: int = Field(..., ge=0, le=40)
     band: float = Field(..., ge=0.0, le=9.0)
 
+    @field_validator("band")
+    @classmethod
+    def band_step(cls, v: float) -> float:
+        if (v * 2) != int(v * 2):
+            raise ValueError("Band phải là bội số của 0.5 (BR-01)")
+        return v
+
 class BandConversionResponse(BandConversionCreate):
     id: str
 
@@ -18,7 +25,7 @@ class SystemSettingCreate(BaseModel):
     description: Optional[str] = None
 
 class SystemSettingUpdate(BaseModel):
-    value: Dict[str, Any]
+    value: Any   # JSON bất kỳ: các tham số số (10, 180, 30...) lưu ở bảng dạng số trần
     description: Optional[str] = None
 
 class SystemSettingResponse(BaseModel):
@@ -61,6 +68,7 @@ class CrawledDatasetIngestResponse(BaseModel):
     questions_created: int = 0
     topics_created: int = 0
     errors: List[str] = []
+    warnings: List[str] = []
 
 class SkillScanSummary(BaseModel):
     total: int = 0

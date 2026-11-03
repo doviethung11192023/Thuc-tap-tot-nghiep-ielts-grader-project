@@ -2,8 +2,10 @@
 Lịch sử làm bài của Learner (UC-11) — GET/DELETE /student/history.
 
 Band lấy từ view attempt_results (luôn là kết quả chính thức). "Xoá" chỉ áp dụng cho bài
-chưa nộp: chuyển sang abandoned (Learner huỷ, ST_attempt) và ẩn khỏi lịch sử; bài đã nộp
-không xoá được vì kết quả chấm phải truy vết được (ADR-12/13).
+chưa nộp (bài đã nộp không xoá được vì kết quả chấm phải truy vết được, ADR-12/13):
+- Luyện tập (practice) đang làm dở: xoá hẳn dòng attempt (attempt_sections, answers xoá theo).
+- Thi thử (mock) đang làm dở: thoát phòng thi tính là bỏ dở, chuyển sang abandoned (ST_attempt),
+  giữ lại dòng và ẩn khỏi lịch sử.
 """
 from typing import Any, Optional
 
@@ -48,10 +50,21 @@ def list_history(user_id: str, page: int, limit: int, skill: Optional[str], stat
     return {"items": items, "total": total, "page": page, "limit": limit}
 
 
-def abandon_attempt(user_id: str, attempt_id: str) -> None:
-    rows = db().table("attempts").select("id, status").eq("id", attempt_id).eq("learner_id", user_id).execute().data
+def discard_attempt(user_id: str, attempt_id: str) -> str:
+    """Huỷ bài chưa nộp của chính Learner. Trả "deleted" (practice) hoặc "abandoned" (mock)."""
+    rows = db().table("attempts").select("id, status, mode").eq("id", attempt_id).eq("learner_id", user_id) \
+        .execute().data
     if not rows:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
-    if rows[0]["status"] not in ("in_progress", "abandoned"):
+    attempt = rows[0]
+    if attempt["status"] == "abandoned":
+        return "abandoned"
+    if attempt["status"] != "in_progress":
         raise HTTPException(status_code=409, detail="Bài đã nộp không xoá được (kết quả chấm cần được lưu lại)")
-    db().table("attempts").update({"status": "abandoned"}).eq("id", attempt_id).eq("status", "in_progress").execute()
+    if attempt["mode"] == "mock":
+        db().table("attempts").update({"status": "abandoned"}).eq("id", attempt_id).eq("status", "in_progress").execute()
+        return "abandoned"
+    # Chỉ xoá khi vẫn in_progress: bài vừa được nộp ở request khác thì không bị xoá nhầm.
+    db().table("attempts").delete().eq("id", attempt_id).eq("learner_id", user_id) \
+        .eq("mode", "practice").eq("status", "in_progress").execute()
+    return "deleted"

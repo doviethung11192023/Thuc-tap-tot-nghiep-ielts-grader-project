@@ -16,10 +16,14 @@ interface ListeningWorkspaceProps {
   mode: 'exam' | 'practice';
   selectedParts?: string[];
   returnUrl?: string;
+  /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
+  onAbandon?: () => Promise<unknown> | void;
+  /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
+  deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
 }
 
-export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onSubmit }: ListeningWorkspaceProps) {
+export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ListeningWorkspaceProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
@@ -43,8 +47,18 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
     defaultDuration: currentSection?.duration_seconds || 450,
   });
 
-  const initialExamSeconds = Math.max(1, availableSections.length) * 8 * 60;
+  // BR-07: Listening Mock 30 phút cho cả 4 section (7,5 phút/section). Phải khớp deadline server
+  // (tests.duration_minutes = 30), nếu dài hơn thì bài tự nộp lúc hết giờ bị server từ chối 409.
+  const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4);
   const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
+
+  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
+  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
+  useEffect(() => {
+    if (mode !== 'exam' || !deadlineMs) return;
+    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
+    setTimerSeconds(prev => Math.min(prev, remaining));
+  }, [mode, deadlineMs]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -152,7 +166,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={() => { setIsExitModalOpen(false); router.push(returnUrl || '/test-practice'); }}
+        onExitDiscard={async () => { setIsExitModalOpen(false); if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); }}
         onSaveDraftAndExit={handleSaveDraft}
       />
 

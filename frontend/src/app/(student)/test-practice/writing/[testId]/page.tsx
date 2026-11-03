@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { WritingWorkspace } from '@/components/exam/WritingWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
-import { startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';
+import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';
 import { useNotificationStore } from '@/stores/notification-store';
 
 export default function WritingWorkspacePage() {
@@ -18,7 +18,7 @@ export default function WritingWorkspacePage() {
   const returnUrl = searchParams.get('returnUrl') || '';
   const parts = searchParams.get('parts') || undefined;
 
-  const { loading, attemptId, writingData } = useExamWorkspaceContent(testId, 'writing', mode);
+  const { loading, attemptId, deadlineMs, writingData } = useExamWorkspaceContent(testId, 'writing', mode);
 
   const handleSubmit = async (text: string, task1Text?: string, task2Text?: string) => {
     const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
@@ -61,6 +61,8 @@ export default function WritingWorkspacePage() {
     <WritingWorkspace
       testData={writingData}
       mode={mode}
+      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
+      deadlineMs={mode === 'exam' ? deadlineMs : null}
       parts={parts}
       returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}

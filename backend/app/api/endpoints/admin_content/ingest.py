@@ -12,6 +12,9 @@ from app.schemas.system_settings import (
 )
 from app.services.dataset_importer import DatasetImporter
 from app.services.dataset_scanner import scan_dataset
+from app.services.dataset_path_resolver import resolve_dataset_paths
+from app.api.endpoints.student_practice.cache_control import clear_student_caches
+from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 
@@ -31,34 +34,43 @@ async def ingest_crawled_dataset(
     current_user: User = Depends(require_admin)
 ):
     """
-    Nạp dữ liệu từ thư mục prep_crawled_dataset vào CSDL Supabase:
-    - Kiểm tra chống nạp trùng đề thi (Deduplication)
+    Nạp dữ liệu từ thư mục dataset vào CSDL Supabase:
+    - Kiểm tra chống nạp trùng đề thi (theo tiêu đề và kỹ năng)
     - 4 kỹ năng: Reading, Listening, Writing, Speaking
+    - success = true chỉ khi không có lỗi; lỗi giữa chừng không để lại đề dở dang
     """
+    root, _, _ = resolve_dataset_paths(req.dataset_path)
+    if not root.exists() or not root.is_dir():
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy thư mục dataset: {root}")
     importer = DatasetImporter(
         root_path=req.dataset_path,
         admin_id=str(current_user.id),
         only_pending=req.only_pending,
         default_difficulty=req.default_difficulty or "medium"
     )
-    result = importer.run(
+    # Importer chạy đồng bộ (nhiều lệnh DB): đưa sang luồng riêng để không làm đứng các API khác
+    result = await run_in_threadpool(
+        importer.run,
         limit=req.test_limit,
         rl=req.include_reading_listening,
         writing=req.include_writing,
         speaking=req.include_speaking,
         selected_tests=req.selected_tests
     )
+    clear_student_caches()
 
     skipped = result.get("tests_skipped_existing", 0)
     created = result.get("tests_created", 0)
-    success = len(result["errors"]) == 0 or created > 0 or skipped > 0
+    errors, warnings = result["errors"], result.get("warnings", [])
 
     msg = f"Đã nạp {created} đề thi mới ({skipped} đề đã tồn tại bỏ qua), {result['sections_created']} sections, {result['questions_created']} câu hỏi."
-    if result["errors"]:
-        msg += f" (Có {len(result['errors'])} cảnh báo)"
+    if errors:
+        msg += f" Có {len(errors)} lỗi."
+    if warnings:
+        msg += f" Có {len(warnings)} cảnh báo."
 
     return CrawledDatasetIngestResponse(
-        success=success,
+        success=len(errors) == 0,
         message=msg,
         test_sets_created=result["test_sets_created"],
         tests_created=created,
@@ -67,7 +79,8 @@ async def ingest_crawled_dataset(
         question_groups_created=result["question_groups_created"],
         questions_created=result["questions_created"],
         topics_created=result["topics_created"],
-        errors=result["errors"]
+        errors=errors,
+        warnings=warnings,
     )
 
 @router.post("/ingest/stream")
@@ -99,6 +112,7 @@ async def ingest_crawled_dataset_stream(
                 speaking=req.include_speaking,
                 selected_tests=req.selected_tests
             )
+            clear_student_caches()
             msg_queue.put({"type": "done", "result": result})
         except Exception as e:
             msg_queue.put({"type": "error", "error": str(e)})

@@ -59,6 +59,21 @@ export async function startTestAttempt(testId: string, mode: "practice" | "mock"
   return res.data.data;
 }
 
+/**
+ * Huỷ bài chưa nộp. Luyện tập đang dở: xoá hẳn; thi thử đang dở (thoát phòng thi): tính abandoned.
+ * Không ném lỗi: thoát phòng thi không được kẹt vì request huỷ.
+ */
+export async function discardAttempt(attemptId?: string | null): Promise<boolean> {
+  if (!attemptId) return false;
+  try {
+    await apiClient.delete(`/api/v1/student/history/${attemptId}`);
+    return true;
+  } catch (err) {
+    console.warn("Không huỷ được bài làm dở:", err);
+    return false;
+  }
+}
+
 export async function getAttemptExamContent(attemptId: string) {
   const res = await apiClient.get<{ meta: { code: number }; data: any }>(
     `/api/v1/test-practice/attempts/${attemptId}/content`

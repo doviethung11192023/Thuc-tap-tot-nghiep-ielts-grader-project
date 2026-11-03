@@ -29,6 +29,7 @@ export function useExamWorkspaceContent(
 
   const [loading, setLoading] = useState<boolean>(!cached);
   const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [deadlineMs, setDeadlineMs] = useState<number | null>(null); // hạn nộp của thi thử, theo đồng hồ client
   const [readingData, setReadingData] = useState<ReadingTestData>(initR || mockReadingFullTest);
   const [listeningData, setListeningData] = useState<ListeningTestData>(initL || mockListeningFullTest);
   const [writingData, setWritingData] = useState<typeof mockWritingExamDataset>((initW as any) || mockWritingExamDataset);
@@ -49,8 +50,15 @@ export function useExamWorkspaceContent(
         hasStartedRef.current = true;
         startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
           .then((attemptRes) => {
-            if (mounted && attemptRes?.attempt_id) {
+            // Không chặn theo `mounted`: StrictMode (dev) chạy cleanup trước khi request xong
+            // nhưng hasStartedRef khiến effect lần hai không gọi lại, nên attemptId sẽ mãi null.
+            if (attemptRes?.attempt_id) {
               setAttemptId(attemptRes.attempt_id);
+              if (attemptRes.deadline_at) {
+                // Quy hạn của server về đồng hồ client để không phụ thuộc lệch giờ máy
+                const serverNow = attemptRes.server_time ? Date.parse(attemptRes.server_time) : Date.now();
+                setDeadlineMs(Date.now() + (Date.parse(attemptRes.deadline_at) - serverNow));
+              }
             }
           })
           .catch((e) => {
@@ -92,6 +100,7 @@ export function useExamWorkspaceContent(
   return {
     loading,
     attemptId,
+    deadlineMs,
     readingData,
     listeningData,
     writingData,

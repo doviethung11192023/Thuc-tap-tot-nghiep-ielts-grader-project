@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ReadingWorkspace } from '@/components/exam/ReadingWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
-import { startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
+import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
 
 export default function ReadingWorkspacePage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function ReadingWorkspacePage() {
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3'];
   const returnUrl = searchParams.get('returnUrl') || '';
 
-  const { loading, attemptId, readingData } = useExamWorkspaceContent(testId, 'reading', mode);
+  const { loading, attemptId, deadlineMs, readingData } = useExamWorkspaceContent(testId, 'reading', mode);
 
   const handleSubmit = async (answers: Record<number, string | string[]>) => {
     const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
@@ -47,6 +47,8 @@ export default function ReadingWorkspacePage() {
     <ReadingWorkspace
       testData={readingData}
       mode={mode}
+      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
+      deadlineMs={mode === 'exam' ? deadlineMs : null}
       selectedParts={parts}
       returnUrl={returnUrl || undefined}
       onSubmit={handleSubmit}

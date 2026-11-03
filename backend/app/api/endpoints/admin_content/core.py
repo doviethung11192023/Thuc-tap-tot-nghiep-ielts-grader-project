@@ -16,6 +16,16 @@ def _with_id(row: dict) -> dict:
     return {**row, "id": f"{row['skill']}:{row['raw_min']}"}
 
 
+def _band_error(e: Exception) -> HTTPException:
+    """Lỗi DB khi ghi bảng quy đổi: khoảng chồng lấn (ràng buộc 15) khác với band sai bước 0.5 (BR-01)."""
+    msg = str(e)
+    if "exclusion" in msg or "conflicting key" in msg or "overlap" in msg or "duplicate key" in msg:
+        return HTTPException(status_code=409, detail="Khoảng điểm đã tồn tại hoặc bị chồng lấn với khoảng khác cùng kỹ năng")
+    if "band" in msg and "check constraint" in msg:
+        return HTTPException(status_code=400, detail="Band phải là bội số của 0.5 từ 0 đến 9 (BR-01)")
+    return HTTPException(status_code=400, detail=msg[:200])
+
+
 def _parse_id(item_id: str) -> tuple:
     try:
         skill_key, raw_min = item_id.split(":")
@@ -55,8 +65,8 @@ async def create_band_conversion(
     }
     try:
         res = db().table("band_conversions").insert(payload).execute()
-    except Exception as e:  # EXCLUDE: khoảng điểm cùng kỹ năng không được chồng nhau (ràng buộc 15)
-        raise HTTPException(status_code=409, detail=f"Khoảng điểm bị chồng lấn hoặc trùng: {str(e)[:200]}")
+    except Exception as e:
+        raise _band_error(e)
     return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": _with_id(res.data[0])}
 
 @router.put("/core/band-conversions/{item_id}")
@@ -78,7 +88,7 @@ async def update_band_conversion(
     try:
         res = db().table("band_conversions").update(payload).eq("skill", skill_key).eq("raw_min", raw_min).execute()
     except Exception as e:
-        raise HTTPException(status_code=409, detail=f"Khoảng điểm bị chồng lấn hoặc trùng: {str(e)[:200]}")
+        raise _band_error(e)
     if not res.data:
         raise HTTPException(status_code=404, detail="Bản ghi quy đổi không tồn tại")
     return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": _with_id(res.data[0])}
@@ -90,7 +100,9 @@ async def delete_band_conversion(
 ):
     """Xóa một khoảng quy đổi điểm."""
     skill_key, raw_min = _parse_id(item_id)
-    db().table("band_conversions").delete().eq("skill", skill_key).eq("raw_min", raw_min).execute()
+    res = db().table("band_conversions").delete().eq("skill", skill_key).eq("raw_min", raw_min).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Bản ghi quy đổi không tồn tại")
     return {"meta": {"code": 200, "message": "Xóa thành công"}}
 
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
@@ -107,6 +119,8 @@ async def update_system_setting(
     current_user: User = Depends(require_admin)
 ):
     """Cập nhật giá trị một cấu hình hệ thống (JSON)."""
+    if not db().table("system_settings").select("key").eq("key", key).execute().data:
+        raise HTTPException(status_code=404, detail=f"Không có cấu hình '{key}'")
     payload = {
         "value": data.value,
         "updated_by": str(current_user.id),

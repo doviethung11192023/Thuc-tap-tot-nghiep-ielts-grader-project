@@ -4,7 +4,7 @@ from datetime import datetime
 
 class TopicCreate(BaseModel):
     title: str
-    description: str
+    description: str = ""   # ô Mô tả trên giao diện là tuỳ chọn
     prompt_content: str
     task_type: str
     difficulty: str

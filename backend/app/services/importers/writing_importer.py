@@ -17,9 +17,11 @@ def import_single_writing_test(
 ):
     _, de_bai_dir, dap_an_dir = resolve_dataset_paths(str(root_path))
     w_de_bai_dir = de_bai_dir / "writing"
+    test_id = None
     try:
         de_bai_file = t_dir / "de_bai.json"
         if not de_bai_file.exists():
+            stats["errors"].append(f"Không tìm thấy file đề: {de_bai_file}")
             return
 
         with open(de_bai_file, "r", encoding="utf-8") as f:
@@ -45,8 +47,8 @@ def import_single_writing_test(
                 "content": {"task_type": "task1" if is_task1 else "task2", "min_words": 150 if is_task1 else 250},
                 "questions": [{"number": 1, "prompt": first_q.get("prompt") or first_q.get("question") or direction}],
             }, stats)
-        import_writer.publish(test_id, admin_id, title, stats)
     except Exception as e:
+        import_writer.abort(test_id, stats)
         stats["errors"].append(f"Error importing writing test {t_dir.name}: {str(e)}")
 
 def import_writing_tests(root_path: Path, admin_id: str, test_set_id: str, limit: Optional[int], stats: Dict[str, Any], only_pending: bool = True, progress_callback = None, difficulty: Optional[str] = "medium"):

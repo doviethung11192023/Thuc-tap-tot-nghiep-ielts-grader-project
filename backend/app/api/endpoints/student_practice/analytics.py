@@ -11,7 +11,7 @@ from app.services.learning_profile_aggregator import (
     compute_learning_profile_test_practice,
 )
 from app.services.practice.learner_profile_store import save_goals
-from app.services.practice.practice_history import abandon_attempt, list_history
+from app.services.practice.practice_history import discard_attempt, list_history
 
 router = APIRouter()
 
@@ -41,10 +41,11 @@ async def get_student_history(page: int = Query(1, ge=1), limit: int = Query(10,
 
 @router.delete("/history/{attempt_id}")
 async def delete_student_attempt(attempt_id: str, current_user: User = Depends(get_current_user)):
-    """Huỷ bài đang làm dở (abandoned). Bài đã nộp không xoá được (409)."""
-    abandon_attempt(current_user.id, attempt_id)
+    """Luyện tập đang dở: xoá hẳn. Thi thử đang dở (thoát phòng thi): abandoned. Bài đã nộp: 409."""
+    outcome = discard_attempt(current_user.id, attempt_id)
     _drop_profile_cache(current_user.id)
-    return {"meta": {"code": 200, "message": "Đã huỷ bài làm dở"}}
+    message = "Đã xoá bài luyện tập làm dở" if outcome == "deleted" else "Đã ghi nhận bỏ dở bài thi thử"
+    return {"meta": {"code": 200, "message": message}, "data": {"outcome": outcome}}
 
 
 @router.get("/learning-profile")

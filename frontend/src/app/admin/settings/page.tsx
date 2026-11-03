@@ -19,6 +19,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);   // đổi mỗi lần tải để các ô nhập của bảng quy đổi dựng lại theo dữ liệu thật
 
   const loadData = async () => {
     setLoading(true);
@@ -29,6 +30,7 @@ export default function AdminSettingsPage() {
       ]);
       setConversions(bandData);
       setSettings(settingsData);
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error("Failed to load settings:", err);
     } finally {
@@ -51,6 +53,7 @@ export default function AdminSettingsPage() {
       alert("Cập nhật quy đổi điểm thành công!");
     } catch (err) {
       alert("Lỗi khi cập nhật quy đổi điểm");
+      loadData();   // đưa ô nhập về giá trị đang lưu
     }
   };
 
@@ -113,6 +116,7 @@ export default function AdminSettingsPage() {
 
       {activeTab === "band" && (
         <BandConversionsTable
+          key={`${bandSkill}-${reloadKey}`}
           conversions={conversions}
           bandSkill={bandSkill}
           onSkillChange={setBandSkill}

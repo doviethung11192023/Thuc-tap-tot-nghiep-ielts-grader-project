@@ -50,5 +50,20 @@ async def health_check():
     return {"status": "healthy"}
 
 from app.api.api_router import api_router
+from app.api.endpoints.student_practice.cache_control import clear_student_caches
+
+_ADMIN_CONTENT_PATHS = ("/tests", "/test-sets", "/sections", "/question-groups", "/questions", "/ingest", "/core/band")
+
+
+@app.middleware("http")
+async def invalidate_student_caches(request, call_next):
+    """Admin đổi đề, bộ đề hoặc bảng quy đổi thành công thì xoá cache phía Learner."""
+    response = await call_next(request)
+    path = request.url.path
+    if (request.method in ("POST", "PUT", "PATCH", "DELETE") and response.status_code < 400
+            and "/admin/" in path and any(p in path for p in _ADMIN_CONTENT_PATHS)):
+        clear_student_caches()
+    return response
+
 
 app.include_router(api_router, prefix="/api/v1")

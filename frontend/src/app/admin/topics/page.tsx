@@ -120,7 +120,7 @@ export default function AdminTopicsPage() {
     <div className="space-y-6 sm:space-y-8 w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">Quản lý Đề thi Writing & Speaking</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">Quản lý Chủ đề Writing (Chấm bài tự do)</h1>
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Thêm, sửa, xóa các bộ đề luyện tập và bài thi thử trong hệ thống</p>
         </div>
         <button onClick={handleOpenCreateModal} className="bg-[#932120] text-white px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-[#7a1a19] transition-all flex items-center gap-2 text-xs sm:text-sm">

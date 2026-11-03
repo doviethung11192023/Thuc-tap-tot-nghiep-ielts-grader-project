@@ -1,7 +1,7 @@
 """
 Ghi đề nhập từ dataset vào DB qua các service CMS (UC-30), dùng chung cho importer L/R, Writing, Speaking.
 
-- Đề tạo ở trạng thái nháp, điền nội dung rồi mới xuất bản (qua bước kiểm tra UC-21 bước 6).
+- Đề tạo ở trạng thái nháp (UC-30) và giữ nguyên nháp; Admin rà soát rồi tự xuất bản ở trình soạn đề (BR-10, UC-21).
 - Đề đã tồn tại: only_pending → bỏ qua; nếu đang nháp → xoá section cũ rồi nạp lại;
   đã xuất bản → không ghi đè (BR-10, phải tạo phiên bản mới).
 - Không gán vào bộ đề: bộ đề Mock chỉ có 1 đề/kỹ năng (FR-36), Admin tự gom sau.
@@ -26,6 +26,9 @@ def begin_test(title: str, skill: str, duration_min: int, difficulty: str, sourc
     if existing:
         if only_pending:
             stats["tests_skipped_existing"] = stats.get("tests_skipped_existing", 0) + 1
+            if f"{title.lower()[:280]}|{skill}" in stats.get("duplicate_titles", ()):
+                stats.setdefault("warnings", []).append(
+                    f"'{title}' trùng tiêu đề với đề khác trong dataset; chống trùng theo tiêu đề nên chỉ giữ một đề")
             _notify(progress, skill, title, "skipped", f"Bài '{title}' đã tồn tại.")
             return None
         if existing[0]["status"] != "draft":
@@ -38,9 +41,22 @@ def begin_test(title: str, skill: str, duration_min: int, difficulty: str, sourc
         test_id = cms_tests.create_test(admin_id, {
             "title": title, "skill": skill, "allowed_mode": "both", "duration_min": duration_min,
             "difficulty": difficulty, "origin": "manual", "source_name": source_name})["id"]
+        stats.setdefault("_new_tests", []).append(test_id)
     stats["tests_created"] = stats.get("tests_created", 0) + 1
     _notify(progress, skill, title, "created", f"Đã nạp bài '{title}' ({skill.capitalize()}).")
     return test_id
+
+
+def abort(test_id: Optional[str], stats: dict) -> None:
+    """Lỗi giữa chừng: bỏ đề nháp vừa tạo trong lần chạy này để không để lại đề dở dang (rồi chạy lại được)."""
+    if not test_id:
+        return
+    stats["tests_created"] = max(0, stats.get("tests_created", 0) - 1)
+    if test_id in stats.get("_new_tests", []):
+        try:
+            db().table("tests").delete().eq("id", test_id).eq("status", "draft").execute()
+        except Exception as e:
+            stats["errors"].append(f"Không dọn được đề nháp dở dang {test_id}: {e}")
 
 
 def add_section(test_id: str, order_no: int, title: str, stats: dict, passage_text: Optional[str] = None,
@@ -57,10 +73,3 @@ def add_group(section_id: str, group: dict[str, Any], stats: dict) -> None:
     cms_questions.create_group(section_id, group)
     stats["question_groups_created"] = stats.get("question_groups_created", 0) + 1
     stats["questions_created"] = stats.get("questions_created", 0) + len(group.get("questions") or [])
-
-
-def publish(test_id: str, admin_id: str, title: str, stats: dict) -> None:
-    try:
-        cms_tests.set_status(admin_id, test_id, "published")
-    except HTTPException as e:
-        stats["errors"].append(f"'{title}' giữ ở nháp, chưa xuất bản được: {e.detail}")

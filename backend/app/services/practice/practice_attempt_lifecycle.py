@@ -50,6 +50,7 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
         "attempt_id": attempt["id"], "test_id": attempt["test_id"], "skill": attempt["skill"],
         "mode": attempt["mode"], "started_at": attempt["started_at"],
         "deadline_at": attempt.get("deadline_at"), "duration_min": duration,
+        "server_time": now_utc().isoformat(),   # để client quy hạn deadline_at về đồng hồ của mình
     }
 
 

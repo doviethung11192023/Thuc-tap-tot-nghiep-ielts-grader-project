@@ -20,10 +20,14 @@ interface WritingWorkspaceProps {
   mode?: 'exam' | 'practice';
   parts?: string;
   returnUrl?: string;
+  /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
+  onAbandon?: () => Promise<unknown> | void;
+  /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
+  deadlineMs?: number | null;
   onSubmit: (submissionText: string, task1Text?: string, task2Text?: string) => void;
 }
 
-export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onSubmit }: WritingWorkspaceProps) {
+export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onAbandon, deadlineMs, onSubmit }: WritingWorkspaceProps) {
   const router = useRouter();
   const activeDataset = testData || mockWritingExamDataset;
   const draftKey = `ielts_writing_draft_${activeDataset.test_id || 'default'}`;
@@ -36,6 +40,14 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
 
   const initialSeconds = mode === 'exam' ? (parts === '2' ? 2400 : parts === '1' ? 1200 : 3600) : 0;
   const [timerSeconds, setTimerSeconds] = useState<number>(initialSeconds);
+
+  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
+  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
+  useEffect(() => {
+    if (mode !== 'exam' || !deadlineMs) return;
+    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
+    setTimerSeconds(prev => Math.min(prev, remaining));
+  }, [mode, deadlineMs]);
 
   const currentTask = activeTaskNum === 1 ? activeDataset.task1 : activeDataset.task2;
   const currentEssayText = taskEssays[activeTaskNum] || '';
@@ -83,7 +95,7 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
 
   const formatDisplayTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
-  const handleExitDiscard = () => { setIsExitModalOpen(false); router.push(returnUrl || '/test-practice'); };
+  const handleExitDiscard = async () => { setIsExitModalOpen(false); if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); };
   const handleSaveDraftAndExit = () => {
     try { localStorage.setItem(draftKey, JSON.stringify(taskEssays)); alert("💾 Đã lưu nháp tiến độ bài làm Writing thành công!"); } catch (e) { console.error(e); }
     setIsExitModalOpen(false);

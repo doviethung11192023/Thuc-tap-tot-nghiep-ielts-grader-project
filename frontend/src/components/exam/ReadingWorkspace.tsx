@@ -15,10 +15,14 @@ interface ReadingWorkspaceProps {
   mode: 'exam' | 'practice';
   selectedParts?: string[];
   returnUrl?: string;
+  /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
+  onAbandon?: () => Promise<unknown> | void;
+  /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
+  deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
 }
 
-export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onSubmit }: ReadingWorkspaceProps) {
+export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
   const router = useRouter();
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
@@ -46,6 +50,14 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onS
 
   const initialExamSeconds = Math.max(1, availablePassages.length) * 20 * 60;
   const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
+
+  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
+  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
+  useEffect(() => {
+    if (mode !== 'exam' || !deadlineMs) return;
+    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
+    setTimerSeconds(prev => Math.min(prev, remaining));
+  }, [mode, deadlineMs]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -157,8 +169,9 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onS
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={() => {
+        onExitDiscard={async () => {
           setIsExitModalOpen(false);
+          if (mode === 'exam') await onAbandon?.();
           router.push(returnUrl || '/test-practice');
         }}
         onSaveDraftAndExit={() => {

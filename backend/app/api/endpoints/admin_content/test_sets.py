@@ -114,8 +114,14 @@ async def delete_admin_test_set(
     except ValueError:
         raise HTTPException(status_code=400, detail="Mã bộ đề thi không hợp lệ (UUID)")
 
-    # 1. Unlink tests
-    db().table("tests").update({"test_set_id": None}).eq("test_set_id", set_id).execute()
+    # 1. Unlink tests (đề archived bị trigger BR-10 khoá, không gỡ được khỏi bộ)
+    try:
+        db().table("tests").update({"test_set_id": None}).eq("test_set_id", set_id).execute()
+    except Exception as e:
+        err = db_error(e)
+        if err.status_code == 409:
+            err.detail = "Bộ đề còn chứa đề đã lưu trữ nên không gỡ được khỏi bộ để xoá (BR-10)"
+        raise err
 
     # 2. Delete set
     res = db().table("test_sets").delete().eq("id", set_id).execute()
