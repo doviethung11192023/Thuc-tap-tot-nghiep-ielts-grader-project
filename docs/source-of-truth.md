@@ -18,6 +18,8 @@ Khi sửa thiết kế (thêm FR, BR hay bảng mới), cập nhật file này *
 
 ---
 
+> **Cách đọc mã:** FR, NFR, BR, ADR, UC, SD là số hiệu trong báo cáo và sơ đồ, giữ lại ở các bảng định nghĩa để đối chiếu. Ở các mục trạng thái và câu hỏi (§11–§13) và trong tài liệu cho nhóm, quy tắc được gọi bằng tên chức năng.
+
 ## 1. Tổng quan
 
 - **Sản phẩm:** web luyện thi **IELTS Academic** (responsive, không có app mobile). AI chấm bài luyện tập; Expert (giáo viên) cho điểm chính thức cho bài thi thử (Mock).
@@ -290,7 +292,7 @@ Quy tắc ánh xạ:
 - Quan hệ M:N có thuộc tính: bảng nối.
 - 1:1: FK + UNIQUE.
 - Cột ngoài sơ đồ (cố ý): `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype/template`, `tests.difficulty`, `questions.diagram_coordinate`. Bảng ngoài sơ đồ: `topics`, `free_essays`, `evaluation_results`, `essay_annotations`, `evaluation_logs` (xem §12).
-- Chuẩn 3NF, **có một ngoại lệ cố ý**: các cột phân loại (`role`, `skill`, `kind`, `test_id`, `evaluator_type`) được chép xuống bảng con để FK ghép chặn tổ hợp sai ngay trong DB (ADR-17).
+- Chuẩn 3NF, **có một ngoại lệ cố ý**: các cột phân loại (`role`, `skill`, `kind`, `test_id`, `evaluator_type`) được chép xuống bảng con để FK ghép chặn tổ hợp sai ngay trong DB (quyết định "ràng buộc đúng kiểu bằng khoá ngoại ghép").
 
 ### Bảng và cột (theo sơ đồ quan hệ Hình 2.34)
 
@@ -563,8 +565,8 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 | # | Mâu thuẫn | Quyết định |
 |---|---|---|
-| 1 | Sơ đồ SD-00, 02, 03, 05, 08, 09 vẽ "Job Queue (**Supabase pgmq**)"; chữ trong báo cáo (3.4, ADR-01) và ARCH_system ghi **Redis + ARQ** | Theo **Redis + ARQ**. Sơ đồ SD cần sửa nhãn |
-| 2 | ADR-04 ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa ADR-04 |
+| 1 | Sơ đồ SD-00, 02, 03, 05, 08, 09 vẽ "Job Queue (**Supabase pgmq**)"; chữ trong báo cáo (mục 3.4 và quyết định kiến trúc "ba khối Core API, worker, AI engine") và ARCH_system ghi **Redis + ARQ** | Theo **Redis + ARQ**. Sơ đồ SD cần sửa nhãn |
+| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa ADR-04 |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
 | 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Trong lúc test, schema mới tạm được expose bằng `ALTER ROLE authenticator SET pgrst.db_schemas`. Đã **RESET** khi cutover (2026-11-03); chỉ còn `public` |
@@ -591,22 +593,22 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 **Legacy đang chờ xoá:** schema `legacy` (bản sao dữ liệu cũ). Xoá bằng `DROP SCHEMA legacy CASCADE` **chỉ sau khi nhóm xác nhận** và đã pull code mới.
 
 **Hành vi thay đổi do schema buộc phải vậy:**
-- Đề published/archived không sửa được (BR-10) → API trả 409.
+- Đề published/archived không sửa được (luật "đề đã xuất bản không được sửa") → API trả 409.
 - Importer không còn gán `test_set`; bộ Mock (UNIQUE(test_set_id, skill)) tạo riêng: 5 bộ "IELTS Recent Actual Tests – Mock Set 1..5".
 - Speaking nộp bài không còn band giả 6.5: trạng thái `grading` hoặc `no_speech`.
 - Đáp án mẫu Writing/Speaking từ dataset không được lưu.
-- L/R chỉ có band khi đủ 40 câu (BR-03); ngược lại `overall_band: null`, frontend hiện "—". "Xoá" lịch sử chỉ huỷ bài chưa nộp; xem attempt của người khác → 404.
+- L/R chỉ có band khi đủ 40 câu (luật "band chỉ tính khi đủ 40 câu"); ngược lại `overall_band: null`, frontend hiện "—". "Xoá" lịch sử chỉ huỷ bài chưa nộp; xem attempt của người khác → 404.
 - Admin cũ `n22dccn050@…`, `test1@gmail.com` thành Learner; attempt của Expert và 53 essay không có attempt không được chuyển.
 - Cột `is_activated` bỏ: "đã kích hoạt" = có `last_sign_in_at` trong Supabase Auth.
 
 **Điểm lệch còn lại so với thiết kế:**
 - Chấm bài chạy bằng FastAPI `BackgroundTasks`, chưa qua ARQ; không có Redis thì dùng `NullRedisCache`.
-- Mock: BR-15 (tự tạo yêu cầu Expert) chưa làm; điểm AI tạm là chính thức.
-- AI engine chưa trả model/prompt version/trace id → cột NFR-05 trong `grading_runs` còn trống.
-- Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái FR-14).
+- Mock chưa tự tạo yêu cầu Expert chấm (luật quota Mock cho Expert); điểm AI tạm là chính thức.
+- AI engine chưa trả model/prompt version/trace id → các cột truy vết mỗi lần chấm (model, phiên bản prompt, mã trace) trong `grading_runs` còn trống.
+- Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái yêu cầu "transcript Listening chỉ hiện sau khi nộp").
 - Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.
 - Đề Writing: 97 đề trên R2 (`ielts-learning`, prefix `dataset/writing/`), mới nhập 6; 91 đề còn lại import sau.
-- Speaking chấm thật, Expert workflow, dashboard BR-17: làm một phần.
+- Speaking chấm thật, Expert workflow, dashboard lộ trình học: làm một phần.
 
 **Bảo mật đã sửa:** JWT fallback verify HS256 + `aud=authenticated`; không còn mượn user đầu tiên khi chưa đăng nhập; xoá lịch sử kiểm tra chủ sở hữu.
 
@@ -625,4 +627,4 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Import 91 đề Writing còn lại từ R2 vào `public`.
 - Hàng đợi chính thức: ARQ (theo báo cáo) hay pgmq (theo sơ đồ SD)? Cần thống nhất rồi sửa lại sơ đồ.
 - Chương IV (triển khai, giao diện, kiểm thử, đánh giá AI bằng MAE) chưa viết; cần bộ dữ liệu so điểm AI với Expert.
-- ADR-04 trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".
+- Quyết định "prompt quản lý trên Langfuse" trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".
