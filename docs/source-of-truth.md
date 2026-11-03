@@ -289,6 +289,7 @@ Quy tắc ánh xạ:
 - Thuộc tính đa trị: bảng con hoặc `text[]`.
 - Quan hệ M:N có thuộc tính: bảng nối.
 - 1:1: FK + UNIQUE.
+- Cột ngoài sơ đồ (cố ý): `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype/template`, `tests.difficulty`, `questions.diagram_coordinate`. Bảng ngoài sơ đồ: `topics`, `free_essays`, `evaluation_results`, `essay_annotations`, `evaluation_logs` (xem §12).
 - Chuẩn 3NF, **có một ngoại lệ cố ý**: các cột phân loại (`role`, `skill`, `kind`, `test_id`, `evaluator_type`) được chép xuống bảng con để FK ghép chặn tổ hợp sai ngay trong DB (ADR-17).
 
 ### Bảng và cột (theo sơ đồ quan hệ Hình 2.34)
@@ -566,68 +567,62 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | 2 | ADR-04 ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa ADR-04 |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
-| 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Người dùng đã đồng ý (2026-11-03) expose `v2` bằng SQL: `ALTER ROLE authenticator SET pgrst.db_schemas = 'public, graphql_public, v2'`. ⚠️ Ai đó bấm Save ở Dashboard → Data API có thể ghi đè cấu hình này; nếu vậy thì chạy lại lệnh trên |
+| 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Trong lúc test, schema mới tạm được expose bằng `ALTER ROLE authenticator SET pgrst.db_schemas`. Đã **RESET** khi cutover (2026-11-03); chỉ còn `public` |
 
 ---
 
-## 12. Trạng thái code thực tế (2026-11-03) và nợ chuyển đổi
+## 12. Trạng thái code thực tế (2026-11-03)
 
-**Đang chuyển đổi: schema `v2` (33 bảng) chạy song song với `public` (cũ).** Kế hoạch: tạo schema mới → test code, debug → xoá hoặc thay `public`. Bước cuối phải hỏi người dùng trước.
+**Đã thống nhất một schema duy nhất `public` (33 bảng + 3 view) theo §7. Không còn khái niệm v1/v2.** Cutover chạy 2026-11-03: các object `public` cũ chuyển sang schema `legacy` (29 bảng, 19 enum, 5 hàm; chỉ để sao lưu, **chưa xoá**), schema mới đổi tên thành `public`, trigger đăng ký `on_auth_user_created` → `public.handle_new_user` (không nuốt lỗi), Realtime publication gồm `attempts`, `review_requests`, `free_essays`.
 
 | Thành phần | Trạng thái |
 |---|---|
-| DDL | `supabase/migrations/20261102100000_v2_schema.sql`, đã áp lên Supabase. Trigger `on_auth_user_created_v2` trên `auth.users` tự tạo hồ sơ `v2` cho tài khoản mới |
-| Test ràng buộc | `supabase/tests/v2_constraints_test.sql`: 48 ca, PASS trên Supabase (chạy xong tự rollback) |
-| Dữ liệu | `supabase/scripts/v2_migrate_data_from_public.sql`, đã chạy 2026-11-03. Giữ UUID cũ; chỉ đọc `public`. Đổi 2 tài khoản admin sang learner (`n22dccn050@…`, `test1@gmail.com`); bỏ attempt của Expert, 53 essay không có attempt, bộ `test_sets` cũ; Writing chỉ 6 đề, ảnh trỏ R2 |
+| DDL | `supabase/migrations/20261103130000_baseline_schema.sql` là migration **duy nhất** (dựng được từ đầu: 38 bảng gồm các bảng ngoài sơ đồ, 3 view, 0 quyền `anon`). Thay đổi sau này: thêm file đánh số lớn hơn |
+| Test ràng buộc | `supabase/tests/schema_constraints_test.sql`: 48/48 PASS trên Supabase, tự rollback |
 | Kết nối psql | `SUPABASE_DB_URL` trong `backend/.env` (Session pooler) |
-| Backend trên `v2` (bật bằng `DB_SCHEMA=v2` trong `backend/.env`) | **Writing, Listening/Reading, lịch sử.** Code ở `backend/app/services/`: `v2_practice/` (bật/tắt v2, client DB, vòng đời attempt, chọn nội dung đề theo kỹ năng, lịch sử), `v2_writing/`, `v2_listening_reading/` (nội dung đề, so khớp đáp án BR-14, chấm, kết quả). Các endpoint có nhánh v2: `attempts/start`, `attempts/{id}/content`, `tests/{id}/content`, `attempts/{id}/submit`, `submit-writing`, `summary`, `detail`, `essays/{id}/results`, `GET/DELETE /student/history`. Xác thực đọc role từ `v2.profiles` (learner trả về là `student` cho frontend) |
-| Phần còn đọc `public` | Catalog đề (UUID trùng nên không sao), Speaking (vẫn là bản giả lập trả band 6.5), Expert, Admin, learning profile/dashboard, exercises, `/essays` list |
-| Hành vi mới theo thiết kế | L/R: band chỉ có khi làm đủ 40 câu (BR-03); làm lẻ thì API trả `overall_band: null`, frontend hiện "—". Nộp lại trả kết quả lần đầu. "Xoá" lịch sử chỉ huỷ bài chưa nộp (`abandoned`); bài đã nộp trả 409. Người khác xem attempt → 404 |
+| Backend | Một đường code duy nhất `app/db/supabase.py: db()`; không còn cờ `DB_SCHEMA`. Services: `practice/`, `writing/`, `listening_reading/`, `speaking/`, `admin/`, `cms/`, `importers/` |
+| Role | `learner \| expert \| admin` ở cả backend và frontend. Trạng thái attempt theo tên thiết kế (`grading`, `grading_failed`, `waiting_expert`, `no_speech`) |
+| Smoke test | 51/51 PASS trên `public` sau cutover; `pytest` backend 26 pass; `tsc` frontend sạch |
 
-**Bảng đối chiếu `public` (cũ) → `v2`:**
+**Cột ngoài sơ đồ (cố ý, đã có trong baseline):** `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
 
-| Thiết kế (đích) | Hiện tại trong DB và code |
-|---|---|
-| `profiles` + `learner_profiles` + `expert_profiles` | `users`, `learner_goals`, `expert_profiles`, `user_progress` |
-| `attempts` | `test_attempts` (có cột `band`, `raw_score`, `mode`, `skill`, `status`) |
-| `sections` + các bảng kiểu con | `test_sections` |
-| `answers` | `attempt_answers` |
-| `question_keys` | `question_answer_keys` (`accepted_answers`, `explanation`, `evidence`) |
-| `essays` (`UNIQUE(attempt_id, section_id)`) | `essays` (có `attempt_id`, **không có cột task**: task lấy từ `raw_ai_response.task_type` hoặc thứ tự nộp) |
-| `evaluations` + `criterion_scores` + `grading_runs` | `evaluation_results` (`raw_ai_response` JSON), `evaluation_logs`, `evaluation_result_history`, `speaking_evaluation_results` |
-| `annotations` | `essay_annotations` |
-| `review_requests` + `review_assignments` | `review_requests`, `expert_reviews`, `expert_review_scores` |
-| (không có) | `topics`, `content_generation_logs` (di sản cũ; `content_generation_logs` trái BR-19) |
+**Bảng ngoài thiết kế (tính năng Chấm bài tự do, giữ nguyên chờ nhóm quyết định):** `topics`, `free_essays` (trước là `essays`), `evaluation_results`, `essay_annotations`, `evaluation_logs`.
 
-Các điểm lệch khác:
-- **Chấm Writing hiện chạy bằng FastAPI `BackgroundTasks`**, chưa qua ARQ. Không có Redis thì chạy `NullRedisCache` (`backend/app/core/null_redis_cache.py`), chỉ mất phần cache.
-- **Writing v2:** mỗi lần nộp tạo 1 evaluation AI và 1 grading_run cho mỗi task (tạo sẵn lúc nộp). Band tính trong code (`writing_bands.py`).
-  - Mock: BR-15 (tự tạo yêu cầu Expert) chưa làm, nên điểm AI tạm là chính thức.
-  - AI engine chưa trả về model, prompt version và trace id, nên các cột này trong `grading_runs` còn trống (nợ NFR-05).
-- **Đã sửa (2026-11-03):**
-  - Bỏ việc decode JWT không kiểm chữ ký. Fallback giờ verify HS256 bằng `SUPABASE_JWT_SECRET`, `aud=authenticated` (`backend/tests/test_security_jwt_verification.py`).
-  - `attempts/start` không còn mượn user đầu tiên trong DB khi chưa đăng nhập.
-  - `DELETE /student/history` (nhánh public) kiểm tra chủ sở hữu trước khi xoá.
-- **Còn tồn:**
-  - Nhánh `public` của summary/detail/submit vẫn cho phép truy cập khi không đăng nhập (`if current_user and ...`). Nhánh v2 đã chặn.
-  - Transcript Listening nằm trong `passage_text` (dữ liệu cũ) nên vẫn hiện trước khi nộp, trái FR-14.
-- **Realtime chưa dùng.** Frontend polling 5 s (`frontend/src/hooks/useWritingAttemptSummary.ts`).
-- Writing demo end-to-end đã chạy được: `POST /grade` của AI engine (port 8001) ← Core API (port 8000) ← Next.js (port 3000). Band attempt = (T1 + 2·T2)/3.
-- Đề Writing (97 test) đã nằm trên R2: bucket `ielts-learning`, prefix `dataset/writing/`. Cột `image_key` trong DB vẫn trỏ Google Storage. Chưa import vào Supabase.
-- Speaking, Expert workflow, CMS, dashboard theo BR-17 và RLS read-only: chưa làm theo thiết kế hoặc làm một phần.
+**Legacy đang chờ xoá:** schema `legacy` (bản sao dữ liệu cũ). Xoá bằng `DROP SCHEMA legacy CASCADE` **chỉ sau khi nhóm xác nhận** và đã pull code mới.
+
+**Hành vi thay đổi do schema buộc phải vậy:**
+- Đề published/archived không sửa được (BR-10) → API trả 409.
+- Importer không còn gán `test_set`; bộ Mock (UNIQUE(test_set_id, skill)) tạo riêng: 5 bộ "IELTS Recent Actual Tests – Mock Set 1..5".
+- Speaking nộp bài không còn band giả 6.5: trạng thái `grading` hoặc `no_speech`.
+- Đáp án mẫu Writing/Speaking từ dataset không được lưu.
+- L/R chỉ có band khi đủ 40 câu (BR-03); ngược lại `overall_band: null`, frontend hiện "—". "Xoá" lịch sử chỉ huỷ bài chưa nộp; xem attempt của người khác → 404.
+- Admin cũ `n22dccn050@…`, `test1@gmail.com` thành Learner; attempt của Expert và 53 essay không có attempt không được chuyển.
+- Cột `is_activated` bỏ: "đã kích hoạt" = có `last_sign_in_at` trong Supabase Auth.
+
+**Điểm lệch còn lại so với thiết kế:**
+- Chấm bài chạy bằng FastAPI `BackgroundTasks`, chưa qua ARQ; không có Redis thì dùng `NullRedisCache`.
+- Mock: BR-15 (tự tạo yêu cầu Expert) chưa làm; điểm AI tạm là chính thức.
+- AI engine chưa trả model/prompt version/trace id → cột NFR-05 trong `grading_runs` còn trống.
+- Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái FR-14).
+- Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.
+- Đề Writing: 97 đề trên R2 (`ielts-learning`, prefix `dataset/writing/`), mới nhập 6; 91 đề còn lại import sau.
+- Speaking chấm thật, Expert workflow, dashboard BR-17: làm một phần.
+
+**Bảo mật đã sửa:** JWT fallback verify HS256 + `aud=authenticated`; không còn mượn user đầu tiên khi chưa đăng nhập; xoá lịch sử kiểm tra chủ sở hữu.
 
 **Khi viết code mới:**
-1. Không phá các luồng đang demo được (Writing).
-2. Tính năng mới bám **tên khái niệm và quy tắc** trong file này (BR, trạng thái, quyền).
-3. Chuyển sang schema 33 bảng phải làm bằng **migration đánh số** trong `supabase/migrations/`, kèm cập nhật §12. Không tự đổi schema khi người dùng chưa đồng ý (DB "đang rối", việc chuyển đổi do cả nhóm quyết).
+1. Bám **tên khái niệm và quy tắc** trong file này (BR, trạng thái, quyền).
+2. Đổi schema bằng migration đánh số trong `supabase/migrations/`, cập nhật §7/§12 cùng commit.
+3. Chỉ migrate DB, không thêm tính năng ngoài yêu cầu.
 4. Không commit secret; `.env` nằm trong gitignore.
 
 ---
 
 ## 13. Câu hỏi còn mở
 
-- Chuyển các module còn lại (Speaking, Expert, Admin, learning profile/dashboard) sang `v2` theo thứ tự nào? Khi nào chuyển hẳn (xoá hoặc đổi tên `public`)?
-- Import 91 đề Writing còn lại từ R2 vào `v2`.
+- Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?
+- Tính năng Chấm bài tự do + `topics`: bỏ hay giữ? (người dùng muốn bỏ nhưng cần debate với nhóm)
+- Import 91 đề Writing còn lại từ R2 vào `public`.
 - Hàng đợi chính thức: ARQ (theo báo cáo) hay pgmq (theo sơ đồ SD)? Cần thống nhất rồi sửa lại sơ đồ.
-- Chương IV (môi trường triển khai, giao diện, kiểm thử, đánh giá độ chính xác AI bằng MAE) chưa viết; cần chọn bộ dữ liệu để so điểm AI với điểm Expert.
+- Chương IV (triển khai, giao diện, kiểm thử, đánh giá AI bằng MAE) chưa viết; cần bộ dữ liệu so điểm AI với Expert.
 - ADR-04 trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".

@@ -21,7 +21,7 @@ export function useGradingNotifications() {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'essays',
+          table: 'free_essays',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {

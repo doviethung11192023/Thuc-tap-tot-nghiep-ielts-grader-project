@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from app.db.supabase import supabase
+from app.db.supabase import db
 from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
 
 def _scan_rl_tests(de_bai_dir: Path, existing: set, summary: dict, pending: list, all_tests: list):
@@ -87,7 +87,7 @@ def scan_dataset(root_path: Optional[str] = None) -> Dict[str, Any]:
     _, de_bai_dir, _ = resolve_dataset_paths(root_path)
     existing_set = set()
     try:
-        res = supabase.table("tests").select("title, skill").execute()
+        res = db().table("tests").select("title, skill").execute()
         for t in res.data or []:
             existing_set.add((t["title"].strip().lower()[:280], t["skill"].strip().lower()))
     except Exception as e:

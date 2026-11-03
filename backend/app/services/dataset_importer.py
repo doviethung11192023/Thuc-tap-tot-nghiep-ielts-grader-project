@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from app.db.supabase import supabase
+from app.db.supabase import db
 from app.schemas.exam_content import SkillType
 from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
 from app.services.importers.rl_importer import process_single_rl_exam
@@ -23,22 +23,14 @@ class DatasetImporter:
             "topics_created": 0, "errors": []
         }
 
-    def _get_or_create_test_set(self, name: str) -> str:
-        existing = supabase.table("test_sets").select("id").eq("name", name).limit(1).execute()
-        if existing.data:
-            return existing.data[0]["id"]
-        res = supabase.table("test_sets").insert({"name": name, "created_by": self.admin_id}).execute()
-        self.stats["test_sets_created"] += 1
-        return res.data[0]["id"]
-
     def run(self, limit: Optional[int] = None, rl: bool = True, writing: bool = True, speaking: bool = True, selected_tests: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         try:
             if not self.admin_id:
-                adm = supabase.table("users").select("id").eq("role", "admin").limit(1).execute()
+                adm = db().table("profiles").select("id").eq("role", "admin").limit(1).execute()
                 if adm.data:
                     self.admin_id = adm.data[0]["id"]
 
-            test_set_id = self._get_or_create_test_set("IELTS Recent Actual Tests (Full Set)")
+            test_set_id = None   # bộ đề Mock chỉ có 1 đề/kỹ năng (FR-36): đề nhập vào là đề độc lập
             if selected_tests:
                 self._import_selected(test_set_id, selected_tests)
             else:
@@ -105,7 +97,7 @@ class DatasetImporter:
                 if not prompt:
                     continue
                 task_type = "task1" if "task 1" in title.lower() or "task1" in wf.stem.lower() else "task2"
-                supabase.table("topics").insert({
+                db().table("topics").insert({
                     "title": title[:200], "description": title, "prompt_content": prompt,
                     "task_type": task_type, "difficulty": self.default_difficulty, "category": "Academic",
                     "is_active": True, "created_by": self.admin_id

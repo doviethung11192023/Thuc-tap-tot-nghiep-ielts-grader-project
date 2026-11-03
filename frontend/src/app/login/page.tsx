@@ -50,7 +50,7 @@ export default function LoginPage() {
         toast.success('Đăng nhập thành công!');
         
         const { data: userData, error: userError } = await supabase
-          .from('users')
+          .from('profiles')
           .select('role')
           .eq('id', data.session.user.id)
           .single();

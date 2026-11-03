@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from app.core.security import require_admin, User
-from app.db.supabase import supabase
+from app.db.supabase import db
+from app.services.cms.cms_tests import db_error
 
 router = APIRouter()
 
@@ -20,10 +21,10 @@ class BulkAssignSetPayload(BaseModel):
 @router.get("/test-sets")
 async def list_admin_test_sets(current_user: User = Depends(require_admin)):
     """Danh sách tất cả bộ đề thi trong hệ thống kèm thống kê bài thi và kỹ năng."""
-    sets_res = supabase.table("test_sets").select("*").order("created_at", desc=True).execute()
+    sets_res = db().table("test_sets").select("*").order("created_at", desc=True).execute()
     test_sets = sets_res.data or []
 
-    tests_res = supabase.table("tests").select("id, skill, status, test_set_id").execute()
+    tests_res = db().table("tests").select("id, skill, status, test_set_id").execute()
     all_tests = tests_res.data or []
 
     tests_by_set: Dict[str, List[Dict[str, Any]]] = {}
@@ -66,19 +67,12 @@ async def create_admin_test_set(
 ):
     """Tạo mới một bộ đề thi."""
     name_clean = payload.name.strip()
-    existing = supabase.table("test_sets").select("id").ilike("name", name_clean).execute()
+    existing = db().table("test_sets").select("id").ilike("name", name_clean).execute()
     if existing.data:
         raise HTTPException(status_code=400, detail=f"Bộ đề thi '{name_clean}' đã tồn tại")
 
-    insert_data = {"name": name_clean}
-    if current_user and current_user.id:
-        try:
-            user_chk = supabase.table("users").select("id").eq("id", str(current_user.id)).maybe_single().execute()
-            if user_chk and user_chk.data:
-                insert_data["created_by"] = str(current_user.id)
-        except Exception:
-            pass
-    res = supabase.table("test_sets").insert(insert_data).execute()
+    insert_data = {"name": name_clean, "status": "published"}   # bộ đề Mock: tối đa 1 đề / kỹ năng (FR-36)
+    res = db().table("test_sets").insert(insert_data).execute()
     if not res.data:
         raise HTTPException(status_code=500, detail="Không thể tạo bộ đề thi trong database")
 
@@ -100,7 +94,7 @@ async def update_admin_test_set(
         raise HTTPException(status_code=400, detail="Mã bộ đề thi không hợp lệ (UUID)")
 
     name_clean = payload.name.strip()
-    res = supabase.table("test_sets").update({"name": name_clean}).eq("id", set_id).execute()
+    res = db().table("test_sets").update({"name": name_clean}).eq("id", set_id).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ đề thi để cập nhật")
 
@@ -121,10 +115,10 @@ async def delete_admin_test_set(
         raise HTTPException(status_code=400, detail="Mã bộ đề thi không hợp lệ (UUID)")
 
     # 1. Unlink tests
-    supabase.table("tests").update({"test_set_id": None}).eq("test_set_id", set_id).execute()
+    db().table("tests").update({"test_set_id": None}).eq("test_set_id", set_id).execute()
 
     # 2. Delete set
-    res = supabase.table("test_sets").delete().eq("id", set_id).execute()
+    res = db().table("test_sets").delete().eq("id", set_id).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ đề thi để xóa")
 
@@ -150,7 +144,10 @@ async def bulk_assign_tests_to_set(
 
     updated_count = 0
     for tid in payload.test_ids:
-        u_res = supabase.table("tests").update({"test_set_id": target_set_id}).eq("id", tid).execute()
+        try:
+            u_res = db().table("tests").update({"test_set_id": target_set_id}).eq("id", tid).execute()
+        except Exception as e:
+            raise db_error(e)
         if u_res.data:
             updated_count += len(u_res.data)
 

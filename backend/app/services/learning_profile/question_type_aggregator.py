@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from app.db.supabase import supabase
+from app.services.practice import learning_profile_readers
 
 def compute_question_type_accuracy(user_id: str, scored_attempts: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -12,25 +12,11 @@ def compute_question_type_accuracy(user_id: str, scored_attempts: List[Dict[str,
     att_map = {a["id"]: a for a in scored_attempts}
     att_ids = list(att_map.keys())
 
-    # Lấy câu trả lời thực tế (tối đa 50 attempts gần nhất để tối ưu thời gian phản hồi)
-    ans_res = supabase.table("attempt_answers").select("attempt_id, question_id, is_correct").in_("attempt_id", att_ids[:50]).execute()
-    answers = ans_res.data or []
-
+    # Câu trả lời kèm dạng câu (tối đa 50 attempts gần nhất để phản hồi nhanh)
+    answers = learning_profile_readers.answers_with_types(att_ids[:50])
     if not answers:
         return {"report": [], "highlights": _get_empty_highlights()}
-
-    q_ids = list(set([a["question_id"] for a in answers if a.get("question_id")]))
-    q_grp_map = {}
-
-    # Truy vấn thông tin dạng câu hỏi theo từng chunk 100 câu
-    for i in range(0, len(q_ids), 100):
-        chunk = q_ids[i:i + 100]
-        q_res = supabase.table("questions").select(
-            "id, group_id, question_groups(id, question_type, question_subtype)"
-        ).in_("id", chunk).execute()
-        for q in (q_res.data or []):
-            grp = q.get("question_groups") or {}
-            q_grp_map[q["id"]] = (grp.get("question_type") or "other", grp.get("question_subtype") or "")
+    q_grp_map = {a["question_id"]: (a["question_type"], a["question_subtype"]) for a in answers}
 
     type_stats = {}
     for ans in answers:

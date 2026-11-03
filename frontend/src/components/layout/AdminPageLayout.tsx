@@ -74,7 +74,7 @@ export function AdminPageLayout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between items-center py-1">
             <span className="text-zinc-500">Vai trò hiện tại:</span>
             <span className="px-2 py-0.5 rounded font-bold uppercase text-[10px] bg-amber-100 text-amber-800">
-              {user.role === "expert" ? "Chuyên gia (Expert)" : user.role === "student" ? "Học viên (Student)" : user.role}
+              {user.role === "expert" ? "Chuyên gia (Expert)" : user.role === "learner" ? "Học viên (Learner)" : user.role}
             </span>
           </div>
         </div>

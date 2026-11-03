@@ -2,7 +2,7 @@ import time
 from fastapi import APIRouter, Depends, Query
 from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
-from app.db.supabase import supabase
+from app.services.practice import practice_catalog
 
 router = APIRouter()
 
@@ -33,16 +33,12 @@ async def get_question_types_summary(skill: str = Query("reading")):
         if now_ts - entry["ts"] < _CACHE_TTL_SECONDS:
             return {"meta": {"code": 200, "cached": True}, "data": entry["data"]}
 
-    res = supabase.table("question_groups").select(
-        "id, question_type, test_sections!inner(test_id, tests!inner(id, skill, status))"
-    ).eq("test_sections.tests.status", "published").eq("test_sections.tests.skill", skill_lower).execute()
-
-    items = res.data or []
-    counts: Dict[str, int] = {}
-    for it in items:
-        q_type = it.get("question_type")
-        if q_type:
-            counts[q_type] = counts.get(q_type, 0) + 1
+    if skill_lower in ("writing", "speaking"):
+        counts: Dict[str, int] = {}
+        for it in practice_catalog.task_part_exercises(skill_lower, None):
+            counts[it["question_type"]] = counts.get(it["question_type"], 0) + 1
+    else:
+        counts = practice_catalog.question_type_counts(skill_lower)
 
     summary_list = []
     for q_type, count in counts.items():
@@ -78,31 +74,20 @@ async def list_practice_exercises(
         if now_ts - cached["ts"] < _CACHE_TTL_SECONDS:
             return {"meta": {"code": 200, "cached": True}, "data": cached["data"]}
 
-    offset = (page - 1) * limit
-    query = supabase.table("question_groups").select(
-        "id, question_type, instructions, order_no, section_id, test_sections!inner(id, order_no, title, test_id, tests!inner(id, title, skill, difficulty, status)), questions(id)",
-        count="exact"
-    ).eq("test_sections.tests.status", "published").eq("test_sections.tests.skill", skill_lower)
-
-    if type_filter:
-        query = query.eq("question_type", type_filter)
-    if diff_filter:
-        query = query.eq("test_sections.tests.difficulty", diff_filter)
-
-    query = query.order("order_no", desc=False)
-    res = query.range(offset, offset + limit - 1).execute()
-
-    items = res.data or []
-    total = res.count if hasattr(res, "count") and res.count is not None else len(items)
+    if skill_lower in ("writing", "speaking"):
+        rows = [r for r in practice_catalog.task_part_exercises(skill_lower, diff_filter)
+                if not type_filter or r["question_type"] == type_filter]
+        total, items = len(rows), rows[(page - 1) * limit: page * limit]
+    else:
+        items, total = practice_catalog.exercise_groups(skill_lower, type_filter, diff_filter, page, limit)
 
     formatted_exercises = []
     for it in items:
         group_id = it.get("id")
         q_type = it.get("question_type", "")
-        sec = it.get("test_sections") or {}
-        test_info = sec.get("tests") or {}
-        questions_list = it.get("questions") or []
-        q_count = len(questions_list)
+        sec = it.get("section") or {}
+        test_info = it.get("test") or {}
+        q_count = it.get("question_count") or 0
 
         part_num = sec.get("order_no", 1)
         sec_title = sec.get("title") or f"Part {part_num}"

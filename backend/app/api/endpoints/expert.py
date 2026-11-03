@@ -4,7 +4,7 @@ from app.schemas.expert import (
     ExpertAvailabilityUpdate
 )
 from app.core.security import require_expert, User
-from app.db.supabase import supabase
+from app.db.supabase import db
 
 router = APIRouter()
 
@@ -14,35 +14,21 @@ async def get_expert_profile(current_user: User = Depends(require_expert)):
     Lấy thông tin hồ sơ của Expert, trạng thái khả dụng nhận bài, 
     và số lượng bài đang được phân công (UC-14, FR-21).
     """
-    # 1. Lấy thông tin user
-    user_res = supabase.table("users").select("id, email, full_name, avatar_url, created_at").eq("id", current_user.id).execute()
+    user_res = db().table("profiles").select("id, email, full_name, avatar_key, created_at").eq("id", current_user.id).execute()
     if not user_res.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    user_data = user_res.data[0]
+    user_data = {**user_res.data[0], "avatar_url": user_res.data[0].get("avatar_key")}
 
-    # 2. Lấy thông tin expert_profiles
-    profile_res = supabase.table("expert_profiles").select("*").eq("user_id", current_user.id).execute()
+    # Hồ sơ Expert được tạo cùng tài khoản (trigger handle_new_user / Admin tạo Expert)
+    profile_res = db().table("expert_profiles").select("*").eq("user_id", current_user.id).execute()
     if not profile_res.data:
-        # Nếu chưa có bản ghi (ví dụ tài khoản admin mới set sang expert), tự động khởi tạo
-        new_profile = {
-            "user_id": current_user.id,
-            "is_available": False,
-            "max_active_reviews": 5,
-            "bio": None
-        }
-        create_res = supabase.table("expert_profiles").insert(new_profile).execute()
-        expert_data = create_res.data[0] if create_res.data else new_profile
-    else:
-        expert_data = profile_res.data[0]
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expert profile not found")
+    expert_data = profile_res.data[0]
 
-    # 3. Đếm số lượng bài đang được gán cho Expert này ('assigned' hoặc 'in_review')
-    count_res = supabase.table("review_requests")\
-        .select("id", count="exact")\
-        .eq("expert_id", current_user.id)\
-        .in_("status", ["assigned", "in_review"])\
-        .execute()
-    
-    active_count = count_res.count if hasattr(count_res, 'count') and count_res.count is not None else len(count_res.data or [])
+    # Số assignment đang mở (chưa kết thúc) của Expert này
+    count_res = db().table("review_assignments").select("id", count="exact") \
+        .eq("expert_id", current_user.id).is_("ended_at", "null").execute()
+    active_count = count_res.count if getattr(count_res, "count", None) is not None else len(count_res.data or [])
 
     return ExpertProfileResponse(
         user_id=user_data["id"],
@@ -69,9 +55,7 @@ async def update_expert_availability(
     if not fields_to_update:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
 
-    # Upsert/Update vào expert_profiles
-    fields_to_update["user_id"] = current_user.id
-    res = supabase.table("expert_profiles").upsert(fields_to_update).execute()
+    res = db().table("expert_profiles").update(fields_to_update).eq("user_id", current_user.id).execute()
     if not res.data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update expert profile")
 

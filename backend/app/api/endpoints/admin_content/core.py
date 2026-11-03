@@ -1,13 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from datetime import datetime, timezone
 from typing import Optional
 from app.core.security import require_admin, User
-from app.db.supabase import supabase
+from app.db.supabase import db
 from app.schemas.exam_content import SkillType
 from app.schemas.system_settings import (
     BandConversionCreate, SystemSettingUpdate
 )
 
 router = APIRouter()
+
+
+def _with_id(row: dict) -> dict:
+    """band_conversions có khoá (skill, raw_min); API dùng id "skill:raw_min"."""
+    return {**row, "id": f"{row['skill']}:{row['raw_min']}"}
+
+
+def _parse_id(item_id: str) -> tuple:
+    try:
+        skill_key, raw_min = item_id.split(":")
+        return skill_key, int(raw_min)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Mã quy đổi không hợp lệ (dạng skill:raw_min)")
 
 # --- Band Conversions (Bảng Quy Đổi Điểm Thô Sang Band Score) ---
 @router.get("/core/band-conversions")
@@ -16,11 +30,11 @@ async def get_band_conversions(
     current_user: User = Depends(require_admin)
 ):
     """Danh sách bảng quy đổi điểm số thô sang IELTS Band Score."""
-    query = supabase.table("band_conversions").select("*")
+    query = db().table("band_conversions").select("skill, raw_min, raw_max, band")
     if skill:
         query = query.eq("skill", skill.value)
     res = query.order("skill").order("raw_min", desc=True).execute()
-    return {"meta": {"code": 200}, "data": res.data or []}
+    return {"meta": {"code": 200}, "data": [_with_id(r) for r in res.data or []]}
 
 @router.post("/core/band-conversions", status_code=status.HTTP_201_CREATED)
 async def create_band_conversion(
@@ -39,10 +53,11 @@ async def create_band_conversion(
         "raw_max": data.raw_max,
         "band": data.band
     }
-    res = supabase.table("band_conversions").insert(payload).execute()
-    if not res.data:
-        raise HTTPException(status_code=500, detail="Không thể tạo khoảng quy đổi điểm")
-    return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": res.data[0]}
+    try:
+        res = db().table("band_conversions").insert(payload).execute()
+    except Exception as e:  # EXCLUDE: khoảng điểm cùng kỹ năng không được chồng nhau (ràng buộc 15)
+        raise HTTPException(status_code=409, detail=f"Khoảng điểm bị chồng lấn hoặc trùng: {str(e)[:200]}")
+    return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": _with_id(res.data[0])}
 
 @router.put("/core/band-conversions/{item_id}")
 async def update_band_conversion(
@@ -59,10 +74,14 @@ async def update_band_conversion(
         "raw_max": data.raw_max,
         "band": data.band
     }
-    res = supabase.table("band_conversions").update(payload).eq("id", item_id).execute()
+    skill_key, raw_min = _parse_id(item_id)
+    try:
+        res = db().table("band_conversions").update(payload).eq("skill", skill_key).eq("raw_min", raw_min).execute()
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=f"Khoảng điểm bị chồng lấn hoặc trùng: {str(e)[:200]}")
     if not res.data:
         raise HTTPException(status_code=404, detail="Bản ghi quy đổi không tồn tại")
-    return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": res.data[0]}
+    return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": _with_id(res.data[0])}
 
 @router.delete("/core/band-conversions/{item_id}")
 async def delete_band_conversion(
@@ -70,14 +89,15 @@ async def delete_band_conversion(
     current_user: User = Depends(require_admin)
 ):
     """Xóa một khoảng quy đổi điểm."""
-    res = supabase.table("band_conversions").delete().eq("id", item_id).execute()
+    skill_key, raw_min = _parse_id(item_id)
+    db().table("band_conversions").delete().eq("skill", skill_key).eq("raw_min", raw_min).execute()
     return {"meta": {"code": 200, "message": "Xóa thành công"}}
 
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
 @router.get("/core/settings")
 async def get_system_settings(current_user: User = Depends(require_admin)):
     """Lấy danh sách các cấu hình và tham số hệ thống."""
-    res = supabase.table("system_settings").select("*").order("key").execute()
+    res = db().table("system_settings").select("*").order("key").execute()
     return {"meta": {"code": 200}, "data": res.data or []}
 
 @router.put("/core/settings/{key}")
@@ -90,10 +110,10 @@ async def update_system_setting(
     payload = {
         "value": data.value,
         "updated_by": str(current_user.id),
-        "updated_at": "now()"
+        "admin_role": "admin",
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
-
-    res = supabase.table("system_settings").upsert({"key": key, **payload}).execute()
+    res = db().table("system_settings").upsert({"key": key, **payload}).execute()
     if not res.data:
         raise HTTPException(status_code=500, detail="Không thể lưu cấu hình")
     return {"meta": {"code": 200, "message": f"Cập nhật cấu hình '{key}' thành công"}, "data": res.data[0]}

@@ -4,7 +4,7 @@
 // ============================================================
 
 // ---------- Auth & User ----------
-export type UserRole = "student" | "expert" | "admin";
+export type UserRole = "learner" | "expert" | "admin";
 
 export interface User {
   id: string;

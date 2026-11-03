@@ -55,7 +55,7 @@ export function useWritingAttemptSummary(attemptId?: string) {
           status: res?.status ?? "",
           overallBand: Number(res?.overall_band ?? 0),
           submittedAt: res?.submitted_at,
-          gradingDone: Boolean(writing.grading_done) && res?.status !== "scoring",
+          gradingDone: Boolean(writing.grading_done) && res?.status !== "grading",
           tasks: writing.tasks ?? [],
         };
         setData(next);

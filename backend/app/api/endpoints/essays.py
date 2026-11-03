@@ -1,10 +1,10 @@
+"""Chấm bài tự do (/exam, free_essays — chờ nhóm quyết định giữ/bỏ) và kết quả chi tiết của mọi bài viết."""
 from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from app.schemas.essay import EssayCreate, EvaluationResponse, EssayDetail
 from app.core.security import get_current_user, User
-from app.db.supabase import supabase
+from app.db.supabase import db
 from app.worker.tasks import evaluate_essay_task
-from app.services.v2_practice import is_v2_enabled
-from app.services.v2_writing.writing_result_views import build_essay_result
+from app.services.writing.writing_result_views import build_essay_result
 import uuid
 from datetime import datetime
 import json
@@ -27,7 +27,7 @@ async def submit_essay(request: Request, essay: EssayCreate, background_tasks: B
         essay_data["topic_id"] = essay.topic_id
         
     try:
-        response = supabase.table("essays").insert(essay_data).execute()
+        response = db().table("free_essays").insert(essay_data).execute()
         essay_id = response.data[0]["id"]
         
         # Enqueue background task via FastAPI (Phase 1.5 - Mock Worker)
@@ -35,7 +35,7 @@ async def submit_essay(request: Request, essay: EssayCreate, background_tasks: B
         job_id = str(uuid.uuid4())
         background_tasks.add_task(evaluate_essay_task, None, essay_id)
         
-        supabase.table("essays").update({"task_id": job_id}).eq("id", essay_id).execute()
+        db().table("free_essays").update({"task_id": job_id}).eq("id", essay_id).execute()
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -60,13 +60,12 @@ async def submit_essay(request: Request, essay: EssayCreate, background_tasks: B
 
 @router.get("/{essay_id}/results")
 async def get_evaluation_results(essay_id: str, current_user: User = Depends(get_current_user)):
-    if is_v2_enabled():
-        data = build_essay_result(essay_id, current_user.id, current_user.role == "admin")
-        if data is None:
-            raise HTTPException(status_code=404, detail="Essay not found")
+    # Bài trong attempt (luồng Writing chính); không có thì là bài Chấm tự do (free_essays)
+    data = build_essay_result(essay_id, current_user.id, current_user.role == "admin")
+    if data is not None:
         return {"meta": {"code": 200, "message": "Success"}, "data": data}
 
-    essay_res =supabase.table("essays").select("*").eq("id", essay_id).execute()
+    essay_res =db().table("free_essays").select("*").eq("id", essay_id).execute()
     if not essay_res.data:
         raise HTTPException(status_code=404, detail="Essay not found")
         
@@ -75,12 +74,12 @@ async def get_evaluation_results(essay_id: str, current_user: User = Depends(get
     if essay_data["user_id"] != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Essay not found")
     
-    eval_res = supabase.table("evaluation_results").select("*").eq("essay_id", essay_id).execute()
+    eval_res = db().table("evaluation_results").select("*").eq("essay_id", essay_id).execute()
     result_data = eval_res.data[0] if eval_res.data else None
     
     annotations_data = None
     if essay_data:
-        annotations_res = supabase.table("essay_annotations").select("*").eq("essay_id", essay_id).execute()
+        annotations_res = db().table("essay_annotations").select("*").eq("essay_id", essay_id).execute()
         annotations_data = annotations_res.data
         
     return {
@@ -105,7 +104,7 @@ async def list_essays(request: Request, page: int = 1, limit: int = 10, status: 
     except Exception as cache_err:
         print(f"⚠️ [API] Redis cache get error: {cache_err}")
 
-    query = supabase.table("essays").select("*, topics(title), evaluation_results(overall_band)", count="exact").eq("user_id", current_user.id).order("submitted_at", desc=True)
+    query = db().table("free_essays").select("*, topics(title), evaluation_results(overall_band)", count="exact").eq("user_id", current_user.id).order("submitted_at", desc=True)
     if status:
         query = query.eq("status", status)
         

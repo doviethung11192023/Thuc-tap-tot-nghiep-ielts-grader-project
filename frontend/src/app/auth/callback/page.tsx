@@ -22,10 +22,10 @@ function CallbackContent() {
         // Lưu token cho api-client.ts sử dụng
         localStorage.setItem("supabase_access_token", session.access_token);
 
-        // Kiểm tra xem user đã tồn tại trong public.users chưa
+        // Vai trò để điều hướng (hồ sơ do trigger handle_new_user tạo khi đăng ký)
         const { data: userData } = await supabase
-          .from('users')
-          .select('role, is_activated')
+          .from('profiles')
+          .select('role')
           .eq('id', session.user.id)
           .single();
 
@@ -34,11 +34,6 @@ function CallbackContent() {
         if (nextParam && nextParam.startsWith('/')) {
           router.push(nextParam);
           return;
-        }
-
-        // Tự động kích hoạt tài khoản nếu đăng nhập qua Google OAuth
-        if (userData && userData.is_activated === false) {
-          await supabase.from('users').update({ is_activated: true }).eq('id', session.user.id);
         }
 
         // Đăng nhập thành công, điều hướng theo vai trò

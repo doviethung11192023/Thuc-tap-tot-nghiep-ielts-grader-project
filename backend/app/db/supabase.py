@@ -38,3 +38,12 @@ def get_supabase_client() -> Client:
     return client
 
 supabase: Client = get_supabase_client()
+
+
+
+def db() -> Client:
+    """
+    Client PostgREST (service_role) cho dữ liệu ứng dụng — schema public theo thiết kế
+    (docs/source-of-truth.md §7). Mọi truy cập DB của Core API đi qua hàm này.
+    """
+    return supabase

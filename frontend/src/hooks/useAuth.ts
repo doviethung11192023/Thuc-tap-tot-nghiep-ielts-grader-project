@@ -15,19 +15,20 @@ export function useAuth() {
 
   async function fetchUserProfile(userId: string, authUser?: any) {
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
+      // profiles: chỉ đọc hồ sơ của chính mình (RLS own_read); avatar_key là ảnh đại diện
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, role, avatar_key, is_active, created_at")
         .eq("id", userId)
         .single();
       if (data) {
-        setUser(data);
+        setUser({ ...data, avatar_url: data.avatar_key ?? null, updated_at: data.created_at } as User);
       } else if (authUser) {
         setUser({
           id: authUser.id,
           email: authUser.email,
           full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
-          role: authUser.app_metadata?.role || "student",
+          role: authUser.app_metadata?.role || "learner",
           is_active: true,
           created_at: authUser.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -42,7 +43,7 @@ export function useAuth() {
           id: authUser.id,
           email: authUser.email,
           full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
-          role: authUser.app_metadata?.role || "student",
+          role: authUser.app_metadata?.role || "learner",
           is_active: true,
           created_at: authUser.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),

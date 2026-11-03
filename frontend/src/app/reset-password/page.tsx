@@ -22,7 +22,7 @@ export default function ResetPasswordPage() {
       if (session?.user) {
         setUserEmail(session.user.email || null);
         const { data: dbUser } = await supabase
-          .from('users')
+          .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .single();
@@ -60,14 +60,6 @@ export default function ResetPasswordPage() {
           toast.error('Lỗi thiết lập mật khẩu: ' + error.message);
         }
         return;
-      }
-
-      // Đánh dấu tài khoản đã được kích hoạt trong public.users
-      if (updateData?.user) {
-        await supabase
-          .from('users')
-          .update({ is_activated: true })
-          .eq('id', updateData.user.id);
       }
 
       toast.success('Kích hoạt tài khoản và thiết lập mật khẩu thành công!');

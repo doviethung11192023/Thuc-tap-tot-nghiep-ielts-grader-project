@@ -20,7 +20,7 @@ class UserProfileResponse(BaseModel):
     email: str
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
-    role: str = "student"
+    role: str = "learner"
     is_active: bool = True
     is_activated: bool = True
     voice_consent_at: Optional[datetime] = None

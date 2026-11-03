@@ -4,15 +4,14 @@ from pydantic import BaseModel
 from jose import jwt, JWTError
 
 from app.core.config import settings
-from app.db.supabase import supabase
+from app.db.supabase import db, supabase
 
 security = HTTPBearer()
 
 class User(BaseModel):
     id: str
-    role: str
+    role: str                 # learner | expert | admin (profiles.role)
     is_active: bool = True
-    is_activated: bool = True
 
 def _verified_sub(token: str) -> str | None:
     """sub của access token Supabase sau khi kiểm chữ ký + hạn + audience; sai → None."""
@@ -52,34 +51,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
         
-        from app.services.v2_practice import is_v2_enabled, v2db
-        if is_v2_enabled():
-            # v2: role learner|expert|admin; API giữ tên cũ "student" cho learner
-            p = v2db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
-            if not p.data:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                    detail="User profile not found in database. Account may not be fully initialized.")
-            role = p.data[0]["role"]
-            return User(id=p.data[0]["id"], role="student" if role == "learner" else role,
-                        is_active=p.data[0]["is_active"], is_activated=True)
+        p = db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
+        if not p.data:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="User profile not found in database. Account may not be fully initialized.")
+        return User(id=p.data[0]["id"], role=p.data[0]["role"], is_active=p.data[0]["is_active"])
 
-        res = supabase.table("users").select("*").eq("id", user_id).execute()
-        if res.data:
-            u = res.data[0]
-            print(f"[SECURITY DEBUG] Token user_id={user_id}, email={u.get('email')}, role={u.get('role')}, is_active={u.get('is_active')}, is_activated={u.get('is_activated')}")
-            return User(
-                id=u["id"], 
-                role=u["role"], 
-                is_active=u["is_active"],
-                is_activated=u.get("is_activated", True)
-            )
-        else:
-            print(f"[SECURITY DEBUG] User {user_id} not found in public.users")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User profile not found in database. Account may not be fully initialized."
-            )
-            
     except HTTPException:
         raise
     except Exception as e:
@@ -114,12 +91,12 @@ async def require_expert(current_user: User = Depends(get_current_active_user)) 
         )
     return current_user
 
-async def require_student(current_user: User = Depends(get_current_active_user)) -> User:
-    if current_user.role != "student" and current_user.role != "admin":
-        print(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'student' is required!")
+async def require_learner(current_user: User = Depends(get_current_active_user)) -> User:
+    if current_user.role != "learner":
+        print(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'learner' is required!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
-            detail=f"Quyền truy cập bị từ chối: Tài khoản có vai trò '{current_user.role}', nhưng chức năng này yêu cầu vai trò 'student'"
+            detail=f"Quyền truy cập bị từ chối: Tài khoản có vai trò '{current_user.role}', nhưng chức năng này yêu cầu vai trò 'learner'"
         )
     return current_user
 

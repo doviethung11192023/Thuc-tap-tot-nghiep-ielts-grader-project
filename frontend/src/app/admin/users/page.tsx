@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
       <div className="flex border-b border-zinc-200 gap-4 sm:gap-8 text-sm sm:text-base font-bold overflow-x-auto">
         {[
           { id: "all", label: "Tất cả" },
-          { id: "student", label: "Học viên (Student)" },
+          { id: "learner", label: "Học viên (Learner)" },
           { id: "expert", label: "Chuyên gia (Expert)" },
           { id: "admin", label: "Quản trị viên (Admin)" },
         ].map((tab) => (

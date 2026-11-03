@@ -108,15 +108,24 @@ export default function ProfilePage() {
   async function fetchStats(userId: string) {
     try {
       setLoadingStats(true);
-      const { data: essays, error } = await supabase
-        .from('essays')
-        .select('*, evaluation_results(overall_band)')
-        .eq('user_id', userId)
-        .order('submitted_at', { ascending: false });
-
+      // Bài Writing trong đề (attempt_results: band chính thức) + bài Chấm tự do (free_essays); RLS chỉ trả bài của mình
+      const [{ data: freeEssays, error }, { data: writingAttempts, error: attemptError }] = await Promise.all([
+        supabase.from('free_essays').select('submitted_at, evaluation_results(overall_band)').eq('user_id', userId),
+        supabase.from('attempt_results').select('band, submitted_at').eq('learner_id', userId).eq('skill', 'writing')
+          .not('submitted_at', 'is', null),
+      ]);
       if (error) throw error;
+      if (attemptError) throw attemptError;
 
-      if (!essays || essays.length === 0) {
+      const essays = [
+        ...(freeEssays || []).map((e: any) => {
+          const r = Array.isArray(e.evaluation_results) ? e.evaluation_results[0] : e.evaluation_results;
+          return { submitted_at: e.submitted_at as string, band: Number(r?.overall_band || 0) };
+        }),
+        ...(writingAttempts || []).map((a: any) => ({ submitted_at: a.submitted_at as string, band: Number(a.band || 0) })),
+      ].sort((a, b) => b.submitted_at.localeCompare(a.submitted_at));
+
+      if (essays.length === 0) {
         setStats({
           totalEssays: 0,
           highestOverall: 0,
@@ -125,16 +134,7 @@ export default function ProfilePage() {
         return;
       }
 
-      let maxBand = 0;
-      essays.forEach(essay => {
-        const results = essay.evaluation_results as any;
-        if (results) {
-          const arr = Array.isArray(results) ? results : [results];
-          arr.forEach((r: any) => {
-            if (r.overall_band > maxBand) maxBand = r.overall_band;
-          });
-        }
-      });
+      const maxBand = Math.max(...essays.map((e) => e.band));
 
       const latestDate = new Date(essays[0].submitted_at).toLocaleDateString('vi-VN', {
         day: '2-digit',

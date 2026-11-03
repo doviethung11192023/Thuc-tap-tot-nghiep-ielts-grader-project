@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Request
 from typing import Optional
 from app.schemas.topic import TopicCreate, TopicUpdate, TopicResponse
 from app.core.security import require_admin, get_current_user, User
-from app.db.supabase import supabase
+from app.db.supabase import db
 import uuid
 import json
 
@@ -16,7 +16,7 @@ async def list_topics(request: Request, page: int = 1, limit: int = 10, task_typ
     if cached:
         return json.loads(cached)
 
-    query = supabase.table("topics").select("*", count="exact").eq("is_active", True)
+    query = db().table("topics").select("*", count="exact").eq("is_active", True)
     if task_type:
         query = query.eq("task_type", task_type)
     if difficulty:
@@ -48,7 +48,7 @@ async def create_topic(request: Request, topic: TopicCreate, current_user: User 
     topic_data["created_by"] = current_user.id
     
     try:
-        res = supabase.table("topics").insert(topic_data).execute()
+        res = db().table("topics").insert(topic_data).execute()
         # Invalidate cache
         keys = await request.app.state.redis.keys("topics:list:*")
         if keys:
@@ -67,7 +67,7 @@ async def update_topic(request: Request, topic_id: str, topic: TopicUpdate, curr
     if not update_data:
         return {"meta": {"code": 200, "message": "Nothing to update"}}
     
-    res = supabase.table("topics").update(update_data).eq("id", topic_id).execute()
+    res = db().table("topics").update(update_data).eq("id", topic_id).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Topic not found")
         
@@ -80,7 +80,7 @@ async def update_topic(request: Request, topic_id: str, topic: TopicUpdate, curr
 
 @router.delete("/{topic_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_topic(request: Request, topic_id: str, current_user: User = Depends(require_admin)):
-    supabase.table("topics").update({"is_active": False}).eq("id", topic_id).execute()
+    db().table("topics").update({"is_active": False}).eq("id", topic_id).execute()
     
     # Invalidate cache
     keys = await request.app.state.redis.keys("topics:list:*")

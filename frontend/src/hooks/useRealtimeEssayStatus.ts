@@ -69,7 +69,7 @@ export function useRealtimeEssayStatus(essayId: string | null) {
         {
           event: "UPDATE",
           schema: "public",
-          table: "essays",
+          table: "free_essays",
           filter: `id=eq.${essayId}`,
         },
         (payload) => {

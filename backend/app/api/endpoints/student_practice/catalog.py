@@ -2,7 +2,7 @@ import time
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
-from app.db.supabase import supabase
+from app.services.practice import practice_catalog
 from app.services.catalog_formatter import format_collection_cards, DEFAULT_COVER_IMAGES
 
 router = APIRouter()
@@ -26,31 +26,7 @@ async def list_published_tests(
         if now_ts - entry["ts"] < _CATALOG_TTL_SECONDS:
             return {"meta": {"code": 200, "cached": True}, "data": entry["data"]}
 
-    offset = (page - 1) * limit
-    query = supabase.table("tests").select(
-        "id, title, skill, duration_min, difficulty, allowed_mode, test_set_id, test_sets(id, name), created_at",
-        count="exact"
-    ).eq("status", "published")
-
-    if skill and skill.lower() != "all":
-        query = query.eq("skill", skill.lower())
-    if difficulty and difficulty.lower() != "all":
-        query = query.eq("difficulty", difficulty.lower())
-    if search and search.strip():
-        query = query.ilike("title", f"%{search.strip()}%")
-
-    query = query.order("created_at", desc=True)
-    res = query.range(offset, offset + limit - 1).execute()
-
-    items = res.data or []
-    total = res.count if hasattr(res, 'count') and res.count is not None else len(items)
-
-    result_data = {
-        "items": items,
-        "total": total,
-        "page": page,
-        "limit": limit
-    }
+    result_data = practice_catalog.list_tests(page, limit, skill, difficulty, search)
     _CATALOG_CACHE[cache_key] = {"ts": now_ts, "data": result_data}
     return {
         "meta": {"code": 200},
@@ -60,55 +36,20 @@ async def list_published_tests(
 @router.get("/sets")
 async def list_exam_collections(current_user: Optional[User] = Depends(get_optional_user)):
     """Danh sách các bộ đề thi IELTS đã xuất bản kèm tiến độ học viên (Batch Optimized)."""
-    sets_res = supabase.table("test_sets").select("id, name, created_at").order("created_at", desc=True).execute()
-    test_sets = sets_res.data or []
-
-    tests_res = supabase.table("tests").select("id, title, skill, duration_min, status, test_set_id").eq("status", "published").order("created_at").execute()
-    all_tests = tests_res.data or []
-
-    completed_test_ids = set()
-    if current_user:
-        att_res = supabase.table("test_attempts").select("test_id").eq("user_id", current_user.id).eq("status", "scored").execute()
-        completed_test_ids = {a["test_id"] for a in (att_res.data or [])}
-
+    test_sets, all_tests, completed_test_ids = practice_catalog.collections_source(current_user.id if current_user else None)
     collections = format_collection_cards(test_sets, all_tests, completed_test_ids)
     return {"meta": {"code": 200}, "data": collections}
 
 @router.get("/sets/{set_id}")
 async def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Chi tiết bộ đề và danh sách các bài test phân rã theo 4 kỹ năng."""
-    if set_id == "standalone-tests":
-        test_set = {"id": "standalone-tests", "name": "Đề Thi Thực Chiến Độc Lập"}
-        t_res = supabase.table("tests").select("id, title, skill, duration_min, status, created_at").is_("test_set_id", "null").eq("status", "published").order("created_at").execute()
-    else:
-        is_valid_uuid = False
-        try:
-            import uuid
-            uuid.UUID(set_id)
-            is_valid_uuid = True
-        except Exception:
-            pass
-
-        if is_valid_uuid:
-            s_res = supabase.table("test_sets").select("*").eq("id", set_id).execute()
-        else:
-            s_res = supabase.table("test_sets").select("*").order("created_at").limit(1).execute()
-
-        if not s_res.data:
-            raise HTTPException(status_code=404, detail="Bộ đề thi không tồn tại")
-        test_set = s_res.data[0]
-        t_res = supabase.table("tests").select("id, title, skill, duration_min, status, created_at").eq("test_set_id", test_set["id"]).eq("status", "published").order("created_at").execute()
-
-    tests = t_res.data or []
-
+    source = practice_catalog.collection_detail_source(set_id, current_user.id if current_user else None)
+    if source is None:
+        raise HTTPException(status_code=404, detail="Bộ đề thi không tồn tại")
+    test_set, tests, attempts = source
     user_attempts_by_test: Dict[str, List[Dict[str, Any]]] = {}
-    if current_user:
-        att_res = supabase.table("test_attempts").select("id, test_id, skill, band, started_at, submitted_at, status").eq("user_id", current_user.id).order("started_at", desc=True).execute()
-        for a in (att_res.data or []):
-            tid = a["test_id"]
-            if tid not in user_attempts_by_test:
-                user_attempts_by_test[tid] = []
-            user_attempts_by_test[tid].append(a)
+    for a in attempts:
+        user_attempts_by_test.setdefault(a["test_id"], []).append(a)
 
     test_cards = []
     for idx, t in enumerate(tests):

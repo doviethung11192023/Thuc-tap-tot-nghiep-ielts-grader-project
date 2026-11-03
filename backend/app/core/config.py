@@ -21,8 +21,6 @@ class Settings(BaseSettings):
 
     # Postgres trực tiếp (Session pooler) cho migration/psql; Core API không dùng
     SUPABASE_DB_URL: str = ""
-    # Schema DB của luồng Writing: "public" (schema cũ) hoặc "v2" (thiết kế 33 bảng)
-    DB_SCHEMA: str = "public"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
