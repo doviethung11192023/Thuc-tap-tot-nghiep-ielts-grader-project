@@ -566,7 +566,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | # | Mâu thuẫn | Quyết định |
 |---|---|---|
 | 1 | Sơ đồ SD-00, 02, 03, 05, 08, 09 vẽ "Job Queue (**Supabase pgmq**)"; chữ trong báo cáo (mục 3.4 và quyết định kiến trúc "ba khối Core API, worker, AI engine") và ARCH_system ghi **Redis + ARQ** | Theo **Redis + ARQ**. Sơ đồ SD cần sửa nhãn |
-| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa ADR-04 |
+| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa quyết định đó |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
 | 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Trong lúc test, schema mới tạm được expose bằng `ALTER ROLE authenticator SET pgrst.db_schemas`. Đã **RESET** khi cutover (2026-11-03); chỉ còn `public` |

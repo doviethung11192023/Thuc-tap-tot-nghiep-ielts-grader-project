@@ -104,3 +104,8 @@ docs/*
 dataset_clean/
 # Cấu hình MCP server cá nhân của Claude Code
 .mcp.json
+
+# Browser automation: credentials, TOTP secret, Chrome profiles (local only)
+private/
+tools/browser-automation/node_modules/
+dataset_clean/
