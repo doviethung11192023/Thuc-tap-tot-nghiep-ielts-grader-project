@@ -1,12 +1,15 @@
 """One-call grading: parsing, prompt building and flow routing."""
 import asyncio
 import json
+import time
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 
 import pytest
 
+from handlers import grammar_checker
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
-from services import grading_pipeline as gp, holistic_grader, prompt_builder
+from services import grading_pipeline as gp, holistic_grader, llm_evaluator, prompt_builder
 from services.holistic_grader import parse_all_criteria
 from services.reference_corpus import BandLadder, Reference
 
@@ -100,3 +103,46 @@ def test_explicit_argument_overrides_the_setting(monkeypatch):
     calls = route(monkeypatch, "legacy")
     asyncio.run(gp.run_grading_pipeline("t", "e", task_type="task2", pipeline="reference"))
     assert calls == ["reference"]
+
+
+def llm_reply(text, finish_reason="stop"):
+    return SimpleNamespace(choices=[SimpleNamespace(
+        finish_reason=finish_reason, message=SimpleNamespace(content=text)
+    )])
+
+
+def test_output_cut_off_by_max_tokens_retries_from_the_original_prompt(monkeypatch):
+    replies = [llm_reply('{"ta":   \n   \n', "length"), llm_reply(json.dumps(output()))]
+    seen = []
+
+    async def create(**kwargs):
+        seen.append(len(kwargs["messages"]))
+        return replies.pop(0)
+
+    async def no_wait(_):
+        return None
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    monkeypatch.setattr(llm_evaluator, "get_async_llm_client", lambda: client)
+    monkeypatch.setattr(llm_evaluator.asyncio, "sleep", no_wait)
+    compiled = SimpleNamespace(
+        messages=[{"role": "user", "content": "grade"}],
+        model="m", temperature=0, max_tokens=10, langfuse_prompt=SimpleNamespace(config={}),
+    )
+    assert asyncio.run(holistic_grader.grade_all_criteria(compiled)).ta.band == 6.0
+    assert seen == [1, 1]
+
+
+def test_concurrent_first_calls_start_one_language_tool(monkeypatch):
+    started = []
+
+    def fake_tool(language):
+        started.append(language)
+        time.sleep(0.05)
+        return object()
+
+    monkeypatch.setattr(grammar_checker, "_tool", None)
+    monkeypatch.setattr(grammar_checker.language_tool_python, "LanguageTool", fake_tool)
+    with ThreadPoolExecutor(8) as pool:
+        tools = list(pool.map(lambda _: grammar_checker._get_tool(), range(8)))
+    assert len(started) == 1 and len(set(map(id, tools))) == 1

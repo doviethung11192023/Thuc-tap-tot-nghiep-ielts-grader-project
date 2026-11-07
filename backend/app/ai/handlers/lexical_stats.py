@@ -1,4 +1,5 @@
 from __future__ import annotations
+import threading
 from collections import defaultdict
 import spacy
 
@@ -7,12 +8,14 @@ from schemas.tool_output import ProcessedEssay, LexicalStatsResult, RepeatedWord
 # ── Singletons ────────────────────────────────────────────────────────────────
 
 _nlp: spacy.Language | None = None
+_nlp_lock = threading.Lock()
 
 
 def _get_nlp() -> spacy.Language:
     global _nlp
-    if _nlp is None:
-        _nlp = spacy.load("en_core_web_sm")
+    with _nlp_lock:  # concurrent first calls would each load a copy of the model
+        if _nlp is None:
+            _nlp = spacy.load("en_core_web_sm")
     return _nlp
 
 

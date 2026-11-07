@@ -77,7 +77,12 @@ async def call_llm_json(
                 extra_body=llm_extra_body() if extra_body is None else extra_body,
                 **options,
             )
-            raw_content = response.choices[0].message.content or "{}"
+            choice = response.choices[0]
+            if choice.finish_reason == "length":
+                # qwen-flash can loop on whitespace in JSON mode. The text is unusable, so
+                # raw_content stays empty and the retry starts again from the original prompt.
+                raise ValueError("Output reached max_tokens")
+            raw_content = choice.message.content or "{}"
             return parse(raw_content)
         except Exception as e:
             if attempt == max_retries:

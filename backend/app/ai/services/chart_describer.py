@@ -2,7 +2,7 @@
 Chart describer — vision pass for IELTS Writing Task 1.
 
 Downloads the task image (R2 public URL or any http(s) URL), sends it to the
-vision model with the Langfuse `CHART/ System prompt`, and returns a structured
+vision model with the Langfuse `writing/task1/chart` prompt, and returns a structured
 description of the visual. The text-only criterion agents then grade the essay
 against this description.
 

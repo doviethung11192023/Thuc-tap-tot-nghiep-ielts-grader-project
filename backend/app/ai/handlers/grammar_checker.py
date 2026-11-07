@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 import language_tool_python
 
 from settings.config import DISABLED_GRAMMAR_RULES
@@ -26,13 +27,15 @@ def _error_type(category: str) -> str:
 # ── Singleton ─────────────────────────────────────────────────────────────────
 
 _tool: language_tool_python.LanguageTool | None = None
+_tool_lock = threading.Lock()
 
 
 def _get_tool() -> language_tool_python.LanguageTool:
     """Return the shared LanguageTool instance, initialising it on first call."""
     global _tool
-    if _tool is None:
-        _tool = language_tool_python.LanguageTool("en-US")
+    with _tool_lock:  # each instance starts its own Java server, so concurrent first calls must share one
+        if _tool is None:
+            _tool = language_tool_python.LanguageTool("en-US")
     return _tool
 
 

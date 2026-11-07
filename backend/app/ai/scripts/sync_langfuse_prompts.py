@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from urllib.parse import quote
 
+from langfuse.api.commons.errors.error import Error
+
 AI_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(AI_ROOT))
 
@@ -76,9 +78,20 @@ def delete_unregistered(yes: bool) -> None:
     if not yes:
         print("Dry run. Re-run with --yes to delete them.")
         return
-    for name in targets:
-        client.api.prompts.delete(_api_name(name))
-        print(f"  deleted {name}")
+    # Langfuse refuses to delete a prompt that another one composes, so dependents must go first.
+    while targets:
+        blocked = []
+        for name in targets:
+            try:
+                client.api.prompts.delete(_api_name(name))
+                print(f"  deleted {name}")
+            except Error as error:
+                if error.status_code != 400:
+                    raise
+                blocked.append(name)
+        if len(blocked) == len(targets):
+            raise RuntimeError(f"Could not delete: {blocked}")
+        targets = blocked
 
 
 def main():

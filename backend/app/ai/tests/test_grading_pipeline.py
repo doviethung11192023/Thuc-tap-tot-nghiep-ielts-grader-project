@@ -80,8 +80,8 @@ async def test_task1_routing(stubbed):
 
 
 @pytest.mark.asyncio
-async def test_task2_default_routing(stubbed):
-    result = await gp.run_grading_pipeline("Discuss both views.", ESSAY)
+async def test_task2_legacy_routing(stubbed):
+    result = await gp.run_grading_pipeline("Discuss both views.", ESSAY, pipeline="legacy")
     assert stubbed["classifier_called"]
     assert stubbed["build"]["task"] == "task2"
     assert stubbed["build"]["visual_description"] == ""

@@ -461,7 +461,9 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | Band | Trung bình 4 tiêu chí, làm tròn theo luật IELTS **trong code** | `schemas/llm_output.py` |
 | E, F | Prompt rewrite tạo danh sách lỗi kèm bản sửa và bài đã sửa; code định vị lại vị trí ký tự và loại phần chồng lấn | `services/synthesis_service.py`, `utils/char_index_resolver.py`, `utils/annotation_normalizer.py` |
 
-**Luồng Reference cho Task 2 (ADR-22, mặc định tắt):** bật bằng `WRITING_TASK2_PIPELINE=reference`; mặc định `legacy` là bảng trên. Task 1 luôn đi bảng trên.
+**Luồng Reference cho Task 2 (ADR-22, mặc định):** thay phase C, D của bảng trên cho Task 2. `WRITING_TASK2_PIPELINE=legacy` quay về bảng trên. Task 1 luôn đi bảng trên.
+
+**Bất biến:** mọi bài chấm đều ra 4 feedback theo 4 tiêu chí ở structured output, sau đó một agent tổng hợp 4 feedback và rewrite bài cải thiện. Không bắt buộc 4 agent riêng.
 
 | Bước | Việc | Code |
 |---|---|---|
@@ -470,7 +472,7 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | 3 | Một lần gọi `writing/task2/grade` chấm cả 4 tiêu chí; số liệu LanguageTool và thống kê từ vựng chỉ để tham khảo, không có trần band | `services/holistic_grader.py` |
 | 4 | Dùng lại bước rewrite; band tổng tính trong code | `services/task2_reference_pipeline.py` |
 
-Kho tham chiếu là file đọc-chỉ `data/reference_corpus/` (2.885 bài, git-ignored), mount vào container vì AI engine không truy cập DB. Nhãn band của `chillies/IELTS-writing-task-2-evaluation` **chưa kiểm chứng**: nguồn không nêu người chấm và giấy phép, nên không dùng làm bằng chứng độ chính xác so với giám khảo. Mô tả band trong prompt là bản diễn giải của nhóm, không phải nguyên văn Band Descriptors chính thức.
+Kho tham chiếu là file đọc-chỉ `data/reference_corpus/` (2.885 bài, git-ignored), mount vào container vì AI engine không truy cập DB. Clone mới phải tự dựng kho bằng `scripts/build_reference_corpus.py`; thiếu kho thì chấm Task 2 trả 503, không tự về `legacy`. Nhãn band của `chillies/IELTS-writing-task-2-evaluation` **chưa kiểm chứng**: nguồn không nêu người chấm và giấy phép, nên không dùng làm bằng chứng độ chính xác so với giám khảo. Mô tả band trong prompt là bản diễn giải của nhóm, không phải nguyên văn Band Descriptors chính thức.
 
 **Nguyên tắc AI:**
 - LLM chỉ chấm **từng tiêu chí**; band tổng tính trong code (ADR-03).
@@ -543,7 +545,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-19 | Band L/R chỉ khi làm đủ 40 câu | Không cho ra band gây hiểu nhầm |
 | ADR-20 | Rate limit thay cho quota chấm AI theo ngày | Practice không bị chặn; chi phí AI theo dõi trên dashboard |
 | ADR-21 | Speaking hai kênh; band P tính trong code, LLM chỉ giải thích. Theo cổng quyết định, kênh âm vị không vào band P vì đo trên L2-ARCTIC kém hơn độ tin cậy Whisper (tương quan với nhãn người −0,339 so với −0,441); band dùng độ tin cậy nhận dạng và ngữ điệu, gắn nhãn độ tin cậy thấp | Không dùng nội dung transcript làm bằng chứng phát âm (ASR tự sửa lời nói); không để LLM cho band P vì LLM không nghe được audio; giữ kênh âm vị cho gợi ý từ và để phát hiện bản ghi hỏng |
-| ADR-22 | Task 2 có luồng Reference: phân loại dạng đề, thang bài mẫu theo band, một lần gọi chấm cả 4 tiêu chí. Giữ `legacy` làm mặc định vì đo trên 120 bài held-out: MAE 1,216 so với 1,271, p90 57,6 s nhưng độ phân tán chỉ 0,44 so với cổng 0,70 và 2/120 bài lỗi JSON. Nhãn đo chưa kiểm chứng | Bốn lượt gọi tiêu chí và trần band từ số liệu công cụ làm điểm dồn về band 6–7; TTR không phân biệt band trong dữ liệu (0,549 ở band 4, 0,555 ở band 8). Không tự rơi về `legacy` khi thiếu kho tham chiếu vì sẽ trộn hai cách chấm dưới một nhãn |
+| ADR-22 | Task 2 mặc định đi luồng Reference: phân loại dạng đề, thang bài mẫu theo band, một lần gọi trả cả 4 tiêu chí, rồi tổng hợp và rewrite như cũ. Chủ dự án chọn ngày 2026-11-07, dùng `qwen3.7-plus` (v5 của `writing/task2/grade`) và chấp nhận hai cổng chưa đạt. Đo trên 44 bài held-out, nhãn chưa kiểm chứng: MAE 1,239 so với 1,227 của `legacy` trên cùng bài, độ phân tán 0,46 (cổng 0,70), **p90 74,4 s, vượt NFR-02**, 1 thay vì 4 lượt gọi LLM chấm điểm | Bốn lượt gọi tiêu chí và trần band từ số liệu công cụ làm điểm dồn về band 6–7; TTR không phân biệt band trong dữ liệu (0,549 ở band 4, 0,555 ở band 8). Không tự rơi về `legacy` khi thiếu kho tham chiếu vì sẽ trộn hai cách chấm dưới một nhãn |
 
 ---
 
@@ -622,7 +624,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 **Cột ngoài sơ đồ (cố ý):** `grading_runs.claimed_at` + `recovery_count` (migration `20261107100000`, lease cho job chấm); trong baseline: `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
 
-**Writing Task 2 (2026-11-07):** luồng Reference (ADR-22) đã có trong code nhưng tắt; `WRITING_TASK2_PIPELINE` mặc định `legacy`, nên điểm người học chưa đổi. Prompt `writing/task2/grade` dùng `qwen-flash`. Phân loại dùng Jev (85–86/96 đề có nhãn, Qwen 83/96 khi đo cùng ngày); thiếu `TYPESAFE_API_KEY` hoặc Jev lỗi thì dùng `writing/task2/classify`. Cả hai pipeline Task 2 đều qua bước này, nên title đề được gửi cho TypeSafe.
+**Writing Task 2 (2026-11-07):** luồng Reference (ADR-22) là mặc định, nên điểm Task 2 của bài chấm mới sẽ khác trước; bài đã chấm không đổi. Prompt `writing/task2/grade` v5 dùng `qwen3.7-plus`; p90 toàn luồng 74,4 s, chưa đạt NFR-02 (≤ 60 s). Phân loại dùng Jev (85–86/96 đề có nhãn, Qwen 83/96 khi đo cùng ngày); thiếu `TYPESAFE_API_KEY` hoặc Jev lỗi thì dùng `writing/task2/classify`. Cả hai pipeline Task 2 đều qua bước này, nên title đề được gửi cho TypeSafe.
 
 **Chấm bài tự do đã bỏ (2026-11-07):** đã gỡ `/exam`, `admin/topics` và các API `/topics`, `/essays/evaluate`, `GET /essays`; giữ `GET /essays/{id}/results` vì Writing trong attempt dùng. Migration `20261107110000_drop_free_essay_feature.sql` xoá 5 bảng `topics`, `free_essays`, `evaluation_results`, `essay_annotations`, `evaluation_logs`, **chạy sau khi code mới đã triển khai**. Band bài tự do không còn tính vào hồ sơ học tập và thống kê Admin.
 
@@ -672,7 +674,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 ## 13. Câu hỏi còn mở
 
-- Có chuyển Task 2 sang luồng Reference không? Cần chốt cổng độ phân tán (đang 0,44, yêu cầu 0,70) và lỗi JSON 2/120 của `qwen-flash` (ADR-22).
+- Task 2 chưa đạt NFR-02 (p90 74,4 s) và cổng độ phân tán (0,46 so với 0,70): giữ luồng Reference và nới cổng, hay tối ưu tiếp (ADR-22)?
 - Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?
 - Import 91 đề Writing còn lại từ R2 vào `public`.
 - Chuyển `backend/app/ai` ra `ai-engine/` ở gốc repo để tách khỏi package Core API (`pytest` trần trong `backend/` đang lỗi vì quét vào đó). Làm sau khi spec 002 xong; cần kiểm tra thư mục gốc trong cấu hình deploy.

@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # max_tokens on the REWRITE pass). Sent as extra_body only to DashScope endpoints.
     llm_enable_thinking: bool = False
     # Writing Task 2 flow: "legacy" (4 criterion agents) or "reference" (one call with band-ladder references).
-    writing_task2_pipeline: str = "legacy"
+    writing_task2_pipeline: str = "reference"
     reference_corpus_dir: str = str(ROOT / "data" / "reference_corpus")
     # Override the model in the Langfuse config of writing/task2/grade (empty → use Langfuse config).
     grade_llm_model: str = ""
