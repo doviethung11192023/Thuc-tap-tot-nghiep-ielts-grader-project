@@ -1,9 +1,9 @@
 """
 No-op stand-in for the ARQ Redis pool, used when Redis is not reachable at startup.
 
-Redis is only a cache in this backend (topics list, admin statistics) and Writing
-grading runs through FastAPI BackgroundTasks, so local demos can run without Redis:
-every cache read misses and every write is silently dropped.
+Without Redis the API still serves requests: every cache read misses and every write is dropped.
+Submitting still saves the work, but nothing is graded until Redis and the ARQ workers are running:
+grading_runs keeps the pending jobs and the recovery cron enqueues them.
 """
 
 
@@ -19,6 +19,13 @@ class NullRedisCache:
 
     async def delete(self, *keys):
         return 0
+
+    async def incr(self, key):
+        return 0
+
+    async def enqueue_job(self, function, *args, **kwargs):
+        print(f"⚠️ [Queue] Redis unavailable, {function} left for the recovery cron")
+        return None
 
     async def close(self):
         return None

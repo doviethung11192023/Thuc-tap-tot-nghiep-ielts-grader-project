@@ -33,8 +33,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Download spacy model at build time (so it's baked into image)
-RUN python -m spacy download en_core_web_sm
+# en_core_web_sm is a locked dependency in pyproject.toml, so uv sync already installed it
 
 # Railway injects PORT automatically; default 8000 for local testing
 ENV PORT=8000

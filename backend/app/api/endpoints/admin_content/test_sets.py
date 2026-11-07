@@ -2,11 +2,12 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
+from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
 from app.services.cms.cms_tests import db_error
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 class TestSetCreatePayload(BaseModel):
     name: str = Field(..., min_length=2, max_length=150)

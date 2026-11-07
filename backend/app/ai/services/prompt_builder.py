@@ -9,9 +9,14 @@ from schemas.tool_output import (
 )
 from schemas.task_type import TaskTypeResult
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 from services.langfuse.prompt_manager import PromptManager, CompiledPrompt, WritingTask
 from utils.essay_formatter import format_annotated_essay, format_indexed_essay
+
+
+if TYPE_CHECKING:
+    from services.reference_corpus import BandLadder
 
 
 @dataclass
@@ -125,4 +130,38 @@ def build_criterion_prompts(
             grammar=_build_grammar(grammar_findings),
             **shared,
         ),
+    )
+
+
+def _as_data(text: str) -> str:
+    """Stop an essay from closing the tag that marks it as material, not instructions."""
+    return text.replace("<", "(").replace(">", ")")
+
+
+def format_references(ladder: "BandLadder") -> str:
+    if not ladder.references:
+        return "(none available)"
+    return "\n\n".join(
+        f'<example band="{reference.band:.1f}">\n'
+        f"Question: {_as_data(reference.prompt)}\n\n{_as_data(reference.essay)}\n</example>"
+        for reference in ladder.references
+    )
+
+
+def build_grade_prompt(
+    processed: ProcessedEssay,
+    essay_type: str,
+    ladder: "BandLadder",
+    grammar_findings: list[GrammarFinding],
+    lex_result: LexicalStatsResult,
+) -> CompiledPrompt:
+    """One prompt for all four Task 2 criteria; tool metrics are information only."""
+    signals = {"grammar": _build_grammar(grammar_findings), "lexical": _build_lexical_stats(lex_result)}
+    return get_prompt_manager().get_grade_prompt(
+        essay_type=essay_type,
+        references=format_references(ladder),
+        title=processed.title,
+        word_count=processed.word_count,
+        text_signals=json.dumps(signals),
+        essay=_as_data(format_annotated_essay(processed)),
     )

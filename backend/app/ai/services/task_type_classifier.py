@@ -1,14 +1,19 @@
 """
-Task Type Classifier — classifies an IELTS Task 2 title into one of 6 types
-using few-shot LLM prompting.
+Essay type classifier: one of 6 Task 2 types from the title alone.
+
+Order: Jev (TypeSafe) when configured, then the Langfuse prompt `writing/task2/classify`,
+then "Unknown". There is no default type: a wrong type would select the wrong references.
 """
 from __future__ import annotations
+
 import json
 import logging
 
-from settings.config import get_settings
-from schemas.task_type import TaskTypeResult
+from schemas.task_type import UNKNOWN_TASK_TYPE, TaskTypeResult
+from services import jev_client
 from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence
+from services.prompt_builder import get_prompt_manager
+from settings.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -119,51 +124,48 @@ Each question must receive:
 - mixing answers together"""
 }
 
-_FEW_SHOT_EXAMPLES = [
-    ("To what extent do you agree or disagree that unpaid community service should be compulsory for high school students?", "Opinion"),
-    ("Some people prefer to live in cities while others prefer to live in the countryside. Discuss both views and give your own opinion.", "Discussion"),
-    ("What are the advantages and disadvantages of working from home?", "Advantages_Disadvantages"),
-    ("In many cities, traffic congestion is a serious problem. What are the causes of this problem and what solutions can be suggested?", "Cause_Solution"),
-    ("Many young people are moving from rural areas to cities. What are the causes and effects of this trend?", "Cause_Effect"),
-    ("What are the most important qualities of a good leader? Are these qualities innate or can they be learned?", "Two_Part_Question"),
-]
 
-_SYSTEM_PROMPT = """You are an IELTS task type classifier. Given an IELTS Writing Task 2 title, output ONLY a JSON object with one field: {"task_type": "<type>"}.
-Valid types: Opinion, Discussion, Advantages_Disadvantages, Cause_Solution, Cause_Effect, Two_Part_Question."""
+def _result(task_type: str, classifier: str) -> TaskTypeResult:
+    return TaskTypeResult(task_type, _TASK_TYPES.get(task_type, ""), classifier)
 
-def _build_messages(title: str) -> list[dict]:
-    messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
-    for example_title, example_type in _FEW_SHOT_EXAMPLES:
-        messages.append({"role": "user", "content": example_title})
-        messages.append({"role": "assistant", "content": json.dumps({"task_type": example_type})})
-    messages.append({"role": "user", "content": title})
-    return messages
+
+def _classify_with_prompt(compiled) -> str | None:
+    response = get_sync_llm_client().chat.completions.create(
+        model=compiled.model,
+        messages=compiled.messages,
+        temperature=compiled.temperature,
+        max_tokens=compiled.max_tokens,
+        response_format={"type": "json_object"},
+        extra_body=llm_extra_body(),
+    )
+    data = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}"))
+    task_type = data.get("task_type")
+    return task_type if task_type in _TASK_TYPES else None
+
 
 def classify_task_type(title: str) -> TaskTypeResult:
-    """Classify the IELTS Task 2 title into one of 6 task types.
-
-    An empty title (e.g. prompt not found upstream) or any LLM/JSON failure
-    falls back to "Opinion" instead of failing the whole grading request.
-    """
-    default = TaskTypeResult(task_type="Opinion", description=_TASK_TYPES["Opinion"])
+    """Classify a Task 2 title. Failures end in "Unknown" and never stop the grading."""
+    unknown = _result(UNKNOWN_TASK_TYPE, "none")
     if not title or not title.strip():
-        logger.warning("Empty task title — skipping classifier, defaulting to Opinion")
-        return default
+        logger.warning("Empty task title: essay type is unknown")
+        return unknown
 
     try:
-        response = get_sync_llm_client().chat.completions.create(
-            model=get_settings().default_llm_model,
-            messages=_build_messages(title),
-            temperature=0.0,
-            max_tokens=50,
-            response_format={"type": "json_object"},
-            extra_body=llm_extra_body(),
-        )
-        data = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}"))
+        compiled = get_prompt_manager().get_classify_prompt(title)
     except Exception as e:
-        logger.warning("Task type classifier failed (%s) — defaulting to Opinion", e)
-        return default
+        logger.warning("Classifier prompt unavailable (%s): essay type is unknown", e)
+        return unknown
 
-    task_type = data.get("task_type", "Opinion")
-    description = _TASK_TYPES.get(task_type, _TASK_TYPES["Opinion"])
-    return TaskTypeResult(task_type=task_type, description=description)
+    if get_settings().essay_classifier == "jev" and jev_client.is_configured():
+        options = (compiled.langfuse_prompt.config or {}).get("options") or {}
+        task_type = jev_client.choose_essay_type(title, options)
+        if task_type:
+            return _result(task_type, "jev")
+        logger.warning("Jev gave no valid type: falling back to the Qwen classifier")
+
+    try:
+        task_type = _classify_with_prompt(compiled)
+    except Exception as e:
+        logger.warning("Qwen classifier failed: %s", e)
+        task_type = None
+    return _result(task_type, "qwen") if task_type else unknown

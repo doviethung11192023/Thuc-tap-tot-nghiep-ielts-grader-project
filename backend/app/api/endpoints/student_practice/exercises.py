@@ -1,13 +1,11 @@
-import time
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
+from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
 
 router = APIRouter()
 
-_EXERCISES_CACHE: Dict[str, Dict[str, Any]] = {}
-_TYPES_SUMMARY_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL_SECONDS = 60
 
 TYPE_DISPLAY_NAMES: Dict[str, str] = {
@@ -23,16 +21,7 @@ TYPE_DISPLAY_NAMES: Dict[str, str] = {
     "speaking_part3": "Speaking Part 3 (Thảo luận 2 chiều)",
 }
 
-@router.get("/question-types-summary")
-async def get_question_types_summary(skill: str = Query("reading")):
-    """Tổng hợp danh sách các dạng bài kèm số lượng bài tập thực tế trong hệ thống."""
-    skill_lower = (skill or "reading").lower()
-    now_ts = time.time()
-    if skill_lower in _TYPES_SUMMARY_CACHE:
-        entry = _TYPES_SUMMARY_CACHE[skill_lower]
-        if now_ts - entry["ts"] < _CACHE_TTL_SECONDS:
-            return {"meta": {"code": 200, "cached": True}, "data": entry["data"]}
-
+def _build_question_types_summary(skill_lower: str) -> List[Dict[str, Any]]:
     if skill_lower in ("writing", "speaking"):
         counts: Dict[str, int] = {}
         for it in practice_catalog.task_part_exercises(skill_lower, None):
@@ -50,30 +39,21 @@ async def get_question_types_summary(skill: str = Query("reading")):
         })
 
     summary_list.sort(key=lambda x: x["count"], reverse=True)
-    _TYPES_SUMMARY_CACHE[skill_lower] = {"ts": now_ts, "data": summary_list}
-    return {"meta": {"code": 200}, "data": summary_list}
+    return summary_list
 
-@router.get("/exercises")
-async def list_practice_exercises(
-    skill: str = Query("reading"),
-    question_type: Optional[str] = None,
-    difficulty: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(12, ge=1, le=100),
-    current_user: Optional[User] = Depends(get_optional_user)
-):
-    """Danh sách bài tập thực chiến theo dạng bài bóc tách từ các đề thi đã xuất bản."""
+
+@router.get("/question-types-summary")
+async def get_question_types_summary(request: Request, skill: str = Query("reading")):
+    """Tổng hợp danh sách các dạng bài kèm số lượng bài tập thực tế trong hệ thống."""
     skill_lower = (skill or "reading").lower()
-    type_filter = question_type.lower() if question_type and question_type.lower() != "all" else None
-    diff_filter = difficulty.lower() if difficulty and difficulty.lower() != "all" else None
+    summary_list, cached = await get_or_load(
+        request.app.state.redis, "question-types", skill_lower, _CACHE_TTL_SECONDS,
+        lambda: _build_question_types_summary(skill_lower))
+    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": summary_list}
 
-    cache_key = f"{skill_lower}_{type_filter or ''}_{diff_filter or ''}_{page}_{limit}"
-    now_ts = time.time()
-    if cache_key in _EXERCISES_CACHE:
-        cached = _EXERCISES_CACHE[cache_key]
-        if now_ts - cached["ts"] < _CACHE_TTL_SECONDS:
-            return {"meta": {"code": 200, "cached": True}, "data": cached["data"]}
 
+def _build_exercises(skill_lower: str, type_filter: Optional[str], diff_filter: Optional[str],
+                     page: int, limit: int) -> Dict[str, Any]:
     if skill_lower in ("writing", "speaking"):
         rows = [r for r in practice_catalog.task_part_exercises(skill_lower, diff_filter)
                 if not type_filter or r["question_type"] == type_filter]
@@ -118,6 +98,26 @@ async def list_practice_exercises(
         "page": page,
         "limit": limit
     }
-    _EXERCISES_CACHE[cache_key] = {"ts": now_ts, "data": result_data}
+    return result_data
 
-    return {"meta": {"code": 200}, "data": result_data}
+
+@router.get("/exercises")
+async def list_practice_exercises(
+    request: Request,
+    skill: str = Query("reading"),
+    question_type: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(12, ge=1, le=100),
+    current_user: Optional[User] = Depends(get_optional_user)
+):
+    """Danh sách bài tập thực chiến theo dạng bài bóc tách từ các đề thi đã xuất bản."""
+    skill_lower = (skill or "reading").lower()
+    type_filter = question_type.lower() if question_type and question_type.lower() != "all" else None
+    diff_filter = difficulty.lower() if difficulty and difficulty.lower() != "all" else None
+
+    cache_key = f"{skill_lower}_{type_filter or ''}_{diff_filter or ''}_{page}_{limit}"
+    result_data, cached = await get_or_load(
+        request.app.state.redis, "exercises", cache_key, _CACHE_TTL_SECONDS,
+        lambda: _build_exercises(skill_lower, type_filter, diff_filter, page, limit))
+    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}

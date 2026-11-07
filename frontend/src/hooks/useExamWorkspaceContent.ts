@@ -12,7 +12,7 @@ import {
 import { mockReadingFullTest } from "@/mocks/exam-reading";
 import { mockListeningFullTest, type ListeningTestData } from "@/mocks/exam-listening";
 import { mockWritingExamDataset } from "@/mocks/exam-writing";
-import { mockSpeakingExamDataset, type MockSpeakingExamDataset } from "@/mocks/exam-speaking";
+import type { MockSpeakingExamDataset } from "@/mocks/exam-speaking";
 import type { ReadingTestData } from "@/types/exam";
 
 export function useExamWorkspaceContent(
@@ -33,7 +33,10 @@ export function useExamWorkspaceContent(
   const [readingData, setReadingData] = useState<ReadingTestData>(initR || mockReadingFullTest);
   const [listeningData, setListeningData] = useState<ListeningTestData>(initL || mockListeningFullTest);
   const [writingData, setWritingData] = useState<typeof mockWritingExamDataset>((initW as any) || mockWritingExamDataset);
-  const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset>(initS || mockSpeakingExamDataset);
+  // Speaking không bao giờ rơi về đề giả: bài ghi âm phải gắn với câu hỏi thật.
+  const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset | null>(initS);
+  const [attemptMode, setAttemptMode] = useState<"practice" | "mock" | null>(null);
+  const [attemptError, setAttemptError] = useState<string | null>(null);
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
@@ -54,6 +57,7 @@ export function useExamWorkspaceContent(
             // nhưng hasStartedRef khiến effect lần hai không gọi lại, nên attemptId sẽ mãi null.
             if (attemptRes?.attempt_id) {
               setAttemptId(attemptRes.attempt_id);
+              setAttemptMode(attemptRes.mode ?? null);   // attempt dở có thể khác mode trên URL
               if (attemptRes.deadline_at) {
                 // Quy hạn của server về đồng hồ client để không phụ thuộc lệch giờ máy
                 const serverNow = attemptRes.server_time ? Date.parse(attemptRes.server_time) : Date.now();
@@ -63,6 +67,7 @@ export function useExamWorkspaceContent(
           })
           .catch((e) => {
             console.warn("Could not start attempt session in background:", e);
+            setAttemptError(e?.response?.data?.detail || "Không bắt đầu được bài thi");
           });
       }
 
@@ -100,6 +105,8 @@ export function useExamWorkspaceContent(
   return {
     loading,
     attemptId,
+    attemptMode,
+    attemptError,
     deadlineMs,
     readingData,
     listeningData,

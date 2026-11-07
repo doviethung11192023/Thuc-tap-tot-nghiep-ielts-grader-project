@@ -4,11 +4,13 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
+from app.core.student_content_cache import StudentContentMutationRoute
+from app.core.domain_errors import DomainError
 from app.core.security import User, require_admin
 from app.schemas.exam_content import AllowedMode, ContentStatus, SkillType, TestCreate, TestStatusUpdate, TestUpdate
 from app.services.cms import cms_tests
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 
 def _plain(data: dict) -> dict:
@@ -77,7 +79,7 @@ async def bulk_update_status(data: BulkStatusRequest, current_user: User = Depen
     for tid in data.test_ids:
         try:
             results.append(cms_tests.set_status(current_user.id, tid, data.status.value))
-        except HTTPException as e:
+        except DomainError as e:
             errors.append({"test_id": tid, "detail": e.detail})
     return {"meta": {"code": 200, "message": f"Đã cập nhật {len(results)}/{len(data.test_ids)} bài thi"},
             "data": results, "errors": errors}

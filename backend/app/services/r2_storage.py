@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from app.core.config import settings
 
 class R2StorageService:
@@ -69,6 +70,37 @@ class R2StorageService:
                 domain = f"https://{domain}"
             return f"{domain}/{clean_key}"
         return f"/uploads/media/{clean_key}"
+
+    # ---- Bucket private cho audio bài làm: không có local fallback, không có URL public ----
+
+    @property
+    def private_bucket_configured(self) -> bool:
+        return bool(self.account_id and self.access_key and self.secret_key and settings.R2_PRIVATE_BUCKET_NAME)
+
+    def presign_private_put(self, key: str, content_type: str, expires_in: int = 600) -> str:
+        """URL PUT ngắn hạn; Content-Type nằm trong chữ ký nên client phải gửi đúng header này."""
+        return self._get_client().generate_presigned_url(
+            "put_object", ExpiresIn=expires_in,
+            Params={"Bucket": settings.R2_PRIVATE_BUCKET_NAME, "Key": key, "ContentType": content_type})
+
+    def presign_private_get(self, key: str, expires_in: int = 600) -> str:
+        return self._get_client().generate_presigned_url(
+            "get_object", ExpiresIn=expires_in,
+            Params={"Bucket": settings.R2_PRIVATE_BUCKET_NAME, "Key": key})
+
+    def head_private_object(self, key: str) -> Optional[dict]:
+        """{size, content_type} của object, None nếu chưa có."""
+        try:
+            head = self._get_client().head_object(Bucket=settings.R2_PRIVATE_BUCKET_NAME, Key=key)
+        except ClientError as err:
+            if err.response.get("ResponseMetadata", {}).get("HTTPStatusCode") == 404:
+                return None
+            raise
+        return {"size": head.get("ContentLength", 0), "content_type": head.get("ContentType") or ""}
+
+    def delete_private_object(self, key: str) -> None:
+        """Lỗi được ném ra để job retention không ghi audio_deleted_at khi xoá thất bại."""
+        self._get_client().delete_object(Bucket=settings.R2_PRIVATE_BUCKET_NAME, Key=key)
 
     def delete_file(self, key: str) -> bool:
         """Deletes a file from R2 or local fallback."""

@@ -1,11 +1,12 @@
 """Admin: section của đề (đoạn đọc/audio L/R, task Writing, part Speaking)."""
 from fastapi import APIRouter, Depends, status
 
+from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import User, require_admin
 from app.schemas.exam_content import TestSectionCreate, TestSectionUpdate
 from app.services.cms import cms_sections
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 
 @router.post("/tests/{test_id}/sections", status_code=status.HTTP_201_CREATED)

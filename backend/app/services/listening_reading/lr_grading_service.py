@@ -8,12 +8,12 @@ Nộp và chấm Listening/Reading (SD-04): chấm ngay trong request.
 """
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import InvalidRequestError, NotFoundError
 
 from app.services.listening_reading.lr_answer_matching import is_correct
 from app.services.listening_reading.lr_test_content import load_lr_test, lr_part
 from app.db.supabase import db
-from app.services.practice.practice_attempt_lifecycle import lock_for_submit
+from app.services.practice.practice_attempt_lifecycle import ensure_can_submit, require_submitted
 
 
 def lookup_band(skill: str, raw_score: int) -> Optional[float]:
@@ -37,23 +37,17 @@ def submit_lr(attempt: dict[str, Any], answers: dict[str, Any], parts: Optional[
         return _result(attempt, time_spent)
     test = load_lr_test(attempt["test_id"])
     if not test:
-        raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
+        raise NotFoundError("Bài thi không tồn tại")
     sections = [s for s in test.get("sections") or [] if not parts or s["order_no"] in parts]
     if not sections:
-        raise HTTPException(status_code=400, detail="Không có phần thi nào được chọn")
+        raise InvalidRequestError("Không có phần thi nào được chọn")
 
-    submitted_at = lock_for_submit(attempt, "submitted")
+    ensure_can_submit(attempt)
     questions = [(s["id"], g, q) for s in sections for g in (lr_part(s).get("question_groups") or [])
                  for q in g.get("questions") or []]
     qids = [q["id"] for _, _, q in questions]
     keys = {r["question_id"]: r["accepted_answers"] for r in (db().table("question_keys")
             .select("question_id, accepted_answers").in_("question_id", qids).execute().data or [])} if qids else {}
-
-    conn = db()
-    conn.table("attempt_sections").upsert([
-        {"attempt_id": attempt["id"], "section_id": s["id"], "test_id": attempt["test_id"],
-         "started_at": attempt["started_at"], "finished_at": submitted_at} for s in sections
-    ], on_conflict="attempt_id,section_id").execute()
 
     rows, raw = [], 0
     for section_id, group, q in questions:
@@ -61,14 +55,12 @@ def submit_lr(attempt: dict[str, Any], answers: dict[str, Any], parts: Optional[
         text = ",".join(map(str, given)) if isinstance(given, list) else (str(given) if given is not None else None)
         ok = is_correct(given, keys.get(q["id"]) or [], group.get("max_words"))
         raw += ok
-        rows.append({"attempt_id": attempt["id"], "question_id": q["id"], "section_id": section_id,
-                     "answer": text, "is_correct": ok, "updated_at": submitted_at})
-    if rows:
-        conn.table("answers").upsert(rows, on_conflict="attempt_id,question_id").execute()
+        rows.append({"question_id": q["id"], "section_id": section_id, "answer": text, "is_correct": ok})
 
     count = len(questions)
     band = lookup_band(attempt["skill"], raw) if count == 40 else None
-    updated = conn.table("attempts").update({
-        "status": "scored", "raw_score": raw, "question_count": count, "lr_band": band,
-    }).eq("id", attempt["id"]).execute().data[0]
+    updated = require_submitted(db().rpc("submit_lr_attempt", {
+        "p_attempt_id": attempt["id"], "p_section_ids": [s["id"] for s in sections], "p_answers": rows,
+        "p_raw_score": raw, "p_question_count": count, "p_band": band,
+    }).execute().data)
     return _result(updated, time_spent)

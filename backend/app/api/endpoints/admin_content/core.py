@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from datetime import datetime, timezone
 from typing import Optional
+from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
 from app.schemas.exam_content import SkillType
@@ -8,7 +9,7 @@ from app.schemas.system_settings import (
     BandConversionCreate, SystemSettingUpdate
 )
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 
 def _with_id(row: dict) -> dict:

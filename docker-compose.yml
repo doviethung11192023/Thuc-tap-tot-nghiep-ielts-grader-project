@@ -5,14 +5,67 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    env_file: ./backend/.env
     environment:
       - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006/v1/traces
-      # - SUPABASE_URL=...
-      # - SUPABASE_KEY=...
       - REDIS_URL=redis://redis:6379
+      - AI_ENGINE_URL=http://ai-engine:8001/grade
+      - AI_ENGINE_SPEAKING_URL=http://ai-engine:8001/grade-speaking
     depends_on:
       - redis
       - phoenix
+
+  # ARQ: Writing grading and cron (recovering abandoned grading runs, 180-day audio deletion)
+  worker:
+    build: ./backend
+    command: arq app.worker.tasks.WorkerSettings
+    env_file: ./backend/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - AI_ENGINE_URL=http://ai-engine:8001/grade
+      - AI_ENGINE_SPEAKING_URL=http://ai-engine:8001/grade-speaking
+    depends_on:
+      - redis
+
+  # ARQ: Speaking grading, one test at a time (the AI engine runs one test on the GPU)
+  worker-speaking:
+    build: ./backend
+    command: arq app.worker.tasks.SpeakingWorkerSettings
+    env_file: ./backend/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - AI_ENGINE_SPEAKING_URL=http://ai-engine:8001/grade-speaking
+    depends_on:
+      - redis
+
+  # Internal only: no published port. CPU settings by default; see the gpu override below.
+  ai-engine:
+    build: ./backend/app/ai
+    env_file: ./backend/app/ai/.env
+    environment:
+      - PORT=8001
+      - SPEECH_DEVICE=cpu
+      - SPEECH_STT_MODEL=small.en
+      - SPEECH_STT_COMPUTE_TYPE=int8
+    volumes:
+      - speech_models:/root/.cache/huggingface
+      - ./backend/app/ai/data/reference_corpus:/app/data/reference_corpus:ro
+    profiles: ["cpu"]
+
+  ai-engine-gpu:
+    extends: ai-engine
+    environment:
+      - PORT=8001
+      - SPEECH_DEVICE=auto
+      - SPEECH_STT_MODEL=medium.en
+      - SPEECH_STT_COMPUTE_TYPE=auto
+    gpus:
+      - driver: nvidia
+        count: 1
+    networks:
+      default:
+        aliases: [ai-engine]
+    profiles: ["gpu"]
 
   redis:
     image: redis:7-alpine
@@ -35,6 +88,8 @@ services:
       - phoenix_data:/mnt/data
 
 volumes:
+  speech_models:
+    driver: local
   phoenix_data:
     driver: local
   redis_data:

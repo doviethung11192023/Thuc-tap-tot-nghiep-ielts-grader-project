@@ -110,13 +110,10 @@ export async function submitWritingAttempt(
   return res.data.data;
 }
 
-export async function submitSpeakingAttempt(
-  attemptId: string,
-  payload: { recordings?: any[]; time_spent_sec?: number }
-) {
+export async function submitSpeakingAttempt(attemptId: string) {
   const res = await apiClient.post<{ meta: { code: number }; data: any }>(
     `/api/v1/test-practice/attempts/${attemptId}/submit-speaking`,
-    payload
+    {}
   );
   return res.data.data;
 }

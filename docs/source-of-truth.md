@@ -30,7 +30,7 @@ Khi sửa thiết kế (thêm FR, BR hay bảng mới), cập nhật file này *
 |---|---|
 | Listening, Reading | Tự động so với đáp án (40 câu) |
 | Writing | LLM chấm 4 tiêu chí: TA/TR, CC, LR, GRA. Task 1 có đọc ảnh biểu đồ |
-| Speaking | Phòng thi có AI examiner phát câu hỏi (TTS), ghi âm, rồi STT, phân tích giọng nói và LLM chấm FC, LR, GRA, P |
+| Speaking | Phòng thi có AI examiner phát câu hỏi, ghi âm, rồi xử lý tiếng nói. LLM chấm FC, LR, GRA; P do code tính từ âm thanh, LLM chỉ viết nhận xét (ADR-21) |
 
 - **Practice:** điểm AI là kết quả; người học có thể xin Expert chấm lại. **Mock:** điểm Expert là chính thức; trong lúc chờ, điểm AI hiện kèm nhãn "preliminary".
 - **AI chỉ dùng để chấm, không bao giờ dùng để tạo đề** (BR-19, ADR-16). TTS chỉ đọc câu hỏi do người viết.
@@ -292,7 +292,7 @@ Quy tắc ánh xạ:
 - Thuộc tính đa trị: bảng con hoặc `text[]`.
 - Quan hệ M:N có thuộc tính: bảng nối.
 - 1:1: FK + UNIQUE.
-- Cột ngoài sơ đồ (cố ý): `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype/template`, `tests.difficulty`, `questions.diagram_coordinate`. Bảng ngoài sơ đồ: `topics`, `free_essays`, `evaluation_results`, `essay_annotations`, `evaluation_logs` (xem §12).
+- Cột ngoài sơ đồ (cố ý): `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype/template`, `tests.difficulty`, `questions.diagram_coordinate`.
 - Chuẩn 3NF, **có một ngoại lệ cố ý**: các cột phân loại (`role`, `skill`, `kind`, `test_id`, `evaluator_type`) được chép xuống bảng con để FK ghép chặn tổ hợp sai ngay trong DB (quyết định "ràng buộc đúng kiểu bằng khoá ngoại ghép").
 
 ### Bảng và cột (theo sơ đồ quan hệ Hình 2.34)
@@ -440,13 +440,14 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 
 - Python 3.11 + FastAPI + Pydantic (có OpenAPI).
 - Supabase: PostgreSQL, Auth, Realtime. Media lưu trên Cloudflare R2.
-- Redis + ARQ: job chấm AI, job TTS, cron:
+- Redis + ARQ: job chấm AI, job TTS, cron. Hai hàng đợi: Writing chạy song song, Speaking mỗi lần một bài (`SpeakingWorkerSettings`) để bài chờ nằm trong hàng đợi thay vì giữ kết nối HTTP tới AI engine. Cron:
+  - cứu lượt chấm bị mất hoặc worker chết (mỗi phút): chạy lại tối đa 2 lần, sau đó `grading_failed`
   - tự nộp bài quá hạn (mỗi 30 s)
   - giao bài cho Expert (mỗi 10 phút)
   - thu hồi assignment quá 48 h
   - xoá audio quá 180 ngày
 - LLM: Qwen qua DashScope, gọi bằng OpenAI SDK. Model vision đọc biểu đồ Task 1. Langfuse quản lý prompt có phiên bản và trace mọi lần gọi.
-- Speaking: faster-whisper (transcript + timing từng từ), Silero VAD (tốc độ nói, khoảng ngắt), wav2vec2 (âm vị, để tính P), LLM chấm FC/LR/GRA. Tốc độ chạy trên CPU chưa được kiểm chứng.
+- Speaking: xem mục Pipeline chấm Speaking. Tốc độ chạy trên CPU chưa được kiểm chứng.
 - TTS: Piper. Đọc câu hỏi Speaking **một lần lúc soạn đề**.
 
 ### Pipeline chấm Writing (AI engine)
@@ -460,11 +461,40 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | Band | Trung bình 4 tiêu chí, làm tròn theo luật IELTS **trong code** | `schemas/llm_output.py` |
 | E, F | Prompt rewrite tạo danh sách lỗi kèm bản sửa và bài đã sửa; code định vị lại vị trí ký tự và loại phần chồng lấn | `services/synthesis_service.py`, `utils/char_index_resolver.py`, `utils/annotation_normalizer.py` |
 
+**Luồng Reference cho Task 2 (ADR-22, mặc định tắt):** bật bằng `WRITING_TASK2_PIPELINE=reference`; mặc định `legacy` là bảng trên. Task 1 luôn đi bảng trên.
+
+| Bước | Việc | Code |
+|---|---|---|
+| 1 | Phân loại dạng đề từ title: Jev (TypeSafe, chỉ gửi title), lỗi hoặc thiếu key thì dùng prompt `writing/task2/classify`, vẫn không có đáp án thì `Unknown` | `services/jev_client.py`, `services/task_type_classifier.py` |
+| 2 | Chọn thang tham chiếu: mỗi band 5, 6, 7, 8 một bài cùng dạng; cùng bài nộp luôn ra cùng thang; bậc thiếu ghi vào `reference_gaps`, `Cause_Effect` mượn từ `Cause_Solution` | `services/reference_corpus.py` |
+| 3 | Một lần gọi `writing/task2/grade` chấm cả 4 tiêu chí; số liệu LanguageTool và thống kê từ vựng chỉ để tham khảo, không có trần band | `services/holistic_grader.py` |
+| 4 | Dùng lại bước rewrite; band tổng tính trong code | `services/task2_reference_pipeline.py` |
+
+Kho tham chiếu là file đọc-chỉ `data/reference_corpus/` (2.885 bài, git-ignored), mount vào container vì AI engine không truy cập DB. Nhãn band của `chillies/IELTS-writing-task-2-evaluation` **chưa kiểm chứng**: nguồn không nêu người chấm và giấy phép, nên không dùng làm bằng chứng độ chính xác so với giám khảo. Mô tả band trong prompt là bản diễn giải của nhóm, không phải nguyên văn Band Descriptors chính thức.
+
 **Nguyên tắc AI:**
 - LLM chỉ chấm **từng tiêu chí**; band tổng tính trong code (ADR-03).
 - Chống prompt injection: bọc bài viết trong delimiter và bắt output đúng JSON schema.
 - **Chỉ gửi nội dung bài làm** cho LLM, không gửi tên, email hay id tài khoản.
 - Mọi điểm AI có nhãn "estimate".
+
+### Pipeline chấm Speaking (AI engine)
+
+ASR đoán ý nên có thể ghi "scool" thành "school": transcript cho biết người học **định nói gì**, không phải **đã phát ra âm gì**. Vì vậy nội dung transcript không bao giờ là bằng chứng phát âm. Band P chỉ lấy **độ tin cậy nhận dạng** của từng từ, là số đo độ dễ hiểu, không phải chữ ASR đã viết ra (ADR-21).
+
+| Lớp | Việc | Dựa vào transcript? | Code |
+|---|---|---|---|
+| 0. Tín hiệu | Giải mã 16 kHz, SNR, clipping, Silero VAD, phát hiện im lặng | Không | `services/speaking/audio_signal.py` |
+| 1. Âm học | Đếm âm tiết theo De Jong & Wempe, tốc độ nói, tốc độ phát âm, khoảng ngắt, F0, nhịp nPVI | Không | `acoustic_features.py` |
+| 2. Kênh ý định | Whisper tinh chỉnh để giữ nguyên văn; từ đệm, lặp từ, tự sửa | Là transcript | `speech_transcriber.py` |
+| 3. Kênh âm vị | wav2vec2 CTC giải mã không có mô hình ngôn ngữ | Không | `phoneme_recognizer.py` |
+| 4. So khớp | Từ định nói → âm vị chuẩn (espeak), căn Needleman-Wunsch, thay thế, mất, thừa theo từng từ; gộp biến thể giọng | Chỉ lấy từ định nói | `phoneme_comparison.py` |
+| Band P | Rubric `provisional-2` theo độ tin cậy nhận dạng từ và ngữ điệu; luôn hiện là ước lượng, độ tin cậy thấp. Kênh âm vị không quyết định band, chỉ hỗ trợ gợi ý từ và phát hiện bản ghi hỏng. File ghi kém, quá ít từ, hoặc hai kênh mâu thuẫn (`channels_disagree`): tối đa 6.0 và nhắc thu lại | Chỉ lấy độ tin cậy, không lấy nội dung | `pronunciation_rubric.py` |
+| LLM | FC, LR, GRA chấm từ bằng chứng; FC nhận thêm câu hỏi để xét lạc đề (`speaking/common/fc` v3, trần tạm 5 và 4); `speaking/common/pr` (v3) chỉ giải thích band đã có; nhận xét từng Part và báo cáo tổng lỗi thì chỉ thiếu phần nhận xét | Có | `speaking_grading_pipeline.py`, `speaking_feedback.py` |
+
+**Giới hạn đã biết:** band P ước lượng độ dễ hiểu, chưa chấm được từng âm, nên lỗi mà ASR đoán lại được vẫn có thể lọt; nhầm sang từ có thật ("ship"/"sheep") không phát hiện được với bài nói tự do; model học từ giọng chuẩn nên dễ coi giọng Việt là lỗi, bảng biến thể chỉ giảm chứ không loại hết; gợi ý từ chỉ hiện "có thể" và bỏ sót phần lớn lỗi; ngưỡng rubric là **tạm** cho tới khi có dữ liệu so với Expert. Số đo ở `docs/speech-eval-report.md`.
+
+Ghi âm tắt `noiseSuppression`, `autoGainControl`, `echoCancellation` của trình duyệt vì chúng làm biến dạng tín hiệu cần đo.
 
 ### Hợp đồng API của Core API (đích thiết kế)
 
@@ -498,7 +528,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | Mã | Quyết định | Phương án bị loại / hệ quả |
 |---|---|---|
 | ADR-01 | Ba khối: Core API, ARQ worker, AI engine | Không gộp AI engine vào Core API (image nặng, khó giới hạn tài nguyên). AI engine chỉ chạy trong mạng nội bộ |
-| ADR-02 | Chấm AI bất đồng bộ; Realtime đẩy kết quả, polling dự phòng | Không gọi AI ngay trong request (timeout 30–90 s) |
+| ADR-02 | Chấm AI bất đồng bộ; Realtime đẩy kết quả, polling dự phòng. `grading_runs` giữ trạng thái thật, hàng đợi ARQ chỉ là tín hiệu kích hoạt; worker nhận lượt chấm bằng lease, cron đẩy lại lượt bị mất hoặc bị bỏ rơi | Không gọi AI ngay trong request (timeout 30–90 s). Không dùng pgmq |
 | ADR-03 | Band tổng tính trong code | LLM không thể thổi phồng band tổng |
 | ADR-04 | Prompt quản lý trên Langfuse; lưu prompt version và trace id cho mỗi lần chấm | Không hard-code prompt. *(Báo cáo ghi "backup prompt trong repo": **đã bị thay** bằng chỉ thị "không lưu bản sao local", xem §11)* |
 | ADR-05 | Audio và ảnh upload thẳng lên R2 bằng presigned URL, server xác nhận | Không upload qua backend, không dùng Supabase Storage |
@@ -512,6 +542,8 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-18 | Tách assignment khỏi request | Giữ được lịch sử giao, giao lại, hết hạn |
 | ADR-19 | Band L/R chỉ khi làm đủ 40 câu | Không cho ra band gây hiểu nhầm |
 | ADR-20 | Rate limit thay cho quota chấm AI theo ngày | Practice không bị chặn; chi phí AI theo dõi trên dashboard |
+| ADR-21 | Speaking hai kênh; band P tính trong code, LLM chỉ giải thích. Theo cổng quyết định, kênh âm vị không vào band P vì đo trên L2-ARCTIC kém hơn độ tin cậy Whisper (tương quan với nhãn người −0,339 so với −0,441); band dùng độ tin cậy nhận dạng và ngữ điệu, gắn nhãn độ tin cậy thấp | Không dùng nội dung transcript làm bằng chứng phát âm (ASR tự sửa lời nói); không để LLM cho band P vì LLM không nghe được audio; giữ kênh âm vị cho gợi ý từ và để phát hiện bản ghi hỏng |
+| ADR-22 | Task 2 có luồng Reference: phân loại dạng đề, thang bài mẫu theo band, một lần gọi chấm cả 4 tiêu chí. Giữ `legacy` làm mặc định vì đo trên 120 bài held-out: MAE 1,216 so với 1,271, p90 57,6 s nhưng độ phân tán chỉ 0,44 so với cổng 0,70 và 2/120 bài lỗi JSON. Nhãn đo chưa kiểm chứng | Bốn lượt gọi tiêu chí và trần band từ số liệu công cụ làm điểm dồn về band 6–7; TTR không phân biệt band trong dữ liệu (0,549 ở band 4, 0,555 ở band 8). Không tự rơi về `legacy` khi thiếu kho tham chiếu vì sẽ trộn hai cách chấm dưới một nhãn |
 
 ---
 
@@ -570,35 +602,38 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa quyết định đó |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
+| 6 | Báo cáo ghi "P suy ra từ độ chính xác phát âm"; Langfuse có `speaking/common/pr` để LLM cho band | Code tính band P, prompt `pr` v3 chỉ giải thích. Band dựa trên độ tin cậy nhận dạng, không còn dựa trên độ chính xác âm vị, nên báo cáo cần sửa theo ADR-21 |
 | 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Trong lúc test, schema mới tạm được expose bằng `ALTER ROLE authenticator SET pgrst.db_schemas`. Đã **RESET** khi cutover (2026-11-03); chỉ còn `public` |
 
 ---
 
-## 12. Trạng thái code thực tế (2026-11-03)
+## 12. Trạng thái code thực tế (cập nhật 2026-11-07)
 
 **Đã thống nhất một schema duy nhất `public` (33 bảng + 3 view) theo §7. Không còn khái niệm v1/v2.** Cutover chạy 2026-11-03: các object `public` cũ chuyển sang schema `legacy` (29 bảng, 19 enum, 5 hàm; chỉ để sao lưu, **chưa xoá**), schema mới đổi tên thành `public`, trigger đăng ký `on_auth_user_created` → `public.handle_new_user` (không nuốt lỗi), Realtime publication gồm `attempts`, `review_requests`, `free_essays`.
 
 | Thành phần | Trạng thái |
 |---|---|
-| DDL | `supabase/migrations/20261103130000_baseline_schema.sql` là migration **duy nhất** (dựng được từ đầu: 38 bảng gồm các bảng ngoài sơ đồ, 3 view, 0 quyền `anon`). Thay đổi sau này: thêm file đánh số lớn hơn |
+| DDL | `supabase/migrations/20261103130000_baseline_schema.sql` là migration gốc (dựng được từ đầu: 38 bảng gồm các bảng ngoài sơ đồ, 3 view, 0 quyền `anon`). `20261107100000_atomic_grading_jobs.sql` thêm các function nộp bài và kết thúc chấm chạy trong một transaction (ADR-07); đã chạy lên Supabase 2026-11-07, Core API và worker cần migration này. Thay đổi sau này: thêm file đánh số lớn hơn |
 | Test ràng buộc | `supabase/tests/schema_constraints_test.sql`: 48/48 PASS trên Supabase, tự rollback |
 | Kết nối psql | `SUPABASE_DB_URL` trong `backend/.env` (Session pooler) |
 | Backend | Một đường code duy nhất `app/db/supabase.py: db()`; không còn cờ `DB_SCHEMA`. Services: `practice/`, `writing/`, `listening_reading/`, `speaking/`, `admin/`, `cms/`, `importers/` |
 | Role | `learner \| expert \| admin` ở cả backend và frontend. Trạng thái attempt theo tên thiết kế (`grading`, `grading_failed`, `waiting_expert`, `no_speech`) |
 | Smoke test | 51/51 PASS trên `public` sau cutover; `pytest` backend 26 pass; `tsc` frontend sạch |
 
-**Cột ngoài sơ đồ (cố ý, đã có trong baseline):** `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
+**Cột ngoài sơ đồ (cố ý):** `grading_runs.claimed_at` + `recovery_count` (migration `20261107100000`, lease cho job chấm); trong baseline: `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
 
-**Bảng ngoài thiết kế (tính năng Chấm bài tự do, giữ nguyên chờ nhóm quyết định):** `topics`, `free_essays` (trước là `essays`), `evaluation_results`, `essay_annotations`, `evaluation_logs`.
+**Writing Task 2 (2026-11-07):** luồng Reference (ADR-22) đã có trong code nhưng tắt; `WRITING_TASK2_PIPELINE` mặc định `legacy`, nên điểm người học chưa đổi. Prompt `writing/task2/grade` dùng `qwen-flash`. Phân loại dùng Jev (85–86/96 đề có nhãn, Qwen 83/96 khi đo cùng ngày); thiếu `TYPESAFE_API_KEY` hoặc Jev lỗi thì dùng `writing/task2/classify`. Cả hai pipeline Task 2 đều qua bước này, nên title đề được gửi cho TypeSafe.
+
+**Chấm bài tự do đã bỏ (2026-11-07):** đã gỡ `/exam`, `admin/topics` và các API `/topics`, `/essays/evaluate`, `GET /essays`; giữ `GET /essays/{id}/results` vì Writing trong attempt dùng. Migration `20261107110000_drop_free_essay_feature.sql` xoá 5 bảng `topics`, `free_essays`, `evaluation_results`, `essay_annotations`, `evaluation_logs`, **chạy sau khi code mới đã triển khai**. Band bài tự do không còn tính vào hồ sơ học tập và thống kê Admin.
 
 **Legacy đang chờ xoá:** schema `legacy` (bản sao dữ liệu cũ). Xoá bằng `DROP SCHEMA legacy CASCADE` **chỉ sau khi nhóm xác nhận** và đã pull code mới.
 
 **Hành vi thay đổi do schema buộc phải vậy:**
 - Đề published/archived không sửa được (luật "đề đã xuất bản không được sửa") → API trả 409.
 - Lỗi ràng buộc DB khi soạn đề trả 409 hoặc 400 kèm lý do thay vì 500: tạo đề cùng kỹ năng trong một bộ Mock (FR-36), xoá bộ còn đề archived (BR-10). `POST /attempts/start` trả thêm `server_time`; đồng hồ thi thử ở frontend không được dài hơn hạn `deadline_at` của server (BR-07: nộp trễ quá 30 s bị từ chối).
-- Nạp đề từ dataset (`/admin/ingest/*`): thư mục mặc định là `dataset_clean/` ở gốc repo (đổi bằng biến môi trường `DATASET_ROOT`); thư mục không tồn tại → 404. Importer chạy trong luồng riêng (không làm đứng API khác). `success = true` chỉ khi không có lỗi; lỗi giữa chừng thì đề nháp vừa tạo được dọn (chạy lại được); file không tồn tại, `skill` lạ, thiếu `path` được báo lỗi rõ ràng. Câu không có đáp án trong file lời giải để trống (không gán `N/A`). Tiêu đề trùng trong dataset được báo cảnh báo (chống trùng vẫn theo tiêu đề và kỹ năng, vì bảng `tests` chưa có cột khoá nguồn). Nạp hàng loạt không còn ghi file tổng quan bộ đề vào `topics` và không thêm chủ đề trùng. Đề nạp xong luôn ở trạng thái **nháp** (UC-30); Admin rà soát rồi tự xuất bản ở trình soạn đề, nên Learner chưa thấy đề cho tới lúc đó. Lượt chấm AI thành công ghi `grading_runs.model` (lấy từ AI engine); `trace_id` vẫn trống vì AI engine chưa có Langfuse tracing. Thẻ "Total Essays" ở thống kê Admin là tổng bài Writing trong đề cộng bài chấm tự do.
+- Nạp đề từ dataset (`/admin/ingest/*`): thư mục mặc định là `dataset_clean/` ở gốc repo (đổi bằng biến môi trường `DATASET_ROOT`); thư mục không tồn tại → 404. Importer chạy trong luồng riêng (không làm đứng API khác). `success = true` chỉ khi không có lỗi; lỗi giữa chừng thì đề nháp vừa tạo được dọn (chạy lại được); file không tồn tại, `skill` lạ, thiếu `path` được báo lỗi rõ ràng. Câu không có đáp án trong file lời giải để trống (không gán `N/A`). Tiêu đề trùng trong dataset được báo cảnh báo (chống trùng vẫn theo tiêu đề và kỹ năng, vì bảng `tests` chưa có cột khoá nguồn). Đề nạp xong luôn ở trạng thái **nháp** (UC-30); Admin rà soát rồi tự xuất bản ở trình soạn đề, nên Learner chưa thấy đề cho tới lúc đó. Lượt chấm AI thành công ghi `grading_runs.model` (lấy từ AI engine); `trace_id` vẫn trống vì AI engine chưa có Langfuse tracing. Thẻ "Total Essays" ở thống kê Admin là tổng bài Writing trong đề.
 - Bảng quy đổi band: `band` phải là bội số của 0.5 (422); khoảng chồng lấn hoặc trùng 409; xoá dòng không tồn tại 404. Cài đặt hệ thống: nhận giá trị JSON bất kỳ (kể cả số); khoá không tồn tại 404. Chủ đề: `description` tuỳ chọn.
-- Admin đổi đề, bộ đề, câu hỏi hoặc bảng quy đổi thành công thì cache RAM phía Learner (danh mục, nội dung đề, bài tập theo dạng) được xoá ngay.
+- Admin đổi đề, bộ đề, câu hỏi hoặc bảng quy đổi thành công thì cache Redis phía Learner (danh mục, nội dung đề, bài tập theo dạng) mất hiệu lực ngay, nhờ route class `StudentContentMutationRoute` tăng số phiên bản trong khoá. Redis lỗi thì đọc thẳng DB.
 - Importer không còn gán `test_set`; bộ Mock (UNIQUE(test_set_id, skill)) tạo riêng: 5 bộ "IELTS Recent Actual Tests – Mock Set 1..5".
 - Speaking nộp bài không còn band giả 6.5: trạng thái `grading` hoặc `no_speech`.
 - Đáp án mẫu Writing/Speaking từ dataset không được lưu.
@@ -607,13 +642,23 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Cột `is_activated` bỏ: "đã kích hoạt" = có `last_sign_in_at` trong Supabase Auth.
 
 **Điểm lệch còn lại so với thiết kế:**
-- Chấm bài chạy bằng FastAPI `BackgroundTasks`, chưa qua ARQ; không có Redis thì dùng `NullRedisCache`.
+- Chấm Writing và Speaking chạy qua ARQ (`app/services/grading/`), nên cần Redis và worker. Không có Redis thì API vẫn chạy bằng `NullRedisCache`, bài được lưu nhưng chờ chấm tới khi Redis và worker hoạt động.
 - Mock chưa tự tạo yêu cầu Expert chấm (luật quota Mock cho Expert); điểm AI tạm là chính thức.
 - AI engine chưa trả model/prompt version/trace id → các cột truy vết mỗi lần chấm (model, phiên bản prompt, mã trace) trong `grading_runs` còn trống.
 - Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái yêu cầu "transcript Listening chỉ hiện sau khi nộp").
 - Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.
 - Đề Writing: 97 đề trên R2 (`ielts-learning`, prefix `dataset/writing/`), mới nhập 6; 91 đề còn lại import sau.
-- Speaking chấm thật, Expert workflow, dashboard lộ trình học: làm một phần.
+- Expert workflow, dashboard lộ trình học: làm một phần.
+
+**Speaking (2026-11-06):** đã có phòng thi Practice và Mock (đồng ý ghi âm, mic check, ghi âm thật, upload presigned, hết giờ tự chuyển câu, Mock không ghi lại và tự nộp), pipeline chấm hai kênh, màn kết quả thật, job xoá audio 180 ngày trong ARQ. Không cần migration.
+- Cần `R2_PRIVATE_BUCKET_NAME`: bucket không public, có CORS cho `PUT` từ origin frontend. Chưa cấu hình thì API upload trả 503.
+- Chấm chạy qua hàng đợi Speaking, mỗi lần một bài. Worker chết giữa lúc chấm thì cron tự chạy lại sau khi hết lease (25 phút). Attempt `grading_failed` chạy lại bằng `backend/scripts/regrade_speaking_attempt.py`.
+- Job xoá audio chỉ chạy khi có tiến trình `arq app.worker.tasks.WorkerSettings`.
+- Audio câu hỏi vẫn là link bên thứ ba; Piper TTS (FR-32), sửa CMS Speaking, kiểm tra khi publish để đợt sau.
+- Mock chưa có Expert nên điểm AI là chính thức; chưa có nhãn "preliminary".
+- `grading_runs.trace_id` vẫn trống. `model` và `prompt_versions` đã ghi.
+- Bộ đếm âm tiết đếm thiếu ở lời nói nối âm (mẫu thử: 11 so với 14–15 âm tiết thật); cần kiểm chứng ở bộ đo thử.
+- Giấy phép: `praat-parselmouth` là GPLv3; L2-ARCTIC là CC BY-NC 4.0; trọng số CrisperWhisper chỉ cho phi thương mại. Dùng được cho KLTN, cần xem lại nếu thương mại hoá.
 
 **Bảo mật đã sửa:** JWT fallback verify HS256 + `aud=authenticated`; không còn mượn user đầu tiên khi chưa đăng nhập; xoá lịch sử kiểm tra chủ sở hữu.
 
@@ -627,9 +672,10 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 ## 13. Câu hỏi còn mở
 
+- Có chuyển Task 2 sang luồng Reference không? Cần chốt cổng độ phân tán (đang 0,44, yêu cầu 0,70) và lỗi JSON 2/120 của `qwen-flash` (ADR-22).
 - Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?
-- Tính năng Chấm bài tự do + `topics`: bỏ hay giữ? (người dùng muốn bỏ nhưng cần debate với nhóm)
 - Import 91 đề Writing còn lại từ R2 vào `public`.
-- Hàng đợi chính thức: ARQ (theo báo cáo) hay pgmq (theo sơ đồ SD)? Cần thống nhất rồi sửa lại sơ đồ.
+- Chuyển `backend/app/ai` ra `ai-engine/` ở gốc repo để tách khỏi package Core API (`pytest` trần trong `backend/` đang lỗi vì quét vào đó). Làm sau khi spec 002 xong; cần kiểm tra thư mục gốc trong cấu hình deploy.
 - Chương IV (triển khai, giao diện, kiểm thử, đánh giá AI bằng MAE) chưa viết; cần bộ dữ liệu so điểm AI với Expert.
 - Quyết định "prompt quản lý trên Langfuse" trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".
+- Hiệu chuẩn ngưỡng rubric phát âm bằng bộ đo thử (`docs/speech-eval-recording-script.md`) và sau đó bằng dữ liệu Expert.

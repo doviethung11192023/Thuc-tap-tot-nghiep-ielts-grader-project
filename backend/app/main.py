@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from arq import create_pool
 from arq.connections import RedisSettings
 from app.core.config import settings
+from app.core.domain_errors import DomainError
 
 import sys
 
@@ -15,7 +17,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Setup ARQ Redis Pool (Redis is only a cache → fall back to a no-op cache when it is down)
+    # ARQ Redis Pool: hàng đợi chấm và cache. Redis sập thì API vẫn chạy, nhưng bài nộp chờ tới khi Redis và worker hoạt động
     try:
         redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
         redis_settings.conn_retries = 1
@@ -50,20 +52,12 @@ async def health_check():
     return {"status": "healthy"}
 
 from app.api.api_router import api_router
-from app.api.endpoints.student_practice.cache_control import clear_student_caches
-
-_ADMIN_CONTENT_PATHS = ("/tests", "/test-sets", "/sections", "/question-groups", "/questions", "/ingest", "/core/band")
 
 
-@app.middleware("http")
-async def invalidate_student_caches(request, call_next):
-    """Admin đổi đề, bộ đề hoặc bảng quy đổi thành công thì xoá cache phía Learner."""
-    response = await call_next(request)
-    path = request.url.path
-    if (request.method in ("POST", "PUT", "PATCH", "DELETE") and response.status_code < 400
-            and "/admin/" in path and any(p in path for p in _ADMIN_CONTENT_PATHS)):
-        clear_student_caches()
-    return response
+@app.exception_handler(DomainError)
+async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
+    """Lỗi nghiệp vụ của service → response cùng dạng HTTPException."""
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
 app.include_router(api_router, prefix="/api/v1")

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from collections import Counter
-from fastapi import HTTPException
+from app.core.domain_errors import NotFoundError
 from app.db.supabase import db
 from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
 
@@ -88,7 +88,7 @@ def _scan_subject_tests(de_bai_dir: Path, skill: str, dur: int, existing: set, s
 def scan_dataset(root_path: Optional[str] = None) -> Dict[str, Any]:
     root, de_bai_dir, _ = resolve_dataset_paths(root_path)
     if not root.exists() or not root.is_dir():
-        raise HTTPException(status_code=404, detail=f"Không tìm thấy thư mục dataset: {root}")
+        raise NotFoundError(f"Không tìm thấy thư mục dataset: {root}")
     existing_set = set()
     try:
         res = db().table("tests").select("title, skill").execute()

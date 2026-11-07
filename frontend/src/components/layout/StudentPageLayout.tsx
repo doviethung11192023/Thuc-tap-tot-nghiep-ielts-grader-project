@@ -2,18 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, LayoutDashboard, Library, User, LogOut, PenTool } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Library, User, LogOut } from 'lucide-react';
 import { AuthGuard } from '@/components/guards/AuthGuard';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { useGradingNotifications } from '@/hooks/useGradingNotifications';
 import { usePathname, useRouter } from 'next/navigation';
 
 export function StudentPageLayout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  useGradingNotifications();
 
   const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
   
@@ -49,14 +47,6 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Link
-                    href="/exam"
-                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#932120] hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-2xs"
-                    title="Luyện viết tự do IELTS Task 1 & Task 2"
-                  >
-                    <PenTool className="w-3.5 h-3.5" />
-                    <span>Chấm bài tự do</span>
-                  </Link>
                   <span className="text-sm font-medium hidden md:block">Student Portal</span>
                   <NotificationBell />
                   <Link 

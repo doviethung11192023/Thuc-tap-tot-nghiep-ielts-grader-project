@@ -8,7 +8,7 @@ không đổi được vai trò (attempts tham chiếu learner_profiles).
 """
 from typing import Any, Optional
 
-from fastapi import HTTPException, status
+from app.core.domain_errors import ConflictError, InvalidRequestError, NotFoundError
 
 from app.db.supabase import db, supabase
 
@@ -31,16 +31,16 @@ def write_audit(admin_id: Optional[str], action: str, entity: str, entity_id: An
 def set_role(user_id: str, role: str, full_name: Optional[str] = None, expert_fields: Optional[dict] = None) -> None:
     profile = db().table("profiles").select("role").eq("id", user_id).execute().data
     if not profile:
-        raise HTTPException(status_code=404, detail="User profile not found")
+        raise NotFoundError("User profile not found")
     current = profile[0]["role"]
     if current != role:
         if current == "learner":
             if db().table("attempts").select("id").eq("learner_id", user_id).limit(1).execute().data:
-                raise HTTPException(status_code=409, detail="Learner đã có bài làm, không đổi vai trò được")
+                raise ConflictError("Learner đã có bài làm, không đổi vai trò được")
             db().table("learner_profiles").delete().eq("user_id", user_id).execute()
         elif current == "expert":
             if db().table("review_assignments").select("id").eq("expert_id", user_id).limit(1).execute().data:
-                raise HTTPException(status_code=409, detail="Expert đã có lịch sử chấm, không đổi vai trò được")
+                raise ConflictError("Expert đã có lịch sử chấm, không đổi vai trò được")
             db().table("expert_profiles").delete().eq("user_id", user_id).execute()
         db().table("profiles").update({"role": role}).eq("id", user_id).execute()
     if full_name:
@@ -68,7 +68,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
     email_sent = False
     if existing:
         if existing[0]["role"] == role:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Tài khoản này đã có vai trò {role}")
+            raise InvalidRequestError(f"Tài khoản này đã có vai trò {role}")
         user_id = existing[0]["id"]
     else:
         user_id = None
@@ -85,7 +85,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
                                                        "app_metadata": {"role": role}, "email_confirm": True})
                 user_id = res.user.id
             except Exception as e:
-                raise HTTPException(status_code=400, detail=f"Lỗi khi khởi tạo tài khoản trên hệ thống xác thực: {e}")
+                raise InvalidRequestError(f"Lỗi khi khởi tạo tài khoản trên hệ thống xác thực: {e}")
     set_role(user_id, role, full_name, expert_fields)
     if existing:
         try:
@@ -103,7 +103,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
 def resend_invite(admin_id: str, user_id: str) -> dict[str, Any]:
     rows = db().table("profiles").select("email").eq("id", user_id).execute().data
     if not rows:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise NotFoundError("User not found")
     email, email_sent = rows[0]["email"].strip().lower(), False
     try:
         supabase.auth.reset_password_for_email(email, options={"redirect_to": REDIRECT_TARGET})

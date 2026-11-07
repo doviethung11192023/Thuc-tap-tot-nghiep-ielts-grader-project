@@ -45,14 +45,6 @@ def get_user_attempts(user_id: str) -> List[Dict[str, Any]]:
     return learning_profile_readers.user_attempts(user_id)
 
 
-def get_user_essays(user_id: str) -> List[Dict[str, Any]]:
-    """Bài của tính năng Chấm bài tự do (free_essays, ngoài thiết kế — chờ nhóm quyết định giữ/bỏ)."""
-    res = db().table("free_essays").select(
-        "id, topic_id, status, submitted_at, topics(title), evaluation_results(overall_band)"
-    ).eq("user_id", user_id).order("submitted_at", desc=True).limit(100).execute()
-    return res.data or []
-
-
 def get_learner_goal(user_id: str) -> Dict[str, Any]:
     """Mục tiêu học tập của học viên (giá trị mặc định khi chưa đặt)."""
     goal = learning_profile_readers.learner_goal_row(user_id)
@@ -82,7 +74,7 @@ def get_vietnamese_month_abbr(dt: datetime) -> str:
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     return months[dt.month - 1]
 
-def compute_daily_active_minutes(attempts: List[Dict[str, Any]], essays: List[Dict[str, Any]]) -> Dict[str, int]:
+def compute_daily_active_minutes(attempts: List[Dict[str, Any]]) -> Dict[str, int]:
     """
     Tính toán thời lượng học tập và luyện đề thực tế theo từng ngày.
     Sử dụng thuật toán gom nhóm phiên học tập thực tế (Session Clustering) với ngưỡng nghỉ 30 phút giữa các phiên,
@@ -99,15 +91,6 @@ def compute_daily_active_minutes(attempts: List[Dict[str, Any]], essays: List[Di
                     events_by_date.setdefault(ds, []).append(dt)
                 except Exception:
                     pass
-    for e in essays:
-        val = e.get("submitted_at")
-        if val:
-            try:
-                ds = str(val)[:10]
-                dt = datetime.fromisoformat(val)
-                events_by_date.setdefault(ds, []).append(dt)
-            except Exception:
-                pass
 
     daily_minutes: Dict[str, int] = {}
     for ds, times in events_by_date.items():

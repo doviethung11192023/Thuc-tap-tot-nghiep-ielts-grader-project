@@ -113,6 +113,8 @@ export interface SpeakingPartQuestionItem {
   question_number: number;
   question: string;
   audio_prompt_url?: string;
+  prep_time_sec?: number;
+  answer_time_sec?: number;
   ideas: SpeakingIdeaStep[];
   detailed_result?: DetailedQuestionResult;
 }

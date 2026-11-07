@@ -44,8 +44,28 @@ class Settings(BaseSettings):
     # DashScope Qwen3.x hybrid models "think" by default (≈2.5× slower and can exhaust
     # max_tokens on the REWRITE pass). Sent as extra_body only to DashScope endpoints.
     llm_enable_thinking: bool = False
+    # Writing Task 2 flow: "legacy" (4 criterion agents) or "reference" (one call with band-ladder references).
+    writing_task2_pipeline: str = "legacy"
+    reference_corpus_dir: str = str(ROOT / "data" / "reference_corpus")
+    # Override the model in the Langfuse config of writing/task2/grade (empty → use Langfuse config).
+    grade_llm_model: str = ""
+    # Essay type classifier: "jev" uses TypeSafe when a key is set, else the Qwen prompt; "qwen" skips Jev.
+    essay_classifier: str = "jev"
+    typesafe_api_key: str = ""
+    jev_model: str = "jev-latest"
+    jev_timeout_seconds: float = 5.0
     # Max size (bytes) of a Task 1 image downloaded for the vision model.
     max_image_bytes: int = 8 * 1024 * 1024
+
+    # Speaking. Device "auto" uses the GPU when one is available; on a CPU-only VPS use
+    # SPEECH_STT_MODEL=small.en and SPEECH_STT_COMPUTE_TYPE=int8.
+    speech_device: str = "auto"
+    speech_stt_model: str = "medium.en"
+    speech_stt_compute_type: str = "auto"
+    speech_stt_beam_size: int = 5
+    speech_phoneme_model: str = "facebook/wav2vec2-lv-60-espeak-cv-ft"
+    # Shared with Core API. Empty disables the check, for local development only.
+    ai_engine_secret: str = ""
 
     # Server
     enable_ngrok: bool = False

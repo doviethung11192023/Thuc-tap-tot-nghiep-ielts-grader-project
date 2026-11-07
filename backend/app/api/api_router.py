@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import essays, topics, users, admin, auth, expert
+from app.api.endpoints import essays, users, admin, auth, expert
 from app.api.endpoints.admin_content import (
     tests as admin_tests,
     sections as admin_sections,
@@ -13,7 +13,6 @@ from app.api.endpoints.student_practice import student_practice_router
 
 api_router = APIRouter()
 api_router.include_router(essays.router, prefix="/essays", tags=["Essays"])
-api_router.include_router(topics.router, prefix="/topics", tags=["Topics"])
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(admin_tests.router, prefix="/admin", tags=["Admin Tests"])

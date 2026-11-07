@@ -95,7 +95,6 @@ export interface IngestResponse {
   sections_created: number;
   question_groups_created: number;
   questions_created: number;
-  topics_created: number;
   errors: string[];
 }
 

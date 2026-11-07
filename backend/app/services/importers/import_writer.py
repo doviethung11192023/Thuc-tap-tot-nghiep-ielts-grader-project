@@ -8,7 +8,6 @@ Ghi đề nhập từ dataset vào DB qua các service CMS (UC-30), dùng chung 
 """
 from typing import Any, Callable, Optional
 
-from fastapi import HTTPException
 
 from app.db.supabase import db
 from app.services.cms import cms_questions, cms_sections, cms_tests

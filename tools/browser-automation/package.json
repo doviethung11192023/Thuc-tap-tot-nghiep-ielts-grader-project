@@ -1,0 +1,8 @@
+{
+  "name": "browser-automation",
+  "private": true,
+  "type": "module",
+  "description": "Playwright login/logout/TOTP automation, persistent Chrome profile per account",
+  "scripts": { "test": "node lib/totp.test.mjs" },
+  "dependencies": { "playwright-core": "^1.57.0" }
+}

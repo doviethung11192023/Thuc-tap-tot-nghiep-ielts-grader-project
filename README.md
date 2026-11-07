@@ -23,10 +23,16 @@ cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# Mở một terminal khác, khởi chạy ARQ Worker (Background Tasks)
+# Mở terminal khác: worker chấm Writing và cron (cứu lượt chấm bị bỏ rơi, xoá audio quá hạn)
 cd backend
 arq app.worker.tasks.WorkerSettings
+
+# Mở terminal khác: worker chấm Speaking, mỗi lần một bài
+cd backend
+arq app.worker.tasks.SpeakingWorkerSettings
 ```
+
+Chấm Writing và Speaking **cần Redis và worker đang chạy**. Thiếu chúng thì bài vẫn được lưu nhưng nằm ở trạng thái đang chấm; cron sẽ đẩy lại khi worker hoạt động.
 
 ### 2. Khởi chạy Frontend
 Yêu cầu: Đã cài đặt Node.js.

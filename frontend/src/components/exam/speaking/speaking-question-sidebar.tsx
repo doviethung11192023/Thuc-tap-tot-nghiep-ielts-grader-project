@@ -9,6 +9,8 @@ interface SpeakingQuestionSidebarProps {
   currentPart: 1 | 2 | 3;
   currentQuestionIndex: number;
   recordedStatus: Record<string, boolean>; // key: "p1_q1", value: boolean
+  /** Thi thử hoặc đang ghi âm: không được nhảy câu. */
+  locked?: boolean;
   onSelectQuestion: (partNumber: 1 | 2 | 3, questionIndex: number) => void;
   onOpenReview: () => void;
 }
@@ -18,6 +20,7 @@ export const SpeakingQuestionSidebar: React.FC<SpeakingQuestionSidebarProps> = (
   currentPart,
   currentQuestionIndex,
   recordedStatus,
+  locked = false,
   onSelectQuestion,
   onOpenReview,
 }) => {
@@ -42,7 +45,7 @@ export const SpeakingQuestionSidebar: React.FC<SpeakingQuestionSidebarProps> = (
         {!isCollapsed && (
           <div className="space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
             {parts.map((p) => {
-              const questions = p.questions || (p.cue_card ? [{ id: 'p2_cue', question_number: 1, question: p.cue_card.topic, ideas: p.cue_card.ideas }] : []);
+              const questions = p.questions ?? [];
 
               return (
                 <div key={p.part_number} className="space-y-1.5">
@@ -60,6 +63,7 @@ export const SpeakingQuestionSidebar: React.FC<SpeakingQuestionSidebarProps> = (
                         <button
                           key={q.id || idx}
                           onClick={() => onSelectQuestion(p.part_number, idx)}
+                          disabled={locked}
                           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all border ${
                             isCurrent
                               ? 'bg-emerald-50/70 border-emerald-500 text-slate-800 shadow-sm'
@@ -108,7 +112,8 @@ export const SpeakingQuestionSidebar: React.FC<SpeakingQuestionSidebarProps> = (
       <div className="pt-4 border-t border-slate-100 mt-4">
         <button
           onClick={onOpenReview}
-          className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+          disabled={locked}
+          className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <PlayCircle className="w-4 h-4 text-blue-600" />
           <span>Review bài làm</span>

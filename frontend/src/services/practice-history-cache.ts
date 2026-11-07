@@ -8,8 +8,8 @@ export interface TimelineHistoryItem {
   title: string;
   skill: "Listening" | "Reading" | "Writing" | "Speaking";
   mode: "practice" | "mock";
-  status: "scored" | "in_progress" | "completed";
-  band: number;
+  status: string;
+  band: number | null;
   raw_score?: number;
   submitted_at: string;
   duration_min: number;
@@ -94,7 +94,7 @@ export async function fetchPracticeHistoryData(force = false): Promise<PracticeH
         skill: item.skill,
         mode: item.mode || "practice",
         status: item.status || "scored",
-        band: item.band ?? 0.0,
+        band: item.band ?? null,
         raw_score: item.raw_score,
         submitted_at: dateStr,
         duration_min: item.duration_min || 60,

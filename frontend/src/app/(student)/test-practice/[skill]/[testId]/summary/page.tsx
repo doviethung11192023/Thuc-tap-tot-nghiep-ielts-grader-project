@@ -28,7 +28,8 @@ export default function SkillSummaryResultPage() {
   const returnUrl = searchParams.get('returnUrl') || '';
 
   const isReading = skill === 'reading';
-  const { data: cleanData, loading } = useAttemptSummary(attemptId, skill);
+  // Speaking và Writing có hook kết quả riêng; không gọi API lần hai rồi bỏ kết quả
+  const { data: cleanData, loading } = useAttemptSummary(skill === 'speaking' ? undefined : attemptId, skill);
 
   if (skill === 'writing') {
     return (
@@ -47,7 +48,6 @@ export default function SkillSummaryResultPage() {
         testId={testId} 
         attemptId={attemptId}
         returnUrl={returnUrl || undefined}
-        testTitle="Full Test 1: Saying thank you, Wild animals and Politeness"
       />
     );
   }

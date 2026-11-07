@@ -4,6 +4,7 @@ from app.api.endpoints.student_practice.attempts import router as attempts_route
 from app.api.endpoints.student_practice.grading import router as grading_router
 from app.api.endpoints.student_practice.submissions_ai import router as submissions_ai_router
 from app.api.endpoints.student_practice.results import router as results_router
+from app.api.endpoints.student_practice.speaking_uploads import router as speaking_uploads_router
 from app.api.endpoints.student_practice.analytics import router as analytics_router
 from app.api.endpoints.student_practice.exercises import router as exercises_router
 
@@ -14,6 +15,7 @@ student_practice_router.include_router(exercises_router, prefix="/test-practice"
 student_practice_router.include_router(attempts_router, prefix="/test-practice", tags=["Student Exam Attempts"])
 student_practice_router.include_router(grading_router, prefix="/test-practice", tags=["Student Auto Grading"])
 student_practice_router.include_router(submissions_ai_router, prefix="/test-practice", tags=["Student AI Submissions"])
+student_practice_router.include_router(speaking_uploads_router, prefix="/test-practice", tags=["Student Speaking Uploads"])
 student_practice_router.include_router(results_router, prefix="/test-practice", tags=["Student Exam Results"])
 student_practice_router.include_router(analytics_router, prefix="/student", tags=["Student Analytics"])
 student_practice_router.include_router(analytics_router, prefix="/test-practice", tags=["Student Practice Analytics"])

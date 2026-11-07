@@ -3,8 +3,9 @@ import asyncio
 import queue
 import threading
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
+from app.core.student_content_cache import StudentContentMutationRoute, invalidate_student_content
 from app.core.security import require_admin, User
 from app.schemas.system_settings import (
     CrawledDatasetIngestRequest, CrawledDatasetIngestResponse,
@@ -13,10 +14,9 @@ from app.schemas.system_settings import (
 from app.services.dataset_importer import DatasetImporter
 from app.services.dataset_scanner import scan_dataset
 from app.services.dataset_path_resolver import resolve_dataset_paths
-from app.api.endpoints.student_practice.cache_control import clear_student_caches
 from starlette.concurrency import run_in_threadpool
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 @router.get("/ingest/scan", response_model=DatasetScanResponse)
 async def scan_dataset_endpoint(
@@ -57,7 +57,6 @@ async def ingest_crawled_dataset(
         speaking=req.include_speaking,
         selected_tests=req.selected_tests
     )
-    clear_student_caches()
 
     skipped = result.get("tests_skipped_existing", 0)
     created = result.get("tests_created", 0)
@@ -78,7 +77,6 @@ async def ingest_crawled_dataset(
         sections_created=result["sections_created"],
         question_groups_created=result["question_groups_created"],
         questions_created=result["questions_created"],
-        topics_created=result["topics_created"],
         errors=errors,
         warnings=warnings,
     )
@@ -86,6 +84,7 @@ async def ingest_crawled_dataset(
 @router.post("/ingest/stream")
 async def ingest_crawled_dataset_stream(
     req: CrawledDatasetIngestRequest,
+    request: Request,
     current_user: User = Depends(require_admin)
 ):
     """
@@ -112,7 +111,6 @@ async def ingest_crawled_dataset_stream(
                 speaking=req.include_speaking,
                 selected_tests=req.selected_tests
             )
-            clear_student_caches()
             msg_queue.put({"type": "done", "result": result})
         except Exception as e:
             msg_queue.put({"type": "error", "error": str(e)})
@@ -125,6 +123,8 @@ async def ingest_crawled_dataset_stream(
         while True:
             try:
                 item = msg_queue.get_nowait()
+                if item["type"] == "done":   # response stream trả về ngay từ đầu nên route không biết lúc nạp xong
+                    await invalidate_student_content(request.app.state.redis)
                 yield f"data: {json.dumps(item, ensure_ascii=False)}\n\n"
                 if item["type"] in ("done", "error"):
                     break

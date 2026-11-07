@@ -4,13 +4,13 @@ Vòng đời attempt dùng chung cho mọi kỹ năng (ST_attempt, UC-07/08).
 - start_attempt: chỉ Learner; đề phải published và cho phép mode; đang có attempt dở
   của đề này thì làm tiếp (UC-08 E3); Mock có deadline do server đặt (FR-10).
 - get_owned_attempt: không phải chủ → None (API trả 404, không lộ sự tồn tại).
-- lock_for_submit: chỉ lần nộp đầu rời được in_progress (UC-08 E1); nộp muộn hơn
+- ensure_can_submit, require_submitted: chỉ lần nộp đầu rời được in_progress (UC-08 E1); nộp muộn hơn
   deadline quá 30 s bị từ chối (BR-07).
 """
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import AuthenticationRequiredError, ConflictError, ForbiddenError, InternalFailureError, InvalidRequestError, NotFoundError
 
 from app.db.supabase import db
 
@@ -24,12 +24,12 @@ def now_utc() -> datetime:
 
 def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, Any]:
     if not db().table("learner_profiles").select("user_id").eq("user_id", user_id).execute().data:
-        raise HTTPException(status_code=403, detail="Chỉ tài khoản Learner được làm bài (Admin/Expert không làm bài)")
+        raise ForbiddenError("Chỉ tài khoản Learner được làm bài (Admin/Expert không làm bài)")
     if test.get("status") != "published":
-        raise HTTPException(status_code=400, detail="Bài thi chưa được xuất bản")
+        raise InvalidRequestError("Bài thi chưa được xuất bản")
     allowed = test.get("allowed_mode") or "both"
     if allowed not in ("both", mode):
-        raise HTTPException(status_code=400, detail=f"Bài thi không cho phép chế độ {mode}")
+        raise InvalidRequestError(f"Bài thi không cho phép chế độ {mode}")
 
     duration = test.get("duration_minutes") or DEFAULT_MINUTES.get(test["skill"], 60)
     open_res = db().table("attempts").select("*").eq("learner_id", user_id).eq("test_id", test["id"]) \
@@ -44,7 +44,7 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
             "deadline_at": (start + timedelta(minutes=duration)).isoformat() if mode == "mock" else None,
         }).execute()
         if not res.data:
-            raise HTTPException(status_code=500, detail="Không thể tạo phiên làm bài thi")
+            raise InternalFailureError("Không thể tạo phiên làm bài thi")
         attempt = res.data[0]
     return {
         "attempt_id": attempt["id"], "test_id": attempt["test_id"], "skill": attempt["skill"],
@@ -64,14 +64,30 @@ def get_owned_attempt(attempt_id: str, user_id: Optional[str], is_admin: bool = 
     return attempt
 
 
-def lock_for_submit(attempt: dict[str, Any], next_status: str) -> str:
-    """in_progress → next_status (+ submitted_at). Trả submitted_at; đã nộp/quá hạn → 409."""
-    now = now_utc()
+def require_owned_attempt(attempt_id: str, user: Any, skill: str) -> dict[str, Any]:
+    """Attempt của chính Learner đang đăng nhập, đúng kỹ năng; không phải chủ thì 404."""
+    if not user:
+        raise AuthenticationRequiredError("Vui lòng đăng nhập để nộp bài")
+    attempt = get_owned_attempt(attempt_id, user.id)
+    if not attempt or attempt["skill"] != skill:
+        raise NotFoundError("Phiên làm bài không tồn tại")
+    return attempt
+
+
+def past_deadline(attempt: dict[str, Any]) -> bool:
+    """Đã quá deadline + 30 s ân hạn (BR-07)."""
     deadline = attempt.get("deadline_at")
-    if deadline and now > datetime.fromisoformat(deadline) + timedelta(seconds=LATE_GRACE_SECONDS):
-        raise HTTPException(status_code=409, detail="Đã quá thời gian làm bài")
-    locked = db().table("attempts").update({"status": next_status, "submitted_at": now.isoformat()}) \
-        .eq("id", attempt["id"]).eq("status", "in_progress").execute()
-    if not locked.data:
-        raise HTTPException(status_code=409, detail="Bài thi đã được nộp trước đó")
-    return now.isoformat()
+    return bool(deadline) and now_utc() > datetime.fromisoformat(deadline) + timedelta(seconds=LATE_GRACE_SECONDS)
+
+
+def ensure_can_submit(attempt: dict[str, Any]) -> None:
+    """Nộp muộn hơn deadline + ân hạn → 409. Khoá attempt nằm trong function submit_* của DB."""
+    if past_deadline(attempt):
+        raise ConflictError("Đã quá thời gian làm bài")
+
+
+def require_submitted(result: Optional[dict[str, Any]]) -> dict[str, Any]:
+    """Function submit_* trả NULL khi attempt không còn in_progress (UC-08 E1: chỉ lần nộp đầu có hiệu lực)."""
+    if result is None:
+        raise ConflictError("Bài thi đã được nộp trước đó")
+    return result

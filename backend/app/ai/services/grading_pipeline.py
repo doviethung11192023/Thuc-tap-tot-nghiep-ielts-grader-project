@@ -26,6 +26,7 @@ from services.langfuse.prompt_manager import PromptFetchError, WritingTask
 from services.llm_evaluator import evaluate_all_criteria
 from services.prompt_builder import build_criterion_prompts, get_prompt_manager
 from services.synthesis_service import SynthesisService
+from services.task2_reference_pipeline import run_task2_reference_pipeline
 from services.task1_type_knowledge import get_task1_type
 from services.task_type_classifier import classify_task_type
 from handlers.grammar_checker import check as check_grammar
@@ -56,8 +57,13 @@ async def run_grading_pipeline(
     essay: str,
     task_type: str | None = None,
     image_url: str | None = None,
+    pipeline: str | None = None,
 ) -> dict:
+    """`pipeline` overrides WRITING_TASK2_PIPELINE, so one run can compare both Task 2 flows."""
     task = normalize_task(task_type)
+    if task == "task2" and (pipeline or get_settings().writing_task2_pipeline) == "reference":
+        return await run_task2_reference_pipeline(title, essay)
+
     started = time.perf_counter()
     logger.info("Grading pipeline started — %s | essay: %d chars", task, len(essay))
 
@@ -111,6 +117,7 @@ async def run_grading_pipeline(
         visual_description=visual_text,
     )
 
+    final_json["pipeline"] = "legacy"
     final_json["task_subtype"] = task_type_result.task_type
     final_json["model"] = get_settings().default_llm_model  # backend ghi vào grading_runs.model (FR-30)
     if visual is not None:

@@ -19,7 +19,7 @@ def main():
     parser.add_argument("--path", type=str, default=None, help="Dataset directory path")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of test folders to import")
     parser.add_argument("--no-rl", action="store_true", help="Skip Reading and Listening")
-    parser.add_argument("--no-writing", action="store_true", help="Skip Writing topics")
+    parser.add_argument("--no-writing", action="store_true", help="Skip Writing tests")
     args = parser.parse_args()
 
     print("🚀 Bắt đầu quá trình nạp dataset vào CSDL Supabase...")
@@ -36,7 +36,6 @@ def main():
     print(f" - Phần thi (Sections):        {result['sections_created']}")
     print(f" - Nhóm câu hỏi (Groups):      {result['question_groups_created']}")
     print(f" - Câu hỏi & Đáp án (Q&A):     {result['questions_created']}")
-    print(f" - Đề bài Writing (Topics):    {result['topics_created']}")
 
     if result["errors"]:
         print(f"\n⚠️ Có {len(result['errors'])} lỗi/cảnh báo:")

@@ -1,11 +1,12 @@
 """Admin: nhóm câu hỏi, câu hỏi và đáp án chuẩn (đáp án chỉ Admin đọc được — ràng buộc 8)."""
 from fastapi import APIRouter, Depends, status
 
+from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import User, require_admin
 from app.schemas.exam_content import QuestionCreate, QuestionGroupCreate
 from app.services.cms import cms_questions
 
-router = APIRouter()
+router = APIRouter(route_class=StudentContentMutationRoute)
 
 
 def _plain(data: dict) -> dict:

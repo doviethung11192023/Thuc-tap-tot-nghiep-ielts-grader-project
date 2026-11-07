@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CheckCircle, TrendingUp, Target, Clock, PenTool, BookOpen } from "lucide-react";
+import { CheckCircle, TrendingUp, Target, Clock, BookOpen } from "lucide-react";
 import type { DashboardStats } from "@/types/learning-profile";
 
 interface QuickStatCardsProps {
@@ -43,16 +43,9 @@ export function QuickStatCards({ stats }: QuickStatCardsProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="text-base font-black text-zinc-900 tracking-tight">Thống kê tiến trình học tập</h2>
-          <p className="text-xs text-zinc-500">Tổng quan kết quả các bài thi thử và bài viết tự do</p>
+          <p className="text-xs text-zinc-500">Tổng quan kết quả các bài thi thử</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href="/exam"
-            className="px-3.5 py-2 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-          >
-            <PenTool className="w-3.5 h-3.5" />
-            <span>Chấm bài tự do</span>
-          </Link>
           <Link
             href="/test-practice"
             className="px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"

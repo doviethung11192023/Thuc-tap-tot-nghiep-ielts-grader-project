@@ -7,6 +7,7 @@ Trả về đúng hình dạng mà catalog.py / exercises.py cũ dựng từ pub
 from typing import Any, Optional
 
 from app.db.supabase import db
+from app.services.speaking.speaking_test_content import speaking_part_number
 
 
 def _test_row(t: dict[str, Any]) -> dict[str, Any]:
@@ -112,7 +113,7 @@ def task_part_exercises(skill: str, difficulty: Optional[str]) -> list[dict[str,
         wt, sp = s.get("writing_tasks"), s.get("speaking_parts")
         wt = (wt[0] if isinstance(wt, list) and wt else wt) or {}
         sp = (sp[0] if isinstance(sp, list) and sp else sp) or {}
-        q_type = f"writing_{wt['task_type']}" if wt else f"speaking_part{s['order_no']}"
+        q_type = f"writing_{wt['task_type']}" if wt else f"speaking_part{speaking_part_number(s)}"
         out.append({"id": s["id"], "question_type": q_type, "instructions": sp.get("topic"), "order_no": s["order_no"],
                     "question_count": len(sp.get("speaking_questions") or []) or 1,
                     "section": {k: s.get(k) for k in ("id", "order_no", "title")}, "test": s.get("tests") or {}})

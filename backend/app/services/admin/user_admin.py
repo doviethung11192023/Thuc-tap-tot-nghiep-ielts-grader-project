@@ -6,7 +6,7 @@ is_activated cũ.
 """
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import InvalidRequestError, NotFoundError
 
 from app.db.supabase import db, supabase
 from app.services.admin.staff_accounts import write_audit
@@ -44,10 +44,10 @@ def list_users(page: int, limit: int, role: Optional[str], search: Optional[str]
 
 def set_user_active(admin_id: str, user_id: str, is_active: bool, reason: Optional[str]) -> None:
     if user_id == admin_id:
-        raise HTTPException(status_code=400, detail="Admins cannot lock their own account")
+        raise InvalidRequestError("Admins cannot lock their own account")
     res = db().table("profiles").update({"is_active": is_active}).eq("id", user_id).execute()
     if not res.data:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise NotFoundError("User not found")
     try:
         supabase.auth.admin.update_user_by_id(user_id, {"ban_duration": "none" if is_active else "876000h"})
     except Exception as e:

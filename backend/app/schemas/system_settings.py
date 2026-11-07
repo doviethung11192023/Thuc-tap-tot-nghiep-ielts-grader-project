@@ -66,7 +66,6 @@ class CrawledDatasetIngestResponse(BaseModel):
     sections_created: int = 0
     question_groups_created: int = 0
     questions_created: int = 0
-    topics_created: int = 0
     errors: List[str] = []
     warnings: List[str] = []
 

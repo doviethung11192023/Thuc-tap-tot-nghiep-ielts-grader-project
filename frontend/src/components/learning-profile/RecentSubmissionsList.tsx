@@ -44,13 +44,9 @@ export function RecentSubmissionsList({ submissions = [] }: RecentSubmissionsLis
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
-                      item.type === "essay"
-                        ? "bg-blue-50 text-blue-700 border border-blue-200/60"
-                        : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                    }`}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                   >
-                    {item.type === "essay" ? "Tự do" : "Test Practice"}
+                    Test Practice
                   </span>
                   <h4 className="text-xs sm:text-sm font-bold text-zinc-900 truncate" title={item.title}>
                     {item.title}

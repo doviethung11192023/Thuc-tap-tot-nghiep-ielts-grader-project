@@ -47,18 +47,6 @@ export interface ExpertProfile {
 export type TaskType = "task1" | "task2";
 export type Difficulty = "easy" | "medium" | "hard";
 
-export interface Topic {
-  id: string;
-  title: string;
-  description: string | null;
-  prompt_content: string;
-  task_type: TaskType;
-  difficulty: Difficulty;
-  category: string | null;
-  is_active: boolean;
-  created_at: string;
-}
-
 // ---------- Essays (Bài viết) ----------
 export type EssayStatus = "pending" | "evaluating" | "completed" | "failed" | "rejected";
 
@@ -135,16 +123,6 @@ export interface GradingResult {
 }
 
 // ---------- API Response Shapes ----------
-// Response từ API 1: POST /api/v1/essays/evaluate
-export interface SubmitEssayResponse {
-  meta: { code: number; message: string };
-  data: {
-    essay_id: string;
-    status: EssayStatus;
-    word_count: number;
-  };
-}
-
 // Response từ API 2: GET /api/v1/essays/{id}/results
 export interface EssayResultsResponse {
   meta: { code: number; message: string };
@@ -168,22 +146,3 @@ export interface UserProgress {
   last_submission_at: string | null;
 }
 
-// Response từ API 5: GET /api/v1/topics (có phân trang)
-export interface PaginatedResponse<T> {
-  meta: { code: number; message: string };
-  data: {
-    items: T[];
-    total: number;
-    page: number;
-    limit: number;
-  };
-}
-
-// Response từ API 6: GET /api/v1/essays (lịch sử bài viết)
-export interface EssayHistoryItem {
-  essay_id: string;
-  topic_title: string;
-  status: EssayStatus;
-  overall_band: number | null;
-  submitted_at: string;
-}

@@ -30,6 +30,13 @@ async def update_my_profile(profile: UserUpdate, current_user: User = Depends(ge
     return {"meta": {"code": 200, "message": "Profile updated successfully"}, "data": data}
 
 
+@router.post("/me/voice-consent")
+async def give_voice_consent(current_user: User = Depends(get_current_active_user)):
+    """Learner đồng ý ghi âm trước lần ghi đầu tiên (UC-35); thời điểm đồng ý là bằng chứng."""
+    data = profiles.update_profile(current_user.id, None, None, True)
+    return {"meta": {"code": 200, "message": "Đã ghi nhận đồng ý ghi âm"}, "data": data}
+
+
 @router.post("/me/activate")
 async def activate_my_account(current_user: User = Depends(get_current_active_user)):
     """Giữ cho frontend cũ: tài khoản được kích hoạt bởi Supabase Auth (xác minh email / link mời)."""

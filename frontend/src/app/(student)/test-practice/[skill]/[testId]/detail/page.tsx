@@ -51,7 +51,8 @@ export default function SkillDetailedResultPage() {
   if (skill === 'speaking') {
     return (
       <SpeakingResultsView
-        onRetake={handleRetake}
+        attemptId={attemptId}
+        backUrl={`/test-practice/speaking/${testId}/summary?attemptId=${attemptId}${returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
       />
     );
   }

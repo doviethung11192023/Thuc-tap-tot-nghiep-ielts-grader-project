@@ -1,14 +1,14 @@
 """Nộp bài Writing (chấm AI nền, UC-09) và Speaking (UC-10)."""
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from app.core.security import User, get_optional_user
-from app.services.practice.practice_attempt_lifecycle import get_owned_attempt
+from app.services.practice.practice_attempt_lifecycle import require_owned_attempt
+from app.services.grading.grading_queue import enqueue_grading_run
 from app.services.speaking.speaking_submission_service import submit_speaking
 from app.services.writing.writing_attempt_service import submit_writing
-from app.services.writing.writing_grading_service import grade_writing_task
 
 router = APIRouter()
 
@@ -20,36 +20,21 @@ class WritingSubmissionRequest(BaseModel):
     time_spent_sec: Optional[int] = None
 
 
-class SpeakingSubmissionRequest(BaseModel):
-    recordings: Optional[List[Dict[str, Any]]] = None  # [{question_id, audio_key|audio_url, duration_sec}]
-    time_spent_sec: Optional[int] = None
-
-
-def _owned(attempt_id: str, current_user: Optional[User], skill: str) -> dict:
-    if not current_user:
-        raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để nộp bài")
-    attempt = get_owned_attempt(attempt_id, current_user.id)          # chỉ chủ bài được nộp
-    if not attempt or attempt["skill"] != skill:
-        raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
-    return attempt
-
-
 @router.post("/attempts/{attempt_id}/submit-writing")
-async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest, background_tasks: BackgroundTasks,
+async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest, request: Request,
                                  current_user: Optional[User] = Depends(get_optional_user)):
-    """Nộp Task 1 / Task 2 rồi chấm AI nền từng task."""
-    attempt = _owned(attempt_id, current_user, "writing")
+    """Nộp Task 1 / Task 2; bài đã lưu và job đã tạo trong DB, worker chấm từng task sau."""
+    attempt = require_owned_attempt(attempt_id, current_user, "writing")
     sub = submit_writing(attempt, req.task1_text, req.task2_text, req.essay_text)
-    for job in sub["jobs"]:
-        background_tasks.add_task(grade_writing_task, None, sub["evaluation_id"], job["run_id"],
-                                  job["essay_id"], job["task_no"])
+    for run_id in sub["run_ids"]:
+        await enqueue_grading_run(request.app.state.redis, run_id, "writing")
     return {
         "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
         "data": {
             "attempt_id": attempt_id,
-            "essay_id": sub["jobs"][-1]["essay_id"],
-            "essay_ids": {f"task{j['task_no']}": j["essay_id"] for j in sub["jobs"]},
-            "word_count": sum(j["word_count"] for j in sub["jobs"]),
+            "essay_id": sub["essays"][-1]["essay_id"],
+            "essay_ids": {f"task{e['task_no']}": e["essay_id"] for e in sub["essays"]},
+            "word_count": sum(e["word_count"] for e in sub["essays"]),
             "status": "grading",
             "submitted_at": sub["submitted_at"],
         },
@@ -57,9 +42,12 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
 
 
 @router.post("/attempts/{attempt_id}/submit-speaking")
-async def submit_speaking_attempt(attempt_id: str, req: SpeakingSubmissionRequest,
+async def submit_speaking_attempt(attempt_id: str, request: Request,
                                   current_user: Optional[User] = Depends(get_optional_user)):
-    """Nộp bài Speaking. Chưa có pipeline chấm Speaking nên không trả band."""
-    attempt = _owned(attempt_id, current_user, "speaking")
-    data = submit_speaking(attempt, req.recordings)
-    return {"meta": {"code": 200, "message": "Bài thi nói đã được ghi nhận"}, "data": data}
+    """Nộp bài Speaking: chỉ các câu đã confirm được chấm; worker chấm sau."""
+    attempt = require_owned_attempt(attempt_id, current_user, "speaking")
+    sub = submit_speaking(attempt)
+    job = sub.pop("job")
+    if job:
+        await enqueue_grading_run(request.app.state.redis, job["runs"][0]["run_id"], "speaking")
+    return {"meta": {"code": 200, "message": "Bài thi nói đã được ghi nhận"}, "data": sub}

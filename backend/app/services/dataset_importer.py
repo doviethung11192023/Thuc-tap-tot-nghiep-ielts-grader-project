@@ -20,7 +20,7 @@ class DatasetImporter:
         self.stats = {
             "test_sets_created": 0, "tests_created": 0, "tests_skipped_existing": 0,
             "sections_created": 0, "question_groups_created": 0, "questions_created": 0,
-            "topics_created": 0, "errors": [], "warnings": []
+            "errors": [], "warnings": []
         }
 
     def run(self, limit: Optional[int] = None, rl: bool = True, writing: bool = True, speaking: bool = True, selected_tests: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
@@ -41,7 +41,6 @@ class DatasetImporter:
                     self._import_rl(test_set_id, limit)
                 if writing:
                     import_writing_tests(self.root, self.admin_id, test_set_id, limit, self.stats, self.only_pending, self.progress_callback, self.default_difficulty)
-                    self._import_topics(limit)
                 if speaking:
                     import_speaking_tests(self.root, self.admin_id, test_set_id, limit, self.stats, self.only_pending, self.progress_callback, self.default_difficulty)
         except Exception as e:
@@ -95,33 +94,3 @@ class DatasetImporter:
                     import_single_speaking_test(p.parent, self.root, self.admin_id, test_set_id, self.stats, self.only_pending, self.progress_callback, diff)
             except Exception as e:
                 self.stats["errors"].append(f"Error importing selected {item.get('title')}: {str(e)}")
-
-    def _import_topics(self, limit: Optional[int] = None):
-        w_dir = self.de_bai_dir / "writing"
-        if not w_dir.exists():
-            return
-        w_files = [f for f in w_dir.glob("**/*.json") if not f.name.lower().startswith("tong_quan")]   # file tổng quan bộ đề không phải đề bài
-        if limit:
-            w_files = w_files[:limit * 2]
-        existing_topics = {t["title"].strip().lower() for t in (db().table("topics").select("title").execute().data or [])}
-        for wf in w_files:
-            try:
-                with open(wf, "r", encoding="utf-8") as f:
-                    d = json.load(f)
-                data = d.get("data", d)
-                title = data.get("title") or wf.stem.replace("_", " ").title()
-                prompt = data.get("content") or data.get("prompt") or data.get("description")
-                if not prompt:
-                    continue
-                if title[:200].strip().lower() in existing_topics:
-                    continue   # đã có chủ đề cùng tiêu đề
-                existing_topics.add(title[:200].strip().lower())
-                task_type = "task1" if "task 1" in title.lower() or "task1" in wf.stem.lower() else "task2"
-                db().table("topics").insert({
-                    "title": title[:200], "description": title, "prompt_content": prompt,
-                    "task_type": task_type, "difficulty": self.default_difficulty, "category": "Academic",
-                    "is_active": True, "created_by": self.admin_id
-                }).execute()
-                self.stats["topics_created"] += 1
-            except Exception as e:
-                self.stats["errors"].append(f"Topic {wf.name} error: {str(e)}")

@@ -11,6 +11,13 @@ interface PracticeHistoryItemCardProps {
   onDelete?: (attemptId: string) => void;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  grading: "Đang chấm",
+  grading_failed: "Lỗi chấm",
+  no_speech: "Không có tiếng",
+  scored: "Chưa có điểm",
+};
+
 export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemCardProps) {
   const formatDateTime = (raw: string) => {
     try {
@@ -36,9 +43,12 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
     }
   };
 
-  const isScored = item.status === "scored";
+  const isScored = item.status === "scored" && item.band !== null;
+  const isOpen = item.status === "in_progress";
+  const statusLabel = STATUS_LABELS[item.status] ?? "Đang làm";
 
-  const targetUrl = isScored
+  // Bài đã nộp luôn mở trang kết quả, kể cả khi đang chấm: không đưa Learner về phòng thi.
+  const targetUrl = !isOpen
     ? `/test-practice/${item.skill.toLowerCase()}/${item.test_id}/summary?attemptId=${item.id}&returnUrl=${encodeURIComponent('/test-practice/history')}`
     : `/test-practice/${item.skill.toLowerCase()}/${item.test_id}`;
 
@@ -50,18 +60,18 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
       <div className="flex items-start sm:items-center gap-4">
         {/* Score Pill Left */}
         <div className={`w-14 h-12 rounded-2xl flex flex-col items-center justify-center font-black shrink-0 shadow-xs transition-colors ${
-          item.band >= 5.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-          item.band > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+          (item.band ?? 0) >= 5.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+          (item.band ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
           isScored ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
           'bg-amber-50 text-amber-800 border border-amber-200 text-xs'
         }`}>
           {isScored ? (
             <>
-              <span className="text-sm font-black leading-tight">{item.band.toFixed(1)}</span>
+              <span className="text-sm font-black leading-tight">{item.band?.toFixed(1)}</span>
               <span className="text-[9px] font-bold uppercase opacity-75">Band</span>
             </>
           ) : (
-            <span className="text-[11px] font-bold">Đang làm</span>
+            <span className="text-[11px] font-bold text-center leading-tight">{statusLabel}</span>
           )}
         </div>
 

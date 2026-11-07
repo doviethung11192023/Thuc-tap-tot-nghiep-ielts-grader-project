@@ -9,9 +9,10 @@ chưa nộp (bài đã nộp không xoá được vì kết quả chấm phải 
 """
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import ConflictError, NotFoundError
 
 from app.db.supabase import db
+from app.services.speaking.speaking_audio_retention import delete_attempt_audio
 
 def list_history(user_id: str, page: int, limit: int, skill: Optional[str], status: Optional[str]) -> dict[str, Any]:
     q = db().table("attempts").select(
@@ -41,7 +42,7 @@ def list_history(user_id: str, page: int, limit: int, skill: Optional[str], stat
             "title": test.get("title") or f"IELTS {a['skill'].capitalize()} Practice",
             "skill": a["skill"].capitalize(), "mode": a["mode"],
             "status": a["status"],
-            "band": float(band) if band is not None else 0.0,
+            "band": float(band) if band is not None else None,
             "raw_score": a.get("raw_score"), "total_questions": a.get("question_count"),
             "submitted_at": a.get("submitted_at") or a.get("started_at"),
             "duration_min": test.get("duration_minutes") or 60,
@@ -55,16 +56,17 @@ def discard_attempt(user_id: str, attempt_id: str) -> str:
     rows = db().table("attempts").select("id, status, mode").eq("id", attempt_id).eq("learner_id", user_id) \
         .execute().data
     if not rows:
-        raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
+        raise NotFoundError("Phiên làm bài không tồn tại")
     attempt = rows[0]
     if attempt["status"] == "abandoned":
         return "abandoned"
     if attempt["status"] != "in_progress":
-        raise HTTPException(status_code=409, detail="Bài đã nộp không xoá được (kết quả chấm cần được lưu lại)")
+        raise ConflictError("Bài đã nộp không xoá được (kết quả chấm cần được lưu lại)")
     if attempt["mode"] == "mock":
         db().table("attempts").update({"status": "abandoned"}).eq("id", attempt_id).eq("status", "in_progress").execute()
         return "abandoned"
     # Chỉ xoá khi vẫn in_progress: bài vừa được nộp ở request khác thì không bị xoá nhầm.
+    delete_attempt_audio(attempt_id)
     db().table("attempts").delete().eq("id", attempt_id).eq("learner_id", user_id) \
         .eq("mode", "practice").eq("status", "in_progress").execute()
     return "deleted"

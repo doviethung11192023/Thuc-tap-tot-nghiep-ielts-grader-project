@@ -11,6 +11,8 @@ Endpoints:
                           "image_url": "https://..." (optional, Task 1 chart) }
                   → frontend JSON result (scores, criteria_analysis,
                     inline_annotations, overall_upgraded_essay, word_count, task_type)
+    POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}] }
+                  → transcripts, speech metrics, 4 criteria, feedback. Requires X-AI-Engine-Secret.
     GET  /health
     GET  /
 
@@ -20,11 +22,12 @@ NGROK_AUTH_TOKEN, NGROK_STATIC_DOMAIN, SERVER_RELOAD (default false).
 
 import asyncio
 import os
+import secrets
 from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -41,6 +44,8 @@ from services.grading_pipeline import (  # noqa: E402
     run_grading_pipeline,
     warm_up_nlp_tools,
 )
+from services.reference_corpus import ReferenceCorpusError  # noqa: E402
+from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
 
@@ -80,6 +85,26 @@ class GradeRequest(BaseModel):
     image_url: str | None = None   # Task 1 chart/diagram (R2 public URL or any http(s) URL)
 
 
+class SpeakingAnswerRequest(BaseModel):
+    response_id: str
+    part: int = Field(..., ge=1, le=3)
+    question: str
+    audio_url: str
+    duration_ms: int | None = None
+
+
+class GradeSpeakingRequest(BaseModel):
+    title: str = ""
+    answers: list[SpeakingAnswerRequest] = Field(..., min_length=1)
+
+
+def require_engine_secret(x_ai_engine_secret: str | None = Header(default=None)) -> None:
+    """Only the Core API may spend LLM quota here (STRIDE: direct calls to the AI engine)."""
+    expected = get_settings().ai_engine_secret
+    if expected and not secrets.compare_digest(x_ai_engine_secret or "", expected):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+
 @app.get("/")
 def root():
     return {"status": "ok", "message": "IELTS Grader API is running."}
@@ -105,8 +130,24 @@ async def grade(req: GradeRequest):
     except PromptFetchError as e:
         logger.error("Langfuse prompt missing: %s", e)
         raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
+    except ReferenceCorpusError as e:
+        logger.error("Reference corpus unavailable: %s", e)
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error("Grading failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/grade-speaking", dependencies=[Depends(require_engine_secret)])
+async def grade_speaking(req: GradeSpeakingRequest):
+    """Speech layers, then LLM. Slow, so the Core API calls this from a background task."""
+    try:
+        return await run_speaking_pipeline(req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers])
+    except PromptFetchError as e:
+        logger.error("Langfuse prompt missing: %s", e)
+        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
+    except Exception as e:
+        logger.error("Speaking grading failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 

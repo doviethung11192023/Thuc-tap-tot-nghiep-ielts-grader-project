@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     SUPABASE_JWT_SECRET: str
     AI_ENGINE_URL: str = "http://localhost:8001/grade"
+    AI_ENGINE_SPEAKING_URL: str = "http://localhost:8001/grade-speaking"
+    AI_ENGINE_SECRET: str = ""
     # AI_ENGINE_URL: str = "https://dd03-2405-4802-80bc-cca0-6c28-e1b1-6417-dd23.ngrok-free.app/grade"
 
     # Cloudflare R2 Storage (S3-compatible)
@@ -18,6 +20,8 @@ class Settings(BaseSettings):
     R2_SECRET_ACCESS_KEY: str = ""
     R2_BUCKET_NAME: str = "ielts-grader-media"
     R2_PUBLIC_DOMAIN: str = ""
+    # Bucket KHÔNG public cho audio bài làm (ADR-05, NFR-07): chỉ truy cập bằng presigned URL.
+    R2_PRIVATE_BUCKET_NAME: str = ""
 
     # Postgres trực tiếp (Session pooler) cho migration/psql; Core API không dùng
     SUPABASE_DB_URL: str = ""

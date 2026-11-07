@@ -13,7 +13,7 @@ from app.services.writing.writing_bands import to_half_band
 from app.services.writing.writing_evaluation_finalizer import finalize_writing_evaluation
 from app.services.writing.writing_test_content import chart_image_url
 from app.services.writing.annotation_alignment import align_annotation_coordinates
-from app.worker.ai_engine_client import call_ai_grade
+from app.clients.ai_engine_client import call_ai_grade
 
 ANNOTATION_TYPES = {"error", "upgrade", "logic_issue", "strength"}
 # Khoá điểm trong JSON AI engine → mã tiêu chí (TA cho Task 1, TR cho Task 2)

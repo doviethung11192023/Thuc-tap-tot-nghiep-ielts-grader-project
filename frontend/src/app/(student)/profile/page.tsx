@@ -108,22 +108,14 @@ export default function ProfilePage() {
   async function fetchStats(userId: string) {
     try {
       setLoadingStats(true);
-      // Bài Writing trong đề (attempt_results: band chính thức) + bài Chấm tự do (free_essays); RLS chỉ trả bài của mình
-      const [{ data: freeEssays, error }, { data: writingAttempts, error: attemptError }] = await Promise.all([
-        supabase.from('free_essays').select('submitted_at, evaluation_results(overall_band)').eq('user_id', userId),
-        supabase.from('attempt_results').select('band, submitted_at').eq('learner_id', userId).eq('skill', 'writing')
-          .not('submitted_at', 'is', null),
-      ]);
+      // Bài Writing trong đề (attempt_results: band chính thức); RLS chỉ trả bài của mình
+      const { data: writingAttempts, error } = await supabase.from('attempt_results').select('band, submitted_at')
+        .eq('learner_id', userId).eq('skill', 'writing').not('submitted_at', 'is', null);
       if (error) throw error;
-      if (attemptError) throw attemptError;
 
-      const essays = [
-        ...(freeEssays || []).map((e: any) => {
-          const r = Array.isArray(e.evaluation_results) ? e.evaluation_results[0] : e.evaluation_results;
-          return { submitted_at: e.submitted_at as string, band: Number(r?.overall_band || 0) };
-        }),
-        ...(writingAttempts || []).map((a: any) => ({ submitted_at: a.submitted_at as string, band: Number(a.band || 0) })),
-      ].sort((a, b) => b.submitted_at.localeCompare(a.submitted_at));
+      const essays = (writingAttempts || [])
+        .map((a: any) => ({ submitted_at: a.submitted_at as string, band: Number(a.band || 0) }))
+        .sort((a, b) => b.submitted_at.localeCompare(a.submitted_at));
 
       if (essays.length === 0) {
         setStats({

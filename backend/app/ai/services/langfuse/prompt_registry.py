@@ -7,7 +7,8 @@ folder layout shown in the Langfuse UI (label "production" is what the code read
     writing/
       common/   cc, lr, gra            criteria shared by Task 1 and Task 2
       task1/    ta, chart, rewrite     Task Achievement, vision chart reader, upgraded report
-      task2/    ta, rewrite            Task Response, upgraded essay
+      task2/    ta, rewrite, classify  Task Response, upgraded essay, essay type classifier
+                grade                  all four criteria in one call (reference flow)
     speaking/
       common/   fc, lr, gra, pr        criteria scored on the whole test transcript
                 overall                synthesis: summary + study plan from the 4 criteria
@@ -48,7 +49,12 @@ REWRITE_PROMPT_NAMES: dict[WritingTask, str] = {
 
 CHART_PROMPT_NAME = "writing/task1/chart"
 
-# ── Speaking (prompts exist on Langfuse; the grading pipeline is not built yet) ─
+# Essay type classifier: option definitions shared by every classifier backend.
+CLASSIFY_PROMPT_NAME = "writing/task2/classify"
+# One call for all four criteria, with band-ladder references.
+GRADE_PROMPT_NAME = "writing/task2/grade"
+
+# ── Speaking ──────────────────────────────────────────────────────────────────
 SPEAKING_PROMPT_NAMES: dict[SpeakingCriterion, str] = {
     "fc": "speaking/common/fc",
     "lr": "speaking/common/lr",
@@ -70,6 +76,8 @@ WRITING_PROMPT_NAMES: tuple[str, ...] = tuple(sorted({
     *TASK1_PROMPT_NAMES.values(),
     *REWRITE_PROMPT_NAMES.values(),
     CHART_PROMPT_NAME,
+    CLASSIFY_PROMPT_NAME,
+    GRADE_PROMPT_NAME,
 }))
 
 ALL_SPEAKING_PROMPT_NAMES: tuple[str, ...] = tuple(sorted({

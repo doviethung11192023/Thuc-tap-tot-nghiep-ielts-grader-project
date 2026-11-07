@@ -10,7 +10,7 @@ Soạn nhóm câu hỏi và câu hỏi (UC-21 bước 2). Payload cũ → bảng
 """
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import DomainError, NotFoundError
 
 from app.db.supabase import db
 from app.services.cms.cms_sections import section_skill
@@ -72,7 +72,7 @@ def _save_speaking_question(part_id: str, q: dict[str, Any], question_id: Option
 def create_group(section_id: str, grp: dict[str, Any]) -> dict[str, Any]:
     sec = section_skill(section_id)
     if not sec:
-        raise HTTPException(status_code=404, detail="Section không tồn tại")
+        raise NotFoundError("Section không tồn tại")
     try:
         if sec["kind"] == "writing":
             _save_writing(sec, grp)
@@ -95,7 +95,7 @@ def create_group(section_id: str, grp: dict[str, Any]) -> dict[str, Any]:
         for q in grp.get("questions") or []:
             _save_lr_question(group, q)
         return {**group, "section_id": section_id}
-    except HTTPException:
+    except DomainError:
         raise
     except Exception as e:
         raise db_error(e)
@@ -127,7 +127,7 @@ def save_question(group_id: Optional[str], q: dict[str, Any], question_id: Optio
             if db().table("writing_tasks").select("section_id").eq("section_id", question_id).execute().data:
                 db().table("writing_tasks").update({"task_prompt": q.get("prompt") or ""}).eq("section_id", question_id).execute()
                 return {"id": question_id}
-            raise HTTPException(status_code=404, detail="Câu hỏi không tồn tại")
+            raise NotFoundError("Câu hỏi không tồn tại")
         group = db().table("question_groups").select("id, max_words").eq("id", group_id).execute().data
         if group:
             return {"id": _save_lr_question(group[0], q)}
@@ -137,8 +137,8 @@ def save_question(group_id: Optional[str], q: dict[str, Any], question_id: Optio
         if sec and sec["kind"] == "writing":
             db().table("writing_tasks").update({"task_prompt": q.get("prompt") or ""}).eq("section_id", group_id).execute()
             return {"id": group_id}
-        raise HTTPException(status_code=404, detail="Nhóm câu hỏi không tồn tại")
-    except HTTPException:
+        raise NotFoundError("Nhóm câu hỏi không tồn tại")
+    except DomainError:
         raise
     except Exception as e:
         raise db_error(e)

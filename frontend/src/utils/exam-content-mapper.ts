@@ -107,47 +107,54 @@ export function mapToWritingExamData(apiData: any) {
   };
 }
 
+/** Tách "topic ... You should say: a / b / c" do người soạn đề viết; không tự thêm gợi ý (BR-19). */
+function splitCueCard(prompt: string): { topic: string; bullet_points: string[] } {
+  const marker = prompt.search(/you should say:?/i);
+  if (marker < 0) return { topic: prompt.trim(), bullet_points: [] };
+  const rest = prompt.slice(marker).replace(/you should say:?/i, "");
+  return {
+    topic: prompt.slice(0, marker).trim(),
+    bullet_points: rest.split(/\n|•|;/).map((line) => line.replace(/^[\s\-–]+/, "").trim()).filter(Boolean),
+  };
+}
+
+/** Lời dẫn từng Part là nội dung tĩnh; câu hỏi, thời gian, cue card luôn lấy từ đề thật. */
 export function mapToSpeakingExamData(apiData: any) {
   const sections = apiData?.sections || [];
   if (!sections.length) return null;
 
   const parts: SpeakingPartData[] = sections.map((sec: any, idx: number) => {
-    const partNum = Math.min(3, Math.max(1, Number(sec.order_no || idx + 1))) as 1 | 2 | 3;
+    const partNum = Math.min(3, Math.max(1, Number(sec.part_number || sec.order_no || idx + 1))) as 1 | 2 | 3;
     const rawQs = (sec.question_groups || []).flatMap((g: any) => g.questions || []);
     const questions = rawQs.map((q: any, qIdx: number) => ({
-      id: String(q.id || `p${partNum}_q${qIdx + 1}`),
+      id: String(q.id),
       question_number: qIdx + 1,
       question: q.prompt || `Question ${qIdx + 1}`,
       audio_prompt_url: q.prompt_audio_key || undefined,
-      ideas: Array.isArray(q.options)
-        ? q.options.map((stepText: any, sIdx: number) => ({
-            step: sIdx + 1,
-            title: typeof stepText === "string" ? stepText : stepText?.title || `Step ${sIdx + 1}`,
-            example: typeof stepText === "object" && stepText?.example ? stepText.example : "",
-          }))
-        : [],
+      prep_time_sec: q.prep_time_sec ?? undefined,
+      answer_time_sec: q.answer_time_sec ?? undefined,
+      ideas: [],
     }));
 
-    const fallbackPart = mockSpeakingExamDataset.parts.find((p) => p.part_number === partNum) || mockSpeakingExamDataset.parts[0];
+    const staticPart = mockSpeakingExamDataset.parts.find((p) => p.part_number === partNum) || mockSpeakingExamDataset.parts[0];
     return {
-      ...fallbackPart,
       part_number: partNum,
-      title: sec.title || fallbackPart.title,
-      instructions: sec.passage_text || fallbackPart.instructions,
-      questions: questions.length > 0 ? questions : fallbackPart.questions,
+      title: sec.title || staticPart.title,
+      instructions: staticPart.instructions,
+      guidelines: staticPart.guidelines,
+      questions,
       cue_card: partNum === 2 && questions.length > 0 ? {
-        topic: questions[0].question,
-        bullet_points: ["What it is", "When and where it happened", "Why it is memorable to you"],
-        preparation_time_seconds: 60,
-        speaking_time_seconds: 120,
-        ideas: fallbackPart.cue_card?.ideas || [],
-      } : fallbackPart.cue_card,
+        ...splitCueCard(questions[0].question),
+        preparation_time_seconds: questions[0].prep_time_sec ?? 60,
+        speaking_time_seconds: questions[0].answer_time_sec ?? 120,
+        ideas: [],
+      } : undefined,
     };
   });
   return {
     ...mockSpeakingExamDataset,
-    test_id: String(apiData.test_id || mockSpeakingExamDataset.test_id),
-    title: apiData.title || mockSpeakingExamDataset.title,
+    test_id: String(apiData.test_id),
+    title: apiData.title,
     parts,
   };
 }

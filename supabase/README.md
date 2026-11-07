@@ -5,6 +5,8 @@ Một schema duy nhất (`public`) theo thiết kế 33 bảng trong [`docs/sour
 | File | Dùng để |
 |---|---|
 | `migrations/20261103130000_baseline_schema.sql` | Dựng toàn bộ schema cho môi trường **mới**: 33 bảng + 3 view, 16 ràng buộc, trigger, RLS chỉ đọc, seed bảng quy đổi band, Realtime, các bảng ngoài sơ đồ đã ghi trong source-of-truth |
+| `migrations/20261107100000_atomic_grading_jobs.sql` | Function nộp bài và kết thúc chấm AI theo transaction, lease cho job chấm (`grading_runs.claimed_at`, `recovery_count`). Chỉ `service_role` gọi được |
+| `tests/grading_job_functions_test.sql` | Test các function trên; chạy trong transaction rồi ROLLBACK |
 | `tests/schema_constraints_test.sql` | 48 ca test ràng buộc (C1–C16, BR, RLS, NFR-11); chạy trong transaction rồi ROLLBACK, không để lại dữ liệu |
 
 ```bash

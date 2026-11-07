@@ -1,16 +1,16 @@
-import time
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
+from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
 from app.services.catalog_formatter import format_collection_cards, DEFAULT_COVER_IMAGES
 
 router = APIRouter()
-_CATALOG_CACHE: Dict[str, Dict[str, Any]] = {}
 _CATALOG_TTL_SECONDS = 60
 
 @router.get("/tests")
 async def list_published_tests(
+    request: Request,
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=100),
     skill: Optional[str] = None,
@@ -18,20 +18,12 @@ async def list_published_tests(
     search: Optional[str] = None,
     current_user: Optional[User] = Depends(get_optional_user)
 ):
-    """Danh sách bài thi đã xuất bản cho học viên làm bài với RAM Cache tốc độ cao."""
+    """Danh sách bài thi đã xuất bản cho học viên làm bài, có cache Redis."""
     cache_key = f"{page}_{limit}_{skill or ''}_{difficulty or ''}_{search or ''}"
-    now_ts = time.time()
-    if cache_key in _CATALOG_CACHE:
-        entry = _CATALOG_CACHE[cache_key]
-        if now_ts - entry["ts"] < _CATALOG_TTL_SECONDS:
-            return {"meta": {"code": 200, "cached": True}, "data": entry["data"]}
-
-    result_data = practice_catalog.list_tests(page, limit, skill, difficulty, search)
-    _CATALOG_CACHE[cache_key] = {"ts": now_ts, "data": result_data}
-    return {
-        "meta": {"code": 200},
-        "data": result_data
-    }
+    result_data, cached = await get_or_load(
+        request.app.state.redis, "catalog", cache_key, _CATALOG_TTL_SECONDS,
+        lambda: practice_catalog.list_tests(page, limit, skill, difficulty, search))
+    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}
 
 @router.get("/sets")
 async def list_exam_collections(current_user: Optional[User] = Depends(get_optional_user)):

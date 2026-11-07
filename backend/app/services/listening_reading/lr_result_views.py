@@ -6,7 +6,7 @@ Kết quả Listening/Reading:
 from collections import defaultdict
 from typing import Any
 
-from fastapi import HTTPException
+from app.core.domain_errors import InvalidRequestError, NotFoundError
 
 from app.services.listening_reading.lr_test_content import build_lr_sections, load_lr_test
 from app.db.supabase import db
@@ -49,10 +49,10 @@ def build_lr_summary(attempt: dict[str, Any]) -> dict[str, Any]:
 
 def build_lr_detail(attempt: dict[str, Any]) -> dict[str, Any]:
     if attempt["status"] in ("in_progress", "abandoned"):
-        raise HTTPException(status_code=400, detail="Chỉ xem đáp án sau khi nộp bài")   # FR-14
+        raise InvalidRequestError("Chỉ xem đáp án sau khi nộp bài")   # FR-14
     test = load_lr_test(attempt["test_id"])
     if not test:
-        raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
+        raise NotFoundError("Bài thi không tồn tại")
     answer_rows = db().table("answers").select("question_id, answer, is_correct") \
         .eq("attempt_id", attempt["id"]).execute().data or []
     practiced = {r["section_id"] for r in db().table("attempt_sections").select("section_id")

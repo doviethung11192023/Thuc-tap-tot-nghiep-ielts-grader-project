@@ -10,8 +10,7 @@ test_sections lồng nhau); bảng thật là tests / sections / lr_sections / w
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import HTTPException
-
+from app.core.domain_errors import ConflictError, DomainError, InvalidRequestError, NotFoundError
 from app.db.supabase import db
 from app.services.admin.staff_accounts import write_audit
 
@@ -29,20 +28,20 @@ def to_api(t: dict[str, Any]) -> dict[str, Any]:
             "created_by": t.get("author_id"), "reviewed_by": t.get("reviewer_id")}
 
 
-def db_error(e: Exception) -> HTTPException:
+def db_error(e: Exception) -> DomainError:
     msg = str(e)
     if "BR-10" in msg or "new version" in msg:
-        return HTTPException(status_code=409, detail="Đề đã xuất bản/lưu trữ không sửa được — hãy tạo phiên bản mới (BR-10)")
+        return ConflictError("Đề đã xuất bản/lưu trữ không sửa được — hãy tạo phiên bản mới (BR-10)")
     if "tests_test_set_id_skill_key" in msg:
-        return HTTPException(status_code=409, detail="Bộ đề Mock chỉ có 1 đề cho mỗi kỹ năng (FR-36)")
+        return ConflictError("Bộ đề Mock chỉ có 1 đề cho mỗi kỹ năng (FR-36)")
     if "foreign key" in msg and "attempts" in msg:
-        return HTTPException(status_code=409, detail="Đề đã có bài làm, không xoá được — hãy lưu trữ (archive)")
-    return HTTPException(status_code=400, detail=msg[:300])
+        return ConflictError("Đề đã có bài làm, không xoá được — hãy lưu trữ (archive)")
+    return InvalidRequestError(msg[:300])
 
 
 def _payload(data: dict[str, Any]) -> dict[str, Any]:
     if data.get("origin") == "ai_generated":
-        raise HTTPException(status_code=400, detail="Không dùng nội dung đề do AI tạo (BR-19)")
+        raise InvalidRequestError("Không dùng nội dung đề do AI tạo (BR-19)")
     out = {k: data[k] for k in ("title", "skill", "test_set_id", "allowed_mode", "difficulty", "source_name", "license")
            if k in data}
     if "duration_min" in data:
@@ -94,13 +93,13 @@ def update_test(admin_id: str, test_id: str, data: dict[str, Any]) -> dict[str, 
         except Exception as e:
             raise db_error(e)
         if not res.data:
-            raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
+            raise NotFoundError("Bài thi không tồn tại")
         row = res.data[0]
         write_audit(admin_id, "update_test", "tests", test_id, after=payload)
     if status:
         return set_status(admin_id, test_id, status)
     if row is None:
-        raise HTTPException(status_code=400, detail="Không có dữ liệu cập nhật")
+        raise InvalidRequestError("Không có dữ liệu cập nhật")
     return to_api(row)
 
 
@@ -114,7 +113,7 @@ def set_status(admin_id: str, test_id: str, status: str) -> dict[str, Any]:
     except Exception as e:
         raise db_error(e)
     if not res.data:
-        raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
+        raise NotFoundError("Bài thi không tồn tại")
     write_audit(admin_id, f"{status}_test", "tests", test_id, after={"status": status})
     return to_api(res.data[0])
 

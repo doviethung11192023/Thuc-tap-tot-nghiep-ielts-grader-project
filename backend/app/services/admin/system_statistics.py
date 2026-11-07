@@ -1,7 +1,7 @@
 """
 Dashboard hệ thống (UC-23, FR-29) và giám sát chấm AI (UC-24, FR-30: lượt chạy lỗi, độ trễ).
 
-Bài viết = essays (bài Writing trong attempt) + free_essays (Chấm bài tự do).
+Bài viết = essays (bài Writing trong attempt).
 Tỉ lệ lỗi AI và thời gian xử lý lấy từ grading_runs (NFR-05).
 """
 from datetime import datetime, timedelta, timezone
@@ -35,11 +35,10 @@ def system_statistics() -> dict[str, Any]:
         trend.append({"date": day.strftime("%d/%m"), "count": n})
 
     essays_today = (db().table("attempts").select("id", count="exact").eq("skill", "writing")
-                    .gte("submitted_at", today.isoformat()).limit(1).execute().count or 0) \
-        + _count("free_essays", submitted_at=("gte", today.isoformat()))
+                    .gte("submitted_at", today.isoformat()).limit(1).execute().count or 0)
     return {
         "total_users": _count("profiles"),
-        "total_essays": _count("essays") + _count("free_essays"),
+        "total_essays": _count("essays"),
         "essays_today": essays_today,
         "ai_error_rate": round(failed / len(finished) * 100, 2) if finished else 0.0,
         "avg_processing_time": round(sum(latencies) / len(latencies) / 1000, 1) if latencies else 0.0,

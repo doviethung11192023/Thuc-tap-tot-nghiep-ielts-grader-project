@@ -8,7 +8,7 @@ test_date, voice_consent_at). Không còn is_activated: kích hoạt tài khoả
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import HTTPException
+from app.core.domain_errors import ForbiddenError, InvalidRequestError
 
 from app.db.supabase import db
 
@@ -39,9 +39,9 @@ def update_profile(user_id: str, full_name: Optional[str], avatar_url: Optional[
             "voice_consent_at": datetime.now(timezone.utc).isoformat() if voice_consent else None,
         }).eq("user_id", user_id).execute()
         if not res.data:
-            raise HTTPException(status_code=403, detail="Chỉ Learner mới cần đồng ý ghi âm")
+            raise ForbiddenError("Chỉ Learner mới cần đồng ý ghi âm")
     if not changes and voice_consent is None:
-        raise HTTPException(status_code=400, detail="No fields to update")
+        raise InvalidRequestError("No fields to update")
     return get_profile(user_id)
 
 
@@ -56,7 +56,7 @@ def save_goals(user_id: str, goals: dict[str, Any]) -> dict[str, Any]:
     payload = {k: v for k, v in goals.items() if k in GOAL_FIELDS}
     res = db().table("learner_profiles").update(payload).eq("user_id", user_id).execute()
     if not res.data:
-        raise HTTPException(status_code=403, detail="Chỉ Learner mới đặt mục tiêu IELTS")
+        raise ForbiddenError("Chỉ Learner mới đặt mục tiêu IELTS")
     return res.data[0]
 
 
