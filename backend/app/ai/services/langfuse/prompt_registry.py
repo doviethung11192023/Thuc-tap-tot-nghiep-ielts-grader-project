@@ -6,7 +6,8 @@ folder layout shown in the Langfuse UI (label "production" is what the code read
 
     writing/
       common/   cc, lr, gra            criteria shared by Task 1 and Task 2
-      task1/    ta, chart, rewrite     Task Achievement, vision chart reader, upgraded report
+      task1/    classify               visual type from the image (light vision model)
+                ta, chart, rewrite     Task Achievement, vision chart reader, upgraded report
       task2/    ta, rewrite, classify  Task Response, upgraded essay, essay type classifier
                 grade                  all four criteria in one call (reference flow)
     speaking/
@@ -49,6 +50,9 @@ REWRITE_PROMPT_NAMES: dict[WritingTask, str] = {
 
 CHART_PROMPT_NAME = "writing/task1/chart"
 
+# Task 1 visual type, read from the image by a light vision model.
+VISUAL_CLASSIFY_PROMPT_NAME = "writing/task1/classify"
+
 # Essay type classifier: option definitions shared by every classifier backend.
 CLASSIFY_PROMPT_NAME = "writing/task2/classify"
 # One call for all four criteria, with band-ladder references.
@@ -76,6 +80,7 @@ WRITING_PROMPT_NAMES: tuple[str, ...] = tuple(sorted({
     *TASK1_PROMPT_NAMES.values(),
     *REWRITE_PROMPT_NAMES.values(),
     CHART_PROMPT_NAME,
+    VISUAL_CLASSIFY_PROMPT_NAME,
     CLASSIFY_PROMPT_NAME,
     GRADE_PROMPT_NAME,
 }))

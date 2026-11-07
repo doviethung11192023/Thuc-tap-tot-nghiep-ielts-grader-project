@@ -455,7 +455,7 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | Phase | Việc | Code |
 |---|---|---|
 | A | Tiền xử lý: tách đoạn và câu, đếm từ | `utils/preprocessor.py` |
-| B | Phân loại dạng đề Task 2 (6 dạng) bằng LLM; LanguageTool bắt lỗi ngữ pháp và chính tả; thống kê từ vựng (lặp từ, mật độ, TTR). Task 1: model vision mô tả biểu đồ | `services/task_type_classifier.py`, `handlers/grammar_checker.py`, `handlers/lexical_stats.py`, `services/chart_describer.py` |
+| B | Phân loại dạng đề Task 2 (6 dạng) bằng LLM; LanguageTool bắt lỗi ngữ pháp và chính tả; thống kê từ vựng (lặp từ, mật độ, TTR). Task 1: model vision mô tả biểu đồ; song song đó `qwen3.8-flash` đọc ảnh để phân loại 8 dạng (Line, Bar, Pie, Table, Map, Process tự nhiên, Process nhân tạo, Mixed), lỗi thì dùng dạng do bước mô tả trả về | `services/task_type_classifier.py`, `handlers/grammar_checker.py`, `handlers/lexical_stats.py`, `services/chart_describer.py` |
 | C | Lấy 4 prompt tiêu chí từ Langfuse (label `production`), chèn các tín hiệu từ phase B | `services/prompt_builder.py`, `services/langfuse/prompt_manager.py` |
 | D | Gọi Qwen song song cho 4 tiêu chí, ép JSON, tự sửa JSON sai tối đa 2 lần | `services/llm_evaluator.py` |
 | Band | Trung bình 4 tiêu chí, làm tròn theo luật IELTS **trong code** | `schemas/llm_output.py` |

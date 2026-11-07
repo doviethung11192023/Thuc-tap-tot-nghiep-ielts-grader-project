@@ -23,12 +23,13 @@ import httpx
 from settings.config import get_settings
 from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
 from services.langfuse.prompt_manager import PromptManager
-from services.task1_type_knowledge import normalize_task1_type
+from services.task1_type_knowledge import TASK1_TYPES, normalize_task1_type
 
 logger = logging.getLogger(__name__)
 
 _IMAGE_TIMEOUT_SECONDS = 20.0
 _ALLOWED_IMAGE_TYPES = ("image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif")
+_CLASSIFY_TIMEOUT_SECONDS = 10.0
 
 # Keyword fallback when no image can be analysed.
 # Specific chart words first; checked as whole words.
@@ -136,6 +137,59 @@ def _parse_description(raw_text: str) -> ChartDescription:
     )
 
 
+def _with_image(messages: list[dict], data_url: str, fallback_text: str) -> list[dict]:
+    """Attach the image to the last user message of a compiled chat prompt."""
+    result = [dict(m) for m in messages]
+    last_user = next((m for m in reversed(result) if m.get("role") == "user"), None)
+    image_message = {
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {"url": data_url}},
+            {"type": "text", "text": last_user["content"] if last_user else fallback_text},
+        ],
+    }
+    if last_user:
+        result[result.index(last_user)] = image_message
+    else:
+        result.append(image_message)
+    return result
+
+
+async def classify_visual(data_url: str, prompt_manager: PromptManager) -> str | None:
+    """Visual type from a light vision model; None keeps the type from the description."""
+    try:
+        compiled = await asyncio.to_thread(prompt_manager.get_visual_classify_prompt)
+        response = await asyncio.wait_for(
+            get_async_llm_client().chat.completions.create(
+                model=compiled.model,
+                messages=_with_image(compiled.messages, data_url, "Classify this visual."),
+                temperature=compiled.temperature,
+                max_tokens=compiled.max_tokens,
+                response_format={"type": "json_object"},
+                extra_body=llm_extra_body(),
+            ),
+            _CLASSIFY_TIMEOUT_SECONDS,
+        )
+        visual_type = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}")).get("type")
+    except Exception as e:
+        logger.warning("[Task1] Visual classifier failed: %s", e)
+        return None
+    return visual_type if visual_type in TASK1_TYPES else None
+
+
+async def _describe(title: str, data_url: str, prompt_manager: PromptManager) -> ChartDescription:
+    compiled = await asyncio.to_thread(prompt_manager.get_chart_prompt, title)
+    response = await get_async_llm_client().chat.completions.create(
+        model=compiled.model,
+        messages=_with_image(compiled.messages, data_url, f"Task prompt:\n{title}"),
+        temperature=compiled.temperature,
+        max_tokens=compiled.max_tokens,
+        response_format={"type": "json_object"},
+        extra_body=llm_extra_body(),
+    )
+    return _parse_description(response.choices[0].message.content or "{}")
+
+
 async def describe_chart(
     title: str,
     image_url: str | None,
@@ -149,33 +203,12 @@ async def describe_chart(
 
     try:
         data_url = await _image_to_data_url(image_url)
-        compiled = await asyncio.to_thread(prompt_manager.get_chart_prompt, title)
-
-        # Attach the image to the last user message of the compiled chat prompt.
-        messages = [dict(m) for m in compiled.messages]
-        last_user = next((m for m in reversed(messages) if m.get("role") == "user"), None)
-        text = last_user["content"] if last_user else f"Task prompt:\n{title}"
-        image_message = {
-            "role": "user",
-            "content": [
-                {"type": "image_url", "image_url": {"url": data_url}},
-                {"type": "text", "text": text},
-            ],
-        }
-        if last_user:
-            messages[messages.index(last_user)] = image_message
-        else:
-            messages.append(image_message)
-
-        response = await get_async_llm_client().chat.completions.create(
-            model=compiled.model,
-            messages=messages,
-            temperature=compiled.temperature,
-            max_tokens=compiled.max_tokens,
-            response_format={"type": "json_object"},
-            extra_body=llm_extra_body(),
+        description, visual_type = await asyncio.gather(
+            _describe(title, data_url, prompt_manager),
+            classify_visual(data_url, prompt_manager),
         )
-        description = _parse_description(response.choices[0].message.content or "{}")
+        if visual_type:
+            description.chart_type = visual_type
         logger.info("[Task1] Vision pass OK — visual type: %s", description.chart_type)
         return description
     except Exception as e:

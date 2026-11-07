@@ -9,6 +9,7 @@ from .client import get_langfuse_client
 from .prompt_registry import (  # noqa: E402,F401
     ALL_PROMPT_NAMES,
     CHART_PROMPT_NAME,
+    VISUAL_CLASSIFY_PROMPT_NAME,
     CLASSIFY_PROMPT_NAME,
     GRADE_PROMPT_NAME,
     PROMPT_NAMES,
@@ -165,6 +166,10 @@ class PromptManager:
     def get_classify_prompt(self, title: str) -> CompiledPrompt:
         """Essay type classifier for one Task 2 title; the model comes from the Langfuse config."""
         return self._compile_speaking(CLASSIFY_PROMPT_NAME, title=title)
+
+    def get_visual_classify_prompt(self) -> CompiledPrompt:
+        """Task 1 visual type; model and limits come from the Langfuse config."""
+        return self._compile_speaking(VISUAL_CLASSIFY_PROMPT_NAME)
 
     def get_grade_prompt(self, **variables: Any) -> CompiledPrompt:
         """All four Task 2 criteria in one call; model and thinking come from the Langfuse config."""

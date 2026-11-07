@@ -5,6 +5,7 @@ import pytest
 
 import services.chart_describer as cd
 from services.langfuse.prompt_manager import CompiledPrompt
+from services.task1_type_knowledge import get_task1_type
 
 
 class FakePromptManager:
@@ -69,3 +70,51 @@ async def test_vision_call_attaches_image(monkeypatch):
     user = sent["messages"][-1]
     assert user["content"][0]["image_url"]["url"].startswith("data:image/png")
     assert user["content"][1]["text"] == "P: Prompt"
+
+
+class ClassifyingManager(FakePromptManager):
+    def get_visual_classify_prompt(self):
+        return CompiledPrompt(
+            messages=[{"role": "system", "content": "sys"}, {"role": "user", "content": "Classify."}],
+            model="light-vision", temperature=0.0, max_tokens=40, langfuse_prompt=None,
+        )
+
+
+def vision_client(monkeypatch, visual_type):
+    seen = []
+
+    async def create(**kwargs):
+        seen.append(kwargs["model"])
+        if kwargs["model"] == "light-vision":
+            if isinstance(visual_type, Exception):
+                raise visual_type
+            text = json.dumps({"type": visual_type})
+        else:
+            text = json.dumps({"chart_type": "process", "overview": "Stages."})
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=text))])
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    monkeypatch.setattr(cd, "get_async_llm_client", lambda: client)
+    return seen
+
+
+@pytest.mark.asyncio
+async def test_light_model_sets_the_visual_type(monkeypatch):
+    seen = vision_client(monkeypatch, "process_natural")
+    desc = await cd.describe_chart("The diagram", "data:image/png;base64,x", ClassifyingManager())
+    assert desc.chart_type == "process_natural"
+    assert sorted(seen) == ["light-vision", "vision-model"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("answer", ["poster", RuntimeError("down")])
+async def test_classifier_failure_keeps_the_description_type(monkeypatch, answer):
+    vision_client(monkeypatch, answer)
+    desc = await cd.describe_chart("The diagram", "data:image/png;base64,x", ClassifyingManager())
+    assert desc.available and desc.chart_type == "process"
+
+
+def test_process_types_have_their_own_guidance():
+    natural = get_task1_type("process_natural")
+    made = get_task1_type("process_manufacturing")
+    assert "active verbs" in natural.description and "passive voice" in made.description

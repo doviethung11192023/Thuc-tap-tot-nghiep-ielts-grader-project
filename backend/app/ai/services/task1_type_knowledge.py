@@ -10,6 +10,10 @@ from __future__ import annotations
 
 from schemas.task_type import TaskTypeResult
 
+_PROCESS_REQUIREMENTS = """- Overview must state the number of stages and the start/end points
+- Describe every stage in sequence with sequencing language
+- Common mistakes: skipping stages; adding opinions; no overview"""
+
 _COMMON_REQUIREMENTS = """Common requirements for every Task 1 visual:
 - Introduction paraphrasing what the visual shows (no copying of the prompt)
 - A clear OVERVIEW of the main trends / differences / stages (essential for Band 6+)
@@ -44,11 +48,15 @@ TASK1_TYPES: dict[str, str] = {
 - Describe additions, removals, relocations and expansions with location language
 - Use passive voice and appropriate tenses (past / future plans)
 - Common mistakes: random order of description; missing overall change""",
-    "process": """Process diagram — stages of a natural cycle or manufacturing process.
-- Overview must state the number of stages and the start/end points
-- Describe every stage in sequence with sequencing language
-- Use passive voice for man-made processes
-- Common mistakes: skipping stages; adding opinions; no overview""",
+    "process": f"""Process diagram — stages of a natural cycle or man-made process.
+{_PROCESS_REQUIREMENTS}
+- Use passive voice for man-made processes""",
+    "process_natural": f"""Natural process — a life cycle or natural cycle.
+{_PROCESS_REQUIREMENTS}
+- Use active verbs in the present simple; a cycle has no fixed end, so state how it repeats""",
+    "process_manufacturing": f"""Man-made process — how something is produced, or how a device or structure works.
+{_PROCESS_REQUIREMENTS}
+- Use passive voice for the stages""",
     "mixed": """Mixed visuals — two or more different charts.
 - Overview must summarise the main point of EACH visual and, if possible, link them
 - Report key features of every visual in a balanced way
