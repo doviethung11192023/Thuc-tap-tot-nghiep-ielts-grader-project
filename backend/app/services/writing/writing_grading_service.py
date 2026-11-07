@@ -108,7 +108,8 @@ async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str
         _store_scores(evaluation_id, task_no, ai)
         n_ann = _store_annotations(evaluation_id, essay, task_no, ai)
         db().table("grading_runs").update({
-            "status": "done", "output": ai, "model": ai.get("model"), "finished_at": _now_iso(),
+            "status": "done", "output": ai, "model": ai.get("model"),
+            "prompt_versions": ai.get("prompt_versions"), "finished_at": _now_iso(),
             "latency_ms": int((time.monotonic() - started) * 1000),
         }).eq("id", run_id).execute()
         print(f"✅ [Worker] task {task_no} done ({n_ann} annotations)")

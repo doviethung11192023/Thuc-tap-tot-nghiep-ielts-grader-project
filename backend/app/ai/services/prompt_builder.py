@@ -26,6 +26,22 @@ class CriterionPrompts:
     lr: CompiledPrompt
     gra: CompiledPrompt
 
+    def items(self) -> list[tuple[str, CompiledPrompt]]:
+        return [("ta", self.ta), ("cc", self.cc), ("lr", self.lr), ("gra", self.gra)]
+
+    def model_label(self) -> str:
+        """Model text for grading_runs.model: one name, or "ta=a; cc,lr,gra=b" when criteria differ."""
+        groups: dict[str, list[str]] = {}
+        for name, compiled in self.items():
+            groups.setdefault(compiled.model, []).append(name)
+        if len(groups) == 1:
+            return next(iter(groups))
+        return "; ".join(f"{','.join(names)}={model}" for model, names in groups.items())
+
+    def prompt_versions(self) -> dict[str, int | None]:
+        """Langfuse version per criterion; the model of each call is in that version's config."""
+        return {name: getattr(compiled.langfuse_prompt, "version", None) for name, compiled in self.items()}
+
 
 # ── Private helpers (serialize tool outputs to JSON-safe dicts) ───────────────
 

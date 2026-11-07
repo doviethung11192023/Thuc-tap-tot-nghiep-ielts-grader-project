@@ -457,7 +457,7 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | A | Tiền xử lý: tách đoạn và câu, đếm từ | `utils/preprocessor.py` |
 | B | Phân loại dạng đề Task 2 (6 dạng) bằng LLM; LanguageTool bắt lỗi ngữ pháp và chính tả; thống kê từ vựng (lặp từ, mật độ, TTR). Task 1: model vision mô tả biểu đồ; song song đó `qwen3.8-flash` đọc ảnh để phân loại 8 dạng (Line, Bar, Pie, Table, Map, Process tự nhiên, Process nhân tạo, Mixed), lỗi thì dùng dạng do bước mô tả trả về | `services/task_type_classifier.py`, `handlers/grammar_checker.py`, `handlers/lexical_stats.py`, `services/chart_describer.py` |
 | C | Lấy 4 prompt tiêu chí từ Langfuse (label `production`), chèn các tín hiệu từ phase B | `services/prompt_builder.py`, `services/langfuse/prompt_manager.py` |
-| D | Gọi Qwen song song cho 4 tiêu chí, ép JSON, tự sửa JSON sai tối đa 2 lần | `services/llm_evaluator.py` |
+| D | Gọi Qwen song song cho 4 tiêu chí, ép JSON, tự sửa JSON sai tối đa 2 lần. Mỗi tiêu chí dùng model ghi trong config prompt, không ghi thì dùng `DEFAULT_LLM_MODEL` (`qwen-flash`). Hiện chỉ `writing/task1/ta` ghi `qwen3.7-plus`: đo 24 bài Task 1 (nhãn chưa kiểm chứng), bài viết sai biểu đồ được TA 2.75 thay vì 5.0, bài đúng biểu đồ gần như không đổi (6.50 so với 6.62), p90 77 s so với 66 s | `services/llm_evaluator.py` |
 | Band | Trung bình 4 tiêu chí, làm tròn theo luật IELTS **trong code** | `schemas/llm_output.py` |
 | E, F | Prompt rewrite tạo danh sách lỗi kèm bản sửa và bài đã sửa; code định vị lại vị trí ký tự và loại phần chồng lấn | `services/synthesis_service.py`, `utils/char_index_resolver.py`, `utils/annotation_normalizer.py` |
 
@@ -658,7 +658,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Job xoá audio chỉ chạy khi có tiến trình `arq app.worker.tasks.WorkerSettings`.
 - Audio câu hỏi vẫn là link bên thứ ba; Piper TTS (FR-32), sửa CMS Speaking, kiểm tra khi publish để đợt sau.
 - Mock chưa có Expert nên điểm AI là chính thức; chưa có nhãn "preliminary".
-- `grading_runs.trace_id` vẫn trống. `model` và `prompt_versions` đã ghi.
+- `grading_runs.trace_id` vẫn trống. `model` và `prompt_versions` đã ghi cho cả Writing và Speaking. Writing luồng cũ (Task 1): `model` là một tên nếu 4 tiêu chí cùng model, khác nhau thì ghi theo nhóm (ví dụ `ta=qwen3.7-plus; cc,lr,gra=qwen-flash`); `prompt_versions` là phiên bản Langfuse của 4 prompt tiêu chí. Luồng Reference ghi model và phiên bản của `writing/task2/grade`.
 - Bộ đếm âm tiết đếm thiếu ở lời nói nối âm (mẫu thử: 11 so với 14–15 âm tiết thật); cần kiểm chứng ở bộ đo thử.
 - Giấy phép: `praat-parselmouth` là GPLv3; L2-ARCTIC là CC BY-NC 4.0; trọng số CrisperWhisper chỉ cho phi thương mại. Dùng được cho KLTN, cần xem lại nếu thương mại hoá.
 

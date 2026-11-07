@@ -9,7 +9,6 @@ import json
 import logging
 from typing import Callable, TypeVar
 
-from settings.config import get_settings
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
 from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
 from services.prompt_builder import CriterionPrompts, CompiledPrompt
@@ -112,9 +111,9 @@ async def evaluate_criterion(
     compiled_prompt: CompiledPrompt,
     max_retries: int = 2,
 ) -> AgentCriterionOutput:
-    """Call the LLM for one criterion, validate output, retry when JSON is broken."""
+    """Call the LLM for one criterion with the model from its prompt config, or the default."""
     return await call_llm_json(
-        criterion, compiled_prompt, _parse_and_validate, get_settings().default_llm_model, max_retries
+        criterion, compiled_prompt, _parse_and_validate, compiled_prompt.model, max_retries
     )
 
 

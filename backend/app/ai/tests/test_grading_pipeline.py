@@ -1,11 +1,14 @@
 """Pipeline routing: Task 1 uses vision + Task 1 knowledge; Task 2 uses the classifier."""
+from types import SimpleNamespace
+
 import pytest
 
 import services.grading_pipeline as gp
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
 from schemas.task_type import TaskTypeResult
 from services.chart_describer import ChartDescription
-from services.langfuse.prompt_manager import resolve_agent_prompt_name
+from services.langfuse.prompt_manager import CompiledPrompt, resolve_agent_prompt_name
+from services.prompt_builder import CriterionPrompts
 
 ESSAY = "The bar chart compares aid from six countries between 2008 and 2010. Overall, the USA gave the most."
 
@@ -43,7 +46,9 @@ def stubbed(monkeypatch):
 
     def fake_build(**kwargs):
         seen["build"] = kwargs
-        return "prompts"
+        ta = CompiledPrompt([], "plus", 0.0, 100, SimpleNamespace(version=3))
+        other = CompiledPrompt([], "flash", 0.0, 100, SimpleNamespace(version=1))
+        return CriterionPrompts(ta, other, other, other)
 
     async def fake_eval(prompts):
         return AllAgentOutputs(ta=out, cc=out, lr=out, gra=out)
@@ -77,6 +82,8 @@ async def test_task1_routing(stubbed):
     assert "USA highest" in stubbed["synthesis_visual"]
     assert result["visual_analysis"]["chart_type"] == "bar_chart"
     assert result["task_subtype"] == "bar_chart"
+    assert result["model"] == "ta=plus; cc,lr,gra=flash"
+    assert result["prompt_versions"] == {"ta": 3, "cc": 1, "lr": 1, "gra": 1}
 
 
 @pytest.mark.asyncio

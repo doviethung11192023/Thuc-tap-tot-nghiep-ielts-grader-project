@@ -57,6 +57,7 @@ async def run_task2_reference_pipeline(title: str, essay: str) -> dict:
         "references": [{"id": r.id, "band": r.band} for r in ladder.references],
         "reference_gaps": list(ladder.gaps),
         "model": compiled.model,
+        "prompt_versions": {"grade": getattr(compiled.langfuse_prompt, "version", None)},
     })
     logger.info(
         "Reference flow completed in %.1fs: overall band %.1f | references %s",

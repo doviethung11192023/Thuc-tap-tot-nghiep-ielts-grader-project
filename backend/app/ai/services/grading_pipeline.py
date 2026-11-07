@@ -119,7 +119,8 @@ async def run_grading_pipeline(
 
     final_json["pipeline"] = "legacy"
     final_json["task_subtype"] = task_type_result.task_type
-    final_json["model"] = get_settings().default_llm_model  # backend ghi vào grading_runs.model (FR-30)
+    final_json["model"] = prompts.model_label()  # backend ghi vào grading_runs.model (FR-30)
+    final_json["prompt_versions"] = prompts.prompt_versions()
     if visual is not None:
         final_json["visual_analysis"] = visual.to_dict()
 
