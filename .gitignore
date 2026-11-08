@@ -96,6 +96,7 @@ data/
 # docs/ cá nhân không commit, trừ tài liệu gốc mà CLAUDE.md trỏ tới
 docs/*
 !docs/source-of-truth.md
+!docs/defense-highlights.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)
