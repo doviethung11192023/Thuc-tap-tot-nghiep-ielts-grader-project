@@ -65,9 +65,12 @@ def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
     for e in _essays_with_task(attempt["id"]):
         run = runs.get(e["task_no"]) or {}
         output = run.get("output") or {}
+        # Task không có lượt chấm và không có chữ: Learner bỏ trống, không phải "đang chờ chấm"
+        status = RUN_TO_ESSAY_STATUS.get(run["status"], "pending") if run else \
+            ("not_attempted" if not (e.get("word_count") or 0) else "pending")
         tasks.append({
             "task": f"task{e['task_no']}", "essay_id": e["id"],
-            "status": RUN_TO_ESSAY_STATUS.get(run.get("status"), "pending"),
+            "status": status,
             "word_count": e.get("word_count") or 0,
             "scores": scores.get(e["task_no"]) if run.get("status") == "done" else None,
             "task_subtype": output.get("task_subtype"),

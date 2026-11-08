@@ -45,7 +45,7 @@ INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, deadline_at) 
   ('70000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000a', 'reading', 'practice', NULL),
   ('70000000-0000-0000-0000-00000000000b', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000b', 'writing', 'practice', NULL),
   ('70000000-0000-0000-0000-00000000000c', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000c', 'speaking', 'practice', NULL),
-  ('70000000-0000-0000-0000-00000000000d', '00000000-0000-0000-0000-0000000000b2', '20000000-0000-0000-0000-00000000000c', 'speaking', 'mock', now() + interval '1 hour');
+  ('70000000-0000-0000-0000-00000000000d', '00000000-0000-0000-0000-0000000000b2', '20000000-0000-0000-0000-00000000000c', 'speaking', 'practice', NULL);
 
 -- ---------- Writing ----------
 CREATE TEMP TABLE writing_result ON COMMIT DROP AS
@@ -73,7 +73,7 @@ SELECT pg_temp.check('writing: second submit returns NULL and creates nothing',
 DO $$
 BEGIN
   INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, deadline_at) VALUES
-    ('70000000-0000-0000-0000-00000000000e', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000b', 'writing', 'mock', now() + interval '1 hour');
+    ('70000000-0000-0000-0000-00000000000e', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000b', 'writing', 'practice', NULL);
   BEGIN
     PERFORM public.submit_writing_attempt('70000000-0000-0000-0000-00000000000e', jsonb_build_array(
       jsonb_build_object('task_no', 1, 'section_id', '30000000-0000-0000-0000-0000000000c1', 'content', 'wrong test section')));
@@ -167,8 +167,9 @@ DECLARE
   r text;
 BEGIN
   FOREACH fn IN ARRAY ARRAY[
-    'public.create_ai_grading_job(uuid, public.skill, smallint[])', 'public.submit_writing_attempt(uuid, jsonb)',
-    'public.submit_speaking_attempt(uuid)', 'public.submit_lr_attempt(uuid, uuid[], jsonb, integer, integer, numeric)',
+    'public.create_ai_grading_job(uuid, public.skill, smallint[])', 'public.submit_writing_attempt(uuid, jsonb, boolean)',
+    'public.submit_speaking_attempt(uuid, boolean)', 'public.submit_lr_attempt(uuid, uuid[], jsonb, integer, integer, numeric, boolean)',
+    'public.save_lr_answers(uuid, jsonb)', 'public.save_writing_essays(uuid, jsonb)',
     'public.claim_grading_run(uuid, integer)', 'public.publish_ai_evaluation(uuid, uuid, numeric)',
     'public.fail_ai_evaluation(uuid, uuid, public.attempt_status)'
   ] LOOP

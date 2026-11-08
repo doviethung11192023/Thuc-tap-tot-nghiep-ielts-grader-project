@@ -97,6 +97,7 @@ data/
 docs/*
 !docs/source-of-truth.md
 !docs/defense-highlights.md
+!docs/project-roadmap.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)

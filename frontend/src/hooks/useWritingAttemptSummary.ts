@@ -7,7 +7,7 @@ import { getAttemptSummary } from "@/services/student-test-practice";
 export interface WritingTaskSummary {
   task: "task1" | "task2" | string;
   essay_id: string;
-  status: "pending" | "evaluating" | "completed" | "failed" | string;
+  status: "pending" | "evaluating" | "completed" | "failed" | "not_attempted" | string;
   word_count: number;
   scores: {
     overall_band: number;
@@ -27,6 +27,8 @@ export interface WritingAttemptSummary {
   overallBand: number;
   submittedAt?: string;
   gradingDone: boolean;
+  /** AI chấm lỗi (grading_failed): Admin chạy lại, bài làm vẫn được lưu */
+  gradingFailed: boolean;
   tasks: WritingTaskSummary[];
 }
 
@@ -56,6 +58,7 @@ export function useWritingAttemptSummary(attemptId?: string) {
           overallBand: Number(res?.overall_band ?? 0),
           submittedAt: res?.submitted_at,
           gradingDone: Boolean(writing.grading_done) && res?.status !== "grading",
+          gradingFailed: res?.status === "grading_failed",
           tasks: writing.tasks ?? [],
         };
         setData(next);

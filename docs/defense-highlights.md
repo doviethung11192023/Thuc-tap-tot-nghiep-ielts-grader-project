@@ -41,17 +41,20 @@
 - Nộp bài và kết thúc chấm chạy trong **một transaction** (function SQL). Trước đây lỗi giữa chừng làm bài kẹt ở trạng thái "đang chấm" (ADR-07).
 - Job chấm dùng **lease**: worker chết giữa chừng thì cron nhận lại sau khi hết hạn; bảng `grading_runs` là trạng thái thật, hàng đợi chỉ là tín hiệu (ADR-02).
 - Hai hàng đợi: Writing chạy song song, Speaking mỗi lần một bài trên GPU.
+- **"Không ghi đè" do DB chặn, không phải do code tự giác** (migration `20261109100000`): evaluation đã `done`/`failed` chỉ được đổi cờ chính thức; điểm tiêu chí và lỗi đánh dấu của nó không thêm, sửa, xoá được; đáp án và bài viết không sửa được sau khi nộp; audit log chỉ được thêm, kể cả với service_role.
+- Điểm L/R do DB tự tính lại từ các dòng đáp án vừa ghi và bảng quy đổi, không tin số Core API truyền vào.
 
 ## 4. Thiết kế CSDL tự bảo vệ (✅)
 
-- 33 bảng, 16 ràng buộc nghiệp vụ do **DB tự chặn**: FK ghép "đúng kiểu" (ADR-17), unique có điều kiện, trigger.
+- 32 bảng, 16 ràng buộc nghiệp vụ do **DB tự chặn**: FK ghép "đúng kiểu" (ADR-17), unique có điều kiện, trigger.
 - Ví dụ: một bài chỉ có một kết quả chính thức; một yêu cầu chỉ có một Expert đang giữ; khoảng quy đổi band không chồng nhau.
-- 48 test ràng buộc chạy trên Supabase, tự rollback.
+- 100 test SQL chạy trên Supabase, tự rollback: 46 ràng buộc, 14 chọn đề Mock, 19 function nộp/chấm, 21 lưu bài, tự nộp và bất biến (2026-11-09).
+- Bài Mock có yêu cầu Expert đang mở: điểm AI tự động chỉ là "preliminary" (không chính thức), attempt chờ Expert. Luật nằm trong function công bố điểm, nên luồng Expert làm sau không phải sửa lại.
 
 ## 5. Bảo mật và dữ liệu cá nhân (✅)
 
 - RLS trên mọi bảng, **chỉ đọc**; mọi thao tác ghi qua Core API. Người khác xem bài trả 404 thay vì 403 để không lộ bài có tồn tại.
-- Đáp án L/R nằm ở bảng riêng, không bao giờ gửi xuống trình duyệt trước khi nộp.
+- Đáp án L/R nằm ở bảng riêng, không bao giờ gửi xuống trình duyệt trước khi nộp. Transcript Listening (chứa đáp án) bị thu quyền đọc theo **cột**: Learner gọi thẳng Supabase cũng không đọc được (rà soát 2026-11-09 phát hiện lỗ này).
 - AI engine chỉ chạy trong mạng nội bộ, có secret header, không truy cập DB.
 - Giọng nói theo Nghị định 13/2023: xin đồng ý trước lần ghi đầu, bucket riêng tư, link ký ngắn hạn, tự xoá sau 180 ngày.
 
@@ -60,13 +63,20 @@
 - **Điểm nghẽn là con người, không phải máy:** 3–10 Expert. Điều tiết bằng quota từng Learner **và** suất chung cả hệ thống theo sức chấm của Expert.
 - Expert nhận sẵn điểm và nhận xét AI rồi sửa, rút ngắn thời gian chấm. Hệ thống ghi tiêu chí nào bị sửa và lý do khi lệch từ 1 band, làm dữ liệu đánh giá AI.
 - Hạn 48 **giờ làm việc**, không tính cuối tuần; Expert được trả lại bài trong 2 giờ đầu.
+- **Kỳ nghỉ lễ do Admin đặt:** hệ thống ngừng nhận yêu cầu mới, ngừng giao bài và tự lùi hạn của bài đang giao, nên không Expert nào bị tính quá hạn vì nghỉ lễ. Learner được báo trước khi thi Mock rằng bài chỉ có điểm AI.
 - Quota kiểm và ghi trong một transaction có khoá, nên hai yêu cầu cùng lúc không vượt được (có test chạy đồng thời).
 
-## 7. Bài thi bị gián đoạn (🔧, spec 004)
+## 6b. Điểm Mock là lần gặp đề đầu tiên (✅, 2026-11-09)
 
-- Treo máy, đóng tab, khởi động lại: bài đã lưu trên server, làm tiếp được trên máy khác; đồng hồ do server giữ nên không gian lận được bằng cách tắt trang.
-- Hết giờ chưa nộp: tự nộp "làm bao nhiêu chấm bấy nhiêu", hai lớp: cron của worker và nộp ngay khi Learner quay lại (chạy được cả khi worker tắt).
-- Speaking: câu đang ghi dở được hỏi lại **một lần**; server ghi lại để không ai cố tắt trang nhiều lần để được trả lời lại.
+- Learner chỉ chọn kỹ năng; **server** chọn ngẫu nhiên một đề trong bộ đề Mock mà Learner chưa từng làm. Không lặp đề; hết đề thì từ chối.
+- Đề Mock không làm Practice được, không hiện ở danh mục, không đọc trước được kể cả gọi thẳng Supabase (RLS) hay API nội dung đề. Trước đây sửa URL `?mode=exam` là thi Mock được trên đề vừa luyện và xem đáp án: DB thật có 7 lượt như vậy.
+- Luật nằm trong DB: trigger chặn Mock trên đề đã làm kể cả khi INSERT trực tiếp; khoá theo (Learner, kỹ năng) để bấm hai lần không ra hai bài. 14 test SQL.
+
+## 7. Bài thi bị gián đoạn (✅ lưu bài + tự nộp; 🔧 Speaking hỏi lại, spec 004)
+
+- ✅ Treo máy, đóng tab, khởi động lại: bài L/R/Writing tự lưu lên server (~2–3,5 s sau khi ngừng gõ, gõ liên tục thì ít nhất mỗi 12 s, có độ trễ ngẫu nhiên để không dồn cùng giây), làm tiếp được trên máy khác; đồng hồ do server giữ nên không gian lận được bằng cách tắt trang. Mất mạng thì giữ bài trên màn hình và thử lại với thời gian chờ tăng dần.
+- ✅ Hết giờ chưa nộp: tự nộp "làm bao nhiêu chấm bấy nhiêu", hai lớp: cron của worker mỗi phút, và Learner nộp muộn thì server chấm bản đã lưu trước hạn (bỏ chữ gõ sau hạn) thay vì từ chối. Lưu sau hạn + 30 s bị DB từ chối. Nộp tay và cron cùng giây: DB khoá dòng attempt, chỉ một lần có hiệu lực (có test). Chạy thật 2026-11-09: 2 bài Mock kẹt từ 2026-11-02 đã được đóng.
+- 🔧 Speaking: câu đang ghi dở được hỏi lại **một lần**; server ghi lại để không ai cố tắt trang nhiều lần để được trả lời lại.
 
 ## 8. Chịu tải khi 5.000 người cùng làm bài (🔧 thiết kế, 📏 phải đo)
 
@@ -96,6 +106,14 @@
 - Không cần huấn luyện, không thêm bảng, mỗi gợi ý kèm 1 câu lý do giải thích được.
 - **Bằng chứng cần có (📏):** unit test theo từng ca (người mới, hoà, gần ngày thi, hết đề); trình diễn một Learner làm vài bài và lộ trình đổi theo.
 
+## 8b. Kiến trúc tiến hoá theo số đo (🔧, ADR-24 đến ADR-28)
+
+- Đo hiện trạng bằng k6 **trước** khi đổi, rồi đo lại **sau**: biểu đồ trước và sau là bằng chứng mạnh nhất.
+- Mỗi thành phần thêm vào gắn với một vấn đề cụ thể: client Postgres async có pool (event loop bị chặn), Redis Streams (tải ghi tự lưu), Traefik và nhiều bản sao Core API (mở rộng ngang), hàng đợi ưu tiên (bài Mock đến dồn), GPU thuê theo giờ (mở rộng chấm Speaking), OpenTelemetry + Prometheus + Grafana + Sentry (thấy và chứng minh).
+- Demo: chạy k6 và mở dashboard Grafana cùng lúc; bật thêm một pod GPU và cho thấy hàng đợi Speaking giảm nhanh hơn.
+- **Biết khi nào không dùng:** không Kubernetes, Kafka, Temporal (ADR-28) vì nhóm 3 người, 1 tháng, quy mô thiết kế không cần. Pattern đã có sẵn: `grading_runs` + cron quét lại chính là **transactional outbox**.
+- Chi phí: GPU thuê theo giờ, dự kiến dưới 200.000 đ cho load test và ngày bảo vệ.
+
 ## 10. Quy trình làm phần mềm (✅)
 
 - Spec-driven development (GitHub Spec Kit): spec, plan, tasks, rồi mới code; mỗi tính năng có tiêu chí thành công đo được.
@@ -114,8 +132,12 @@
 | Nhiều người dùng cùng lúc thì sao? | Mục 8: tách tải lưu bài (giải được) và tải chấm (giới hạn bởi GPU/LLM, xử lý bằng hàng đợi); có số load test |
 | Mất điện giữa giờ thi? | Mục 7 |
 | Học viên gian lận bằng cách tắt trang? | Đồng hồ ở server; Speaking chỉ hỏi lại một lần và server ghi lại |
+| Học viên luyện trước đề rồi thi thử để lấy band cao? | Mục 6b: đề Mock do server chọn ngẫu nhiên, chưa từng làm, không xem trước được; DB chặn |
+| DB đảm bảo "không ghi đè" thế nào, hay chỉ do code? | Trigger trong DB (mục 3): kể cả service_role cũng không sửa được điểm đã chấm, bài đã nộp, audit log; có test chứng minh |
+| Learner tự gọi Supabase bằng anon key thì đọc được gì? | Chỉ dữ liệu RLS cho phép; không ghi được bảng nào; không đọc được đáp án và transcript (quyền theo cột); có test (NFR-11) |
 | Dữ liệu giọng nói có an toàn không? | Mục 5 và Nghị định 13 |
 | Sao lộ trình không dùng recommendation system hay deep learning? | Collaborative filtering cần nhiều người dùng và hỏng ở người mới; deep knowledge tracing cần hàng triệu lượt trả lời để huấn luyện; LLM mỗi lần một khác và khó kiểm thử. Elo chạy được với ít dữ liệu, giải thích được, kiểm thử được (mục 9, ADR-23) |
+| Sao không dùng Kubernetes hay Kafka? | Mục 8b: quy mô và nhân lực không cần; nêu thứ đang dùng thay thế và vì sao đủ |
 | Sao Expert thấy điểm AI, không sợ bị ảnh hưởng? | Chủ ý để Expert làm nhanh hơn; vì vậy báo cáo không coi điểm Expert là phép đo độc lập mà đo tỉ lệ và mức Expert sửa |
 
 ## Giới hạn nên tự nói trước
@@ -124,4 +146,7 @@
 - Writing Task 2 chưa đạt mục tiêu 60 s.
 - Chưa đo tốc độ chấm Speaking trên máy không có GPU.
 - Chưa có số load test (mục 8) cho tới khi chạy xong.
+- Kho đề Mock nhỏ (4–5 đề mỗi kỹ năng): Learner làm hết thì không thi thử được nữa cho tới khi có đề mới; kho Practice cũng mỏng đi (Writing 2, Speaking 1 đề).
+- "Đúng 1 kết quả chính thức" thực tế DB chặn "tối đa 1"; "ít nhất 1" do function công bố điểm bảo đảm.
+- Bảng quy đổi band chặn khoảng chồng nhau nhưng chưa chặn khoảng hở; suất Expert chung (BR-20) và kỳ nghỉ lễ (BR-22) chưa có ràng buộc DB (luồng Expert chưa code).
 - Tham số lộ trình (Elo, ngưỡng, vùng 60–75%) là giá trị khởi đầu, chưa hiệu chỉnh bằng dữ liệu người học thật; chưa chứng minh được lộ trình làm tăng band.

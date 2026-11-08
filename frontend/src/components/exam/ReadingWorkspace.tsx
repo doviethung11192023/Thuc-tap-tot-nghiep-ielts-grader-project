@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ReadingTestData } from '@/types/exam';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
@@ -20,13 +21,28 @@ interface ReadingWorkspaceProps {
   /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
   deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
+  /** Bài đã lưu trên server khi làm tiếp (FR-11): số câu -> câu trả lời. */
+  initialAnswers?: Record<string, string | string[]>;
+  /** Báo mỗi lần đáp án đổi để trang cha tự lưu lên server. */
+  onAnswersChange?: (answers: Record<number, string | string[]>) => void;
 }
 
-export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
+export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ReadingWorkspaceProps) {
   const router = useRouter();
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+
+  // Khôi phục bài đã lưu trên server khi nó tới; câu Learner vừa trả lời trước đó thì giữ bản mới
+  // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
+  const [restoredFrom, setRestoredFrom] = useState<typeof initialAnswers>(undefined);
+  if (initialAnswers !== restoredFrom) {
+    setRestoredFrom(initialAnswers);
+    const restored: Record<number, string | string[]> = {};
+    Object.entries(initialAnswers || {}).forEach(([num, value]) => { restored[Number(num)] = value; });
+    setUserAnswers(prev => ({ ...restored, ...prev }));
+  }
+  useEffect(() => { onAnswersChange?.(userAnswers); }, [userAnswers, onAnswersChange]);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [highlightedEvidence, setHighlightedEvidence] = useState<{ paragraph: string; quote: string } | null>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
@@ -49,35 +65,11 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
   const allQuestions = useMemo(() => availablePassages.flatMap(p => p.question_groups.flatMap(g => g.questions)), [availablePassages]);
 
   const initialExamSeconds = Math.max(1, availablePassages.length) * 20 * 60;
-  const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
-  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
-  useEffect(() => {
-    if (mode !== 'exam' || !deadlineMs) return;
-    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
-    setTimerSeconds(prev => Math.min(prev, remaining));
-  }, [mode, deadlineMs]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (mode === 'exam') {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(interval!);
-            setIsGrading(true);
-            onSubmit(userAnswers);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000);
-    }
-    return () => { if (interval) clearInterval(interval); };
-  }, [mode, onSubmit, userAnswers]);
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, () => {
+    setIsGrading(true);
+    Promise.resolve(onSubmit(userAnswers)).catch(() => setIsGrading(false));
+  });
 
   const handleSelectEvidence = (paragraphId: string, quote: string) => {
     setHighlightedEvidence({ paragraph: paragraphId, quote });

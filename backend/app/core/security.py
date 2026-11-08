@@ -106,8 +106,10 @@ async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(
     if not credentials or not credentials.credentials:
         return None
     try:
-        return await get_current_user(credentials)
+        user = await get_current_user(credentials)
     except Exception:
         return None
+    # Tài khoản bị khoá (FR-04) coi như chưa đăng nhập, kể cả khi JWT cũ chưa hết hạn
+    return user if user.is_active else None
 
 

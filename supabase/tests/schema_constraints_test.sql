@@ -102,16 +102,10 @@ SELECT pg_temp.expect_fail('BR-10d change answer key of published test',
 SELECT pg_temp.expect_fail('BR-10e delete published test',
   $$DELETE FROM public.tests WHERE id = '20000000-0000-0000-0000-00000000000a'$$);
 
--- C3: mock session
-INSERT INTO public.mock_sessions (id, learner_id, test_set_id) VALUES
-  ('60000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000b1', '10000000-0000-0000-0000-000000000001');
-INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, mock_session_id, deadline_at) VALUES
+-- Attempt Mock dùng cho các test sau (mock session đã bỏ ở migration 20261109130000)
+INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, deadline_at) VALUES
   ('70000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000b', 'writing', 'mock',
-   '60000000-0000-0000-0000-000000000001', now() + interval '1 hour');
-SELECT pg_temp.expect_fail('C3a second writing attempt in same session',
-  $$INSERT INTO public.attempts (learner_id, test_id, skill, mode, mock_session_id, deadline_at) VALUES ('00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000c', 'writing', 'mock', '60000000-0000-0000-0000-000000000001', now() + interval '1 hour')$$);
-SELECT pg_temp.expect_fail('C3b another learner''s session',
-  $$INSERT INTO public.attempts (learner_id, test_id, skill, mode, mock_session_id, deadline_at) VALUES ('00000000-0000-0000-0000-0000000000b2', '20000000-0000-0000-0000-00000000000a', 'reading', 'mock', '60000000-0000-0000-0000-000000000001', now() + interval '1 hour')$$);
+   now() + interval '1 hour');
 SELECT pg_temp.expect_fail('uq_open_attempt: 2 open attempts of same test',
   $$INSERT INTO public.attempts (learner_id, test_id, skill, mode, deadline_at) VALUES ('00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000b', 'writing', 'mock', now() + interval '1 hour')$$);
 
@@ -137,8 +131,8 @@ SELECT pg_temp.expect_fail('C2b essay on a section not in the attempt',
   $$INSERT INTO public.essays (attempt_id, section_id) VALUES ('70000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-0000000000c1')$$);
 
 -- L/R attempt cho C4
-INSERT INTO public.attempts (id, learner_id, test_id, skill, mode) VALUES
-  ('70000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000a', 'reading', 'practice');
+INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, deadline_at) VALUES
+  ('70000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000a', 'reading', 'mock', now() + interval '1 hour');
 SELECT pg_temp.expect_fail('BR-03 lr_band without 40 questions',
   $$UPDATE public.attempts SET raw_score = 1, question_count = 1, lr_band = 5 WHERE id = '70000000-0000-0000-0000-000000000002'$$);
 SELECT pg_temp.expect_fail('BR-01 band 6.3',
@@ -176,8 +170,10 @@ SELECT pg_temp.expect_fail('official evaluation must be done',
   $$UPDATE public.evaluations SET is_official = true WHERE id = '90000000-0000-0000-0000-000000000001'$$);
 UPDATE public.evaluations SET status = 'done', overall_band = 6.5 WHERE id = '90000000-0000-0000-0000-000000000001';
 UPDATE public.attempts SET status = 'waiting_expert', submitted_at = now() WHERE id = '70000000-0000-0000-0000-000000000001';
+INSERT INTO public.attempts (id, learner_id, test_id, skill, mode) VALUES
+  ('70000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000c', 'writing', 'practice');
 SELECT pg_temp.expect_fail('waiting_expert on practice attempt',
-  $$UPDATE public.attempts SET status = 'waiting_expert' WHERE id = '70000000-0000-0000-0000-000000000002'$$);
+  $$UPDATE public.attempts SET status = 'waiting_expert' WHERE id = '70000000-0000-0000-0000-000000000003'$$);
 
 -- C11 + C10 + C9 + capacity: yêu cầu Expert và assignment
 INSERT INTO public.review_requests (id, attempt_id, learner_id, skill) VALUES
@@ -210,7 +206,6 @@ END $$;
 RESET ROLE;
 
 -- Expert nộp (giống finalize_expert_evaluation): Expert thành chính thức
-UPDATE public.criterion_scores SET band = band;  -- no-op
 UPDATE public.evaluations SET status = 'done', overall_band = 7.0, submitted_at = now(), is_official = true
 WHERE id = '90000000-0000-0000-0000-000000000002';
 UPDATE public.review_assignments SET ended_at = now(), end_reason = 'completed' WHERE id = 'b0000000-0000-0000-0000-000000000001';

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ListeningTestData } from '@/mocks/exam-listening';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
@@ -21,12 +22,27 @@ interface ListeningWorkspaceProps {
   /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
   deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
+  /** Bài đã lưu trên server khi làm tiếp (FR-11): số câu -> câu trả lời. */
+  initialAnswers?: Record<string, string | string[]>;
+  /** Báo mỗi lần đáp án đổi để trang cha tự lưu lên server. */
+  onAnswersChange?: (answers: Record<number, string | string[]>) => void;
 }
 
-export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ListeningWorkspaceProps) {
+export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ListeningWorkspaceProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+
+  // Khôi phục bài đã lưu trên server khi nó tới; câu Learner vừa trả lời trước đó thì giữ bản mới
+  // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
+  const [restoredFrom, setRestoredFrom] = useState<typeof initialAnswers>(undefined);
+  if (initialAnswers !== restoredFrom) {
+    setRestoredFrom(initialAnswers);
+    const restored: Record<number, string | string[]> = {};
+    Object.entries(initialAnswers || {}).forEach(([num, value]) => { restored[Number(num)] = value; });
+    setUserAnswers(prev => ({ ...restored, ...prev }));
+  }
+  useEffect(() => { onAnswersChange?.(userAnswers); }, [userAnswers, onAnswersChange]);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isGrading, setIsGrading] = useState<boolean>(false);
@@ -50,35 +66,11 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
   // BR-07: Listening Mock 30 phút cho cả 4 section (7,5 phút/section). Phải khớp deadline server
   // (tests.duration_minutes = 30), nếu dài hơn thì bài tự nộp lúc hết giờ bị server từ chối 409.
   const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4);
-  const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
-  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
-  useEffect(() => {
-    if (mode !== 'exam' || !deadlineMs) return;
-    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
-    setTimerSeconds(prev => Math.min(prev, remaining));
-  }, [mode, deadlineMs]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (mode === 'exam') {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(interval!);
-            setIsGrading(true);
-            onSubmit(userAnswers);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000);
-    }
-    return () => { if (interval) clearInterval(interval); };
-  }, [mode, onSubmit, userAnswers]);
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, () => {
+    setIsGrading(true);
+    Promise.resolve(onSubmit(userAnswers)).catch(() => setIsGrading(false));
+  });
 
   const handleQuestionPaletteClick = (qNumber: number) => {
     const targetIdx = availableSections.findIndex(s => 

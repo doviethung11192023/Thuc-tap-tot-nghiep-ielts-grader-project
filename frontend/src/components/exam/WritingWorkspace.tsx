@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Send, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { mockWritingExamDataset } from '@/mocks/exam-writing';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { WritingPromptColumn, type WritingTaskItem } from './writing/WritingPromptColumn';
@@ -25,9 +26,15 @@ interface WritingWorkspaceProps {
   /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
   deadlineMs?: number | null;
   onSubmit: (submissionText: string, task1Text?: string, task2Text?: string) => void;
+  /** Bài đã lưu trên server khi làm tiếp (FR-11). */
+  initialEssays?: { "1"?: string; "2"?: string };
+  /** Báo mỗi lần bài viết đổi để trang cha tự lưu lên server. */
+  onEssaysChange?: (essays: Record<1 | 2, string>) => void;
+  /** Trạng thái tự lưu lên server; thay cho dòng "tự động lưu nháp" cũ. */
+  saveStatusLabel?: string;
 }
 
-export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onAbandon, deadlineMs, onSubmit }: WritingWorkspaceProps) {
+export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onAbandon, deadlineMs, onSubmit, initialEssays, onEssaysChange, saveStatusLabel }: WritingWorkspaceProps) {
   const router = useRouter();
   const activeDataset = testData || mockWritingExamDataset;
   const draftKey = `ielts_writing_draft_${activeDataset.test_id || 'default'}`;
@@ -38,16 +45,16 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
   const [autoSaveTime, setAutoSaveTime] = useState<string>('Vừa xong');
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
 
-  const initialSeconds = mode === 'exam' ? (parts === '2' ? 2400 : parts === '1' ? 1200 : 3600) : 0;
-  const [timerSeconds, setTimerSeconds] = useState<number>(initialSeconds);
+  // Khôi phục bài đã lưu trên server cho task còn trống (mở lại trên máy bất kỳ)
+  // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
+  const [restoredFrom, setRestoredFrom] = useState<typeof initialEssays>(undefined);
+  if (initialEssays !== restoredFrom) {
+    setRestoredFrom(initialEssays);
+    setTaskEssays(prev => ({ 1: prev[1] || initialEssays?.['1'] || '', 2: prev[2] || initialEssays?.['2'] || '' }));
+  }
+  useEffect(() => { onEssaysChange?.(taskEssays); }, [taskEssays, onEssaysChange]);
 
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
-  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
-  useEffect(() => {
-    if (mode !== 'exam' || !deadlineMs) return;
-    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
-    setTimerSeconds(prev => Math.min(prev, remaining));
-  }, [mode, deadlineMs]);
+  const initialSeconds = mode === 'exam' ? (parts === '2' ? 2400 : parts === '1' ? 1200 : 3600) : 0;
 
   const currentTask = activeTaskNum === 1 ? activeDataset.task1 : activeDataset.task2;
   const currentEssayText = taskEssays[activeTaskNum] || '';
@@ -68,23 +75,9 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
     } catch {}
   }, [mode, draftKey]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (mode === 'exam') {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]);
-            return 0;
-          }
-          return prev - 1;
-        });
-      } else {
-        setTimerSeconds(prev => prev + 1);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [mode, onSubmit, taskEssays]);
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialSeconds, deadlineMs,
+    () => onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]));
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -184,7 +177,7 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
               Academic Essay Editor
             </span>
             <span className="text-xs text-zinc-500 font-medium">
-              Tự động lưu nháp: <strong className="text-zinc-700">{autoSaveTime}</strong>
+              {saveStatusLabel ? <strong className="text-zinc-700">{saveStatusLabel}</strong> : <>Tự động lưu nháp: <strong className="text-zinc-700">{autoSaveTime}</strong></>}
             </span>
           </div>
 

@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import { Library, Target } from "lucide-react";
-import { useExamCollections } from "@/hooks/useExamCollection";
 import { useStudentPublishedTests } from "@/hooks/useStudentPublishedTests";
 import { StudentPracticeBanner } from "@/components/exam/student-practice/StudentPracticeBanner";
-import { StudentCollectionsSection } from "@/components/exam/student-practice/StudentCollectionsSection";
+import { StudentMockLauncherSection } from "@/components/exam/student-practice/StudentMockLauncherSection";
 import { StudentDirectTestsSection } from "@/components/exam/student-practice/StudentDirectTestsSection";
 import { StudentSkillExercisesSection } from "@/components/exam/student-practice/StudentSkillExercisesSection";
 import { PracticeHistorySidebarWidget } from "@/components/exam/student-practice/PracticeHistorySidebarWidget";
@@ -13,7 +12,6 @@ import { TestPrepModal } from "@/components/exam/TestPrepModal";
 import type { PublishedTestItem } from "@/types/test-practice";
 
 export default function TestPracticePage() {
-  const { collections, loading: collectionsLoading } = useExamCollections();
   const {
     page,
     setPage,
@@ -117,7 +115,7 @@ export default function TestPracticePage() {
 
           {activeTab === "explore" && (
             <div className="space-y-6">
-              <StudentCollectionsSection collections={collections} loading={collectionsLoading} />
+              <StudentMockLauncherSection />
               <StudentDirectTestsSection
                 skill={skill}
                 setSkill={setSkill}

@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from app.services.grading.grading_queue import GRADING_JOB_TIMEOUT_SECONDS, SPEAKING_QUEUE, WRITING_QUEUE
 from app.services.grading.grading_run_executor import execute_grading_run
 from app.services.grading.stale_grading_run_recovery import recover_stale_grading_runs
+from app.services.practice.mock_auto_submit import auto_submit_overdue_mocks
 from app.services.speaking.speaking_audio_retention import purge_expired_speaking_audio
 
 load_dotenv()
@@ -34,6 +35,13 @@ async def recover_stale_runs_task(ctx):
         print(f"♻️ [Recovery] {counts}")
 
 
+async def auto_submit_mocks_task(ctx):
+    """Tự nộp bài Mock quá deadline + 30 s bằng phần đã lưu (FR-12, BR-21)."""
+    counts = await auto_submit_overdue_mocks(ctx["redis"])
+    if counts:
+        print(f"⏰ [AutoSubmit] {counts}")
+
+
 async def purge_speaking_audio_task(ctx):
     """Xoá audio Speaking quá hạn lưu (NFR-07)."""
     print(f"🧹 [Retention] removed {purge_expired_speaking_audio()} audio files")
@@ -46,7 +54,8 @@ class WorkerSettings:
     job_timeout = GRADING_JOB_TIMEOUT_SECONDS
     keep_result = 0            # giải phóng job id ngay khi xong để cron đẩy lại được
     cron_jobs = [cron(purge_speaking_audio_task, hour=3, minute=0),
-                 cron(recover_stale_runs_task, minute=set(range(60)))]
+                 cron(recover_stale_runs_task, minute=set(range(60))),
+                 cron(auto_submit_mocks_task, minute=set(range(60)), second=15)]
     redis_settings = _redis_settings
 
 

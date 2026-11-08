@@ -31,6 +31,17 @@ export default function SkillSummaryResultPage() {
   // Speaking và Writing có hook kết quả riêng; không gọi API lần hai rồi bỏ kết quả
   const { data: cleanData, loading } = useAttemptSummary(skill === 'speaking' ? undefined : attemptId, skill);
 
+  if (!attemptId) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 p-6 text-center">
+        <p className="text-sm text-zinc-700">Không tìm thấy bài làm để hiện kết quả.</p>
+        <Link href={returnUrl || '/test-practice'} className="text-sm font-semibold text-[#932120] hover:underline">
+          Quay lại trang luyện thi
+        </Link>
+      </div>
+    );
+  }
+
   if (skill === 'writing') {
     return (
       <WritingSummaryResult 

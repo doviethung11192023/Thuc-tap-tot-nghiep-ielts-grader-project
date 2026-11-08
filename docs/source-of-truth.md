@@ -86,7 +86,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | FR-07 | Dashboard | Band hiện tại từng kỹ năng, khoảng cách tới mục tiêu, số ngày còn lại, lịch sử, biểu đồ tiến bộ |
 | FR-08 | Dashboard | Lộ trình (BR-17, ADR-23): 1 kỹ năng ưu tiên, điểm yếu (dạng câu L/R theo mô hình năng lực Elo; tiêu chí và dạng task W/S), 3 gợi ý bắt đầu được ngay, 1 câu lý do sinh theo mẫu. Chỉ dùng luật và mô hình năng lực, không dùng LLM. **Tính lúc xem, không lưu** |
 | FR-09 | Practice | R/L: làm cả đề hoặc chọn phần, không giới hạn giờ, được dừng và tua audio, xem đáp án ngay sau khi nộp |
-| FR-10 | Mock | Mock **từng kỹ năng** (mỗi lần 1 bài, 1 attempt). Hệ thống không có lượt thi 4 kỹ năng liền nhau; Learner muốn thi đủ 4 kỹ năng thì tự làm lần lượt từng bài (chốt 2026-11-08); đồng hồ do server giữ; audio Listening phát 1 lần (server ghi lại lượt phát) |
+| FR-10 | Mock | Mock **từng kỹ năng** (mỗi lần 1 bài, 1 attempt); **Learner chỉ chọn kỹ năng, hệ thống chọn ngẫu nhiên một đề trong bộ đề Mock mà Learner chưa từng làm**, hết đề thì từ chối, không lặp đề (chốt 2026-11-09). Hệ thống không có lượt thi 4 kỹ năng liền nhau; Learner muốn thi đủ 4 kỹ năng thì tự làm lần lượt từng bài (chốt 2026-11-08); đồng hồ do server giữ; audio Listening phát 1 lần (server ghi lại lượt phát) |
 | FR-11 | Mock | Tự lưu đáp án và bài viết **lên server** (cả Practice); làm tiếp được sau khi mất mạng, tải lại trang, đóng tab hoặc khởi động lại máy, kể cả trên máy khác |
 | FR-12 | Mock | Tự nộp khi hết giờ, kể cả khi Learner không còn mở trang (BR-21) |
 | FR-13 | Chấm | Chấm R/L bằng so khớp đáp án đã chuẩn hoá (BR-14); chỉ quy ra band khi làm đủ 40 câu (BR-03) |
@@ -111,13 +111,14 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | FR-32 | CMS | Sinh audio câu hỏi Speaking bằng TTS lúc soạn đề; nghe lại, sinh lại, hoặc thay bằng bản ghi âm |
 | FR-33 | Expert | Bài Mock có W/S tự tạo yêu cầu cho Expert; điểm Expert là chính thức (BR-08, BR-15) |
 | FR-35 | CMS | (Could) Audio Listening nhiều giọng bằng TTS từ kịch bản do người viết |
-| FR-36 | CMS | Quản lý bộ đề Mock: gom 4 đề kỹ năng thành 1 bộ để Learner dễ tìm và tự làm lần lượt; bộ đề chỉ dùng để nhóm đề, không tạo lượt thi chung |
+| FR-36 | CMS | Quản lý bộ đề Mock: gom 4 đề kỹ năng thành 1 bộ. Các bộ đề published tạo thành **kho đề Mock**; đề trong bộ chỉ dùng cho Mock (DB tự đặt `allowed_mode = 'mock'`), không hiện ở danh mục Practice và Learner không xem trước được (chốt 2026-11-09). Bộ đề không tạo lượt thi chung |
 | FR-37 | Admin | Xem audit log của Admin |
 | FR-38 | Speaking | Xin đồng ý ghi âm trước lần ghi đầu tiên, nói rõ mục đích dùng và thời gian lưu |
 | FR-39 | Expert | Expert trả lại bài được giao kèm lý do, trước khi bấm Start và trong 2 giờ làm việc đầu; bài quay lại hàng đợi ngay và không giao lại cho Expert đó |
 | FR-40 | Expert | Learner thấy thời điểm dự kiến có điểm Expert: hạn của assignment nếu đã giao, ước tính từ hàng đợi nếu chưa |
 | FR-41 | Expert | (Should) Kho nhận xét của từng Expert để chèn lại vào bài khác |
 | FR-42 | Expert | (Should) Sửa band lệch AI từ 1 band trở lên thì Expert ghi lý do ngắn; lý do chỉ Expert và Admin thấy |
+| FR-43 | Admin | Đặt, sửa, xoá kỳ nghỉ lễ của Expert: trong kỳ nghỉ hệ thống ngừng nhận yêu cầu Expert, ngừng giao bài và lùi hạn của bài đang giao (BR-22) |
 
 ## 3. Yêu cầu phi chức năng (NFR)
 
@@ -140,7 +141,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | Mã | Quy tắc |
 |---|---|
 | BR-01 | Band từ 0 đến 9, bước 0.5 |
-| BR-02 | Overall = trung bình 4 kỹ năng, làm tròn: phần lẻ < .25 thì xuống; từ .25 đến < .75 thành .5; từ .75 thì lên band nguyên kế tiếp |
+| BR-02 | Overall = trung bình 4 kỹ năng, làm tròn: phần lẻ < .25 thì xuống; từ .25 đến < .75 thành .5; từ .75 thì lên band nguyên kế tiếp. Trên dashboard, overall chỉ tính khi cả 4 kỹ năng có band hiện tại (BR-12); thiếu kỹ năng nào thì hiện "chưa đủ dữ liệu" |
 | BR-03 | Band L/R quy đổi từ số câu đúng /40 theo bảng Academic lưu trong DB, **chỉ khi đủ 40 câu**; nếu không thì hiển thị "x / y đúng" |
 | BR-04 | Writing: mỗi task = trung bình 4 tiêu chí (TA/TR, CC, LR, GRA); **Task 2 nặng gấp đôi Task 1**: (T1 + 2·T2)/3, làm tròn 0.5. Practice làm 1 task thì lấy band của task đó |
 | BR-05 | Speaking = trung bình 4 tiêu chí (FC, LR, GRA, P) |
@@ -149,21 +150,22 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | BR-08 | Điểm Expert không ghi đè điểm AI; lưu và hiện cả hai. Mỗi attempt có **đúng 1 kết quả chính thức**: điểm Expert nếu có, nếu không thì điểm AI (riêng bài Mock đang chờ Expert thì điểm AI chỉ là "preliminary"). Chạy lại AI không thay được điểm Expert |
 | BR-09 | Không giới hạn số lần chấm AI mỗi ngày; chống lạm dụng bằng rate limit theo user và bắt buộc xác minh email |
 | BR-10 | Đề đã publish không sửa trực tiếp; sửa thì tạo phiên bản mới, attempt cũ vẫn trỏ về phiên bản cũ |
-| BR-11 | Mỗi yêu cầu có tối đa 1 assignment đang mở, giao cho Expert Available chưa đạt tải tối đa, không giao lại cho Expert đã trả lại hoặc để quá hạn chính yêu cầu đó. Chỉ giao khi lượt chấm AI đã xong hoặc đã lỗi (lỗi thì Expert chấm từ bản trống). Hạn là **48 giờ làm việc**: chỉ đếm thứ Hai đến thứ Sáu theo giờ Việt Nam, ngày lễ tính như ngày thường (giao 15:00 thứ Sáu thì hạn 15:00 thứ Ba; giao thứ Bảy thì bắt đầu đếm từ 00:00 thứ Hai). Quá hạn thì assignment kết thúc và yêu cầu quay lại hàng đợi |
+| BR-11 | Mỗi yêu cầu có tối đa 1 assignment đang mở, giao cho Expert Available chưa đạt tải tối đa, không giao lại cho Expert đã trả lại hoặc để quá hạn chính yêu cầu đó. Chỉ giao khi lượt chấm AI đã xong hoặc đã lỗi (lỗi thì Expert chấm từ bản trống). Hạn là **48 giờ làm việc**: chỉ đếm thứ Hai đến thứ Sáu theo giờ Việt Nam, ngày lễ rơi vào ngày thường vẫn tính, trừ giờ nằm trong kỳ nghỉ do Admin đặt (BR-22) (giao 15:00 thứ Sáu thì hạn 15:00 thứ Ba; giao thứ Bảy thì bắt đầu đếm từ 00:00 thứ Hai). Quá hạn thì assignment kết thúc và yêu cầu quay lại hàng đợi |
 | BR-12 | Band hiện tại của một kỹ năng = trung bình điểm chính thức của tối đa **3 bài Mock gần nhất** (không tính bài đang chờ Expert). Chưa có Mock: trung bình tối đa 5 bài Practice gần nhất có band. Gắn nhãn "độ tin cậy thấp" khi chưa có Mock hoặc chỉ có 1 bài. Chưa có bài nào có band: "chưa đủ dữ liệu" (từ 2026-11-08 ngưỡng hạ từ 2 bài xuống 1 bài để người mới thấy band sớm). L/R chỉ có band khi làm đủ 40 câu (BR-03); làm từng phần không tính vào band nhưng vẫn cập nhật mô hình năng lực (BR-17). Band Learner tự nhập lúc đặt mục tiêu không phải band hiện tại |
 | BR-13 | Speaking: Part 1 mỗi câu tối đa 45 s; Part 2 chuẩn bị 60 s, nói tối đa 120 s; Part 3 mỗi câu tối đa 90 s. Hết giờ thì dừng ghi và sang câu tiếp. Mock: phát 1 lần, không dừng, không ghi lại. Thời gian lưu theo từng part, Admin sửa được |
 | BR-14 | Chấm L/R: không phân biệt hoa thường; bỏ khoảng trắng thừa; đúng nếu khớp bất kỳ đáp án nào trong danh sách; từ trong ngoặc là tuỳ chọn ("(the) library" chấp nhận "the library" và "library"); vượt giới hạn số từ thì 0 điểm; nhóm "Choose N letters" mỗi lựa chọn đúng tính 1 lần; 1 điểm/câu, không trừ điểm |
-| BR-15 | Mock có W/S tự tạo yêu cầu Expert. Mỗi Learner tối đa **2 bài Mock được Expert chấm mỗi tuần** (cấu hình được). **Đếm theo bài**: mỗi attempt Writing hoặc Speaking là 1 lượt. Tuần là **tuần lịch** (từ 00:00 thứ Hai, giờ Việt Nam), tính theo lúc bắt đầu bài. Lượt được **giữ chỗ khi bắt đầu** attempt W/S nếu còn quota và còn suất chung (BR-20); bài bỏ dở (`abandoned`) thì nhả chỗ; nộp bài thì tạo yêu cầu. Đã tạo yêu cầu thì **không hoàn** lượt. Không giữ được chỗ thì bài vẫn làm được nhưng chỉ có điểm AI, và phải báo trước khi bắt đầu |
+| BR-15 | Mock có W/S tự tạo yêu cầu Expert. Mỗi Learner tối đa **2 bài Mock được Expert chấm mỗi tuần** (cấu hình được). **Đếm theo bài**: mỗi attempt Writing hoặc Speaking là 1 lượt. Tuần là **tuần lịch** (từ 00:00 thứ Hai, giờ Việt Nam), tính theo lúc bắt đầu bài. Lượt được **giữ chỗ khi bắt đầu** attempt W/S nếu còn quota, còn suất chung (BR-20) và không nằm trong kỳ nghỉ lễ của Expert (BR-22); bài bỏ dở (`abandoned`) thì nhả chỗ; nộp bài thì tạo yêu cầu. Đã tạo yêu cầu thì **không hoàn** lượt. Không giữ được chỗ thì bài vẫn làm được nhưng chỉ có điểm AI, và phải báo trước khi bắt đầu |
 | BR-16 | Learner xin Expert chấm lại tối đa **3 bài Practice mỗi tuần lịch** (cấu hình được), tính theo lúc gửi yêu cầu; mỗi attempt tối đa 1 yêu cầu đang mở. Yêu cầu đã gửi thì **không hoàn** lượt, kể cả khi Learner huỷ |
-| BR-17 | Lộ trình (thuật toán ở §8 "Lộ trình học", ADR-23). **Kỹ năng ưu tiên:** kỹ năng chưa có band xếp đầu (gợi ý bài chẩn đoán), nhiều kỹ năng thiếu thì theo thứ tự L, R, W, S; còn lại chọn khoảng cách (mục tiêu − hiện tại) lớn nhất, hoà thì band thấp hơn, hoà nữa theo thứ tự L, R, W, S; chưa đặt mục tiêu từng kỹ năng thì dùng mục tiêu tổng. **Điểm yếu:** L/R là dạng câu có mức thành thạo Elo thấp nhất trong các dạng đã trả lời ≥ 6 câu (không dạng nào đủ thì không nêu điểm yếu); W/S là tiêu chí có trung bình động thấp nhất, Writing thêm dạng đề có band thấp nhất trong các dạng đã làm ≥ 2 bài. **3 gợi ý:** L/R là các phần đề (section) chứa dạng câu yếu, xếp theo xác suất làm đúng dự đoán gần 70% nhất; không có điểm yếu thì gợi ý cả đề; W/S là đề Practice thuộc dạng đề yếu, không có thì đề Practice bất kỳ của kỹ năng đó. Chỉ lấy đề đã publish, chưa làm trong 14 ngày qua; hết thì lấy đề làm lâu nhất. Còn ≤ 14 ngày tới ngày thi và kỹ năng ưu tiên chưa có bài Mock nào trong 14 ngày qua thì gợi ý đầu tiên là 1 đề Mock của kỹ năng đó. Câu lý do sinh theo mẫu. Tính lại mỗi lần xem dashboard |
+| BR-17 | Lộ trình (thuật toán ở §8 "Lộ trình học", ADR-23). **Kỹ năng ưu tiên:** kỹ năng chưa có band xếp đầu (gợi ý bài chẩn đoán), nhiều kỹ năng thiếu thì theo thứ tự L, R, W, S; còn lại chọn khoảng cách (mục tiêu − hiện tại) lớn nhất, hoà thì band thấp hơn, hoà nữa theo thứ tự L, R, W, S; chưa đặt mục tiêu từng kỹ năng thì dùng mục tiêu tổng. **Điểm yếu:** L/R là dạng câu có mức thành thạo Elo thấp nhất trong các dạng đã trả lời ≥ 6 câu (không dạng nào đủ thì không nêu điểm yếu); W/S là tiêu chí có trung bình động thấp nhất, Writing thêm dạng đề có band thấp nhất trong các dạng đã làm ≥ 2 bài. **3 gợi ý:** L/R là các phần đề (section) chứa dạng câu yếu, xếp theo xác suất làm đúng dự đoán gần 70% nhất; không có điểm yếu thì gợi ý cả đề; W/S là đề Practice thuộc dạng đề yếu, không có thì đề Practice bất kỳ của kỹ năng đó. Chỉ lấy đề đã publish, chưa làm trong 14 ngày qua; hết thì lấy đề làm lâu nhất. Còn ≤ 14 ngày tới ngày thi và kỹ năng ưu tiên chưa có bài Mock nào trong 14 ngày qua thì gợi ý đầu tiên là 1 đề Mock của kỹ năng đó. Kỹ năng ưu tiên không có đề nào đã publish thì chuyển sang kỹ năng kế tiếp theo cùng luật. Câu lý do sinh theo mẫu. Tính lại mỗi lần xem dashboard |
 | BR-18 | Learner chỉ thấy đề đã publish. Mỗi đề lưu loại nguồn (original, open licence, public domain), tên nguồn, giấy phép, và phải được Admin duyệt trước khi publish |
 | BR-19 | Không dùng AI để tạo nội dung đề. TTS chỉ đọc câu do người viết; AI chỉ dùng để chấm |
 | BR-20 | **Suất Expert chung cả hệ thống** mỗi tuần lịch (`expert_weekly_capacity`, Admin sửa theo sức chấm của Expert). Lượt Mock giữ chỗ và yêu cầu Practice cùng trừ vào suất này. Hết suất: Mock vẫn làm được nhưng chỉ có điểm AI (báo trước khi bắt đầu); yêu cầu Practice bị từ chối với lý do "hết suất tuần này". Mock được ưu tiên khi giao bài (xem luồng giao yêu cầu Expert) |
 | BR-21 | **Hết giờ mà chưa nộp: làm bao nhiêu chấm bấy nhiêu.** Hệ thống tự nộp với những gì server đã lưu: L/R chấm đáp án đã lưu, Writing chấm bài đã lưu, Speaking chấm các câu đã upload (không câu nào thì `no_speech`). Bài Mock W/S tự nộp có lượt Expert giữ chỗ: **Learner chọn** gửi Expert (dùng lượt) hay chỉ chấm AI (nhả lượt); chưa chọn tới hết tuần lịch thì coi là chỉ chấm AI. Speaking: câu đang ghi dở lúc gián đoạn chưa có bản ghi nên được hỏi lại một lần khi quay lại, vẫn trong hạn chung của bài |
+| BR-22 | **Kỳ nghỉ lễ của Expert** do Admin tự đặt (bắt đầu, kết thúc theo giờ Việt Nam, lý do), có audit log. Trong kỳ nghỉ: (1) **không nhận yêu cầu mới**: yêu cầu Practice bị từ chối với lý do "Expert nghỉ lễ đến <ngày giờ kết thúc>" và không trừ quota; bài Mock W/S bắt đầu trong kỳ nghỉ không giữ chỗ, chỉ có điểm AI và được báo trước khi bắt đầu; bài Mock đã giữ chỗ trước kỳ nghỉ mà nộp trong kỳ nghỉ vẫn tạo yêu cầu và chờ trong hàng đợi; (2) **không giao bài**, kể cả Admin giao lại; yêu cầu đang chờ được giao sau kỳ nghỉ, Mock trước; (3) **hạn lùi lại**: giờ trong kỳ nghỉ không tính vào hạn 48 giờ làm việc (BR-11) và 2 giờ được trả lại bài (FR-39) của assignment đang mở; Expert vẫn được chấm và nộp nếu muốn; (4) thời điểm dự kiến cho Learner (FR-40) tính cả kỳ nghỉ. Các kỳ nghỉ không chồng nhau; kết thúc phải sau bắt đầu; kỳ đã qua không sửa được; kỳ đang diễn ra chỉ sửa được giờ kết thúc (chốt 2026-11-08) |
 
 ---
 
-## 5. Use case (37 UC)
+## 5. Use case (38 UC)
 
 | Mã | Use case | Actor | Ưu tiên | FR |
 |---|---|---|---|---|
@@ -204,17 +206,18 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | UC-37 | Đánh dấu lỗi trong bài viết («extend» Grade) | Expert | Must | FR-23 |
 | UC-38 | Xem audit log | Admin | Must | FR-37 |
 | UC-39 | Upload audio và ảnh («extend» Compose test) | Admin | Must | FR-26 |
+| UC-40 | Đặt kỳ nghỉ lễ của Expert | Admin | Must | FR-43 |
 
 ### Đặc tả các UC lõi (rút gọn)
 
 **UC-06 Dashboard.** Chưa đặt mục tiêu thì yêu cầu đặt trước. Tính band từng kỹ năng theo BR-12 và overall theo BR-02. Hiện khoảng cách tới mục tiêu, số ngày còn lại tới ngày thi, biểu đồ, lịch sử. Thẻ "Bước tiếp theo" áp dụng BR-17: kỹ năng ưu tiên, điểm yếu, 3 gợi ý có nút bắt đầu ngay và 1 câu lý do (ví dụ "Reading thấp hơn mục tiêu 1.0 band; dạng True/False/Not Given bạn làm đúng khoảng 45%", hoặc "Writing thấp hơn mục tiêu 1.0 band; tiêu chí yếu nhất là CC" kèm nhận xét CC ở bài gần nhất). Người mới hoặc kỹ năng chưa có band thì gợi ý bài chẩn đoán. Hết đề chưa làm trong 14 ngày thì nới điều kiện và gợi ý đề làm lâu nhất. Không ghi dữ liệu.
 
-**UC-08 Mock.** Chọn 1 đề của 1 kỹ năng (không có lượt thi cả bộ; muốn thi đủ 4 kỹ năng thì Learner tự làm lần lượt). Bài W/S hiện số lượt Expert còn lại trong tuần và báo trước bài này có được Expert chấm không (BR-15, BR-20). Mỗi bài là một Attempt với deadline, không tạo `mock_session`. Trả đề **không kèm đáp án**. Tự lưu 10–15 s. Listening phát 1 lần (server ghi lượt phát, từ chối lần 2). Khi nộp: khoá attempt; L/R chấm ngay; W/S tạo job chấm AI và yêu cầu Expert. Ngoại lệ:
+**UC-08 Mock.** Chọn 1 kỹ năng; hệ thống chọn ngẫu nhiên 1 đề Mock của kỹ năng đó mà Learner chưa từng làm (kể cả bỏ dở). Đang có bài Mock dở của kỹ năng đó thì làm tiếp bài đó. Hết đề chưa làm thì báo "đã làm hết đề thi thử của kỹ năng này", không lặp đề cũ, để band Mock luôn là lần gặp đề đầu tiên (BR-12). Không có lượt thi cả bộ; muốn thi đủ 4 kỹ năng thì Learner tự làm lần lượt. Bài W/S hiện số lượt Expert còn lại trong tuần và báo trước bài này có được Expert chấm không (BR-15, BR-20). Mỗi bài là một Attempt với deadline, không tạo `mock_session`. Trả đề **không kèm đáp án**. Tự lưu 10–15 s. Listening phát 1 lần (server ghi lượt phát, từ chối lần 2). Khi nộp: khoá attempt; L/R chấm ngay; W/S tạo job chấm AI và yêu cầu Expert. Ngoại lệ:
 - Nộp hai lần thì chỉ lần đầu có hiệu lực.
 - Đáp án muộn hơn deadline 30 s bị từ chối.
 - Có attempt dở của cùng đề thì phải chọn làm tiếp hoặc huỷ.
 - Gián đoạn (treo máy, đóng tab, khởi động lại): vào lại thấy thông báo "bài Mock đang dở, còn X phút" và làm tiếp; đã quá hạn thì thấy "bài đã được nộp tự động lúc …" (BR-21).
-- Không giữ được lượt (hết quota hoặc hết suất chung) thì chỉ chấm AI, và điểm AI là chính thức.
+- Không giữ được lượt (hết quota, hết suất chung hoặc đang trong kỳ nghỉ lễ của Expert) thì chỉ chấm AI, và điểm AI là chính thức.
 
 **UC-09 Writing.** Practice: Task 1, Task 2 hoặc cả hai. Mock: cả hai. Task 1 phóng to được biểu đồ. Đếm từ, tự lưu. Nộp xong trả về ngay; worker chấm từng task (1 grading run/task, 4 tiêu chí chạy song song, tìm lỗi). Lưu 4 điểm tiêu chí/task và các lỗi, tính band theo BR-04, đánh dấu chính thức nếu chưa có điểm Expert. Trình duyệt nhận kết quả qua Realtime. Hiện nhãn "estimate". Ngoại lệ:
 - LLM timeout hoặc lỗi 429/5xx: thử lại 3 lần có backoff; vẫn lỗi thì attempt chuyển `grading_failed` và Admin chạy lại (UC-24).
@@ -284,7 +287,7 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 ---
 
-## 7. Thiết kế cơ sở dữ liệu (đích: 33 bảng, 3 view, 45 FK)
+## 7. Thiết kế cơ sở dữ liệu (đích: 32 bảng, 2 view, 43 FK; bỏ `mock_sessions` ngày 2026-11-09)
 
 ERD vẽ theo ký hiệu Chen. Có 4 phép chuyên biệt hoá (specialisation):
 
@@ -330,9 +333,8 @@ Quy tắc ánh xạ:
 - `criteria(id PK, code, name, skill, task_type)`
 - `criterion_descriptors(criterion_id PK/FK, band PK, descriptor)`
 
-**Làm bài (7)**
-- `mock_sessions(id PK, learner_id FK, test_set_id FK, status, started_at)`: **không dùng** từ 2026-11-08 (Mock chỉ từng kỹ năng); giữ trong schema, `attempts.mock_session_id` luôn NULL
-- `attempts(id PK, learner_id FK, test_id FK, skill FK, mode, status, mock_session_id FK, started_at, deadline_at, submitted_at, raw_score, question_count, lr_band)`
+**Làm bài (6)** (`mock_sessions` và `attempts.mock_session_id` đã xoá ở migration `20261109130000`: Mock chỉ từng kỹ năng)
+- `attempts(id PK, learner_id FK, test_id FK, skill FK, mode, status, started_at, deadline_at, submitted_at, raw_score, question_count, lr_band)`
 - `attempt_sections(attempt_id PK/FK, section_id PK/FK, test_id FK, started_at, audio_played_at, finished_at)`
 - `answers(attempt_id PK/FK, question_id PK/FK, section_id FK, answer, is_correct, updated_at)`
 - `essays(id PK, attempt_id FK, section_id FK, content, word_count (cột generated), updated_at)`, `UNIQUE(attempt_id, section_id)`
@@ -367,11 +369,11 @@ Ràng buộc `tests UNIQUE(test_set_id, skill)` nghĩa là mỗi bộ đề Mock
 - Chi tiết function và trạng thái: `specs/003-expert-review/data-model.md`.
 - (Should) `criterion_scores.change_reason`: lý do Expert sửa band lệch AI từ 1 band (FR-42).
 - (Should) Bảng mới `expert_comment_snippets(id, expert_id FK, text, created_at)` cho kho nhận xét (FR-41); khi có thì thành 34 bảng.
-- `system_settings`: thêm `expert_weekly_capacity` (BR-20) và `review_decline_hours` = 2 (FR-39); `review_due_hours` = 48 nay là giờ làm việc.
+- `system_settings`: thêm `expert_weekly_capacity` (BR-20) và `review_decline_hours` = 2 (FR-39); `review_due_hours` = 48 nay là giờ làm việc; thêm `expert_pause_periods` (BR-22): mảng JSON `{start, end, reason}`, không cần bảng mới. Tạo hoặc sửa kỳ nghỉ thì tính lại `due_at` của assignment đang mở.
 - RLS `expert_eval_read` cho Expert xem bản AI của bài đang được giao (ràng buộc 13).
 - Realtime publication thêm `review_assignments` để báo bài mới cho Expert trong app.
 
-**View (3):** `attempt_results` (band của attempt, luôn lấy từ kết quả chính thức), `mock_session_results` (overall theo cách làm tròn IELTS; không dùng từ 2026-11-08), `review_request_details` (completed_at; nguồn lấy từ `attempts.mode`).
+**View (2):** `attempt_results` (band của attempt, luôn lấy từ kết quả chính thức), `review_request_details` (completed_at; nguồn lấy từ `attempts.mode`).
 
 **Lưu sẵn hay tính khi đọc:**
 - Lưu một lần lúc tạo hoặc lúc chấm, vì không bao giờ đổi: `deadline_at`, `raw_score`, `is_correct`, `evaluations.overall_band`.
@@ -384,7 +386,7 @@ Ràng buộc `tests UNIQUE(test_set_id, skill)` nghĩa là mỗi bộ đề Mock
 |---|---|---|
 | 1 | Kiểu con của section khớp skill của test | CHECK `sections(skill, kind)` + FK ghép `(test_id, skill)`, `(section_id, kind)` |
 | 2 | Attempt chỉ chứa section của chính test đó | FK ghép từ `attempt_sections` tới `attempts(id, test_id)` và `sections(id, test_id)`; answers, essays, recordings trỏ tới `attempt_sections` |
-| 3 | Mỗi skill tối đa 1 attempt trong một mock session; test phải thuộc bộ đề của session (không còn tác dụng vì không tạo mock session) | `UNIQUE(mock_session_id, skill)`; FK `(mock_session_id, learner_id)`; trigger `check_attempt_start` |
+| 3 | (Đã bỏ 2026-11-09 cùng `mock_sessions`.) Thay bằng: Mock chỉ trên đề trong bộ đề Mock mà Learner chưa từng làm | trigger `check_attempt_start`, `sync_test_allowed_mode` |
 | 4 | Chỉ attempt W/S mới có evaluation và yêu cầu Expert | CHECK skill + FK ghép `(attempt_id, skill)`; review_requests dùng `(attempt_id, learner_id, skill)` |
 | 5 | Đúng 1 kết quả chính thức; Expert ưu tiên hơn AI | `UNIQUE(attempt_id) WHERE is_official`; trigger `check_official_priority` |
 | 6 | Tiêu chí khớp skill và task (TA chỉ cho Task 1, TR chỉ cho Task 2) | FK `(criterion_id, skill)`, `(evaluation_id, skill)`; CHECK task_no; trigger `check_criterion_task` |
@@ -400,13 +402,17 @@ Ràng buộc `tests UNIQUE(test_set_id, skill)` nghĩa là mỗi bộ đề Mock
 | 16 | Mỗi dòng audit có actor: Admin, hoặc system cho tác vụ tự động | `CHECK ((actor_type='system') = (actor_id IS NULL))`; FK `(actor_id, actor_role)` |
 
 **Trigger:**
-- `check_attempt_start`: kiểm ràng buộc 3 và 12.
+- `check_attempt_start`: kiểm ràng buộc 3 (bản mới) và 12.
 - `fill_question_section`: điền `section_id` cho câu hỏi.
 - `check_criterion_task`: kiểm ràng buộc 6.
 - `check_official_priority`: kiểm ràng buộc 5.
 - `check_expert_capacity`: không giao vượt `max_active_reviews`.
 - `block_published_edit`: chặn sửa mọi bảng nội dung của đề đã publish hoặc archived.
 - `handle_new_user`: tạo profile. **Chỉ đọc role từ `app_metadata` do server kiểm soát**, để người dùng không tự cấp quyền Admin.
+- (2026-11-09) `block_closed_attempt_work`: `answers`, `essays` chỉ ghi được khi attempt `in_progress`.
+- (2026-11-09) `block_finished_evaluation_edit`, `block_finished_evaluation_detail`: evaluation `done`/`failed` chỉ đổi được `is_official`; `criterion_scores`, `annotations` của nó không đổi được (BR-08).
+- (2026-11-09) `block_audit_log_change`: `audit_logs` chỉ thêm (chặn UPDATE, DELETE, TRUNCATE).
+- (2026-11-09) CHECK `attempts_abandoned_mock_only`, `attempts_auto_submit_mock_only`; quyền đọc `lr_sections` theo cột, không có `transcript`.
 
 **Index:**
 - `idx_attempts_history(learner_id, started_at DESC)`
@@ -426,7 +432,7 @@ Ràng buộc `tests UNIQUE(test_set_id, skill)` nghĩa là mỗi bộ đề Mock
 | Ai | Được đọc |
 |---|---|
 | Admin | Mọi bảng |
-| Mọi người đã đăng nhập | Đề, bộ đề, section, câu hỏi, lựa chọn đã publish; danh mục tiêu chí. **Không** đọc được `question_keys` |
+| Mọi người đã đăng nhập | Đề, bộ đề, section, câu hỏi, lựa chọn đã publish (riêng đề Mock: chỉ khi Learner đã có attempt trên đề đó, 2026-11-09); danh mục tiêu chí. **Không** đọc được `question_keys` |
 | Learner | Hồ sơ, mock session, attempt, essay của mình; evaluation chính thức đã xong của attempt của mình |
 | Expert | Hồ sơ và assignment của mình; evaluation của mình; AI evaluation của bài được giao, **chỉ sau khi đã nộp** |
 
@@ -471,6 +477,7 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 - LLM: Qwen qua DashScope, gọi bằng OpenAI SDK. Model vision đọc biểu đồ Task 1. Langfuse quản lý prompt có phiên bản và trace mọi lần gọi.
 - Speaking: xem mục Pipeline chấm Speaking. Tốc độ chạy trên CPU chưa được kiểm chứng.
 - TTS: Piper. Đọc câu hỏi Speaking **một lần lúc soạn đề**.
+- **Đích sau khi đổi kiến trúc (ADR-24 đến ADR-28, chốt 2026-11-08):** Cloudflare (CDN, WAF, rate limit) và frontend trên Cloudflare Workers; Traefik trước nhiều bản sao Core API; client Postgres async có pool; Redis Streams cho tự lưu; hàng đợi chấm ưu tiên Mock; AI engine qua Cloudflare Tunnel hoặc GPU thuê theo giờ; OpenTelemetry, Prometheus, Grafana, Sentry; k6; GitHub Actions. Lộ trình ở `docs/project-roadmap.md`.
 
 ### Pipeline chấm Writing (AI engine)
 
@@ -522,11 +529,11 @@ Ghi âm tắt `noiseSuppression`, `autoGainControl`, `echoCancellation` của tr
 
 ### Lộ trình học (Learner Journey, ADR-23)
 
-Luật quyết định **làm gì** (kỹ năng ưu tiên, ngày thi, bài chẩn đoán); mô hình năng lực đo **yếu ở đâu** và **đề nào vừa sức**. Tính lúc xem dashboard từ dữ liệu có sẵn (`answers`, `criterion_scores`, `attempts`, `writing_tasks`), **không thêm bảng, không migration**, cache Redis ngắn như hồ sơ học tập hiện tại. Không gọi LLM.
+Luật quyết định **làm gì** (kỹ năng ưu tiên, ngày thi, bài chẩn đoán); mô hình năng lực đo **yếu ở đâu** và **đề nào vừa sức**. Tính lúc xem dashboard từ dữ liệu có sẵn (`answers`, `criterion_scores`, `attempts`, `writing_tasks`), **không thêm bảng, không migration**. Không cache kết quả theo Learner (tính đủ nhanh); chỉ cache độ khó câu hỏi trong bộ nhớ 10 phút. Không gọi LLM.
 
 **Mô hình năng lực L/R (Elo, dạng Rasch 1 tham số):**
-- Mỗi Learner có năng lực θ cho mỗi cặp (kỹ năng, dạng câu `question_groups.question_type`), bắt đầu θ = 0.
-- Độ khó câu q: p_q = (số lượt đúng + m·p0) / (số lượt trả lời + m) trên mọi Learner, với p0 = 0,6 và m = 5; b_q = −ln(p_q / (1 − p_q)). Câu ít người làm có độ khó gần mức trung bình b0 = −ln(0,6/0,4). Độ khó tính chung cho mọi Learner nên cache lâu hơn (1 ngày).
+- Mỗi Learner có năng lực θ cho mỗi cặp (kỹ năng, dạng câu `question_groups.question_type`: 5 dạng của enum, không tách theo `subtype` để đủ dữ liệu), bắt đầu θ = 0.
+- Độ khó câu q: p_q = (số lượt đúng + m·p0) / (số lượt trả lời + m) trên mọi Learner, với p0 = 0,6 và m = 5; b_q = −ln(p_q / (1 − p_q)). Câu ít người làm có độ khó gần mức trung bình b0 = −ln(0,6/0,4). Độ khó tính chung cho mọi Learner.
 - Duyệt các câu Learner đã làm trong các bài đã nộp, theo thời gian nộp. Mỗi câu: P = 1 / (1 + e^−(θ − b_q)); θ ← θ + K·(đúng − P), với K = max(0,1; 0,4 / (1 + n/20)) và n là số câu đã tính của dạng đó. Câu bỏ trống trong phần đã làm tính là sai.
 - Mức thành thạo hiển thị = P với câu độ khó trung bình (b = b0), dạng phần trăm.
 - Một dạng câu chỉ được coi là điểm yếu khi đã trả lời ≥ 6 câu.
@@ -592,6 +599,11 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-21 | Speaking hai kênh; band P tính trong code, LLM chỉ giải thích. Theo cổng quyết định, kênh âm vị không vào band P vì đo trên L2-ARCTIC kém hơn độ tin cậy Whisper (tương quan với nhãn người −0,339 so với −0,441); band dùng độ tin cậy nhận dạng và ngữ điệu, gắn nhãn độ tin cậy thấp | Không dùng nội dung transcript làm bằng chứng phát âm (ASR tự sửa lời nói); không để LLM cho band P vì LLM không nghe được audio; giữ kênh âm vị cho gợi ý từ và để phát hiện bản ghi hỏng |
 | ADR-22 | Task 2 mặc định đi luồng Reference: phân loại dạng đề, thang bài mẫu theo band, một lần gọi trả cả 4 tiêu chí, rồi tổng hợp và rewrite như cũ. Chủ dự án chọn ngày 2026-11-07, dùng `qwen3.7-plus` (v5 của `writing/task2/grade`) và chấp nhận hai cổng chưa đạt. Đo trên 44 bài held-out, nhãn chưa kiểm chứng: MAE 1,239 so với 1,227 của `legacy` trên cùng bài, độ phân tán 0,46 (cổng 0,70), **p90 74,4 s, vượt NFR-02**, 1 thay vì 4 lượt gọi LLM chấm điểm | Bốn lượt gọi tiêu chí và trần band từ số liệu công cụ làm điểm dồn về band 6–7; TTR không phân biệt band trong dữ liệu (0,549 ở band 4, 0,555 ở band 8). Không tự rơi về `legacy` khi thiếu kho tham chiếu vì sẽ trộn hai cách chấm dưới một nhãn |
 | ADR-23 | Lộ trình học dùng luật kết hợp mô hình năng lực: Elo (Rasch 1 tham số) cho dạng câu L/R, trung bình động cho tiêu chí W/S; tính lúc xem, không thêm bảng. Không dùng collaborative filtering, deep knowledge tracing hay LLM. Chủ dự án chốt 2026-11-08 | Bản demo 100–300 tài khoản: collaborative filtering thiếu dữ liệu và hỏng ở người mới; deep knowledge tracing cần dữ liệu lớn và trái giả định không tự huấn luyện mô hình; LLM chậm, mỗi lần một khác, khó kiểm thử và trái BR-19. Elo cập nhật trực tuyến, không cần huấn luyện, chạy được với ít dữ liệu, giải thích được từng gợi ý và kiểm thử được bằng ca cụ thể |
+| ADR-24 | Core API truy cập Postgres bằng client async có pool kết nối (qua pooler của Supabase) cho các đường gọi nhiều (tự lưu, nộp, quota, giao bài); chạy nhiều bản sao sau reverse proxy (Traefik); rate limit ở Cloudflare và theo user trong Redis. Chốt 2026-11-08, chưa code | Client Supabase đồng bộ qua PostgREST chặn event loop; 1 tiến trình không mở rộng được. Không bỏ hẳn supabase-py: các đường ít gọi giữ nguyên để giảm rủi ro |
+| ADR-25 | Tự lưu bài theo kiểu write-behind: lượt lưu vào Redis Streams (có số phiên bản), một consumer group gom theo lô và ghi một lệnh xuống Postgres mỗi 1–2 s; nộp bài đọc bản mới nhất trước khi khoá. Redis hỏng thì ghi thẳng DB. Chốt 2026-11-08, chưa code | Ghi thẳng DB với 5.000 người là khoảng 333 lượt ghi/giây. Không dùng Kafka: Redis Streams đủ cho tải này và đã có Redis |
+| ADR-26 | Quan sát hệ thống: OpenTelemetry ở Core API, worker, AI engine; Prometheus + Grafana cho metrics (độ dài hàng đợi, p95 tự lưu, thời gian chấm); Sentry cho lỗi; nối `trace_id` với Langfuse. Load test bằng k6, đo trước và sau khi đổi kiến trúc. Chốt 2026-11-08, chưa code | Không có số đo thì không chứng minh được chịu tải hay NFR-02 |
+| ADR-27 | Chấm có hàng đợi ưu tiên (Mock trước Practice) và báo vị trí trong hàng. AI engine chạy trên máy có GPU của nhóm qua Cloudflare Tunnel khi phát triển; thuê GPU theo giờ (pod, ngân sách ≤ 500.000 đ) cho ngày load test và ngày bảo vệ, chạy 2 bản để chứng minh mở rộng được. (Should) LiteLLM làm gateway LLM: giới hạn tốc độ chung, thử lại, model dự phòng. Chốt 2026-11-08, chưa code | Cloudflare không chạy được torch và không có GPU. Không dùng GPU serverless vì nạp model mỗi lần khởi động chậm |
+| ADR-28 | Không dùng Kubernetes, Kafka, Temporal, hay tách thêm microservice | Nhóm 3 người, 1 tháng, không có người vận hành; Docker Compose, Redis Streams và cron quét bảng có lease đã đủ cho quy mô thiết kế |
 
 ---
 
@@ -653,18 +665,21 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | 6 | Báo cáo ghi "P suy ra từ độ chính xác phát âm"; Langfuse có `speaking/common/pr` để LLM cho band | Code tính band P, prompt `pr` v3 chỉ giải thích. Band dựa trên độ tin cậy nhận dạng, không còn dựa trên độ chính xác âm vị, nên báo cáo cần sửa theo ADR-21 |
 | 5 | Tài khoản không có quyền sửa Exposed schemas trên Dashboard | Trong lúc test, schema mới tạm được expose bằng `ALTER ROLE authenticator SET pgrst.db_schemas`. Đã **RESET** khi cutover (2026-11-03); chỉ còn `public` |
 | 7 | Báo cáo ghi Expert chấm không thấy điểm AI, chỉ xem sau khi nộp; có buổi Speaking trực tiếp (Later) | Theo chỉ thị 2026-11-08: Expert nhận sẵn điểm và nhận xét AI rồi sửa; bỏ buổi Speaking trực tiếp (Won't, ghi là hướng phát triển); không khiếu nại điểm Expert; hạn 48 giờ không tính cuối tuần. Báo cáo, UC-15/16, SD-07 và sơ đồ UC cần sửa |
-| 8 | Báo cáo và thiết kế DB có Mock đủ 4 kỹ năng trong một lượt (Should, `mock_sessions`, thứ tự L, R, W, S) | Theo chỉ thị 2026-11-08: Mock chỉ từng kỹ năng; Learner muốn thi đủ 4 kỹ năng thì tự làm lần lượt. Bảng `mock_sessions`, view `mock_session_results` và ràng buộc 3 giữ nguyên trong schema nhưng không dùng (không viết migration xoá). Báo cáo, UC-08 và sơ đồ liên quan cần sửa |
+| 8 | Báo cáo và thiết kế DB có Mock đủ 4 kỹ năng trong một lượt (Should, `mock_sessions`, thứ tự L, R, W, S) | Theo chỉ thị 2026-11-08: Mock chỉ từng kỹ năng; Learner muốn thi đủ 4 kỹ năng thì tự làm lần lượt. Ngày 2026-11-09 đã xoá bảng `mock_sessions`, view `mock_session_results`, cột `attempts.mock_session_id`, ràng buộc 3 cũ (migration `20261109130000`). Báo cáo, UC-08 và sơ đồ (ERD Chen, sơ đồ quan hệ Hình 2.34: 32 bảng, 2 view) cần sửa |
 
 ---
 
-## 12. Trạng thái code thực tế (cập nhật 2026-11-07)
+## 12. Trạng thái code thực tế (cập nhật 2026-11-09)
 
-**Đã thống nhất một schema duy nhất `public` (33 bảng + 3 view) theo §7. Không còn khái niệm v1/v2.** Cutover chạy 2026-11-03: các object `public` cũ chuyển sang schema `legacy` (29 bảng, 19 enum, 5 hàm; chỉ để sao lưu, **chưa xoá**), schema mới đổi tên thành `public`, trigger đăng ký `on_auth_user_created` → `public.handle_new_user` (không nuốt lỗi), Realtime publication gồm `attempts`, `review_requests`, `free_essays`.
+**Đã thống nhất một schema duy nhất `public` (từ 2026-11-09: 32 bảng + 2 view) theo §7. Không còn khái niệm v1/v2.** Cutover chạy 2026-11-03: các object `public` cũ chuyển sang schema `legacy` (29 bảng, 19 enum, 5 hàm; chỉ để sao lưu, **chưa xoá**), schema mới đổi tên thành `public`, trigger đăng ký `on_auth_user_created` → `public.handle_new_user` (không nuốt lỗi), Realtime publication gồm `attempts`, `review_requests`, `free_essays`.
 
 | Thành phần | Trạng thái |
 |---|---|
 | DDL | `supabase/migrations/20261103130000_baseline_schema.sql` là migration gốc (dựng được từ đầu: 38 bảng gồm các bảng ngoài sơ đồ, 3 view, 0 quyền `anon`). `20261107100000_atomic_grading_jobs.sql` thêm các function nộp bài và kết thúc chấm chạy trong một transaction (ADR-07); đã chạy lên Supabase 2026-11-07, Core API và worker cần migration này. Thay đổi sau này: thêm file đánh số lớn hơn |
-| Test ràng buộc | `supabase/tests/schema_constraints_test.sql`: 48/48 PASS trên Supabase, tự rollback |
+| Test ràng buộc | `supabase/tests/`: `schema_constraints_test.sql` 46/46, `grading_job_functions_test.sql` 19/19, `saved_work_and_integrity_test.sql` 21/21, `random_mock_selection_test.sql` 14/14 PASS trên Supabase (2026-11-09), tự rollback |
+| Migration bỏ mock session | `20261109130000_drop_mock_sessions.sql` (đã chạy 2026-11-09): xoá `mock_sessions`, `session_status`, `mock_session_results`, cột `attempts.mock_session_id`; dựng lại view `attempt_results` (không đổi cột nào khác, `anon` không có quyền). DB thật: 32 bảng, 2 view, 43 FK. `schema_constraints_test.sql` còn 46 test (bỏ 2 test của mock session) |
+| Migration Mock ngẫu nhiên | `20261109120000_random_mock_selection.sql` (đã chạy 2026-11-09): trigger `sync_test_allowed_mode` (trong bộ → `mock`, ngoài bộ → `practice`; `block_published_edit` cho đổi `allowed_mode` của đề đã publish vì không phải nội dung); `check_attempt_start` chặn Mock trên đề Learner đã có attempt; function `start_mock_attempt`, `mock_pool_summary`; `test_is_published` ẩn đề Mock với Learner chưa có attempt. Backend: `POST /test-practice/mock/start`, `GET /test-practice/mock/summary`; `POST /attempts/start` với Mock chỉ để làm tiếp; `GET /tests/{id}/content` trả 404 với đề Mock; danh mục Practice bỏ đề Mock. Frontend: mục "Thi thử (Mock) theo kỹ năng" thay mục bộ đề; nội dung đề Mock tải qua `/attempts/{id}/content`. Hệ quả: kho Practice còn 13 đề (Writing 2, Speaking 1) vì 19 đề trong bộ thành đề Mock; muốn thêm đề Practice thì Admin bỏ đề khỏi bộ hoặc import thêm. `random_mock_selection_test.sql` 14/14 PASS |
+| Migration 2026-11-09 | `20261109100000_saved_work_auto_submit_and_integrity.sql` (đã chạy lên Supabase): CHECK `abandoned` chỉ cho Mock (xoá 17 dòng Practice `abandoned` cũ); cột `attempts.auto_submitted`; function `save_lr_answers`, `save_writing_essays` (tự lưu, từ chối khi đã nộp hoặc quá hạn + 30 s); `submit_*` nhận `p_auto`, khoá attempt trước rồi ghi bài, `p_tasks NULL` = chấm bài đã lưu, `submit_lr_attempt` tự tính điểm thô, số câu, band; trigger chặn ghi `answers`/`essays` sau khi nộp, chặn sửa evaluation đã kết thúc (trừ `is_official`) cùng `criterion_scores`/`annotations` của nó, `audit_logs` chỉ thêm; thu quyền đọc cột `lr_sections.transcript`; `publish_ai_evaluation`/`fail_ai_evaluation` đưa Mock có yêu cầu Expert mở sang `waiting_expert`, điểm AI không chính thức. `20261107110000` (DROP 5 bảng chấm bài tự do) cũng đã chạy cùng ngày: còn 33 bảng |
 | Kết nối psql | `SUPABASE_DB_URL` trong `backend/.env` (Session pooler) |
 | Backend | Một đường code duy nhất `app/db/supabase.py: db()`; không còn cờ `DB_SCHEMA`. Services: `practice/`, `writing/`, `listening_reading/`, `speaking/`, `admin/`, `cms/`, `importers/` |
 | Role | `learner \| expert \| admin` ở cả backend và frontend. Trạng thái attempt theo tên thiết kế (`grading`, `grading_failed`, `waiting_expert`, `no_speech`) |
@@ -686,6 +701,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Admin đổi đề, bộ đề, câu hỏi hoặc bảng quy đổi thành công thì cache Redis phía Learner (danh mục, nội dung đề, bài tập theo dạng) mất hiệu lực ngay, nhờ route class `StudentContentMutationRoute` tăng số phiên bản trong khoá. Redis lỗi thì đọc thẳng DB.
 - Importer không còn gán `test_set`; bộ Mock (UNIQUE(test_set_id, skill)) tạo riêng: 5 bộ "IELTS Recent Actual Tests – Mock Set 1..5".
 - Speaking nộp bài không còn band giả 6.5: trạng thái `grading` hoặc `no_speech`.
+- (2026-11-09) Không còn dữ liệu giả ở phòng thi và trang kết quả: tải đề lỗi thì báo lỗi (trước đây hiện đề mẫu, Learner làm đề giả trên attempt thật); nộp lỗi thì báo lỗi và ở lại phòng thi (trước đây chuyển sang trang kết quả mẫu với band giả); nộp mà bài đã được nộp (tab khác, cron tự nộp) thì tới kết quả thật; trang kết quả không có `attemptId` báo "không tìm thấy bài làm". Mở lại bài Mock đã kết thúc: `POST /attempts/start` trả `closed: true` và trang chuyển tới kết quả (bài `abandoned` thì báo không có kết quả). Đồng hồ R/L/W dùng chung `useExamCountdown`: tính từ mốc kết thúc, không đứng khi đang gõ, hết giờ nộp đúng một lần.
 - Đáp án mẫu Writing/Speaking từ dataset không được lưu.
 - L/R chỉ có band khi đủ 40 câu (luật "band chỉ tính khi đủ 40 câu"); ngược lại `overall_band: null`, frontend hiện "—". `DELETE /student/history/{id}` chỉ áp dụng cho bài chưa nộp: Practice đang dở → xoá hẳn; Mock đang dở (thoát phòng thi) → `abandoned`; bài đã nộp → 409. Frontend gọi endpoint này khi thoát phòng thi Mock và có nút xoá cho bài Practice dở ở trang lịch sử. Xem attempt của người khác → 404.
 - Admin cũ `n22dccn050@…`, `test1@gmail.com` thành Learner; attempt của Expert và 53 essay không có attempt không được chuyển.
@@ -693,12 +709,11 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 **Điểm lệch còn lại so với thiết kế:**
 - Chấm Writing và Speaking chạy qua ARQ (`app/services/grading/`), nên cần Redis và worker. Không có Redis thì API vẫn chạy bằng `NullRedisCache`, bài được lưu nhưng chờ chấm tới khi Redis và worker hoạt động.
-- Mock chưa tự tạo yêu cầu Expert chấm (luật quota Mock cho Expert); điểm AI tạm là chính thức. Thiết kế luồng Expert đã chốt lại ngày 2026-11-08 (xem mục Expert bên dưới), chưa code.
-- Chưa có cron tự nộp bài Mock quá hạn (FR-12): worker chỉ có cron cứu lượt chấm và xoá audio. Bài Mock chỉ tự nộp khi tab còn mở; đóng tab thì attempt nằm ở `in_progress` mãi. Quay lại sau hạn thì mở lại đúng bài cũ nhưng nộp bị 409.
-- Chưa tự lưu lên server (FR-11): Writing chỉ lưu `localStorage` khi bấm "Lưu nháp"; L/R lưu `localStorage`; chỉ Speaking có dữ liệu trên server (từng câu). Đặc tả sửa ở `specs/004-mock-recovery/spec.md`.
+- Mock chưa tự tạo yêu cầu Expert chấm (luật quota Mock cho Expert), nên điểm AI vẫn là chính thức. DB đã sẵn: có yêu cầu Expert mở thì điểm AI chỉ là preliminary và attempt sang `waiting_expert` (migration 2026-11-09). Thiết kế luồng Expert chốt ngày 2026-11-08 (mục Expert bên dưới), chưa code.
+- Tự lưu và tự nộp (spec 004, làm 2026-11-09): L/R và Writing tự lưu lên server (`PUT /test-practice/attempts/{id}/work`, hook `useServerAutosave`, nhãn trạng thái lưu); `POST /attempts/start` trả `saved_work` để làm tiếp trên máy khác. Cron `auto_submit_mocks_task` (worker, mỗi phút) nộp Mock quá hạn + 30 s bằng bài đã lưu; nộp tay sau hạn cũng chấm bài đã lưu thay vì 409. Writing Mock không có chữ nào thì thành `abandoned`, `auto_submitted = true`. **Chưa làm:** thông báo "bài Mock đang dở, còn X phút" khi quay lại (US2), Speaking hỏi lại câu dở (US4), lựa chọn gửi Expert cho bài tự nộp (FR-013, chờ luồng Expert), hiện nhãn "nộp tự động" ở trang kết quả (FR-014), load test 5.000 người.
 - Core API chạy 1 tiến trình uvicorn; endpoint `async` gọi client Supabase đồng bộ nên mỗi lượt gọi DB chặn event loop. Phải sửa trước khi chịu tải lớn (mục tiêu load test 5.000 người ở spec 004; phương án ở `docs/defense-highlights.md` §8).
 - AI engine chưa trả model/prompt version/trace id → các cột truy vết mỗi lần chấm (model, phiên bản prompt, mã trace) trong `grading_runs` còn trống.
-- Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái yêu cầu "transcript Listening chỉ hiện sau khi nộp").
+- Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái yêu cầu "transcript Listening chỉ hiện sau khi nộp"). Cột `lr_sections.transcript` đã bị thu quyền đọc với `authenticated` (2026-11-09); dữ liệu cần chuyển sang cột đó.
 - Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.
 - Đề Writing: 97 đề trên R2 (`ielts-learning`, prefix `dataset/writing/`), mới nhập 6; 91 đề còn lại import sau.
 - Expert workflow: làm một phần.
@@ -714,7 +729,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Bộ đếm âm tiết đếm thiếu ở lời nói nối âm (mẫu thử: 11 so với 14–15 âm tiết thật); cần kiểm chứng ở bộ đo thử.
 - Giấy phép: `praat-parselmouth` là GPLv3; L2-ARCTIC là CC BY-NC 4.0; trọng số CrisperWhisper chỉ cho phi thương mại. Dùng được cho KLTN, cần xem lại nếu thương mại hoá.
 
-**Expert (thiết kế chốt 2026-11-08, chưa code):** đã có `GET /expert/me`, `PATCH /expert/me/availability` và trang `expert/profile`. Chưa có giữ chỗ quota, suất chung, job giao bài, trả lại bài, màn chấm, nhãn "preliminary", thời điểm dự kiến cho Learner. Đặc tả ở `specs/003-expert-review/spec.md`. Thông báo ngày lễ đăng ngoài hệ thống; app không có chức năng thông báo.
+**Expert (thiết kế chốt 2026-11-08, chưa code):** đã có `GET /expert/me`, `PATCH /expert/me/availability` và trang `expert/profile`. Chưa có giữ chỗ quota, suất chung, job giao bài, trả lại bài, màn chấm, nhãn "preliminary", thời điểm dự kiến cho Learner. Đặc tả ở `specs/003-expert-review/spec.md`. Kỳ nghỉ lễ do Admin đặt trong app (BR-22, chốt 2026-11-08); Learner biết qua lý do từ chối và thông báo trước khi thi Mock, app không có chức năng thông báo chung.
 
 **Bảo mật đã sửa:** JWT fallback verify HS256 + `aud=authenticated`; không còn mượn user đầu tiên khi chưa đăng nhập; xoá lịch sử kiểm tra chủ sở hữu.
 
@@ -727,6 +742,9 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 ---
 
 ## 13. Câu hỏi còn mở
+
+- LiteLLM hỗ trợ DashScope (Qwen) tới mức nào; nếu không đủ thì tự viết bộ giới hạn tốc độ trong Redis (ADR-27).
+- Frontend Next.js 16 chạy trên Cloudflare Workers qua OpenNext: cần thử trước khi chuyển.
 
 - Task 2 chưa đạt NFR-02 (p90 74,4 s) và cổng độ phân tán (0,46 so với 0,70): giữ luồng Reference và nới cổng, hay tối ưu tiếp (ADR-22)?
 - Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?

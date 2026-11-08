@@ -18,7 +18,7 @@ def _test_row(t: dict[str, Any]) -> dict[str, Any]:
 def list_tests(page: int, limit: int, skill: Optional[str], difficulty: Optional[str], search: Optional[str]) -> dict[str, Any]:
     q = db().table("tests").select(
         "id, title, skill, duration_minutes, difficulty, allowed_mode, test_set_id, test_sets(id, name), created_at",
-        count="exact").eq("status", "published")
+        count="exact").eq("status", "published").neq("allowed_mode", "mock")     # đề Mock không lộ ra danh mục
     if skill and skill.lower() != "all":
         q = q.eq("skill", skill.lower())
     if difficulty and difficulty.lower() != "all":
@@ -74,7 +74,8 @@ def exercise_groups(skill: str, q_type: Optional[str], difficulty: Optional[str]
     q = db().table("question_groups").select(
         "id, question_type, subtype, instructions, order_no, questions(id), "
         "lr_sections!inner(sections!inner(id, order_no, title, tests!inner(id, title, skill, difficulty, status)))",
-        count="exact").eq("lr_sections.sections.tests.status", "published").eq("lr_sections.sections.tests.skill", skill)
+        count="exact").eq("lr_sections.sections.tests.status", "published").eq("lr_sections.sections.tests.skill", skill) \
+        .neq("lr_sections.sections.tests.allowed_mode", "mock")
     if q_type:
         q = q.eq("question_type", q_type)
     if difficulty:
@@ -93,7 +94,8 @@ def exercise_groups(skill: str, q_type: Optional[str], difficulty: Optional[str]
 def question_type_counts(skill: str) -> dict[str, int]:
     rows = db().table("question_groups").select(
         "question_type, lr_sections!inner(sections!inner(tests!inner(skill, status)))"
-    ).eq("lr_sections.sections.tests.status", "published").eq("lr_sections.sections.tests.skill", skill).execute().data or []
+    ).eq("lr_sections.sections.tests.status", "published").eq("lr_sections.sections.tests.skill", skill) \
+        .neq("lr_sections.sections.tests.allowed_mode", "mock").execute().data or []
     counts: dict[str, int] = {}
     for r in rows:
         counts[r["question_type"]] = counts.get(r["question_type"], 0) + 1
@@ -105,7 +107,7 @@ def task_part_exercises(skill: str, difficulty: Optional[str]) -> list[dict[str,
     q = db().table("sections").select(
         "id, order_no, title, writing_tasks(task_type), speaking_parts(topic, speaking_questions(id)), "
         "tests!inner(id, title, skill, difficulty, status)"
-    ).eq("tests.status", "published").eq("tests.skill", skill)
+    ).eq("tests.status", "published").eq("tests.skill", skill).neq("tests.allowed_mode", "mock")
     if difficulty:
         q = q.eq("tests.difficulty", difficulty)
     out = []

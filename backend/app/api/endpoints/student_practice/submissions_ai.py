@@ -28,14 +28,15 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
     sub = submit_writing(attempt, req.task1_text, req.task2_text, req.essay_text)
     for run_id in sub["run_ids"]:
         await enqueue_grading_run(request.app.state.redis, run_id, "writing")
+    essays = sub["essays"]           # rỗng khi bài Mock nộp muộn mà chưa lưu chữ nào (abandoned)
     return {
         "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
         "data": {
             "attempt_id": attempt_id,
-            "essay_id": sub["essays"][-1]["essay_id"],
-            "essay_ids": {f"task{e['task_no']}": e["essay_id"] for e in sub["essays"]},
-            "word_count": sum(e["word_count"] for e in sub["essays"]),
-            "status": "grading",
+            "essay_id": essays[-1]["essay_id"] if essays else None,
+            "essay_ids": {f"task{e['task_no']}": e["essay_id"] for e in essays},
+            "word_count": sum(e["word_count"] for e in essays),
+            "status": sub["status"],
             "submitted_at": sub["submitted_at"],
         },
     }

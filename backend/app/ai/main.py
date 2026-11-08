@@ -115,7 +115,7 @@ def health():
     return {"status": "healthy"}
 
 
-@app.post("/grade")
+@app.post("/grade", dependencies=[Depends(require_engine_secret)])
 async def grade(req: GradeRequest):
     """Run the full grading pipeline on the submitted essay."""
     if not req.essay.strip():

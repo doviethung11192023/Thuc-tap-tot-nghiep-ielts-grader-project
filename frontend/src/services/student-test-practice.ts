@@ -74,6 +74,48 @@ export async function discardAttempt(attemptId?: string | null): Promise<boolean
   }
 }
 
+/** Bài đang làm gửi lên server để tự lưu (FR-11). Writing: null/undefined = không đổi task đó. */
+export interface SaveAttemptWorkPayload {
+  answers?: Record<string | number, string | string[]>;
+  task1_text?: string;
+  task2_text?: string;
+}
+
+export async function saveAttemptWork(attemptId: string, payload: SaveAttemptWorkPayload) {
+  const res = await apiClient.put<{ meta: { code: number }; data: { saved_at: string } }>(
+    `/api/v1/test-practice/attempts/${attemptId}/work`,
+    payload
+  );
+  return res.data.data;
+}
+
+export type MockSkill = "listening" | "reading" | "writing" | "speaking";
+
+export interface MockSkillSummary {
+  skill: MockSkill;
+  total: number;
+  remaining: number;
+  open_attempt_id: string | null;
+  open_test_id: string | null;
+  open_deadline_at: string | null;
+}
+
+/** Bài Mock mới: hệ thống chọn ngẫu nhiên một đề chưa làm (UC-08). Có bài dở thì trả bài đó. */
+export async function startRandomMock(skill: MockSkill) {
+  const res = await apiClient.post<{ meta: { code: number }; data: { attempt_id: string; test_id: string; resumed: boolean } }>(
+    "/api/v1/test-practice/mock/start",
+    { skill }
+  );
+  return res.data.data;
+}
+
+export async function getMockSummary(): Promise<MockSkillSummary[]> {
+  const res = await apiClient.get<{ meta: { code: number }; data: MockSkillSummary[] }>(
+    "/api/v1/test-practice/mock/summary"
+  );
+  return res.data.data || [];
+}
+
 export async function getAttemptExamContent(attemptId: string) {
   const res = await apiClient.get<{ meta: { code: number }; data: any }>(
     `/api/v1/test-practice/attempts/${attemptId}/content`

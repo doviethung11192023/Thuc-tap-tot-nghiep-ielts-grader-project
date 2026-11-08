@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Eye, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { prefetchExamContent } from '@/services/exam-content-cache';
+import { startRandomMock, type MockSkill } from '@/services/student-test-practice';
 
 interface TestPrepModalProps {
   testId: string;
@@ -18,6 +19,7 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
   const [mode, setMode] = useState<'exam' | 'practice'>('practice');
   const getAllParts = (s: string) => s === 'Listening' ? [1, 2, 3, 4] : s === 'Reading' ? [1, 2, 3] : [1, 2];
   const [selectedParts, setSelectedParts] = useState<number[]>(() => getAllParts(skill));
+  const [startError, setStartError] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedParts(getAllParts(skill));
@@ -34,8 +36,19 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
     );
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const s = skill.toLowerCase();
+    if (mode === 'exam') {
+      // Thi thử: hệ thống chọn ngẫu nhiên một đề Mock chưa làm của kỹ năng này, không phải đề đang xem (UC-08)
+      try {
+        const attempt = await startRandomMock(s as MockSkill);
+        router.push(`/test-practice/${s}/${attempt.test_id}?mode=exam`);
+      } catch (err) {
+        const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+        setStartError(typeof detail === 'string' ? detail : 'Không bắt đầu được bài thi thử.');
+      }
+      return;
+    }
     const partsParam = selectedParts.join(',');
     const base = s === 'speaking'
       ? `/test-practice/${s}/${testId}?mode=${mode}`
@@ -104,8 +117,8 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
                   mode === 'exam' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
                 }`}
               >
-                <h4 className={`font-bold mb-1 ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện thi</h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">Đếm ngược thời gian. Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần.</p>
+                <h4 className={`font-bold mb-1 ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>Thi thử (Mock)</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">Hệ thống chọn ngẫu nhiên một đề {skill} bạn chưa làm. Đếm ngược, hết giờ tự nộp.</p>
               </button>
             </div>
           </div>
@@ -147,6 +160,10 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
                 </>
               )}
             </div>
+          )}
+
+          {startError && (
+            <p role="alert" className="text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{startError}</p>
           )}
 
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-3 text-sm text-blue-800">

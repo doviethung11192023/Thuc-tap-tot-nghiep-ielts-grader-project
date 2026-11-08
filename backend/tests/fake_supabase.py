@@ -138,15 +138,37 @@ class FakeSupabase:
             runs.append({"run_id": run["id"], "task_no": task_no})
         return {"evaluation_id": evaluation_id, "runs": runs}
 
-    def _rpc_submit_speaking_attempt(self, p_attempt_id):
+    def _rpc_submit_speaking_attempt(self, p_attempt_id, p_auto=False):
         attempt = self._attempt(p_attempt_id)
         if attempt["status"] != "in_progress":
             return None
         confirmed = [r for r in self._rows("speaking_responses")
                      if r["attempt_id"] == p_attempt_id and r.get("confirmed_at")]
-        attempt.update(status="grading" if confirmed else "no_speech", submitted_at="2026-11-07T00:00:00+00:00")
+        attempt.update(status="grading" if confirmed else "no_speech", submitted_at="2026-11-07T00:00:00+00:00",
+                       auto_submitted=p_auto)
         job = self._rpc_create_ai_grading_job(p_attempt_id, "speaking", None) if confirmed else None
         return {"status": attempt["status"], "submitted_at": attempt["submitted_at"], "job": job}
+
+    def _rpc_submit_writing_attempt(self, p_attempt_id, p_tasks, p_auto=False):
+        """p_tasks None: chấm essay đã lưu. Không có chữ nào: Mock → abandoned."""
+        attempt = self._attempt(p_attempt_id)
+        if attempt["status"] != "in_progress":
+            return None
+        essays = self._rows("essays")
+        for t in p_tasks or []:
+            essays[:] = [e for e in essays if not (e["attempt_id"] == p_attempt_id and e["task_no"] == t["task_no"])]
+            essays.append({"id": str(uuid.uuid4()), "attempt_id": p_attempt_id, "task_no": t["task_no"],
+                           "content": t["content"]})
+        graded = sorted((e for e in essays if e["attempt_id"] == p_attempt_id and e["content"].strip()),
+                        key=lambda e: e["task_no"])
+        if not graded:
+            attempt.update(status="abandoned", auto_submitted=p_auto)
+            return {"status": "abandoned", "essays": [], "runs": []}
+        attempt.update(status="grading", submitted_at="2026-11-07T00:00:00+00:00", auto_submitted=p_auto)
+        job = self._rpc_create_ai_grading_job(p_attempt_id, "writing", [e["task_no"] for e in graded])
+        return {**job, "status": "grading", "submitted_at": attempt["submitted_at"],
+                "essays": [{"task_no": e["task_no"], "essay_id": e["id"], "word_count": len(e["content"].split())}
+                           for e in graded]}
 
     def _rpc_claim_grading_run(self, p_run_id, p_lease_seconds):
         run = next((r for r in self._rows("grading_runs") if r["id"] == p_run_id), None)
