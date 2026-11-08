@@ -29,6 +29,7 @@ export interface WritingAttemptSummary {
   gradingDone: boolean;
   /** AI chấm lỗi (grading_failed): Admin chạy lại, bài làm vẫn được lưu */
   gradingFailed: boolean;
+  mode?: string;   // "mock": đề không làm lại được
   tasks: WritingTaskSummary[];
 }
 
@@ -59,6 +60,7 @@ export function useWritingAttemptSummary(attemptId?: string) {
           submittedAt: res?.submitted_at,
           gradingDone: Boolean(writing.grading_done) && res?.status !== "grading",
           gradingFailed: res?.status === "grading_failed",
+          mode: res?.mode,
           tasks: writing.tasks ?? [],
         };
         setData(next);

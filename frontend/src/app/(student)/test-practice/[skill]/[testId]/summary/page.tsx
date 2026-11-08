@@ -186,6 +186,7 @@ export default function SkillSummaryResultPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại</span>
           </Link>
+          {cleanData.mode !== 'mock' && (   /* đề Mock không làm lại được */
           <Link
             href={`/test-practice/${skill}/${testId}${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
@@ -193,6 +194,7 @@ export default function SkillSummaryResultPage() {
             <RotateCcw className="w-4 h-4" />
             <span>Làm lại bài</span>
           </Link>
+          )}
         </div>
 
         <Link

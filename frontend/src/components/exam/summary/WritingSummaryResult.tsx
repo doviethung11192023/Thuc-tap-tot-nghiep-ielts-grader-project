@@ -208,6 +208,7 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại</span>
           </Link>
+          {data?.mode !== 'mock' && (   /* đề Mock không làm lại được */
           <Link
             href={`/test-practice/writing/${testId}${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
             className="h-10 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial"
@@ -215,6 +216,7 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
             <RotateCcw className="w-4 h-4" />
             <span>Làm lại bài</span>
           </Link>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
