@@ -104,21 +104,22 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | FR-25 | Expert | (Won't) Lên lịch và tổ chức buổi Speaking trực tiếp |
 | FR-26 | CMS | Soạn đề 5 dạng câu hỏi MVP: editor theo từng dạng, bài đọc, audio, ảnh, xem trước như Learner |
 | FR-27 | CMS | Soạn, duyệt, kiểm tra trước khi publish, quản lý phiên bản, nguồn và giấy phép; archive đề không dùng |
-| FR-28 | Admin | Dữ liệu tham chiếu: bảng quy đổi band, tiêu chí và band descriptor, prompt AI, quota Expert |
-| FR-29 | Admin | Dashboard hệ thống: người dùng, attempt, phân bố band, hoạt động Expert, chênh lệch AI–Expert; (Should) theo từng Expert: số bài, thời gian chấm trung bình, tỉ lệ quá hạn, mức sửa so với AI |
-| FR-30 | Admin | Giám sát chấm AI: lượt chạy lỗi, độ trễ, token; chạy lại chấm AI |
+| FR-28 | Admin | Dữ liệu tham chiếu: bảng quy đổi band, tiêu chí và band descriptor, prompt AI, quota Expert. Prompt sửa ngay trong app: tạo phiên bản mới và đổi label `production` (kể cả quay về bản cũ); prompt vẫn chỉ lưu trên Langfuse (chốt 2026-11-11, UC-22) |
+| FR-29 | Admin | Dashboard hệ thống: người dùng, attempt, phân bố band, hoạt động Expert, chênh lệch AI–Expert (mặc định 30 ngày gần nhất; trước hết hiện chênh lệch overall, bấm vào xem chênh lệch từng tiêu chí TA/TR, CC, LR, GRA, FC, P để biết AI lệch ở phần nào; chênh lệch = trung bình trị tuyệt đối và trung bình có dấu của band Expert − band AI trên các bài có cả hai điểm, chốt 2026-11-11); (Should) theo từng Expert: số bài, thời gian chấm trung bình, tỉ lệ quá hạn, mức sửa so với AI |
+| FR-30 | Admin | Giám sát chấm AI: danh sách lượt chấm có lọc, lượt lỗi và treo, độ trễ, token, chi phí, link trace Langfuse; badge cảnh báo trên dashboard Admin; chạy lại chấm AI cho một bài hoặc hàng loạt, kể cả bài đã chấm thành công (chốt 2026-11-11, UC-24) |
 | FR-31 | CMS | Import đề hàng loạt từ mẫu Excel/JSON, báo lỗi theo từng dòng |
 | FR-32 | CMS | Sinh audio câu hỏi Speaking bằng TTS lúc soạn đề; nghe lại, sinh lại, hoặc thay bằng bản ghi âm |
 | FR-33 | Expert | Bài Mock có W/S tự tạo yêu cầu cho Expert; điểm Expert là chính thức (BR-08, BR-15) |
 | FR-35 | CMS | (Could) Audio Listening nhiều giọng bằng TTS từ kịch bản do người viết |
 | FR-36 | CMS | Quản lý bộ đề Mock: gom 4 đề kỹ năng thành 1 bộ. Các bộ đề published tạo thành **kho đề Mock**; đề trong bộ chỉ dùng cho Mock (DB tự đặt `allowed_mode = 'mock'`), không hiện ở danh mục Practice và Learner không xem trước được (chốt 2026-11-09). Bộ đề không tạo lượt thi chung |
-| FR-37 | Admin | Xem audit log của Admin |
+| FR-37 | Admin | Xem audit log của Admin và tác vụ tự động: lọc theo actor, hành động, entity, khoảng ngày; chỉ đọc (UC-38) |
 | FR-38 | Speaking | Xin đồng ý ghi âm trước lần ghi đầu tiên, nói rõ mục đích dùng và thời gian lưu |
 | FR-39 | Expert | Expert trả lại bài được giao kèm lý do, trước khi bấm Start và trong 2 giờ làm việc đầu; bài quay lại hàng đợi ngay và không giao lại cho Expert đó |
 | FR-40 | Expert | Learner thấy thời điểm dự kiến có điểm Expert: hạn của assignment nếu đã giao, ước tính từ hàng đợi nếu chưa |
 | FR-41 | Expert | (Should) Kho nhận xét của từng Expert để chèn lại vào bài khác |
 | FR-42 | Expert | (Should) Sửa band lệch AI từ 1 band trở lên thì Expert ghi lý do ngắn; lý do chỉ Expert và Admin thấy |
 | FR-43 | Admin | Đặt, sửa, xoá kỳ nghỉ lễ của Expert: trong kỳ nghỉ hệ thống ngừng nhận yêu cầu Expert, ngừng giao bài và lùi hạn của bài đang giao (BR-22) |
+| FR-44 | Admin | Theo dõi token và chi phí AI theo ngày, tháng, model, kỹ năng; ngân sách tháng do Admin đặt, đạt 80% và 100% thì hiện badge cảnh báo. Chỉ cảnh báo, không chặn chấm (chốt 2026-11-11) |
 
 ## 3. Yêu cầu phi chức năng (NFR)
 
@@ -128,9 +129,9 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | NFR-02 | Hiệu năng AI | Writing ≤ 60 s, Speaking ≤ 120 s (p90, tải bình thường) |
 | NFR-03 | Độ tin cậy | Mất mạng không mất bài: tự lưu mỗi 10–15 s và mỗi lần đổi câu |
 | NFR-04 | Bảo mật | HTTPS; mật khẩu do Supabase Auth quản lý; Core API kiểm quyền cho mọi thao tác nghiệp vụ; RLS trên mọi bảng; không gửi đáp án xuống client trước khi nộp |
-| NFR-05 | Truy vết AI | Mỗi lần gọi AI lưu model, prompt version, Langfuse trace id, token, độ trễ, lỗi (bảng `grading_runs`) |
+| NFR-05 | Truy vết AI | Mỗi `grading_run` (một task Writing hoặc một bài Speaking) có đúng một trace Langfuse, `session_id = attempt_id`; mỗi lần gọi LLM trong lượt đó (4 tiêu chí, phân loại đề, thử lại, hỏi lại khi JSON sai) là một generation của trace. `grading_runs` lưu model, prompt version, `trace_id`, tổng token và chi phí (tính cả lần thử lại), độ trễ thực (`finished_at − started_at`), lỗi (ADR-29) |
 | NFR-06 | Minh bạch | Mọi điểm AI có nhãn "estimate"; điểm AI của bài Mock đang chờ Expert có nhãn "preliminary" |
-| NFR-07 | Riêng tư | Xin đồng ý xử lý giọng nói (nói rõ dữ liệu lưu ở nước ngoài); tự xoá audio Speaking sau 180 ngày; tuân thủ Nghị định 13/2023/NĐ-CP |
+| NFR-07 | Riêng tư | Xin đồng ý xử lý giọng nói (nói rõ dữ liệu lưu ở nước ngoài); tự xoá audio Speaking sau 180 ngày; trace Langfuse giữ 90 ngày; `output` và `error` của lượt chấm lỗi giữ 180 ngày; `output` của lượt chấm thành công theo vòng đời attempt; số liệu lượt chấm (model, token, chi phí, độ trễ, trạng thái) giữ lâu dài (ADR-29); tuân thủ Nghị định 13/2023/NĐ-CP |
 | NFR-08 | Tương thích | Chrome, Edge, Firefox bản mới; ghi âm cần HTTPS và quyền micro |
 | NFR-09 | Bảo trì | Test tự động phủ ≥ 60% module chấm điểm và phân quyền; API mô tả bằng OpenAPI |
 | NFR-10 | Triển khai | Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compose; schema dựng từ các file SQL đánh số; dựng môi trường mới từ clone trong < 30 phút |
@@ -156,7 +157,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | BR-14 | Chấm L/R: không phân biệt hoa thường; bỏ khoảng trắng thừa; đúng nếu khớp bất kỳ đáp án nào trong danh sách; từ trong ngoặc là tuỳ chọn ("(the) library" chấp nhận "the library" và "library"); vượt giới hạn số từ thì 0 điểm; nhóm "Choose N letters" mỗi lựa chọn đúng tính 1 lần; 1 điểm/câu, không trừ điểm |
 | BR-15 | Mock có W/S tự tạo yêu cầu Expert. Mỗi Learner tối đa **2 bài Mock được Expert chấm mỗi tuần** (cấu hình được). **Đếm theo bài**: mỗi attempt Writing hoặc Speaking là 1 lượt. Tuần là **tuần lịch** (từ 00:00 thứ Hai, giờ Việt Nam), tính theo lúc bắt đầu bài. Lượt được **giữ chỗ khi bắt đầu** attempt W/S nếu còn quota, còn suất chung (BR-20) và không nằm trong kỳ nghỉ lễ của Expert (BR-22); bài bỏ dở (`abandoned`) thì nhả chỗ; nộp bài thì tạo yêu cầu. Đã tạo yêu cầu thì **không hoàn** lượt. Không giữ được chỗ thì bài vẫn làm được nhưng chỉ có điểm AI, và phải báo trước khi bắt đầu |
 | BR-16 | Learner xin Expert chấm lại tối đa **3 bài Practice mỗi tuần lịch** (cấu hình được), tính theo lúc gửi yêu cầu; mỗi attempt tối đa 1 yêu cầu đang mở. Yêu cầu đã gửi thì **không hoàn** lượt, kể cả khi Learner huỷ |
-| BR-17 | Lộ trình (thuật toán ở §8 "Lộ trình học", ADR-23). **Kỹ năng ưu tiên:** kỹ năng chưa có band xếp đầu (gợi ý bài chẩn đoán), nhiều kỹ năng thiếu thì theo thứ tự L, R, W, S; còn lại chọn khoảng cách (mục tiêu − hiện tại) lớn nhất, hoà thì band thấp hơn, hoà nữa theo thứ tự L, R, W, S; chưa đặt mục tiêu từng kỹ năng thì dùng mục tiêu tổng. **Điểm yếu:** L/R là dạng câu có mức thành thạo Elo thấp nhất trong các dạng đã trả lời ≥ 6 câu (không dạng nào đủ thì không nêu điểm yếu); W/S là tiêu chí có trung bình động thấp nhất, Writing thêm dạng đề có band thấp nhất trong các dạng đã làm ≥ 2 bài. **3 gợi ý:** L/R là các phần đề (section) chứa dạng câu yếu, xếp theo xác suất làm đúng dự đoán gần 70% nhất; không có điểm yếu thì gợi ý cả đề; W/S là đề Practice thuộc dạng đề yếu, không có thì đề Practice bất kỳ của kỹ năng đó. Chỉ lấy đề đã publish, chưa làm trong 14 ngày qua; hết thì lấy đề làm lâu nhất. Còn ≤ 14 ngày tới ngày thi và kỹ năng ưu tiên chưa có bài Mock nào trong 14 ngày qua thì gợi ý đầu tiên là 1 đề Mock của kỹ năng đó. Kỹ năng ưu tiên không có đề nào đã publish thì chuyển sang kỹ năng kế tiếp theo cùng luật. Câu lý do sinh theo mẫu. Tính lại mỗi lần xem dashboard |
+| BR-17 | Lộ trình (thuật toán ở §8 "Lộ trình học", ADR-23). **Kỹ năng ưu tiên:** kỹ năng chưa có band xếp đầu (gợi ý bài chẩn đoán), nhiều kỹ năng thiếu thì theo thứ tự L, R, W, S; còn lại chọn khoảng cách (mục tiêu − hiện tại) lớn nhất, hoà thì band thấp hơn, hoà nữa theo thứ tự L, R, W, S; chưa đặt mục tiêu từng kỹ năng thì dùng mục tiêu tổng. **Điểm yếu:** L/R là dạng câu có mức thành thạo Elo thấp nhất trong các dạng đã trả lời ≥ 6 câu (không dạng nào đủ thì không nêu điểm yếu); W/S là tiêu chí có trung bình động thấp nhất, Writing thêm dạng đề có band thấp nhất trong các dạng đã làm ≥ 2 bài. **3 gợi ý:** L/R là các phần đề (section) chứa dạng câu yếu, xếp theo xác suất làm đúng dự đoán gần 70% nhất; không có điểm yếu thì gợi ý cả đề; W/S là đề Practice thuộc dạng đề yếu, không có thì đề Practice bất kỳ của kỹ năng đó. Chỉ lấy đề đã publish, chưa làm trong 14 ngày qua; hết thì lấy đề làm lâu nhất. Còn ≤ 14 ngày tới ngày thi và kỹ năng ưu tiên chưa có bài Mock nào trong 14 ngày qua thì gợi ý đầu tiên là 1 bài Mock của kỹ năng đó (đề do hệ thống chọn ngẫu nhiên khi bắt đầu, chỉ gợi ý khi kỹ năng còn đề Mock chưa làm). Gợi ý Practice chỉ lấy đề `allowed_mode` practice/both. Kỹ năng ưu tiên không có đề nào đã publish thì chuyển sang kỹ năng kế tiếp theo cùng luật. Câu lý do sinh theo mẫu. Tính lại mỗi lần xem dashboard |
 | BR-18 | Learner chỉ thấy đề đã publish. Mỗi đề lưu loại nguồn (original, open licence, public domain), tên nguồn, giấy phép, và phải được Admin duyệt trước khi publish |
 | BR-19 | Không dùng AI để tạo nội dung đề. TTS chỉ đọc câu do người viết; AI chỉ dùng để chấm |
 | BR-20 | **Suất Expert chung cả hệ thống** mỗi tuần lịch (`expert_weekly_capacity`, Admin sửa theo sức chấm của Expert). Lượt Mock giữ chỗ và yêu cầu Practice cùng trừ vào suất này. Hết suất: Mock vẫn làm được nhưng chỉ có điểm AI (báo trước khi bắt đầu); yêu cầu Practice bị từ chối với lý do "hết suất tuần này". Mock được ưu tiên khi giao bài (xem luồng giao yêu cầu Expert) |
@@ -191,7 +192,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | UC-21 | Soạn, duyệt, publish đề | Admin | Must | FR-26, 27 |
 | UC-22 | Cấu hình AI và dữ liệu tham chiếu | Admin | Must | FR-28 |
 | UC-23 | Xem dashboard hệ thống | Admin | Must | FR-29 |
-| UC-24 | Giám sát và chạy lại chấm AI | Admin, LLM | Must | FR-30 |
+| UC-24 | Giám sát và chạy lại chấm AI | Admin, LLM | Must | FR-30, 44 |
 | UC-25 | Giao lại yêu cầu chấm | Admin | Must | FR-22 |
 | UC-26 | Tự nộp khi hết giờ («extend» Take Mock Test) | System | Must | FR-12 |
 | UC-27 | AI chấm và nhận xét («include») | LLM | Must | FR-16, 18 |
@@ -245,6 +246,21 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 **UC-30 Import.** Tải mẫu theo kỹ năng, điền, rồi upload file kèm media. Validate như UC-21, xem trước và danh sách lỗi theo dòng/cột, xác nhận thì tạo đề nháp và xếp TTS. Có lỗi thì **không lưu gì**. Trùng nguồn thì cảnh báo và cho tạo phiên bản mới.
 
+**UC-22 Cấu hình AI (phần prompt, chốt 2026-11-11).** Admin xem danh sách prompt theo `prompt_registry.py`: tên, phiên bản đang gắn `production`, các phiên bản khác, model và tham số trong config. Sửa thì tạo **phiên bản mới** trên Langfuse, chưa gắn `production`; không sửa đè phiên bản cũ. Đổi label `production` sang một phiên bản (kể cả quay về bản cũ) là bước riêng, có hộp xác nhận. Validate trước khi lưu: đủ biến bắt buộc của prompt đó, config là JSON hợp lệ, model nằm trong danh sách cho phép. Mỗi lần tạo phiên bản hoặc đổi label ghi `audit_logs` (tên prompt, phiên bản, label trước và sau). Phiên bản mới có hiệu lực sau tối đa 60 s (cache prompt `langfuse_cache_ttl_seconds`); lượt chấm đang chạy giữ phiên bản đã lấy. Ngoại lệ:
+- Langfuse lỗi: báo lỗi, không ghi gì, không ghi audit.
+- Hai Admin sửa cùng lúc: mỗi người tạo một phiên bản riêng; label theo lần đổi sau cùng; audit có cả hai.
+
+**UC-24 Giám sát và chạy lại chấm AI (chốt 2026-11-11).** Danh sách `grading_runs` mới nhất, lọc theo trạng thái, kỹ năng, khoảng ngày, model, phiên bản prompt. Mỗi dòng có attempt, task, model, phiên bản prompt, token, chi phí, độ trễ, lỗi và link trace Langfuse (ẩn link khi trace đã quá hạn xem của gói Langfuse hoặc đã xoá sau 90 ngày); trang chi tiết thêm `output` và lỗi đầy đủ. Lượt **treo** là lượt còn `grading` quá lease 25 phút. **Badge trên dashboard Admin** (không gửi email) đếm: attempt `grading_failed`, lượt treo, chi phí tháng đạt 80% hoặc 100% ngân sách (FR-44); bấm vào mở danh sách đã lọc sẵn. Trang chi phí: token và chi phí theo ngày, tháng, model, kỹ năng so với ngân sách. Chạy lại:
+- Một bài, hoặc hàng loạt (chọn nhiều dòng hoặc theo bộ lọc, tối đa 50 attempt mỗi lần). Được chạy lại cả bài đã chấm thành công, ví dụ sau khi đổi prompt.
+- Trước khi xác nhận hiện số bài và chi phí ước tính (chi phí trung bình mỗi lượt của kỹ năng đó trong 30 ngày gần nhất).
+- Bỏ qua attempt đang `grading`, `no_speech`, hoặc bài Speaking đã xoá audio; trả về danh sách bị bỏ qua kèm lý do.
+- Mỗi attempt tạo evaluation AI **mới** (bản cũ giữ nguyên), dùng phiên bản `production` lúc chạy, vào hàng đợi chấm thường (Mock trước Practice, không chen hàng).
+- Bản mới xong thì thành chính thức nếu chưa có điểm Expert; đã có điểm Expert thì bản mới không chính thức (SD-09). Bản mới lỗi thì bản cũ vẫn là chính thức.
+- Audit: mỗi attempt một dòng; chạy hàng loạt thì `after` có `batch_id`.
+- Vượt ngân sách vẫn cho chạy lại, chỉ cảnh báo.
+
+**UC-38 Xem audit log.** Danh sách chỉ đọc, mới nhất trước, lọc theo actor (một Admin cụ thể hoặc system), hành động, entity, khoảng ngày; mở một dòng để xem `before` và `after`. Hành động phải ghi: khoá và mở khoá tài khoản, tạo Expert và Admin, publish, archive và tạo phiên bản mới của đề, sửa bộ đề, sửa cấu hình, bảng quy đổi và tiêu chí, tạo phiên bản prompt và đổi label, chạy lại chấm AI, giao lại Expert, kỳ nghỉ lễ; tác vụ tự động ghi với actor system. Không chép bài làm của Learner vào `before`/`after`. Giữ lâu dài (bảng chỉ thêm).
+
 ---
 
 ## 6. Luồng nghiệp vụ và máy trạng thái
@@ -277,6 +293,7 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
   - `in_progress` → `abandoned`: **chỉ Mock (thi thử)**; Learner thoát phòng thi giữa chừng thì tính là bỏ dở. Dòng giữ lại, ẩn khỏi lịch sử
   - Practice (luyện tập) `in_progress` mà Learner xoá thì **xoá hẳn dòng attempt** (và `attempt_sections`, `answers` theo); không có trạng thái `abandoned`. Bài đã nộp không xoá được (409)
   - `grading` → `grading_failed` (lỗi sau 3 lần thử, báo Admin) → `grading` (Admin chạy lại)
+  - Admin chạy lại bài đã `scored`: attempt giữ `scored`, kết quả cũ vẫn hiện tới khi evaluation mới `done` (UC-24)
   - Speaking im lặng toàn bộ → `no_speech`
   - Practice có điểm Expert về sau: kết quả Expert thành chính thức, trạng thái giữ `scored`.
 - **evaluations.status:** AI: `pending` → `done` (tính `overall_band`) hoặc `failed`. Expert: `draft` (lưu nháp) → `done`. Không bao giờ ghi đè; mỗi attempt có đúng 1 evaluation chính thức.
@@ -372,6 +389,11 @@ Ràng buộc `tests UNIQUE(test_set_id, skill)` nghĩa là mỗi bộ đề Mock
 - `system_settings`: thêm `expert_weekly_capacity` (BR-20) và `review_decline_hours` = 2 (FR-39); `review_due_hours` = 48 nay là giờ làm việc; thêm `expert_pause_periods` (BR-22): mảng JSON `{start, end, reason}`, không cần bảng mới. Tạo hoặc sửa kỳ nghỉ thì tính lại `due_at` của assignment đang mở.
 - RLS `expert_eval_read` cho Expert xem bản AI của bài đang được giao (ràng buộc 13).
 - Realtime publication thêm `review_assignments` để báo bài mới cho Expert trong app.
+
+**Thay đổi cho giám sát AI (chốt 2026-11-11, chưa có migration):**
+- `grading_runs.cost_usd numeric(10,6)`: chi phí tính lúc chạy theo bảng giá hiện hành, nên đổi giá không làm sai số cũ.
+- `system_settings`: thêm `ai_model_prices` (JSON `{model: {input_per_1m, output_per_1m}}`, USD) và `ai_monthly_budget_usd` (mặc định 20, Admin sửa được). Ngưỡng cảnh báo cố định 80% và 100%.
+- Cron ARQ hằng ngày: đặt `output`, `error` = null cho lượt `failed` quá 180 ngày. Trace Langfuse quá 90 ngày: cron ARQ hằng ngày lấy `trace_id` của các `grading_runs` có `started_at` cách đây 90–97 ngày rồi gọi `DELETE /api/public/traces` (xoá theo lô, lặp lại không sao). Không dùng cài đặt retention của Langfuse vì chỉ gói Pro và Enterprise có (kiểm tra 2026-11-11: project `IELTS Tuitor` trên Langfuse Cloud, `retentionDays` = null). Nếu nâng lên Pro thì đặt Data Retention = 90 ngày và bỏ cron.
 
 **View (2):** `attempt_results` (band của attempt, luôn lấy từ kết quả chính thức), `review_request_details` (completed_at; nguồn lấy từ `attempts.mode`).
 
@@ -554,7 +576,7 @@ Luật quyết định **làm gì** (kỹ năng ưu tiên, ngày thi, bài chẩ
 |---|---|---|---|---|
 | GET, PUT | `/users/me`, `/users/me/goals` | Hồ sơ; mục tiêu và ngày thi | User; Learner | 04, 05 |
 | POST | `/users/me/voice-consent` | Ghi nhận đồng ý ghi âm | Learner | 35 |
-| GET | `/users/me/dashboard`, `/recommendations`, `/quotas` | Band hiện tại, khoảng cách, lộ trình (BR-17), quota Expert còn lại | Learner | 06, 08, 12 |
+| GET | `/users/me/dashboard`, `/recommendations`, `/quotas` | Band hiện tại, khoảng cách, lộ trình (BR-17), quota Expert còn lại. Code hiện dùng `/test-practice/learning-profile` (thêm `current_bands`, `exam`) và `/test-practice/learning-profile/next-step` (spec 005) | Learner | 06, 08, 12 |
 | GET | `/tests`, `/test-sets` | Đề và bộ đề đã publish | Learner | 07, 08 |
 | POST | `/attempts` | Bắt đầu attempt; trả đề **không kèm đáp án** | Learner | 07–10 |
 | PUT | `/attempts/{id}/answers`, `/attempts/{id}/essays/{task_no}` | Tự lưu đáp án L/R hoặc một task Writing | Chủ bài | 07–09 |
@@ -571,7 +593,8 @@ Luật quyết định **làm gì** (kỹ năng ưu tiên, ngày thi, bài chẩ
 | POST, PATCH | `/admin/experts`, `/admin/users/{id}/status` | Tạo Expert và gửi lời mời; khoá/mở khoá | Admin | 19 |
 | CRUD, POST | `/admin/tests`, `/admin/test-sets`, `/admin/tests/{id}/publish`, `/archive`, `/new-version` | Soạn đề và bộ đề; publish; archive; tạo phiên bản mới | Admin | 21, 34, 36 |
 | POST | `/admin/media-uploads`, `/admin/speaking-questions/{id}/tts`, `/admin/tests/import` | Upload media; sinh lại audio câu hỏi; import đề | Admin | 39, 31, 30 |
-| GET, POST | `/admin/grading-runs`, `/admin/attempts/{id}/regrade` | Lượt chấm lỗi hoặc treo kèm trace id; chạy lại chấm AI | Admin | 24 |
+| GET, POST | `/admin/grading-runs`, `/admin/grading-runs/{id}`, `/admin/ai-usage`, `/admin/alerts`, `/admin/attempts/{id}/regrade`, `/admin/regrade-batches` | Lượt chấm có lọc và chi tiết kèm link trace; token, chi phí, ngân sách; số đếm cho badge; chạy lại một bài hoặc hàng loạt | Admin | 24 |
+| GET, POST, PUT | `/admin/prompts`, `/admin/prompts/{name}/versions`, `/admin/prompts/{name}/production` | Danh sách prompt và phiên bản; tạo phiên bản mới; đổi label `production` | Admin | 22 |
 | POST | `/admin/review-requests/{id}/reassign` | Giao lại cho Expert khác | Admin | 25 |
 | GET, PUT | `/admin/settings`, `/admin/band-conversions`, `/admin/criteria`, `/admin/statistics`, `/admin/audit-logs` | Cấu hình, dữ liệu tham chiếu, dashboard, audit log | Admin | 22, 23, 38 |
 
@@ -604,6 +627,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-26 | Quan sát hệ thống: OpenTelemetry ở Core API, worker, AI engine; Prometheus + Grafana cho metrics (độ dài hàng đợi, p95 tự lưu, thời gian chấm); Sentry cho lỗi; nối `trace_id` với Langfuse. Load test bằng k6, đo trước và sau khi đổi kiến trúc. Chốt 2026-11-08, chưa code | Không có số đo thì không chứng minh được chịu tải hay NFR-02 |
 | ADR-27 | Chấm có hàng đợi ưu tiên (Mock trước Practice) và báo vị trí trong hàng. AI engine chạy trên máy có GPU của nhóm qua Cloudflare Tunnel khi phát triển; thuê GPU theo giờ (pod, ngân sách ≤ 500.000 đ) cho ngày load test và ngày bảo vệ, chạy 2 bản để chứng minh mở rộng được. (Should) LiteLLM làm gateway LLM: giới hạn tốc độ chung, thử lại, model dự phòng. Chốt 2026-11-08, chưa code | Cloudflare không chạy được torch và không có GPU. Không dùng GPU serverless vì nạp model mỗi lần khởi động chậm |
 | ADR-28 | Không dùng Kubernetes, Kafka, Temporal, hay tách thêm microservice | Nhóm 3 người, 1 tháng, không có người vận hành; Docker Compose, Redis Streams và cron quét bảng có lease đã đủ cho quy mô thiết kế |
+| ADR-29 | Truy vết AI: một trace Langfuse cho mỗi `grading_run`, nhóm theo `session_id = attempt_id`; mỗi lần gọi LLM là một generation. Chi phí tính và lưu trong DB (`grading_runs.cost_usd`) làm nguồn cho badge ngân sách. Trace giữ 90 ngày, xoá bằng cron gọi API Langfuse (cài đặt retention chỉ có ở gói Pro trở lên); gói Hobby chỉ cho xem 30 ngày gần nhất, nên link trace cũ hơn 30 ngày không mở được dù dữ liệu còn. `output` lượt lỗi giữ 180 ngày. **Dùng Langfuse Cloud gói Hobby (miễn phí)**: xem trace 30 ngày, 50.000 đơn vị/tháng (ước 6–10 đơn vị mỗi lượt chấm, khoảng 5.000 lượt/tháng). Số liệu lâu dài (token, chi phí, độ trễ, lỗi) lấy từ `grading_runs`, không phụ thuộc Langfuse. Load test bật lấy mẫu trace (`sample_rate`) để không đốt hạn mức. Chuyển sang tự host bằng Docker khi dùng quá 80% hạn mức tháng hoặc cần xem trace cũ hơn 30 ngày. Chốt 2026-11-11, chưa code | Khớp 1:1 với cột `trace_id`; mỗi job ARQ tự mở trace, không phải chuyển trace context giữa các job; chạy lại tạo trace mới, tách khỏi lần cũ. Một trace cho mỗi attempt phải chuyển context qua job và lẫn lần chạy lại; một trace cho mỗi lần gọi thì mất liên kết giữa 4 tiêu chí và các lần thử. Chi phí lưu trong DB để badge không phụ thuộc Langfuse. Trace chứa bài làm nên giữ ngắn (Nghị định 13) |
 
 ---
 
@@ -659,7 +683,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | # | Mâu thuẫn | Quyết định |
 |---|---|---|
 | 1 | Sơ đồ SD-00, 02, 03, 05, 08, 09 vẽ "Job Queue (**Supabase pgmq**)"; chữ trong báo cáo (mục 3.4 và quyết định kiến trúc "ba khối Core API, worker, AI engine") và ARCH_system ghi **Redis + ARQ** | Theo **Redis + ARQ**. Sơ đồ SD cần sửa nhãn |
-| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Báo cáo cần sửa quyết định đó |
+| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Từ 2026-11-11 Admin tạo phiên bản và đổi label ngay trong app (UC-22); app gọi API Langfuse, vẫn không lưu bản sao nào khác. Báo cáo cần sửa quyết định đó |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
 | 6 | Báo cáo ghi "P suy ra từ độ chính xác phát âm"; Langfuse có `speaking/common/pr` để LLM cho band | Code tính band P, prompt `pr` v3 chỉ giải thích. Band dựa trên độ tin cậy nhận dạng, không còn dựa trên độ chính xác âm vị, nên báo cáo cần sửa theo ADR-21 |
@@ -669,7 +693,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 
 ---
 
-## 12. Trạng thái code thực tế (cập nhật 2026-11-09)
+## 12. Trạng thái code thực tế (cập nhật 2026-11-11)
 
 **Đã thống nhất một schema duy nhất `public` (từ 2026-11-09: 32 bảng + 2 view) theo §7. Không còn khái niệm v1/v2.** Cutover chạy 2026-11-03: các object `public` cũ chuyển sang schema `legacy` (29 bảng, 19 enum, 5 hàm; chỉ để sao lưu, **chưa xoá**), schema mới đổi tên thành `public`, trigger đăng ký `on_auth_user_created` → `public.handle_new_user` (không nuốt lỗi), Realtime publication gồm `attempts`, `review_requests`, `free_essays`.
 
@@ -717,7 +741,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.
 - Đề Writing: 97 đề trên R2 (`ielts-learning`, prefix `dataset/writing/`), mới nhập 6; 91 đề còn lại import sau.
 - Expert workflow: làm một phần.
-- Dashboard chưa theo BR-12 (đang lấy trung bình mọi bài đã chấm; Writing chưa có bài thì lấy `input_band`), chưa hiện số ngày còn lại tới ngày thi, chưa có lộ trình BR-17/ADR-23 (`/recommendations`).
+- Lộ trình học (spec 005, làm 2026-11-11): band hiện tại theo BR-12, overall BR-02, khoảng cách, số ngày tới ngày thi (giờ VN) trong `GET /test-practice/learning-profile` (`current_bands`, `exam`); thẻ "Bước tiếp theo" ở `GET /test-practice/learning-profile/next-step` (package `backend/app/services/learner_journey/`, luật thuần + Elo, không LLM, không bảng mới). 58 unit test (`backend/tests/test_learner_journey_*.py`). Mỗi endpoint ~1,4 s gồm xác thực (đo từ máy dev tới Supabase; các lượt đọc chạy song song). Overview cache 30 s, xoá khi nộp L/R; W/S chấm ở worker nên có thể trễ tới 30 s. Band tự nhập (`input_band`) không còn dùng làm band; banner "Đầu vào" vẫn hiện giá trị mặc định 4.0 vì `learner_profiles` không có cột này. Bài L/R nộp trống (40 câu, 0 đúng, band 0.0) vẫn tính vào band hiện tại như mọi kết quả chính thức (chủ dự án chốt 2026-11-11).
 
 **Speaking (2026-11-06):** đã có phòng thi Practice và Mock (đồng ý ghi âm, mic check, ghi âm thật, upload presigned, hết giờ tự chuyển câu, Mock không ghi lại và tự nộp), pipeline chấm hai kênh, màn kết quả thật, job xoá audio 180 ngày trong ARQ. Không cần migration.
 - Cần `R2_PRIVATE_BUCKET_NAME`: bucket không public, có CORS cho `PUT` từ origin frontend. Chưa cấu hình thì API upload trả 503.
@@ -730,6 +754,8 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Giấy phép: `praat-parselmouth` là GPLv3; L2-ARCTIC là CC BY-NC 4.0; trọng số CrisperWhisper chỉ cho phi thương mại. Dùng được cho KLTN, cần xem lại nếu thương mại hoá.
 
 **Expert (thiết kế chốt 2026-11-08, chưa code):** đã có `GET /expert/me`, `PATCH /expert/me/availability` và trang `expert/profile`. Chưa có giữ chỗ quota, suất chung, job giao bài, trả lại bài, màn chấm, nhãn "preliminary", thời điểm dự kiến cho Learner. Đặc tả ở `specs/003-expert-review/spec.md`. Kỳ nghỉ lễ do Admin đặt trong app (BR-22, chốt 2026-11-08); Learner biết qua lý do từ chối và thông báo trước khi thi Mock, app không có chức năng thông báo chung.
+
+**Admin giám sát AI (thiết kế chốt 2026-11-11, chưa code):** hiện có `GET /admin/evaluations/logs` (sẽ đổi thành `/admin/grading-runs`); `trace_id` còn trống (đã có `get_trace_id()` trong `app/ai/services/langfuse/tracing.py` nhưng chưa nối); chưa có API chạy lại (Speaking dùng `backend/scripts/regrade_speaking_attempt.py`), API audit log, sửa prompt trong app, chi phí và badge; `app/schemas/admin.py` còn trường cũ `phoenix_trace_id`.
 
 **Bảo mật đã sửa:** JWT fallback verify HS256 + `aud=authenticated`; không còn mượn user đầu tiên khi chưa đăng nhập; xoá lịch sử kiểm tra chủ sở hữu.
 
@@ -753,5 +779,6 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Chương IV (triển khai, giao diện, kiểm thử, đánh giá AI) chưa viết. Vì Expert sửa từ bản AI nên không đo MAE như hai người chấm độc lập; dùng tỉ lệ và mức Expert sửa (§1).
 - Host AI engine ở đâu: Cloudflare Workers không chạy được torch, Cloudflare Containers chưa có GPU. Lựa chọn: máy có GPU nối qua Cloudflare Tunnel, VPS chỉ CPU (chưa đo tốc độ), hoặc thuê GPU. Core API, worker và Redis cần chỗ chạy liên tục.
 - Quyết định "prompt quản lý trên Langfuse" trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".
+- Banner "Đầu vào" ở dashboard luôn hiện 4.0 (không có cột `input_band`): giữ nguyên, bàn sau (2026-11-11).
 - Tham số lộ trình (K, p0, m, vùng 0,60–0,75, ngưỡng 6 câu và 2 bài, cửa sổ 14 ngày) là giá trị khởi đầu; hiệu chỉnh khi có dữ liệu Learner thật.
 - Hiệu chuẩn ngưỡng rubric phát âm bằng bộ đo thử (`docs/speech-eval-recording-script.md`) và sau đó bằng dữ liệu Expert.
