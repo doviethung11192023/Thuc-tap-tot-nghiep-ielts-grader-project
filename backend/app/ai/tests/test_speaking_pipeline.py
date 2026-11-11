@@ -9,6 +9,7 @@ from services.speaking import speaking_grading_pipeline as pipeline
 from services.speaking.answer_analysis import AnswerAnalysis
 from services.speaking.audio_signal import AudioQuality
 from services.speaking.phoneme_comparison import WordResult
+from services.speaking.speaking_criterion_evidence import CriterionWithEvidence
 from services.speaking.speech_transcriber import TimedWord, Transcript
 from services.speaking.acoustic_features import AcousticFeatures
 
@@ -40,6 +41,12 @@ def stubs(monkeypatch):
     async def fake_evaluate(name, compiled):
         return AgentCriterionOutput(band=9.0 if name == "pr" else 6.0, summary=name)
 
+    async def fake_evaluate_with_evidence(name, compiled):
+        edits = [{"response": "R1", "original": "like", "corrected": "love", "category": "word_choice",
+                  "explanation": "x"}] if name == "lr" else []
+        spans = [{"response": "R2", "group": "topic_word", "text": "music"}] if name == "lr" else []
+        return CriterionWithEvidence(await fake_evaluate(name, compiled), edits, spans)
+
     class Manager:
         def get_speaking_criterion_prompt(self, name, **variables):
             calls["criteria"][name] = variables
@@ -55,6 +62,7 @@ def stubs(monkeypatch):
 
     monkeypatch.setattr(pipeline, "download_audio", fake_download)
     monkeypatch.setattr(pipeline, "evaluate_criterion", fake_evaluate)
+    monkeypatch.setattr(pipeline, "evaluate_criterion_with_evidence", fake_evaluate_with_evidence)
     monkeypatch.setattr(pipeline, "get_prompt_manager", lambda: Manager())
     monkeypatch.setattr(pipeline, "generate_part_feedback", fake_parts)
     monkeypatch.setattr(pipeline, "generate_overall", fake_overall)
@@ -126,3 +134,14 @@ def test_grammar_tools_do_not_see_fillers(stubs, monkeypatch):
 def test_prompts_receive_no_identifiers(stubs, monkeypatch):
     _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
     assert "r1" not in str(stubs["criteria"])
+
+
+def test_quoted_errors_and_strengths_are_stored_per_response(stubs, monkeypatch):
+    result = _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
+    rows = {row["response_id"]: row for row in result["responses"]}
+    edit = rows["r1"]["edits"][0]
+    assert rows["r1"]["transcript"][edit["start"]:edit["end"]] == "like" and edit["criterion"] == "LR"
+    assert rows["r2"]["edits"] == [] and rows["r2"]["strengths"][0]["text"] == "music"
+    assert rows["r1"]["words"][0] == {"text": "um", "start": 0, "end": 0.2}
+    assert result["feedback_anchoring"]["edits_kept"] == 1
+    assert stubs["criteria"]["gra"]["transcript"].startswith("[R1 · Part 1] um I like music")

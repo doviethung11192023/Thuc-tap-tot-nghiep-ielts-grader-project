@@ -205,3 +205,14 @@ def test_discarding_practice_attempt_removes_its_audio(monkeypatch):
     retention, _ = _retention_world(monkeypatch, r2)
     retention.delete_attempt_audio("a1")
     assert sorted(r2.deleted) == ["new.webm", "old.webm"]
+
+
+def test_detail_feedback_is_read_per_response_and_old_outputs_give_empty_lists():
+    """spec 007: lỗi/điểm mạnh/gợi ý phát âm lấy từ output theo response; bài chấm trước 007 không có."""
+    edit = {"kind": "replace", "criterion": "GRA", "original": "is", "corrected": "was", "start": 3, "end": 5}
+    output = {"responses": [{"response_id": "r1", "edits": [edit], "strengths": None},
+                            {"response_id": "r2", "transcript": "old run"}]}
+    feedback = views._feedback_by_response(output)
+    assert feedback["r1"] == {"edits": [edit], "strengths": [], "pronunciation_hints": []}
+    assert feedback["r2"] == {"edits": [], "strengths": [], "pronunciation_hints": []}
+    assert views._feedback_by_response({}) == {}

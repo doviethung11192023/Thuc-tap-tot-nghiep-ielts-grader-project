@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getAttemptDetail } from '@/services/student-test-practice';
 import { SpeakingRecordedAudio } from './speaking/speaking-recorded-audio';
+import { SpeakingAnswerFeedback } from './speaking/speaking-answer-feedback';
+import type { SpeakingEdit, SpeakingPronunciationHint, SpeakingStrength } from './speaking/speaking-feedback-types';
 
 interface SpeakingAnswerDetail {
   response_id: string;
@@ -12,6 +14,9 @@ interface SpeakingAnswerDetail {
   question: string;
   transcript: string | null;
   audio_url: string | null;
+  edits?: SpeakingEdit[];
+  strengths?: SpeakingStrength[];
+  pronunciation_hints?: SpeakingPronunciationHint[];
 }
 
 interface PartFeedbackAnswer {
@@ -31,6 +36,7 @@ interface PartFeedback {
 
 interface SpeakingDetail {
   title: string;
+  speaking?: { pronunciation?: { phoneme_usable?: boolean } | null };
   answers: SpeakingAnswerDetail[];
   parts: Record<string, PartFeedback | null> | null;
 }
@@ -51,12 +57,6 @@ function FeedbackBlock({ feedback }: { feedback: PartFeedbackAnswer }) {
       ))}
       {!!feedback.useful_language?.length && (
         <p><span className="font-bold">Cụm từ nên dùng:</span> {feedback.useful_language.join(', ')}</p>
-      )}
-      {feedback.upgraded_answer && (
-        <details>
-          <summary className="font-bold text-blue-700 cursor-pointer">Xem câu trả lời nâng cấp</summary>
-          <p className="mt-1.5 leading-relaxed">{feedback.upgraded_answer}</p>
-        </details>
       )}
     </div>
   );
@@ -85,6 +85,11 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
       <main className="max-w-3xl mx-auto p-4 space-y-6">
         {failed && <p className="text-sm text-slate-600 text-center pt-10">Không tải được chi tiết bài làm.</p>}
         {!failed && !detail && <p className="text-sm text-slate-500 text-center pt-10">Đang tải...</p>}
+        {detail?.speaking?.pronunciation?.phoneme_usable === false && (
+          <p className="text-xs text-amber-800 bg-amber-50 rounded-xl px-3 py-2">
+            Bản ghi có vẻ bị méo hoặc phát qua loa, nên hệ thống không chỉ ra từ phát âm chưa rõ. Hãy ghi âm trực tiếp, gần micro để nhận gợi ý từng từ.
+          </p>
+        )}
 
         {partNumbers.map((part) => {
           const partFeedback = detail?.parts?.[`part${part}`];
@@ -101,9 +106,14 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
                     {answer.audio_url
                       ? <SpeakingRecordedAudio src={answer.audio_url} className="w-full h-10" />
                       : <p className="text-xs text-slate-500">Audio không còn được lưu.</p>}
-                    <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-3">
-                      {answer.transcript || 'Không nghe được câu trả lời.'}
-                    </p>
+                    <SpeakingAnswerFeedback
+                      transcript={answer.transcript}
+                      audioUrl={answer.audio_url}
+                      edits={answer.edits ?? []}
+                      strengths={answer.strengths ?? []}
+                      hints={answer.pronunciation_hints ?? []}
+                      upgradedAnswer={feedback?.upgraded_answer}
+                    />
                     {feedback && <FeedbackBlock feedback={feedback} />}
                   </article>
                 );

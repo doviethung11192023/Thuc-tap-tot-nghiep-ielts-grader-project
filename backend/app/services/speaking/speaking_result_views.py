@@ -73,6 +73,12 @@ def _metrics_by_response(response_ids: list[str]) -> dict[str, dict[str, float]]
     return grouped
 
 
+def _feedback_by_response(output: dict[str, Any]) -> dict[str, dict[str, list]]:
+    """Lỗi, điểm mạnh, từ có thể phát âm chưa rõ của từng câu (spec 007); bài chấm trước đó không có."""
+    return {row["response_id"]: {key: row.get(key) or [] for key in ("edits", "strengths", "pronunciation_hints")}
+            for row in output.get("responses") or [] if row.get("response_id")}
+
+
 def build_speaking_detail(attempt: dict[str, Any]) -> dict[str, Any]:
     summary = build_speaking_summary(attempt)
     answers = load_answers(attempt["id"])
@@ -83,6 +89,8 @@ def build_speaking_detail(attempt: dict[str, Any]) -> dict[str, Any]:
     evaluation = _current_evaluation(attempt["id"])
     done = bool(evaluation and evaluation["status"] == "done")
     output = _run_output(evaluation["id"]) if done else {}
+    feedback = _feedback_by_response(output)
+    empty = {"edits": [], "strengths": [], "pronunciation_hints": []}
     items = []
     for answer in answers:
         response = response_by_id.get(answer["response_id"]) or {}
@@ -92,5 +100,6 @@ def build_speaking_detail(attempt: dict[str, Any]) -> dict[str, Any]:
             "transcript": response.get("transcript"), "duration_ms": answer["duration_ms"],
             "metrics": metrics.get(answer["response_id"], {}),
             "audio_url": r2_storage.presign_private_get(answer["audio_key"], AUDIO_URL_SECONDS) if audio_available else None,
+            **feedback.get(answer["response_id"], empty),
         })
     return {**summary, "answers": items, "parts": output.get("parts"), "criteria_detail": _criterion_details(output)}

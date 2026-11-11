@@ -62,7 +62,31 @@
 **Tự nêu giới hạn:**
 - PREP mạnh hơn ở chỗ chấm phát âm theo từng từ và trọng âm, và có dữ liệu lớn để huấn luyện model chấm band.
 - Hệ thống của nhóm chưa chấm trọng âm.
-- Chưa so điểm hai hệ thống trên cùng một bản ghi.
+
+### Đã làm theo PREP và đo trên cùng một bản ghi (✅ spec 007, ADR-31)
+
+Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua pipeline của mình.
+
+| | PREP | Nhóm, trước spec 007 | Nhóm, sau spec 007 |
+|---|---|---|---|
+| FC / LR / GRA / P | 6 / 5 / 6 / 6 (overall 5.5) | 8 / 7 / 7 / 6 (7.0) | 8 / 6.5 / 6.5 / 6 (7.0) |
+| Lỗi gạch chân theo vị trí | 11 ngữ pháp + 1 từ vựng | không có | 11 lỗi, **0 lệch vị trí** |
+| Khớp lỗi PREP | — | — | **7/9** lỗi PREP còn trong transcript của nhóm |
+| Thời gian chấm | — | 80 s | 90 s (≤ 120 s, NFR-02) |
+
+**Phát hiện ghi điểm:** Whisper không chỉ "nghe hộ" phát âm (mục 1) mà còn **tự sửa ngữ pháp**: "prepare" → "prepared", "please" → "pleased", bỏ cả đoạn tự sửa "best dishes best decision, I mean, decision". Vì thế GRA ban đầu ra 7.0. Nhóm thử model ASR nguyên văn (CrisperWhisper): giữ được lỗi nhưng **ảo giác lặp** ("the" lặp 37 lần, "To Be A Deceiver" lặp 8 lần), nên loại. Lý do: đánh lỗi vào câu người học không nói còn tệ hơn bỏ sót. Quyết định này dựa trên đo, giống cổng quyết định ở mục 1.
+
+**Cách làm khác PREP:**
+- Lỗi do chính lần chấm GRA/LR trích ra.
+- Code tìm vị trí và so từng từ để tách thành chỗ sửa nhỏ nhất, kiểu ERRANT.
+- Trích không có thật thì bỏ. Điểm mạnh nào chạm lỗi thì bỏ.
+- Nhờ vậy không có chuyện vừa khen vừa chê cùng một cụm như "working on" của PREP.
+
+**Tự nêu giới hạn:**
+- FC vẫn chấm cao hơn PREP 2 band.
+- Lỗi bị ASR sửa mất thì không đánh dấu được.
+- Mới đo trên 1 bản ghi.
+- 90 s là bài 1 câu. Bài 7 câu chấm lại ngày 2026-11-11 mất 234 s (xử lý âm thanh 161 s trên CPU, LLM khoảng 66 s), vượt mục tiêu 120 s; cần đo lại trên máy có GPU trước khi nói đạt NFR-02.
 
 ## 2. Writing: chấm theo bài mẫu từng band (✅)
 

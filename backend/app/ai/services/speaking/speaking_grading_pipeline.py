@@ -25,6 +25,8 @@ from services.speaking.answer_analysis import (
 from services.speaking.audio_signal import download_audio
 from services.speaking.phoneme_comparison import likely_mispronounced
 from services.speaking.pronunciation_rubric import assess_pronunciation
+from services.speaking.speaking_criterion_evidence import evaluate_criterion_with_evidence
+from services.speaking.speaking_response_feedback import build_response_feedback, labelled_transcript
 from services.speaking.speaking_feedback import PartAnswer, generate_overall, generate_part_feedback
 from settings.config import get_settings
 from utils.preprocessor import preprocess
@@ -43,10 +45,6 @@ class SpeakingAnswerInput:
     question: str
     audio_url: str
     duration_ms: int | None = None
-
-
-def _labelled_transcript(answers: list[AnswerAnalysis]) -> str:
-    return "\n".join(f"P{a.part}: {a.transcript.text}" for a in answers if a.transcript.text)
 
 
 def _question_and_answer_transcript(answers: list[AnswerAnalysis]) -> str:
@@ -75,9 +73,10 @@ def _evidence_for_llm(evidence: dict) -> dict:
     return {name: value for name, value in evidence.items() if name not in _PHONEME_EVIDENCE}
 
 
-def _response_rows(answers: list[AnswerAnalysis]) -> list[dict]:
+def _response_rows(answers: list[AnswerAnalysis], feedback: dict[str, dict] | None = None) -> list[dict]:
+    """Stored per response; `feedback` adds word timings, errors, strengths and hints (spec 007)."""
     return [{"response_id": a.response_id, "transcript": a.transcript.text, "silent": a.silent,
-             "metrics": a.metrics} for a in answers]
+             "metrics": a.metrics, **(feedback or {}).get(a.response_id, {})} for a in answers]
 
 
 async def _analyze_all(inputs: list[SpeakingAnswerInput]) -> list[AnswerAnalysis]:
@@ -95,6 +94,15 @@ async def _criterion(name: str, title: str, transcript: str, word_count: int, **
     return output, compiled.langfuse_prompt.version
 
 
+async def _criterion_with_evidence(name: str, title: str, transcript: str, word_count: int, **evidence) -> tuple:
+    """GRA and LR: the band plus the errors and strengths the same call quoted (spec 007)."""
+    compiled = await asyncio.to_thread(
+        get_prompt_manager().get_speaking_criterion_prompt, name, test_title=title,
+        transcript=transcript, word_count=word_count, **evidence)
+    result = await evaluate_criterion_with_evidence(name, compiled)
+    return result, compiled.langfuse_prompt.version
+
+
 def _criterion_payload(output: AgentCriterionOutput) -> dict:
     return {"band": output.band, "summary": output.summary, "strengths": output.strengths,
             "issues": output.issues, "improvements": output.improvements}
@@ -108,7 +116,7 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
         return {"no_speech": True, "responses": _response_rows(answers), "speech_seconds": round(speech_seconds, 1)}
 
     spoken = [a for a in answers if not a.silent]
-    transcript = _labelled_transcript(spoken)
+    transcript = labelled_transcript(spoken)
     metrics = combine_metrics(spoken)
     word_count = int(metrics.get("word_count", 0))
     comparison = combine_comparison(spoken)
@@ -124,16 +132,20 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
                                             asyncio.to_thread(compute_lexical, processed))
     pronunciation_evidence = {**assessment.as_dict(), "words_possibly_mispronounced": weak_words}
 
-    (fc, fc_v), (lr, lr_v), (gra, gra_v), (pr, pr_v) = await asyncio.gather(
+    (fc, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
         _criterion("fc", title, _question_and_answer_transcript(spoken), word_count,
                    speech_metrics=json.dumps(metrics)),
-        _criterion("lr", title, transcript, word_count, lexical_stats=str(lexical)),
-        _criterion("gra", title, transcript, word_count, grammar=str(grammar)),
+        _criterion_with_evidence("lr", title, transcript, word_count, lexical_stats=str(lexical)),
+        _criterion_with_evidence("gra", title, transcript, word_count, grammar=str(grammar)),
         _criterion("pr", title, transcript, word_count,
                    pronunciation_assessment=json.dumps(_evidence_for_llm(pronunciation_evidence), ensure_ascii=False),
                    pronunciation_band=assessment.band),
     )
     pr.band = assessment.band           # code owns this band, whatever the LLM returned
+    lr, gra = lr_full.output, gra_full.output
+    feedback, anchoring = build_response_feedback(
+        spoken, gra_full.edits, lr_full.edits, lr_full.strength_spans + gra_full.strength_spans,
+        assessment.phoneme_usable)
 
     parts = await generate_part_feedback(title, [
         PartAnswer(a.part, a.question, a.transcript.text, a.quality.speech_seconds) for a in spoken])
@@ -142,7 +154,8 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
 
     return {
         "no_speech": False,
-        "responses": _response_rows(answers),
+        "responses": _response_rows(answers, feedback),
+        "feedback_anchoring": anchoring,
         "criteria": criteria,
         "pronunciation": pronunciation_evidence,
         "speech_metrics": metrics,
