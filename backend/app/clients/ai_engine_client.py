@@ -10,12 +10,22 @@ MAX_RETRIES = 3
 TIMEOUT_SECONDS = 300.0
 
 
-async def call_ai_grade(title: str, essay: str, task_no: Optional[int], image_url: Optional[str]) -> dict[str, Any]:
-    """Trả JSON kết quả chấm; hết lượt thử thì raise RuntimeError kèm lỗi cuối."""
+def _engine_url(path: str) -> str:
+    """AI_ENGINE_URL trỏ tới /grade; các endpoint khác cùng host."""
+    base = settings.AI_ENGINE_URL.rsplit("/grade", 1)[0]
+    return f"{base}{path}"
+
+
+async def call_ai_grade(title: str, essay: str, task_no: Optional[int], image_url: Optional[str],
+                        answer_key: Optional[dict] = None) -> dict[str, Any]:
+    """Trả JSON kết quả chấm; hết lượt thử thì raise RuntimeError kèm lỗi cuối.
+    answer_key: đáp án Task 1 đã duyệt, AI engine bỏ bước đọc ảnh (spec 006)."""
     payload: dict[str, Any] = {"title": title, "essay": essay}
     if task_no:
         payload["task_type"] = f"task{task_no}"
         payload["image_url"] = image_url
+    if answer_key:
+        payload["answer_key"] = answer_key
     # Secret nội bộ: /grade của AI engine từ chối request không có (giống /grade-speaking)
     headers = {"Content-Type": "application/json", "ngrok-skip-browser-warning": "true",
                "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
@@ -63,3 +73,36 @@ async def call_ai_grade_speaking(title: str, answers: list[dict[str, Any]]) -> d
         if attempt < SPEAKING_TRIES - 1:
             await asyncio.sleep(5)
     raise RuntimeError(f"AI engine speaking grading failed: {last_error}")
+
+
+MATERIAL_TIMEOUT_SECONDS = 180.0
+
+
+async def call_ai_draft_material(kind: str, task_type: str, title: str, image_url: Optional[str],
+                                 answer_key: Optional[dict]) -> Any:
+    """Bản nháp tài liệu theo đề (spec 006). Lỗi 422 của engine là lỗi dữ liệu Admin sửa được."""
+    payload = {"kind": kind, "task_type": task_type, "title": title, "image_url": image_url,
+               "answer_key": answer_key}
+    async with httpx.AsyncClient(timeout=MATERIAL_TIMEOUT_SECONDS) as client:
+        response = await client.post(_engine_url("/draft-material"), json=payload, headers=_headers())
+    if response.status_code == 422:
+        from app.core.domain_errors import InvalidRequestError
+        raise InvalidRequestError(response.json().get("detail") or "Không soạn được bản nháp")
+    if response.status_code != 200:
+        raise RuntimeError(f"AI engine draft failed: HTTP {response.status_code}: {response.text[:300]}")
+    return response.json()["content"]
+
+
+async def call_ai_grading_fingerprint(task_no: int) -> Optional[str]:
+    """Dấu vân tay cấu hình chấm; lỗi thì None (không dùng cache, chấm như thường)."""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(_engine_url("/grading-fingerprint"), params={"task_type": f"task{task_no}"},
+                                        headers=_headers())
+        return response.json().get("fingerprint") if response.status_code == 200 else None
+    except Exception:
+        return None
+
+
+def _headers() -> dict[str, str]:
+    return {"Content-Type": "application/json", "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}

@@ -11,6 +11,8 @@ Endpoints:
                           "image_url": "https://..." (optional, Task 1 chart) }
                   → frontend JSON result (scores, criteria_analysis,
                     inline_annotations, overall_upgraded_essay, word_count, task_type)
+    POST /draft-material  body: { kind, task_type, title, image_url?, answer_key? } → draft (spec 006)
+    GET  /grading-fingerprint?task_type=  → hash of pipeline, models, production prompt versions
     POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}] }
                   → transcripts, speech metrics, 4 criteria, feedback. Requires X-AI-Engine-Secret.
     GET  /health
@@ -41,10 +43,14 @@ logger = get_logger(__name__)
 from settings.config import get_settings  # noqa: E402
 from services.grading_pipeline import (  # noqa: E402
     PromptFetchError,
+    normalize_task,
     run_grading_pipeline,
     warm_up_nlp_tools,
 )
 from services.reference_corpus import ReferenceCorpusError  # noqa: E402
+from services.grading_fingerprint import grading_fingerprint  # noqa: E402
+from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
+from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
@@ -83,6 +89,15 @@ class GradeRequest(BaseModel):
     essay: str = Field(..., min_length=1, max_length=MAX_ESSAY_CHARS)
     task_type: str | None = None   # "task1" | "task2"; missing → task2 (backward compatible)
     image_url: str | None = None   # Task 1 chart/diagram (R2 public URL or any http(s) URL)
+    answer_key: dict | None = None # Task 1 Admin-approved answer key: replaces the vision pass (spec 006)
+
+
+class DraftMaterialRequest(BaseModel):
+    kind: str                      # "answer_key" | "outline" | "sample"
+    task_type: str = "task2"
+    title: str = Field(..., min_length=1, max_length=MAX_ESSAY_CHARS)
+    image_url: str | None = None
+    answer_key: dict | None = None # approved key; required for Task 1 outline/sample
 
 
 class SpeakingAnswerRequest(BaseModel):
@@ -126,6 +141,7 @@ async def grade(req: GradeRequest):
             essay=req.essay,
             task_type=req.task_type,
             image_url=req.image_url,
+            answer_key=req.answer_key,
         )
     except PromptFetchError as e:
         logger.error("Langfuse prompt missing: %s", e)
@@ -136,6 +152,32 @@ async def grade(req: GradeRequest):
     except Exception as e:
         logger.error("Grading failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/draft-material", dependencies=[Depends(require_engine_secret)])
+async def draft_material_endpoint(req: DraftMaterialRequest):
+    """AI draft of per-task material; the Core API stores it as a draft for Admin approval (ADR-30)."""
+    try:
+        content = await draft_material(req.kind, normalize_task(req.task_type), req.title, req.image_url,
+                                       req.answer_key, get_prompt_manager())
+        return {"kind": req.kind, "content": content}
+    except MaterialRequestError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except PromptFetchError as e:
+        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
+    except Exception as e:
+        logger.error("Material draft failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/grading-fingerprint", dependencies=[Depends(require_engine_secret)])
+async def grading_fingerprint_endpoint(task_type: str = "task2"):
+    """Hash of pipeline, models and production prompt versions; the Core API keys its cache on it."""
+    try:
+        return {"fingerprint": await asyncio.to_thread(
+            grading_fingerprint, normalize_task(task_type), get_prompt_manager())}
+    except PromptFetchError as e:
+        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
 
 
 @app.post("/grade-speaking", dependencies=[Depends(require_engine_secret)])

@@ -25,6 +25,45 @@
 
 **Tự nêu giới hạn:** band P ước lượng độ dễ hiểu, chưa chấm từng âm; ngưỡng là tạm, chưa hiệu chuẩn với giám khảo.
 
+## 1b. So sánh với cách PREP chấm Speaking (📏 suy luận, 2026-11-11)
+
+**Nguồn:** bài chấm mẫu công khai trên `prepedu.com/vi/ielts/lab#demo` (Part 2, 73 s, "Describe a time you gave advice to someone") và mã JS công khai của trang. **Chưa chạy lượt chấm thật**: phòng thi nằm trong iframe khác domain nên không đưa audio thử vào được. Mọi điểm dưới đây là **suy luận từ bằng chứng**, nói rõ như vậy khi trình bày.
+
+**Bằng chứng:**
+- Bài mẫu: P 6.0, FC 6.0, LR 5.0, GRA 6.0, Overall **5.5**.
+- Transcript gần nguyên văn: giữ lặp từ và tự sửa, không có um/uh.
+- 11 lỗi ngữ pháp và 1 lỗi từ vựng. Mỗi lỗi có dạng Thay thế / Thừa từ / Thiếu từ kèm nhãn: chia thì, số nhiều, giới từ, mạo từ, liên từ, chọn tính từ.
+- Lời giải thích luôn đúng một khuôn: "'X' phù hợp hơn 'Y' trong bối cảnh này".
+- Điểm mạnh gồm 12 "cụm từ cố định", là các cặp từ như `in-weeks`, `stay-in`, `working-on`, và 1 "cấu trúc phức".
+- Mã JS có các trường `original_text`, `corrected_text`, `start_index`, `end_index`, `error_category`, `num_word_bad_pronun`, `num_word_bad_stress`, `stress_table`, `user_stressed`, cùng các mục upgraded answer và nhận xét từng câu.
+- Ghi âm xuất WAV, upload theo từng câu.
+
+**Suy luận về pipeline PREP:**
+- ASR (gần nguyên văn) rồi chạy song song nhiều module:
+  - model sửa lỗi ngữ pháp (GEC), phân loại lỗi kiểu ERRANT, giải thích bằng template;
+  - rule trên cây cú pháp để tìm collocation, linking devices và câu phức;
+  - engine phát âm dùng transcript làm văn bản chuẩn, chấm từng từ và trọng âm;
+  - model chấm band huấn luyện trên dữ liệu riêng (họ nói "hơn 18 triệu câu trả lời");
+  - LLM viết upgraded answer và nhận xét.
+
+| | PREP (suy luận) | Hệ thống của nhóm |
+|---|---|---|
+| Lỗi GRA/LR | GEC đánh dấu từng chỗ sửa, giải thích bằng template | LLM chấm từ bằng chứng (grammar checker, thống kê từ vựng) |
+| Band | Model huấn luyện trên dữ liệu lớn | LLM cho FC/LR/GRA, code tính P (ADR-21) |
+| Phát âm | Từng từ và trọng âm | Độ tin cậy nhận dạng và ngữ điệu, gắn nhãn ước lượng |
+| Lạc đề | Không thấy bằng chứng trong bài mẫu | FC nhận câu hỏi để xét lạc đề, có trần điểm |
+| Overall | 5.5 từ 6/6/5/6 (trung bình 5.75; làm tròn kiểu IELTS phải ra 6.0) | Trung bình 4 tiêu chí, làm tròn theo IELTS (BR-05) |
+
+**Ghi điểm vì:**
+- Nhóm khảo sát sản phẩm thương mại bằng bằng chứng, không dựa vào quảng cáo.
+- Bài mẫu của PREP để lộ hai module mâu thuẫn nhau: `working on` vừa được khen là cụm từ cố định, vừa bị đánh lỗi `on → for`. Pipeline của nhóm đưa mọi bằng chứng của một tiêu chí vào **cùng một lần chấm**, nên không có hai kết luận trái ngược cho cùng một chỗ.
+- Overall của PREP lệch cách làm tròn của IELTS; hệ thống của nhóm làm tròn đúng theo IELTS.
+
+**Tự nêu giới hạn:**
+- PREP mạnh hơn ở chỗ chấm phát âm theo từng từ và trọng âm, và có dữ liệu lớn để huấn luyện model chấm band.
+- Hệ thống của nhóm chưa chấm trọng âm.
+- Chưa so điểm hai hệ thống trên cùng một bản ghi.
+
 ## 2. Writing: chấm theo bài mẫu từng band (✅)
 
 - Task 2 phân loại dạng đề, đưa cho model một bài mẫu cùng dạng ở mỗi band, chấm 4 tiêu chí trong một lần gọi (ADR-22).
@@ -34,6 +73,30 @@
 - Prompt có phiên bản trên Langfuse; mỗi lượt chấm lưu model và phiên bản prompt.
 
 **Tự nêu giới hạn:** nhãn của bộ đo chưa kiểm chứng; p90 74,4 s, vượt mục tiêu 60 s.
+
+## 2b. Writing Task 1: chấm theo đáp án đã duyệt, đo được hơn PREP ở số liệu (✅ code, 📏 cần đo nhiều đề, ADR-30)
+
+**Vấn đề:** model đọc ảnh mô tả biểu đồ ở mỗi lần chấm. Đọc sai một con số thì TA chấm sai mà không ai biết, và bước này chậm.
+
+**Đã test PREP thật ngày 2026-11-11** (đề "Graphs with a trend 1", 3 lượt chấm):
+- Mỗi đề có dàn ý viết sẵn và bài mẫu, nên PREP có dữ liệu chuẩn theo đề.
+- TA có danh sách 21 ý chính theo khuôn. Bài cố tình sai số được **18/21 "đạt"**, cao hơn bài đúng (17/21): danh sách chỉ kiểm tra có nhắc tới, không kiểm tra số đúng. TA vẫn tụt 8 → 5 ở một bước khác.
+- Nộp lại y nguyên thì có kết quả trong ≤ 10 s, giống từng chữ: có cache.
+
+**Cách xử lý của nhóm:**
+- AI soạn nháp đáp án số liệu từ ảnh **một lần**, Admin sửa và duyệt. Lúc chấm dùng đáp án thay cho đọc ảnh.
+- LLM chỉ **trích** ý nào được nhắc và con số bài ghi; **code** so con số với đáp án (sai lệch ≤ 5%). Độ đúng số liệu có thể kiểm thử, không phụ thuộc phán đoán của LLM.
+- Mức chỉ số con bị code kẹp theo band (PREP để TA 5.0 vẫn hiện "Excellent").
+- Bài mẫu và dàn ý theo đề, cache bài nộp trùng: ngang PREP.
+
+**Số đo thật (2026-11-11, đáp án nhập tay, cùng 2 bài đã nộp cho PREP):**
+
+| | PREP | Hệ thống của nhóm |
+|---|---|---|
+| Bài đúng số | TA 8.0, 17/21 ý | TA 9.0, 8/8 ý có nhắc, 8/8 đúng số |
+| Bài cố tình sai số | TA 5.0, **18/21 ý "đạt"** | TA 5.0, 7/8 có nhắc, **3/7 đúng số**, cả 4 ý sai số bị chỉ ra kèm số đúng |
+
+**Tự nêu giới hạn:** mới đo trên 1 đề, 2 bài, đáp án do nhóm nhập; mỗi lượt khoảng 70 s. Bài mẫu AI soạn thử có câu so sánh sai ("more than double") và dài hơn mức đặt ra, nên bắt buộc Admin duyệt.
 
 ## 3. Dữ liệu không bao giờ bị ghi đè, không bao giờ treo (✅)
 
@@ -130,6 +193,7 @@
 |---|---|
 | AI chấm có chính xác không? | Có số đo cho từng phần (mục 1, 2); nói rõ nhãn chưa kiểm chứng và chưa hiệu chuẩn với giám khảo; Expert sửa điểm AI là nguồn dữ liệu để đo tiếp |
 | Sao không dùng Whisper để chấm phát âm luôn? | Whisper tự sửa lời; trình bày phép đo và cổng quyết định ở mục 1 |
+| Hệ thống khác gì PREP / ELSA đang có trên thị trường? | Mục 1b: dựa trên bằng chứng từ bài mẫu công khai; nói rõ là suy luận; nêu chỗ PREP hơn (trọng âm, dữ liệu lớn) và chỗ nhóm làm khác (một lần chấm cho mỗi tiêu chí, xét lạc đề, làm tròn theo IELTS) |
 | Sao không để LLM cho điểm phát âm? | LLM không nghe được audio; điểm phải dựa trên tín hiệu đo được |
 | Nhiều người dùng cùng lúc thì sao? | Mục 8: tách tải lưu bài (giải được) và tải chấm (giới hạn bởi GPU/LLM, xử lý bằng hàng đợi); có số load test |
 | Mất điện giữa giờ thi? | Mục 7 |

@@ -65,6 +65,7 @@ export interface Essay {
 // ---------- Criteria & Annotations ----------
 export interface CriteriaDetail {
   sub_criteria?: Record<string, string>;
+  sub_levels?: Record<string, string>;        // spec 006: needs_work | fair | good | very_good | excellent
   feedback: {
     strengths: string[];
     areas_to_improve: string[];
@@ -101,6 +102,19 @@ export interface EvaluationResultDetail {
   overall_upgraded_essay: string | null;
   criteria_analysis: CriteriaAnalysis;
   is_score_overridden: boolean;
+  sample_essay?: string | null;
+  key_point_check?: KeyPointCheck | null;
+  chart_source?: "answer_key" | "image" | null;
+}
+
+// Spec 006: danh sách ý chính Task 1 so với đáp án đã duyệt
+export interface KeyPointFigure { series: string; label: string; value: number; wrong?: boolean }
+export interface KeyPointCheck {
+  total: number;
+  covered: number;
+  accurate: number;
+  items: { id: string; statement: string; covered: boolean; accurate: boolean | null;
+           expected: KeyPointFigure[]; stated: KeyPointFigure[] }[];
 }
 
 // ---------- Frontend UI Types ----------
@@ -120,6 +134,8 @@ export interface GradingResult {
   };
   criteria_analysis: CriteriaAnalysis;
   inline_annotations: InlineAnnotation[];
+  sample_essay?: string | null;
+  key_point_check?: KeyPointCheck | null;
 }
 
 // ---------- API Response Shapes ----------

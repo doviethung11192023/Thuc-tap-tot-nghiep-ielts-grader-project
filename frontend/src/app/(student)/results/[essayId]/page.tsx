@@ -90,7 +90,7 @@ export default function ResultsPage({ params }: { params: Promise<{ essayId: str
                     annotations={result.inline_annotations}
                     onAnnotationClick={handleAnnotationClick}
                     activeAnnotationId={activeAnnotationId}
-                    activeCategoryFilter={activeCriterion === "OVERALL" ? null : activeCriterion}
+                    activeCategoryFilter={["OVERALL", "KEYPOINTS", "SAMPLE"].includes(activeCriterion) ? null : activeCriterion as InlineAnnotation["category"]}
                     activeTypes={activeTypes}
                   />
                 </div>

@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { InlineAnnotation, CriteriaDetail, GradingResult } from "@/types";
+import { KeyPointChecklist } from "./result-extras/KeyPointChecklist";
+import { SampleEssayPanel } from "./result-extras/SampleEssayPanel";
+import { SubLevelBadge } from "./result-extras/SubLevelBadge";
 import { AlertCircle, Sparkles, TrendingUp, ChevronRight, CheckCircle2, BookOpen, Quote } from "lucide-react";
 
-export type CriterionTab = "OVERALL" | "TR" | "CC" | "LR" | "GRA";
+export type CriterionTab = "OVERALL" | "TR" | "CC" | "LR" | "GRA" | "KEYPOINTS" | "SAMPLE";
 
 interface ScoreSidebarProps {
   result: GradingResult;
@@ -33,6 +36,8 @@ export const ScoreSidebar = React.memo(function ScoreSidebar({ result, activeCri
     { id: "CC", label: "CC", tooltip: "Coherence & Cohesion" },
     { id: "LR", label: "LR", tooltip: "Lexical Resource" },
     { id: "GRA", label: "GRA", tooltip: "Grammar & Accuracy" },
+    ...(result.key_point_check ? [{ id: "KEYPOINTS" as CriterionTab, label: "Ý chính", tooltip: "Ý chính so với đáp án" }] : []),
+    ...(result.sample_essay ? [{ id: "SAMPLE" as CriterionTab, label: "Bài mẫu", tooltip: "Bài mẫu Band 8+" }] : []),
   ];
 
   const getCriteriaData = (tab: CriterionTab): CriteriaDetail | null => {
@@ -71,6 +76,10 @@ export const ScoreSidebar = React.memo(function ScoreSidebar({ result, activeCri
       <div className="flex-1 overflow-y-auto p-5" ref={scrollRef}>
         {activeCriterion === "OVERALL" ? (
           <OverallTab result={result} />
+        ) : activeCriterion === "KEYPOINTS" && result.key_point_check ? (
+          <KeyPointChecklist check={result.key_point_check} />
+        ) : activeCriterion === "SAMPLE" && result.sample_essay ? (
+          <SampleEssayPanel text={result.sample_essay} />
         ) : (
           <CriterionDetailTab 
             criteriaData={getCriteriaData(activeCriterion)!} 
@@ -176,7 +185,9 @@ function CriterionDetailTab({
         <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100 shadow-sm">
           {Object.entries(criteriaData.sub_criteria || {}).map(([name, evaluation]) => (
             <div key={name} className="p-4 hover:bg-zinc-50 transition-colors">
-              <span className="text-xs font-bold text-zinc-700 capitalize block mb-1">{name.replace(/_/g, ' ')}</span>
+              <span className="text-xs font-bold text-zinc-700 capitalize block mb-1">
+                {name.replace(/_/g, ' ')}<SubLevelBadge level={criteriaData.sub_levels?.[name]} />
+              </span>
               <span className="text-sm text-zinc-600 leading-relaxed">{evaluation}</span>
             </div>
           ))}

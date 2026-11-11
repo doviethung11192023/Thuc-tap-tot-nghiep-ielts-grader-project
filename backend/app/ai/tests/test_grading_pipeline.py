@@ -94,3 +94,32 @@ async def test_task2_legacy_routing(stubbed):
     assert stubbed["build"]["visual_description"] == ""
     assert "visual_analysis" not in result
     assert result["task_type"] == "task2"
+
+
+@pytest.mark.asyncio
+async def test_task1_with_approved_key_skips_image_and_adds_checklist(stubbed, monkeypatch):
+    """Spec 006: an approved key replaces the vision pass; the checklist feeds the rewrite."""
+    from services.key_point_checker import judge
+    from tests.test_answer_key_and_key_points import SPREADS
+    from schemas.answer_key import parse_answer_key
+
+    async def fake_check(essay, key, pm):
+        return judge(key, {"items": [{"id": "f2", "covered": True,
+                                      "stated": [{"series": "Butter", "label": "1986", "value": 220}]}]})
+
+    monkeypatch.setattr(gp, "run_key_point_check", fake_check)
+    result = await gp.run_grading_pipeline("The graph shows spreads.", ESSAY, "task1", "https://r2/x.png",
+                                           answer_key=SPREADS)
+    assert "image_url" not in stubbed                       # describe_chart never called
+    assert stubbed["build"]["task_type"].task_type == "line_graph"
+    assert stubbed["build"]["visual_description"].startswith("VERIFIED ANSWER KEY")
+    assert "key says Butter 1986: 160" in stubbed["synthesis_visual"]
+    assert result["chart_source"] == "answer_key"
+    assert result["key_point_check"]["covered"] == 1 and result["key_point_check"]["accurate"] == 0
+    assert parse_answer_key(SPREADS)
+
+
+@pytest.mark.asyncio
+async def test_task1_without_key_still_reads_image(stubbed):
+    result = await gp.run_grading_pipeline("The chart shows aid.", ESSAY, "task1", "https://r2/x.png")
+    assert result["chart_source"] == "image" and "key_point_check" not in result

@@ -7,6 +7,7 @@ from typing import Any, Optional
 
 from app.db.supabase import db
 from app.services.writing.writing_bands import task_band
+from app.services.writing.writing_task_materials import approved_sample
 
 RUN_TO_ESSAY_STATUS = {"running": "evaluating", "done": "completed", "failed": "failed"}
 CODE_TO_SCORE_KEY = {"TA": "task_response", "TR": "task_response", "CC": "coherence_cohesion",
@@ -93,8 +94,8 @@ def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
 
 def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[dict[str, Any]]:
     """None khi không có essay hoặc người xem không phải chủ (API trả 404)."""
-    rows = db().table("essays").select("id, attempt_id, content, word_count, updated_at, writing_tasks(task_type)") \
-        .eq("id", essay_id).execute().data
+    rows = db().table("essays").select("id, attempt_id, section_id, content, word_count, updated_at, "
+                                       "writing_tasks(task_type)").eq("id", essay_id).execute().data
     if not rows:
         return None
     essay = rows[0]
@@ -120,6 +121,10 @@ def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[
             "overall_upgraded_essay": output.get("overall_upgraded_essay"),
             "criteria_analysis": {**analysis, "grammar_accuracy": analysis.get("grammatical_range_and_accuracy", {})},
             "is_score_overridden": False,
+            # spec 006: bài mẫu đã duyệt, danh sách ý chính (Task 1 có đáp án), nguồn số liệu biểu đồ
+            "sample_essay": approved_sample(essay["section_id"]),
+            "key_point_check": output.get("key_point_check"),
+            "chart_source": output.get("chart_source"),
         }
         ann_rows = db().table("annotations").select("*").eq("evaluation_id", evaluation["id"]) \
             .eq("essay_id", essay_id).order("start_pos").execute().data or []

@@ -15,6 +15,7 @@ from app.core.domain_errors import DomainError, NotFoundError
 from app.db.supabase import db
 from app.services.cms.cms_sections import section_skill
 from app.services.cms.cms_tests import db_error
+from app.services.writing.writing_task_materials import clear_key_approval
 
 
 def _opts(items: Any) -> list[dict[str, str]]:
@@ -55,7 +56,10 @@ def _save_writing(sec: dict[str, Any], grp: dict[str, Any]) -> None:
     if prompt:
         row["task_prompt"] = prompt
     if row:
+        old = db().table("writing_tasks").select("chart_image_key").eq("section_id", sec["id"]).execute().data
         db().table("writing_tasks").update(row).eq("section_id", sec["id"]).execute()
+        if "chart_image_key" in row and old and old[0].get("chart_image_key") != row["chart_image_key"]:
+            clear_key_approval(sec["id"])          # ảnh mới: đáp án cũ phải duyệt lại (spec 006)
 
 
 def _save_speaking_question(part_id: str, q: dict[str, Any], question_id: Optional[str] = None) -> str:
@@ -111,6 +115,7 @@ def delete_group(group_id: str) -> None:
             db().table("speaking_questions").delete().eq("speaking_part_id", group_id).execute()
         elif sec and sec["kind"] == "writing":
             db().table("writing_tasks").update({"task_prompt": "", "chart_image_key": None}).eq("section_id", group_id).execute()
+            clear_key_approval(group_id)
     except Exception as e:
         raise db_error(e)
 

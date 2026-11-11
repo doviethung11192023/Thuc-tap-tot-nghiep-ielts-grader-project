@@ -13,7 +13,9 @@ from app.services.writing.writing_bands import to_half_band
 from app.services.writing.writing_evaluation_finalizer import finalize_writing_evaluation
 from app.services.writing.writing_test_content import chart_image_url
 from app.services.writing.annotation_alignment import align_annotation_coordinates
-from app.clients.ai_engine_client import call_ai_grade
+from app.clients.ai_engine_client import call_ai_grade, call_ai_grading_fingerprint
+from app.services.writing.writing_grading_cache import find_cached_output, input_hash, is_first_ai_evaluation
+from app.services.writing.writing_task_materials import approved_answer_key
 
 ANNOTATION_TYPES = {"error", "upgrade", "logic_issue", "strength"}
 # Khoá điểm trong JSON AI engine → mã tiêu chí (TA cho Task 1, TR cho Task 2)
@@ -50,9 +52,27 @@ def _comment(analysis: Any) -> str | None:
 
 def _load_task(essay_id: str) -> dict[str, Any]:
     essay = db().table("essays").select("id, attempt_id, content, section_id").eq("id", essay_id).execute().data[0]
-    task = db().table("writing_tasks").select("task_prompt, chart_image_key") \
+    task = db().table("writing_tasks").select("task_type, task_prompt, chart_image_key") \
         .eq("section_id", essay["section_id"]).execute().data[0]
     return {**essay, **task}
+
+
+async def _grade_or_reuse(evaluation_id: str, run_id: str, essay: dict[str, Any], task_no: int) -> dict[str, Any]:
+    """Đáp án đã duyệt (Task 1) đi kèm bài; bài trùng y nguyên lần chấm đầu thì dùng lại kết quả (spec 006)."""
+    key, key_reviewed_at = approved_answer_key(essay["section_id"]) if task_no == 1 else (None, None)
+    hash_value = None
+    if is_first_ai_evaluation(evaluation_id):
+        hash_value = input_hash(task_no, essay["section_id"], essay["content"], key_reviewed_at,
+                                await call_ai_grading_fingerprint(task_no))
+        cached = find_cached_output(hash_value, run_id)
+        if cached:
+            print(f"♻️ [Worker] task {task_no}: reuse result of run {cached[0]}")
+            return {**cached[1], "cached_from_run_id": cached[0], "input_hash": hash_value}
+    ai = await call_ai_grade(essay["task_prompt"], essay["content"], task_no,
+                             chart_image_url(essay.get("chart_image_key")), key)
+    if key_reviewed_at:
+        ai["answer_key_reviewed_at"] = key_reviewed_at
+    return {**ai, "input_hash": hash_value}
 
 
 def _store_scores(evaluation_id: str, task_no: int, ai: dict[str, Any]) -> None:
@@ -103,13 +123,13 @@ async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str
     started = time.monotonic()
     try:
         essay = _load_task(essay_id)
-        ai = await call_ai_grade(essay["task_prompt"], essay["content"], task_no,
-                                 chart_image_url(essay.get("chart_image_key")))
+        ai = await _grade_or_reuse(evaluation_id, run_id, essay, task_no)
+        hash_value = ai.pop("input_hash", None)
         _store_scores(evaluation_id, task_no, ai)
         n_ann = _store_annotations(evaluation_id, essay, task_no, ai)
         db().table("grading_runs").update({
             "status": "done", "output": ai, "model": ai.get("model"),
-            "prompt_versions": ai.get("prompt_versions"), "finished_at": _now_iso(),
+            "prompt_versions": ai.get("prompt_versions"), "finished_at": _now_iso(), "input_hash": hash_value,
             "latency_ms": int((time.monotonic() - started) * 1000),
         }).eq("id", run_id).execute()
         print(f"✅ [Worker] task {task_no} done ({n_ann} annotations)")

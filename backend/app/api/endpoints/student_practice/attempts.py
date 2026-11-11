@@ -10,6 +10,7 @@ from app.services.practice.attempt_saved_work import load_saved_work, save_work
 from app.services.practice.mock_attempt_draw import mock_summary, start_random_mock
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt, start_attempt
 from app.services.practice.test_content import load_test_content, resolve_test
+from app.services.writing.writing_task_materials import with_practice_outlines
 from app.services.speaking.speaking_upload_service import confirmed_answers
 
 router = APIRouter()
@@ -85,6 +86,8 @@ async def get_attempt_exam_content(attempt_id: str, current_user: Optional[User]
     if not attempt:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
     content = load_test_content(attempt["test_id"], attempt["skill"]) or {"sections": []}
+    if attempt["skill"] == "writing" and attempt["mode"] == "practice":
+        content = with_practice_outlines(content)          # dàn ý gợi ý, Mock không có (spec 006)
     extra = {"confirmed_answers": confirmed_answers(attempt["id"])} if attempt["skill"] == "speaking" else {}
     return {"meta": {"code": 200}, "data": {
         **content, **extra, "attempt_id": attempt["id"], "mode": attempt["mode"],
@@ -95,7 +98,8 @@ def _load_published_content(test_id: str, skill: Optional[str]) -> Optional[dict
     test = resolve_test(test_id, skill)
     if not test or test.get("status") != "published" or test.get("allowed_mode") == "mock":
         return None
-    return load_test_content(test["id"], test["skill"]) or None
+    content = load_test_content(test["id"], test["skill"]) or None
+    return with_practice_outlines(content) if content and test["skill"] == "writing" else content
 
 
 @router.get("/tests/{test_id}/content")

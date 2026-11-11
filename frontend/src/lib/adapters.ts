@@ -20,5 +20,7 @@ export function mapApiResultToGradingResult(resData: EssayResultsResponse["data"
     },
     criteria_analysis: resData.result.criteria_analysis,
     inline_annotations: resData.inline_annotations || [],
+    sample_essay: resData.result.sample_essay || null,
+    key_point_check: resData.result.key_point_check || null,
   };
 }

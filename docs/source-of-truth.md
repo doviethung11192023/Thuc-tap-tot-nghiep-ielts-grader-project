@@ -33,7 +33,7 @@ Khi sửa thiết kế (thêm FR, BR hay bảng mới), cập nhật file này *
 | Speaking | Phòng thi có AI examiner phát câu hỏi, ghi âm, rồi xử lý tiếng nói. LLM chấm FC, LR, GRA; P do code tính từ âm thanh, LLM chỉ viết nhận xét (ADR-21) |
 
 - **Practice:** điểm AI là kết quả; người học có thể xin Expert chấm lại. **Mock:** điểm Expert là chính thức; trong lúc chờ, điểm AI hiện kèm nhãn "preliminary".
-- **AI chỉ dùng để chấm, không bao giờ dùng để tạo đề** (BR-19, ADR-16). TTS chỉ đọc câu hỏi do người viết.
+- **AI không bao giờ tạo đề bài** (BR-19, ADR-16). TTS chỉ đọc câu hỏi do người viết. Tài liệu hỗ trợ theo đề (đáp án số liệu Task 1, dàn ý, bài mẫu Writing) do AI soạn nháp phải được Admin duyệt trước khi dùng (sửa 2026-11-11, ADR-30).
 
 ### Phạm vi (MoSCoW)
 
@@ -90,9 +90,9 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | FR-11 | Mock | Tự lưu đáp án và bài viết **lên server** (cả Practice); làm tiếp được sau khi mất mạng, tải lại trang, đóng tab hoặc khởi động lại máy, kể cả trên máy khác |
 | FR-12 | Mock | Tự nộp khi hết giờ, kể cả khi Learner không còn mở trang (BR-21) |
 | FR-13 | Chấm | Chấm R/L bằng so khớp đáp án đã chuẩn hoá (BR-14); chỉ quy ra band khi làm đủ 40 câu (BR-03) |
-| FR-14 | Kết quả | Đáp án, lời giải, transcript Listening sau khi nộp |
+| FR-14 | Kết quả | Đáp án, lời giải, transcript Listening sau khi nộp; Writing: bài mẫu đã duyệt của đề, và với Task 1 có đáp án đã duyệt thì danh sách ý chính (có nhắc tới, đúng số liệu) (2026-11-11, ADR-30) |
 | FR-15 | Writing | Viết và nộp Task 1, Task 2 hoặc cả hai (Practice cho làm 1 task), đếm từ theo thời gian thực |
-| FR-16 | Writing | AI chấm 4 tiêu chí mỗi task, có nhận xét và đánh dấu lỗi trong bài; Task 1 chấm cùng ảnh biểu đồ và mô tả dữ liệu |
+| FR-16 | Writing | AI chấm 4 tiêu chí mỗi task, có nhận xét, đánh dấu lỗi trong bài và mức chỉ số con mỗi tiêu chí (kẹp theo band); Task 1 chấm theo đáp án số liệu đã duyệt, chưa có thì đọc ảnh biểu đồ; bài nộp trùng y nguyên lần chấm đầu dùng lại kết quả cũ (2026-11-11, ADR-30) |
 | FR-17 | Speaking | Phòng thi: phát câu hỏi, ghi âm trong giới hạn thời gian, tự chuyển câu; Part 2 có cue card và 1 phút chuẩn bị |
 | FR-18 | Speaking | STT, đo độ trôi chảy và phát âm, AI chấm 4 tiêu chí |
 | FR-19 | Chấm | Hiện trạng thái chấm (đang chấm, chờ Expert, xong, lỗi) và cập nhật ngay khi có kết quả |
@@ -102,7 +102,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | FR-23 | Expert | Expert xem đề, bài làm, audio, điểm và nhận xét AI; sửa band, nhận xét và lỗi đã đánh dấu (bản nháp chép sẵn từ bản AI); Speaking có nhận xét gắn vào thời điểm trong audio |
 | FR-24 | Expert | Xem lịch sử chấm |
 | FR-25 | Expert | (Won't) Lên lịch và tổ chức buổi Speaking trực tiếp |
-| FR-26 | CMS | Soạn đề 5 dạng câu hỏi MVP: editor theo từng dạng, bài đọc, audio, ảnh, xem trước như Learner |
+| FR-26 | CMS | Soạn đề 5 dạng câu hỏi MVP: editor theo từng dạng, bài đọc, audio, ảnh, xem trước như Learner. Writing: tài liệu theo đề (đáp án số liệu Task 1, dàn ý, bài mẫu) AI soạn nháp, Admin sửa và duyệt, làm được cả với đề đã publish; dàn ý hiện khi làm Practice (2026-11-11, ADR-30) |
 | FR-27 | CMS | Soạn, duyệt, kiểm tra trước khi publish, quản lý phiên bản, nguồn và giấy phép; archive đề không dùng |
 | FR-28 | Admin | Dữ liệu tham chiếu: bảng quy đổi band, tiêu chí và band descriptor, prompt AI, quota Expert. Prompt sửa ngay trong app: tạo phiên bản mới và đổi label `production` (kể cả quay về bản cũ); prompt vẫn chỉ lưu trên Langfuse (chốt 2026-11-11, UC-22) |
 | FR-29 | Admin | Dashboard hệ thống: người dùng, attempt, phân bố band, hoạt động Expert, chênh lệch AI–Expert (mặc định 30 ngày gần nhất; trước hết hiện chênh lệch overall, bấm vào xem chênh lệch từng tiêu chí TA/TR, CC, LR, GRA, FC, P để biết AI lệch ở phần nào; chênh lệch = trung bình trị tuyệt đối và trung bình có dấu của band Expert − band AI trên các bài có cả hai điểm, chốt 2026-11-11); (Should) theo từng Expert: số bài, thời gian chấm trung bình, tỉ lệ quá hạn, mức sửa so với AI |
@@ -159,7 +159,7 @@ Expert **nhận sẵn** đề, bài làm, điểm và nhận xét của AI, rồ
 | BR-16 | Learner xin Expert chấm lại tối đa **3 bài Practice mỗi tuần lịch** (cấu hình được), tính theo lúc gửi yêu cầu; mỗi attempt tối đa 1 yêu cầu đang mở. Yêu cầu đã gửi thì **không hoàn** lượt, kể cả khi Learner huỷ |
 | BR-17 | Lộ trình (thuật toán ở §8 "Lộ trình học", ADR-23). **Kỹ năng ưu tiên:** kỹ năng chưa có band xếp đầu (gợi ý bài chẩn đoán), nhiều kỹ năng thiếu thì theo thứ tự L, R, W, S; còn lại chọn khoảng cách (mục tiêu − hiện tại) lớn nhất, hoà thì band thấp hơn, hoà nữa theo thứ tự L, R, W, S; chưa đặt mục tiêu từng kỹ năng thì dùng mục tiêu tổng. **Điểm yếu:** L/R là dạng câu có mức thành thạo Elo thấp nhất trong các dạng đã trả lời ≥ 6 câu (không dạng nào đủ thì không nêu điểm yếu); W/S là tiêu chí có trung bình động thấp nhất, Writing thêm dạng đề có band thấp nhất trong các dạng đã làm ≥ 2 bài. **3 gợi ý:** L/R là các phần đề (section) chứa dạng câu yếu, xếp theo xác suất làm đúng dự đoán gần 70% nhất; không có điểm yếu thì gợi ý cả đề; W/S là đề Practice thuộc dạng đề yếu, không có thì đề Practice bất kỳ của kỹ năng đó. Chỉ lấy đề đã publish, chưa làm trong 14 ngày qua; hết thì lấy đề làm lâu nhất. Còn ≤ 14 ngày tới ngày thi và kỹ năng ưu tiên chưa có bài Mock nào trong 14 ngày qua thì gợi ý đầu tiên là 1 bài Mock của kỹ năng đó (đề do hệ thống chọn ngẫu nhiên khi bắt đầu, chỉ gợi ý khi kỹ năng còn đề Mock chưa làm). Gợi ý Practice chỉ lấy đề `allowed_mode` practice/both. Kỹ năng ưu tiên không có đề nào đã publish thì chuyển sang kỹ năng kế tiếp theo cùng luật. Câu lý do sinh theo mẫu. Tính lại mỗi lần xem dashboard |
 | BR-18 | Learner chỉ thấy đề đã publish. Mỗi đề lưu loại nguồn (original, open licence, public domain), tên nguồn, giấy phép, và phải được Admin duyệt trước khi publish |
-| BR-19 | Không dùng AI để tạo nội dung đề. TTS chỉ đọc câu do người viết; AI chỉ dùng để chấm |
+| BR-19 | Không dùng AI để tạo đề bài (đề, ảnh, câu hỏi). TTS chỉ đọc câu do người viết. Tài liệu hỗ trợ chấm và học theo đề do AI soạn (đáp án số liệu Task 1, dàn ý, bài mẫu) phải được Admin duyệt; chưa duyệt thì không dùng để chấm và không hiện cho Learner (chủ dự án sửa 2026-11-11) |
 | BR-20 | **Suất Expert chung cả hệ thống** mỗi tuần lịch (`expert_weekly_capacity`, Admin sửa theo sức chấm của Expert). Lượt Mock giữ chỗ và yêu cầu Practice cùng trừ vào suất này. Hết suất: Mock vẫn làm được nhưng chỉ có điểm AI (báo trước khi bắt đầu); yêu cầu Practice bị từ chối với lý do "hết suất tuần này". Mock được ưu tiên khi giao bài (xem luồng giao yêu cầu Expert) |
 | BR-21 | **Hết giờ mà chưa nộp: làm bao nhiêu chấm bấy nhiêu.** Hệ thống tự nộp với những gì server đã lưu: L/R chấm đáp án đã lưu, Writing chấm bài đã lưu, Speaking chấm các câu đã upload (không câu nào thì `no_speech`). Bài Mock W/S tự nộp có lượt Expert giữ chỗ: **Learner chọn** gửi Expert (dùng lượt) hay chỉ chấm AI (nhả lượt); chưa chọn tới hết tuần lịch thì coi là chỉ chấm AI. Speaking: câu đang ghi dở lúc gián đoạn chưa có bản ghi nên được hỏi lại một lần khi quay lại, vẫn trong hạn chung của bài |
 | BR-22 | **Kỳ nghỉ lễ của Expert** do Admin tự đặt (bắt đầu, kết thúc theo giờ Việt Nam, lý do), có audit log. Trong kỳ nghỉ: (1) **không nhận yêu cầu mới**: yêu cầu Practice bị từ chối với lý do "Expert nghỉ lễ đến <ngày giờ kết thúc>" và không trừ quota; bài Mock W/S bắt đầu trong kỳ nghỉ không giữ chỗ, chỉ có điểm AI và được báo trước khi bắt đầu; bài Mock đã giữ chỗ trước kỳ nghỉ mà nộp trong kỳ nghỉ vẫn tạo yêu cầu và chờ trong hàng đợi; (2) **không giao bài**, kể cả Admin giao lại; yêu cầu đang chờ được giao sau kỳ nghỉ, Mock trước; (3) **hạn lùi lại**: giờ trong kỳ nghỉ không tính vào hạn 48 giờ làm việc (BR-11) và 2 giờ được trả lại bài (FR-39) của assignment đang mở; Expert vẫn được chấm và nộp nếu muốn; (4) thời điểm dự kiến cho Learner (FR-40) tính cả kỳ nghỉ. Các kỳ nghỉ không chồng nhau; kết thúc phải sau bắt đầu; kỳ đã qua không sửa được; kỳ đang diễn ra chỉ sửa được giờ kết thúc (chốt 2026-11-08) |
@@ -304,7 +304,7 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 ---
 
-## 7. Thiết kế cơ sở dữ liệu (đích: 32 bảng, 2 view, 43 FK; bỏ `mock_sessions` ngày 2026-11-09)
+## 7. Thiết kế cơ sở dữ liệu (đích: 33 bảng, 2 view, 46 FK; bỏ `mock_sessions` ngày 2026-11-09, thêm `writing_task_materials` ngày 2026-11-11)
 
 ERD vẽ theo ký hiệu Chen. Có 4 phép chuyên biệt hoá (specialisation):
 
@@ -340,6 +340,7 @@ Quy tắc ánh xạ:
 - `sections(id PK, test_id FK, skill FK, kind, order_no, title)`, `UNIQUE(test_id, order_no)`
 - `lr_sections(section_id PK/FK, kind FK, passage, audio_key, transcript)`
 - `writing_tasks(section_id PK/FK, kind FK, task_type, prompt_category, task_prompt, chart_image_key, chart_description, min_words)`
+- `writing_task_materials(section_id PK/FK, answer_key, answer_key_reviewed_at, answer_key_reviewer_id FK, outline, outline_reviewed_at, sample_essay, sample_reviewed_at, reviewer_id FK, updated_at)`: tài liệu theo đề (ADR-30). Tách khỏi `writing_tasks` vì `writing_tasks` cho mọi người đăng nhập đọc và bị khoá khi publish (BR-10); bảng này chỉ Admin đọc (giống `question_keys`), không có trigger BR-10. `*_reviewed_at` NULL = nháp; sửa trường nào thì trường đó về nháp
 - `speaking_parts(section_id PK/FK, kind FK, topic, prep_seconds, answer_seconds)`
 - `question_groups(id PK, lr_section_id FK, order_no, question_type, instructions, image_key, select_count, allow_reuse, max_words)`
 - `group_options(group_id PK/FK, label PK, text)`
@@ -360,7 +361,7 @@ Quy tắc ánh xạ:
 
 **Chấm điểm (4)**
 - `evaluations(id PK, attempt_id FK, skill FK, evaluator_type, status, overall_band, feedback, is_official, created_at, agrees_with_ai, submitted_at)`
-- `grading_runs(id PK, evaluation_id FK, evaluator_type FK, task_no, status, model, prompt_versions, trace_id, error, input_tokens, output_tokens, latency_ms, started_at, finished_at)`
+- `grading_runs(id PK, evaluation_id FK, evaluator_type FK, task_no, status, model, prompt_versions, trace_id, error, input_tokens, output_tokens, latency_ms, started_at, finished_at, input_hash)`: `input_hash` = SHA-256 của (task, section, bài đã bỏ khoảng trắng hai đầu, thời điểm duyệt đáp án, dấu vân tay cấu hình chấm); index một phần trên lượt `done` (ADR-30)
 - `criterion_scores(evaluation_id PK/FK, criterion_id PK/FK, task_no PK, skill FK, band, comment)`
 - `annotations(id PK, evaluation_id FK, attempt_id FK, essay_id FK, type, category, original_text, corrected_text, explanation, start_pos, end_pos)`
 
@@ -512,6 +513,8 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 | Band | Trung bình 4 tiêu chí, làm tròn theo luật IELTS **trong code** | `schemas/llm_output.py` |
 | E, F | Prompt rewrite tạo danh sách lỗi kèm bản sửa và bài đã sửa; code định vị lại vị trí ký tự và loại phần chồng lấn | `services/synthesis_service.py`, `utils/char_index_resolver.py`, `utils/annotation_normalizer.py` |
 
+**Đáp án theo đề cho Task 1 (ADR-30):** đề có đáp án đã duyệt thì bỏ bước đọc ảnh ở phase B; đáp án (khối "VERIFIED ANSWER KEY") vào prompt TA và rewrite. Song song phase D, prompt `writing/task1/keycheck` chỉ **trích** ý chính nào được nhắc và con số bài ghi; **code** so con số với đáp án (sai lệch ≤ max(5% giá trị, 5% khoảng giá trị) là đúng) → `key_point_check`; ý sai số được nối vào khối biểu đồ của rewrite để bản sửa dùng số của đáp án. Lỗi trích xuất không làm hỏng lượt chấm, chỉ mất danh sách. Prompt rewrite trả `sub_levels` cho từng chỉ số con; code kẹp mỗi mức không quá 2 bậc trên mức của band (≤4 cần cải thiện, 5 khá, 6 tốt, 7 rất tốt, ≥8 xuất sắc), riêng "data accuracy" Task 1 lấy từ tỉ lệ ý đúng số. Code: `schemas/answer_key.py`, `services/key_point_checker.py`, `services/sub_indicator_levels.py`, `services/material_drafter.py`, `services/grading_fingerprint.py`.
+
 **Luồng Reference cho Task 2 (ADR-22, mặc định):** thay phase C, D của bảng trên cho Task 2. `WRITING_TASK2_PIPELINE=legacy` quay về bảng trên. Task 1 luôn đi bảng trên.
 
 **Bất biến:** mọi bài chấm đều ra 4 feedback theo 4 tiêu chí ở structured output, sau đó một agent tổng hợp 4 feedback và rewrite bài cải thiện. Không bắt buộc 4 agent riêng.
@@ -614,7 +617,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-09 | Schema thiết kế từ ERD | Không thêm 1 bảng cho mỗi tính năng |
 | ADR-10 | RLS trên mọi bảng, chỉ cho đọc; mọi thao tác ghi qua Core API | Đóng lỗ hổng tự nâng quyền |
 | ADR-12, 13 | Mọi lần làm bài là Attempt; mọi lần chấm là Evaluation, mỗi tiêu chí 1 dòng | Một luồng attempt duy nhất; chấm lại không ghi đè |
-| ADR-16 | Không dùng AI tạo đề | Tránh sai đáp án, sai độ khó, vi phạm bản quyền |
+| ADR-16 | Không dùng AI tạo đề bài. Từ 2026-11-11: AI được soạn nháp tài liệu hỗ trợ theo đề, Admin duyệt mới dùng (ADR-30) | Tránh sai đáp án, sai độ khó, vi phạm bản quyền |
 | ADR-17 | Ràng buộc "đúng kiểu" bằng FK ghép có cột phân loại | DB tự từ chối dữ liệu sai |
 | ADR-18 | Tách assignment khỏi request | Giữ được lịch sử giao, giao lại, hết hạn |
 | ADR-19 | Band L/R chỉ khi làm đủ 40 câu | Không cho ra band gây hiểu nhầm |
@@ -628,6 +631,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 | ADR-27 | Chấm có hàng đợi ưu tiên (Mock trước Practice) và báo vị trí trong hàng. AI engine chạy trên máy có GPU của nhóm qua Cloudflare Tunnel khi phát triển; thuê GPU theo giờ (pod, ngân sách ≤ 500.000 đ) cho ngày load test và ngày bảo vệ, chạy 2 bản để chứng minh mở rộng được. (Should) LiteLLM làm gateway LLM: giới hạn tốc độ chung, thử lại, model dự phòng. Chốt 2026-11-08, chưa code | Cloudflare không chạy được torch và không có GPU. Không dùng GPU serverless vì nạp model mỗi lần khởi động chậm |
 | ADR-28 | Không dùng Kubernetes, Kafka, Temporal, hay tách thêm microservice | Nhóm 3 người, 1 tháng, không có người vận hành; Docker Compose, Redis Streams và cron quét bảng có lease đã đủ cho quy mô thiết kế |
 | ADR-29 | Truy vết AI: một trace Langfuse cho mỗi `grading_run`, nhóm theo `session_id = attempt_id`; mỗi lần gọi LLM là một generation. Chi phí tính và lưu trong DB (`grading_runs.cost_usd`) làm nguồn cho badge ngân sách. Trace giữ 90 ngày, xoá bằng cron gọi API Langfuse (cài đặt retention chỉ có ở gói Pro trở lên); gói Hobby chỉ cho xem 30 ngày gần nhất, nên link trace cũ hơn 30 ngày không mở được dù dữ liệu còn. `output` lượt lỗi giữ 180 ngày. **Dùng Langfuse Cloud gói Hobby (miễn phí)**: xem trace 30 ngày, 50.000 đơn vị/tháng (ước 6–10 đơn vị mỗi lượt chấm, khoảng 5.000 lượt/tháng). Số liệu lâu dài (token, chi phí, độ trễ, lỗi) lấy từ `grading_runs`, không phụ thuộc Langfuse. Load test bật lấy mẫu trace (`sample_rate`) để không đốt hạn mức. Chuyển sang tự host bằng Docker khi dùng quá 80% hạn mức tháng hoặc cần xem trace cũ hơn 30 ngày. Chốt 2026-11-11, chưa code | Khớp 1:1 với cột `trace_id`; mỗi job ARQ tự mở trace, không phải chuyển trace context giữa các job; chạy lại tạo trace mới, tách khỏi lần cũ. Một trace cho mỗi attempt phải chuyển context qua job và lẫn lần chạy lại; một trace cho mỗi lần gọi thì mất liên kết giữa 4 tiêu chí và các lần thử. Chi phí lưu trong DB để badge không phụ thuộc Langfuse. Trace chứa bài làm nên giữ ngắn (Nghị định 13) |
+| ADR-30 | Tài liệu theo đề Writing, lấy Prep làm chuẩn (chủ dự án chốt 2026-11-11): đáp án số liệu Task 1, dàn ý, bài mẫu do AI soạn nháp, Admin sửa và duyệt, lưu ở `writing_task_materials`. Task 1 có đáp án đã duyệt thì chấm theo đáp án thay cho đọc ảnh, có danh sách ý chính mà độ đúng số liệu do code quyết định; mức chỉ số con kẹp theo band; bài nộp trùng y nguyên ở lần chấm đầu dùng lại kết quả (`grading_runs.input_hash` + dấu vân tay prompt và model từ `GET /grading-fingerprint`). Đo 2026-11-11 trên đề "Consumption of Spreads" với đáp án nhập tay: bài đúng số TA 9.0, 8/8 ý đúng; bài cố tình sai số TA 5.0, 7/8 ý có nhắc, 3 ý đúng, cả 4 ý sai số bị chỉ ra kèm số đúng; mỗi bài khoảng 70 s. Cùng bài sai số, Prep cho 18/21 ý "đạt" | Đọc ảnh mỗi lần chấm: mô tả sai thì TA sai mà không ai biết, và chậm. Thêm cột vào `writing_tasks`: lộ đáp án cho Learner (RLS `published_read`) và không điền được cho đề đã publish. Để LLM tự chấm độ đúng số liệu: dễ xuôi theo bài, giống danh sách của Prep chỉ kiểm tra có nhắc tới. Cache Redis có TTL: mất khi khởi động lại, không truy vết được |
 
 ---
 
@@ -709,7 +713,9 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | Role | `learner \| expert \| admin` ở cả backend và frontend. Trạng thái attempt theo tên thiết kế (`grading`, `grading_failed`, `waiting_expert`, `no_speech`) |
 | Smoke test | 51/51 PASS trên `public` sau cutover; `pytest` backend 26 pass; `tsc` frontend sạch |
 
-**Cột ngoài sơ đồ (cố ý):** `grading_runs.claimed_at` + `recovery_count` (migration `20261107100000`, lease cho job chấm); trong baseline: `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
+| Spec 006 tài liệu theo đề (2026-11-11) | Migration `20261111120000_writing_task_materials.sql` **đã chạy** lên Supabase 2026-11-11 (quyền giống `question_keys`: `anon` không có quyền, `authenticated` chỉ SELECT qua RLS Admin). Test trên app 2026-11-11 (đề Practice "Museum visitors"): AI soạn đáp án sai 1 điểm (mùa hè 10 giờ: 800, đúng ≈ 650), Admin sửa rồi duyệt; dàn ý hiện trong phòng Practice; bài cố tình sai 3 số chấm theo đáp án trong 59,5 s, TA 6.5, danh sách 5/6 có nhắc, 3/5 đúng số, 2 đỉnh sai hiện kèm số đúng; nộp lại y nguyên dùng cache, 1,8 s, cùng điểm. AI engine: `POST /draft-material`, `GET /grading-fingerprint`, `/grade` nhận `answer_key`; prompt Langfuse mới `writing/task1/answer-key`, `writing/task1/keycheck`, `writing/common/outline`, `writing/common/sample` (v1), bản mới `writing/task1/ta` v4, `writing/task1/rewrite` v5, `writing/task2/rewrite` v4. Core API: `/admin/writing-tasks/{id}/material` (GET, PUT, `/draft`, `/approve`), dàn ý trong nội dung đề Practice, bài mẫu và danh sách ý chính trong `/essays/{id}/results`, cache trong worker. Frontend: thẻ "Tài liệu theo đề" trong SectionEditor Writing, tab "Ý chính" và "Bài mẫu" ở trang kết quả, nhãn mức chỉ số con, nút gợi ý dàn ý khi làm bài. Script `backend/scripts/draft_writing_materials.py` soạn nháp hàng loạt. Test: AI engine 141, backend 162 pass |
+
+**Cột ngoài sơ đồ (cố ý):** `grading_runs.claimed_at` + `recovery_count` (migration `20261107100000`, lease cho job chấm); `grading_runs.input_hash` (migration `20261111120000`, cache bài trùng); trong baseline: `question_keys.evidence`, `annotations.title`, `grading_runs.output`, `question_groups.subtype` + `template`, `tests.difficulty`, `questions.diagram_coordinate`.
 
 **Writing Task 2 (2026-11-07):** luồng Reference (ADR-22) là mặc định, nên điểm Task 2 của bài chấm mới sẽ khác trước; bài đã chấm không đổi. Prompt `writing/task2/grade` v5 dùng `qwen3.7-plus`; p90 toàn luồng 74,4 s, chưa đạt NFR-02 (≤ 60 s). Phân loại dùng Jev (85–86/96 đề có nhãn, Qwen 83/96 khi đo cùng ngày); thiếu `TYPESAFE_API_KEY` hoặc Jev lỗi thì dùng `writing/task2/classify`. Cả hai pipeline Task 2 đều qua bước này, nên title đề được gửi cho TypeSafe.
 
@@ -772,6 +778,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - LiteLLM hỗ trợ DashScope (Qwen) tới mức nào; nếu không đủ thì tự viết bộ giới hạn tốc độ trong Redis (ADR-27).
 - Frontend Next.js 16 chạy trên Cloudflare Workers qua OpenNext: cần thử trước khi chuyển.
 
+- Spec 006: Admin duyệt đáp án cho 96 đề Task 1 (đã soạn nháp hàng loạt 2026-11-11); đo lại độ chính xác danh sách ý chính trên nhiều đề và Expert kiểm tra. Bài mẫu AI soạn còn sai so sánh và dài hơn mức 170–200 từ: Admin phải đọc kỹ trước khi duyệt. Ý chính sai mốc thời gian (ví dụ "về 0 lúc 5 giờ" thay vì 3 giờ) đang bị tính là "chưa nhắc tới" thay vì "sai số liệu". Phòng làm bài Writing báo "Maximum update depth exceeded" và rơi ký tự khi gõ rất nhanh (công cụ tự động); lỗi có trong `WritingWorkspace.tsx`, không thuộc spec 006, chưa rõ gặp với người gõ thật không.
 - Task 2 chưa đạt NFR-02 (p90 74,4 s) và cổng độ phân tán (0,46 so với 0,70): giữ luồng Reference và nới cổng, hay tối ưu tiếp (ADR-22)?
 - Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?
 - Import 91 đề Writing còn lại từ R2 vào `public`.

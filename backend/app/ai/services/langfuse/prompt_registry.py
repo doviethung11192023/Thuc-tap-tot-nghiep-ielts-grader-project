@@ -10,6 +10,8 @@ folder layout shown in the Langfuse UI (label "production" is what the code read
                 ta, chart, rewrite     Task Achievement, vision chart reader, upgraded report
       task2/    ta, rewrite, classify  Task Response, upgraded essay, essay type classifier
                 grade                  all four criteria in one call (reference flow)
+      task1/    answer-key, keycheck   per-task answer key draft; key-point extraction (spec 006)
+      common/   outline, sample        per-task outline and sample essay drafts (spec 006)
     speaking/
       common/   fc, lr, gra, pr        criteria scored on the whole test transcript
                 overall                synthesis: summary + study plan from the 4 criteria
@@ -58,6 +60,12 @@ CLASSIFY_PROMPT_NAME = "writing/task2/classify"
 # One call for all four criteria, with band-ladder references.
 GRADE_PROMPT_NAME = "writing/task2/grade"
 
+# Per-task material drafted by AI, approved by an Admin (spec 006, ADR-30).
+ANSWER_KEY_PROMPT_NAME = "writing/task1/answer-key"   # vision: figures, overview, key features
+KEYCHECK_PROMPT_NAME = "writing/task1/keycheck"       # which key features the report covers, figures stated
+OUTLINE_PROMPT_NAME = "writing/common/outline"
+SAMPLE_PROMPT_NAME = "writing/common/sample"
+
 # ── Speaking ──────────────────────────────────────────────────────────────────
 SPEAKING_PROMPT_NAMES: dict[SpeakingCriterion, str] = {
     "fc": "speaking/common/fc",
@@ -83,6 +91,10 @@ WRITING_PROMPT_NAMES: tuple[str, ...] = tuple(sorted({
     VISUAL_CLASSIFY_PROMPT_NAME,
     CLASSIFY_PROMPT_NAME,
     GRADE_PROMPT_NAME,
+    ANSWER_KEY_PROMPT_NAME,
+    KEYCHECK_PROMPT_NAME,
+    OUTLINE_PROMPT_NAME,
+    SAMPLE_PROMPT_NAME,
 }))
 
 ALL_SPEAKING_PROMPT_NAMES: tuple[str, ...] = tuple(sorted({

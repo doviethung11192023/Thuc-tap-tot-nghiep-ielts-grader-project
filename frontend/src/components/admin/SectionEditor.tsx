@@ -7,6 +7,7 @@ import { QuestionGroupModal } from "@/components/admin/QuestionGroupModal";
 import { QuestionEditorModal } from "@/components/admin/QuestionEditorModal";
 import { QuestionGroupItem } from "@/components/admin/QuestionGroupItem";
 import { SectionMediaPassageEditor } from "@/components/admin/SectionMediaPassageEditor";
+import { WritingTaskMaterialEditor } from "@/components/admin/writing-material/WritingTaskMaterialEditor";
 import type { TestSection, SkillType, Question } from "@/types/exam";
 
 interface SectionEditorProps {
@@ -132,6 +133,8 @@ export function SectionEditor({ section, skill, onRefresh }: SectionEditorProps)
         uploading={uploading}
         onFileUpload={handleFileUpload}
       />
+
+      {skill === "writing" && <WritingTaskMaterialEditor sectionId={section.id} />}
 
       {/* Question Groups Section */}
       <div className="space-y-3 pt-2">

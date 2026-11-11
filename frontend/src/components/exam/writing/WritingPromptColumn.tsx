@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Lightbulb, RefreshCw } from 'lucide-react';
+import { WritingOutlineHint } from './WritingOutlineHint';
 
 export interface WritingTaskItem {
   id: string;
@@ -11,6 +12,7 @@ export interface WritingTaskItem {
   min_words: number;
   suggested_time: number;
   image_url?: string | null;
+  outline?: string | null;      // dàn ý đã duyệt, chỉ có ở Practice (spec 006)
 }
 
 interface WritingPromptColumnProps {
@@ -83,6 +85,8 @@ export function WritingPromptColumn({
             </div>
           )}
         </div>
+
+        {currentTask.outline && <WritingOutlineHint outline={currentTask.outline} />}
 
         {/* Guidelines Card */}
         <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-5 text-sm text-amber-950 space-y-2">

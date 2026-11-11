@@ -8,7 +8,11 @@ from .client import get_langfuse_client
 # Prompt names / folder layout live in prompt_registry; re-exported here for callers.
 from .prompt_registry import (  # noqa: E402,F401
     ALL_PROMPT_NAMES,
+    ANSWER_KEY_PROMPT_NAME,
     CHART_PROMPT_NAME,
+    KEYCHECK_PROMPT_NAME,
+    OUTLINE_PROMPT_NAME,
+    SAMPLE_PROMPT_NAME,
     VISUAL_CLASSIFY_PROMPT_NAME,
     CLASSIFY_PROMPT_NAME,
     GRADE_PROMPT_NAME,
@@ -188,3 +192,17 @@ class PromptManager:
             max_tokens=int(config.get("max_tokens", self.settings.vision_max_tokens)),
             langfuse_prompt=prompt,
         )
+
+    # ── Per-task material (spec 006) ──────────────────────────────────────────
+    def get_keycheck_prompt(self, **variables: Any) -> CompiledPrompt:
+        """Key-point extraction for one Task 1 report against an approved answer key."""
+        return self._compile_speaking(KEYCHECK_PROMPT_NAME, **variables)
+
+    def get_answer_key_prompt(self, title: str) -> CompiledPrompt:
+        """Vision draft of a Task 1 answer key; the image is attached by the caller."""
+        compiled = self._compile_speaking(ANSWER_KEY_PROMPT_NAME, title=title)
+        return replace(compiled, model=self.settings.vision_llm_model)
+
+    def get_material_prompt(self, kind: str, **variables: Any) -> CompiledPrompt:
+        """Outline or sample essay draft for one Writing task."""
+        return self._compile_speaking(OUTLINE_PROMPT_NAME if kind == "outline" else SAMPLE_PROMPT_NAME, **variables)

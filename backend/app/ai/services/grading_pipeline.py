@@ -18,10 +18,12 @@ import asyncio
 import logging
 import time
 
+from schemas.answer_key import parse_key_or_none
 from schemas.input import EssayInput
 from settings.config import get_settings
 from schemas.task_type import TaskTypeResult
 from services.chart_describer import describe_chart
+from services.key_point_checker import run_key_point_check
 from services.langfuse.prompt_manager import PromptFetchError, WritingTask
 from services.llm_evaluator import evaluate_all_criteria
 from services.prompt_builder import build_criterion_prompts, get_prompt_manager
@@ -58,8 +60,10 @@ async def run_grading_pipeline(
     task_type: str | None = None,
     image_url: str | None = None,
     pipeline: str | None = None,
+    answer_key: dict | None = None,
 ) -> dict:
-    """`pipeline` overrides WRITING_TASK2_PIPELINE, so one run can compare both Task 2 flows."""
+    """`pipeline` overrides WRITING_TASK2_PIPELINE, so one run can compare both Task 2 flows.
+    `answer_key` (Task 1, Admin-approved) replaces the vision pass and enables the key-point check."""
     task = normalize_task(task_type)
     if task == "task2" and (pipeline or get_settings().writing_task2_pipeline) == "reference":
         return await run_task2_reference_pipeline(title, essay)
@@ -72,14 +76,21 @@ async def run_grading_pipeline(
 
     # Phase B — task-type knowledge (+ vision for Task 1) in parallel with the NLP tools
     visual = None
-    if task == "task1":
+    key = parse_key_or_none(answer_key) if task == "task1" else None
+    if key:   # approved answer key: no image reading (spec 006, ADR-30)
+        grammar_findings, lex_result = await asyncio.gather(
+            asyncio.to_thread(check_grammar, processed),
+            asyncio.to_thread(compute_lexical, processed),
+        )
+        task_type_result: TaskTypeResult = get_task1_type(key.visual_type)
+    elif task == "task1":
         visual_job = describe_chart(title, image_url, get_prompt_manager())
         visual, grammar_findings, lex_result = await asyncio.gather(
             visual_job,
             asyncio.to_thread(check_grammar, processed),
             asyncio.to_thread(compute_lexical, processed),
         )
-        task_type_result: TaskTypeResult = get_task1_type(visual.chart_type)
+        task_type_result = get_task1_type(visual.chart_type)
     else:
         task_type_result, grammar_findings, lex_result = await asyncio.gather(
             asyncio.to_thread(classify_task_type, processed.title),
@@ -90,7 +101,7 @@ async def run_grading_pipeline(
         "[Phase B] ✓ type=%s | grammar issues=%d", task_type_result.task_type, len(grammar_findings)
     )
 
-    visual_text = visual.to_prompt_text() if visual else ""
+    visual_text = key.to_prompt_text() if key else (visual.to_prompt_text() if visual else "")
 
     # Phase C (raises PromptFetchError when Langfuse is unavailable)
     prompts = await asyncio.to_thread(
@@ -103,8 +114,9 @@ async def run_grading_pipeline(
         visual_description=visual_text,
     )
 
-    # Phase D
-    results = await evaluate_all_criteria(prompts)
+    # Phase D (+ key-point extraction in parallel when a key exists)
+    results, key_check = await asyncio.gather(
+        evaluate_all_criteria(prompts), run_key_point_check(essay, key, get_prompt_manager()))
     logger.info(
         "[Phase D] ✓ TA=%.1f CC=%.1f LR=%.1f GRA=%.1f",
         results.ta.band, results.cc.band, results.lr.band, results.gra.band,
@@ -114,7 +126,8 @@ async def run_grading_pipeline(
     synthesis = SynthesisService(prompt_manager=get_prompt_manager())
     final_json = await synthesis.synthesize_and_rewrite(
         title=title, essay_raw=essay, all_agent_outputs=results, task=task,
-        visual_description=visual_text,
+        visual_description=visual_text + (key_check.to_prompt_text() if key_check else ""),
+        key_check=key_check,
     )
 
     final_json["pipeline"] = "legacy"
@@ -123,6 +136,10 @@ async def run_grading_pipeline(
     final_json["prompt_versions"] = prompts.prompt_versions()
     if visual is not None:
         final_json["visual_analysis"] = visual.to_dict()
+    if task == "task1":
+        final_json["chart_source"] = "answer_key" if key else "image"
+    if key_check is not None:
+        final_json["key_point_check"] = key_check.to_dict()
 
     logger.info(
         "Grading pipeline completed in %.1fs — overall band %.1f | annotations %d",
