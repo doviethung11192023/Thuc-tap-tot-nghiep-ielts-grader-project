@@ -98,13 +98,15 @@
 
 **Bằng chứng cần có trước khi bảo vệ:** load test (k6 hoặc Locust) tăng dần tới 5.000 người ảo, đo p95 thời gian lưu, tỉ lệ lỗi, và **kiểm không mất dữ liệu**: bản cuối ở client trùng bản trong DB. Đưa biểu đồ vào Chương IV.
 
-## 9. Lộ trình học: luật kết hợp mô hình năng lực (🔧, ADR-23)
+## 9. Lộ trình học: luật kết hợp mô hình năng lực (✅ 2026-11-11, ADR-23)
 
 - **Luật** quyết định làm gì: kỹ năng cách mục tiêu xa nhất, người mới làm bài chẩn đoán, còn ≤ 14 ngày tới ngày thi thì ưu tiên Mock.
 - **Mô hình năng lực Elo** (dạng Rasch 1 tham số, nền tảng của IRT trong khảo thí) đo yếu ở dạng câu nào và chọn phần đề **vừa sức**: xác suất làm đúng dự đoán gần 70%, đủ thử thách mà không nản.
 - Độ khó từng câu suy ra từ tỉ lệ đúng của mọi Learner, có làm mượt cho câu ít người làm. Dạng câu dưới 6 câu chưa bị coi là điểm yếu, tránh kết luận từ dữ liệu quá ít.
 - Không cần huấn luyện, không thêm bảng, mỗi gợi ý kèm 1 câu lý do giải thích được.
-- **Bằng chứng cần có (📏):** unit test theo từng ca (người mới, hoà, gần ngày thi, hết đề); trình diễn một Learner làm vài bài và lộ trình đổi theo.
+- **Bằng chứng đã có:** 58 unit test theo từng ca (người mới, hoà gap/band, dạng câu < 6 câu, gần ngày thi có/không Mock, hết đề trong 14 ngày, đạt mục tiêu, bài chờ Expert, bài làm phần đề, band tự nhập) chạy < 0,2 s, không cần DB; đã test trên trình duyệt (thẻ, link 1 click, Mock). API ~1,4 s gồm xác thực.
+- **Đã diễn thử SC-007 (2026-11-11, qua API thật, tài khoản Learner test):** làm đề chẩn đoán Listening được gợi ý (31/40, band 7.0) → ưu tiên chuyển sang Reading (thiếu 7.0 band), điểm yếu Matching thành thạo 27% (25 câu). Làm 3 phần Reading được gợi ý: Matching 27% → 30% → 33%, phần vừa làm rời khỏi danh sách (luật 14 ngày), sau phần thứ 3 điểm yếu chuyển sang True/False/Not Given 30%. Script: trả lời đúng theo xác suất cố định, seed 7.
+- **Giới hạn nói trước:** Learner yếu thì mọi phần đề đều dưới vùng 60–75%, hệ thống chọn phần gần 70% nhất (≈ 0,33–0,42), chưa có đề dễ hơn để đưa vào vùng mục tiêu.
 
 ## 8b. Kiến trúc tiến hoá theo số đo (🔧, ADR-24 đến ADR-28)
 

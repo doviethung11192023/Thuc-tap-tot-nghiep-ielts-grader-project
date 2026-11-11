@@ -49,10 +49,66 @@ export interface LearningProfileKPIs {
 
 export interface LearningProfileGoals {
   input_band: number;
-  predicted_band: number;
+  /** Overall theo BR-02; null khi chưa đủ band 4 kỹ năng */
+  predicted_band: number | null;
   target_band: number;
   progress_percent: number;
-  test_date: string;
+  /** null khi Learner chưa chọn ngày thi */
+  test_date: string | null;
+  goal_set?: boolean;
+}
+
+export type JourneySkill = "listening" | "reading" | "writing" | "speaking";
+
+/** Band hiện tại 1 kỹ năng (BR-12, spec 005) */
+export interface CurrentSkillBand {
+  band: number | null;
+  source: "mock" | "practice" | "none";
+  attempts_used: number;
+  low_confidence: boolean;
+  target: number | null;
+  gap: number | null;
+}
+
+export type CurrentBands = Record<JourneySkill, CurrentSkillBand> & { overall: number | null };
+
+export interface ExamCountdown {
+  test_date: string | null;
+  days_left: number | null;
+  date_passed: boolean;
+}
+
+export interface NextStepSuggestion {
+  kind: "diagnostic" | "part" | "test" | "mock";
+  skill: JourneySkill;
+  /** null với gợi ý Mock: hệ thống chọn đề ngẫu nhiên khi bắt đầu */
+  test_id: string | null;
+  test_title: string | null;
+  mode: "practice" | "mock";
+  parts: number[];
+  question_type: string | null;
+  predicted_correct: number | null;
+  last_done_at: string | null;
+}
+
+export interface NextStepWeakSpot {
+  kind: "question_type" | "criterion";
+  key: string;
+  label: string;
+  value: number;
+  answered: number | null;
+  comment: string | null;
+  prompt_type: string | null;
+}
+
+/** Thẻ "Bước tiếp theo" (BR-17, ADR-23) */
+export interface LearnerNextStep {
+  goal_set: boolean;
+  priority_skill?: JourneySkill | null;
+  reason?: string;
+  weak_spot?: NextStepWeakSpot | null;
+  suggestions?: NextStepSuggestion[];
+  exam_days_left?: number | null;
 }
 
 export interface DonutItem {
@@ -100,6 +156,8 @@ export interface LearningProfileOverviewData {
   radar_data: SkillScore[];
   donut_data: DonutItem[];
   heatmap_weeks: HeatmapWeek[];
+  current_bands?: CurrentBands;
+  exam?: ExamCountdown;
 }
 
 export interface WeeklySkillStat {

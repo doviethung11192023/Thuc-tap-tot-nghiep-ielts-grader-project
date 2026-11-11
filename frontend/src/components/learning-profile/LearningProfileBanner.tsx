@@ -76,11 +76,11 @@ export function LearningProfileBanner({ userName, goals, onOpenGoalModal }: Lear
                 <div className="px-2">
                   <span className="text-[11px] text-zinc-500 font-medium inline-flex items-center justify-center gap-1">
                     Dự đoán
-                    <span title="Tính từ điểm các bài thi gần nhất" className="inline-flex">
+                    <span title="Overall từ band hiện tại 4 kỹ năng; thiếu kỹ năng nào thì chưa tính" className="inline-flex">
                       <HelpCircle className="w-3 h-3 text-blue-500" />
                     </span>
                   </span>
-                  <span className="text-lg font-black text-blue-600 block">{goals.predicted_band.toFixed(1)}</span>
+                  <span className="text-lg font-black text-blue-600 block">{goals.predicted_band !== null ? goals.predicted_band.toFixed(1) : "—"}</span>
                 </div>
                 <div className="pl-2">
                   <span className="text-[11px] text-zinc-500 font-medium block">Mục tiêu</span>

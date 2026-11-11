@@ -5,6 +5,7 @@ from .common import (
     get_vietnamese_month_abbr, compute_daily_active_minutes,
     get_from_cache, set_to_cache, round_to_ielts_band
 )
+from app.services.learner_journey.next_step_builder import compute_current_bands
 
 def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     """Tổng hợp dữ liệu thực tế cho Tab Tổng quan (Overview) chuẩn IELTS."""
@@ -33,28 +34,16 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
 
     all_bands = [float(a["band"]) for a in scored_attempts]
 
-    def avg_s(arr: List[float], default: float) -> float:
-        if not arr:
-            return round_to_ielts_band(default)
-        non_zero = [b for b in arr if b > 0]
-        target = non_zero if non_zero else arr
-        return round_to_ielts_band(sum(target) / len(target))
-
-    base_band = float(goal.get("input_band") or 5.0)
-    w_score = avg_s(bands_by_skill["writing"], base_band)
-    l_score = avg_s(bands_by_skill["listening"], 0.0) if bands_by_skill["listening"] else 0.0
-    r_score = avg_s(bands_by_skill["reading"], 0.0) if bands_by_skill["reading"] else 0.0
-    # Chưa có điểm thì 0 và không tính vào Overall; band Learner tự nhập không phải kết quả chấm (E-02)
-    s_score = avg_s(bands_by_skill["speaking"], 0.0) if bands_by_skill["speaking"] else 0.0
-
-    active_scores = [s for s in [w_score, l_score, r_score, s_score] if s > 0]
-    calc_overall = round_to_ielts_band(sum(active_scores) / len(active_scores) if active_scores else base_band)
-    avg_band = calc_overall if calc_overall > 0 else (round_to_ielts_band(sum(all_bands) / len(all_bands)) if all_bands else 0.0)
+    # Band hiện tại theo BR-12 (spec 005): không dùng band tự nhập, chưa đủ dữ liệu thì None
+    journey = compute_current_bands(user_id, attempts)
+    cb = journey["current_bands"]
+    l_score, r_score, w_score, s_score = (cb[s]["band"] or 0.0 for s in ("listening", "reading", "writing", "speaking"))
+    avg_band = round_to_ielts_band(sum(all_bands) / len(all_bands)) if all_bands else 0.0
     best_band = round_to_ielts_band(max(all_bands)) if all_bands else 0.0
-    predicted_band = avg_band if avg_band > 0 else round_to_ielts_band(goal["input_band"])
+    predicted_band = cb["overall"]
 
     prog_pct = 0
-    if goal["target_overall"] > goal["input_band"]:
+    if predicted_band is not None and goal["target_overall"] > goal["input_band"]:
         prog_pct = min(100, max(0, round(((predicted_band - goal["input_band"]) / (goal["target_overall"] - goal["input_band"])) * 100)))
 
     all_dates = [str(a.get("started_at") or "")[:10] for a in attempts if a.get("started_at")]
@@ -75,7 +64,7 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
 
     radar_data = [
         {"skill": "Writing", "score": w_score, "count": len(bands_by_skill["writing"])},
-        {"skill": "Overview", "score": predicted_band, "count": len(attempts)},
+        {"skill": "Overview", "score": predicted_band or 0.0, "count": len(attempts)},
         {"skill": "Listening", "score": l_score, "count": len(bands_by_skill["listening"])},
         {"skill": "Reading", "score": r_score, "count": len(bands_by_skill["reading"])},
         {"skill": "Speaking", "score": s_score, "count": len(bands_by_skill["speaking"])},
@@ -117,8 +106,10 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
         "recent_submissions": recent_submissions[:5],
         "goals": {
             "input_band": goal["input_band"], "predicted_band": predicted_band,
-            "target_band": goal["target_overall"], "progress_percent": prog_pct, "test_date": goal["test_date"],
+            "target_band": goal["target_overall"], "progress_percent": prog_pct, "test_date": journey["exam"]["test_date"],
+            "goal_set": journey["goal_set"],
         },
+        "current_bands": cb, "exam": journey["exam"],
         "radar_data": radar_data, "donut_data": donut_data, "heatmap_weeks": weeks_data,
     }
     set_to_cache(cache_key, result, ttl_seconds=30)

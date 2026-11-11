@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
 from app.core.security import User, get_current_user
+from app.services.learner_journey.next_step_builder import compute_next_step
 from app.services.learning_profile.common import _cache
 from app.services.learning_profile_aggregator import (
     compute_learning_profile_overview,
@@ -52,6 +53,13 @@ async def delete_student_attempt(attempt_id: str, current_user: User = Depends(g
 async def get_student_learning_profile(current_user: User = Depends(get_current_user)):
     """KPIs, mục tiêu, Radar, Donut, Heatmap của hồ sơ năng lực."""
     return {"meta": {"code": 200}, "data": compute_learning_profile_overview(current_user.id)}
+
+
+@router.get("/learning-profile/next-step")
+def get_learning_profile_next_step(current_user: User = Depends(get_current_user)):
+    """Thẻ "Bước tiếp theo" (BR-17, ADR-23): kỹ năng ưu tiên, điểm yếu, ≤ 3 gợi ý. Tính lúc xem, không lưu.
+    Hàm thường (không async) để FastAPI chạy trong threadpool, không chặn event loop khi đọc Supabase."""
+    return {"meta": {"code": 200}, "data": compute_next_step(current_user.id)}
 
 
 @router.get("/learning-profile/test-practice")

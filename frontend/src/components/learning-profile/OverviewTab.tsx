@@ -7,6 +7,9 @@ import { QuickStatCards } from "./QuickStatCards";
 import { OverviewChartsSection } from "./OverviewChartsSection";
 import { RecentSubmissionsList } from "./RecentSubmissionsList";
 import { LearningProfileHeatmap } from "./LearningProfileHeatmap";
+import { NextStepCard } from "./NextStepCard";
+import { CurrentBandsRow } from "./CurrentBandsRow";
+import { useLearnerNextStep } from "@/hooks/useLearnerNextStep";
 import type { LearningProfileOverviewData } from "@/types/learning-profile";
 
 interface OverviewTabProps {
@@ -26,7 +29,14 @@ export function OverviewTab({ userName, data, loading, onOpenGoalModal }: Overvi
     );
   }
 
+  return <OverviewContent userName={userName} data={data} onOpenGoalModal={onOpenGoalModal} />;
+}
+
+function OverviewContent({ userName, data, onOpenGoalModal }: Omit<OverviewTabProps, "loading"> & { data: LearningProfileOverviewData }) {
   const { kpis, goals, dashboard_stats, recent_submissions, radar_data, donut_data, heatmap_weeks } = data;
+  // Thẻ "Bước tiếp theo" tải lại khi mục tiêu, ngày thi hoặc số bài làm đổi (spec 005)
+  const refreshKey = `${goals.goal_set}|${goals.target_band}|${goals.test_date}|${kpis.total_tests_taken}|${kpis.total_cups}`;
+  const nextStep = useLearnerNextStep(refreshKey);
 
   return (
     <div className="space-y-6 w-full">
@@ -36,6 +46,12 @@ export function OverviewTab({ userName, data, loading, onOpenGoalModal }: Overvi
         goals={goals}
         onOpenGoalModal={onOpenGoalModal}
       />
+
+      {/* 1b. Lộ trình học (spec 005): bước tiếp theo + band hiện tại theo BR-12 */}
+      <NextStepCard {...nextStep} onOpenGoalModal={onOpenGoalModal} />
+      {data.current_bands && (
+        <CurrentBandsRow bands={data.current_bands} exam={data.exam} onOpenGoalModal={onOpenGoalModal} />
+      )}
 
       {/* 2. Thống kê tiến trình học tập (4 Thẻ Stat & Quick Actions từ Dashboard) */}
       <QuickStatCards stats={dashboard_stats} />

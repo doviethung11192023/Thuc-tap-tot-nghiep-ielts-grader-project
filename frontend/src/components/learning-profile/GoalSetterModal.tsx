@@ -21,7 +21,8 @@ export function GoalSetterModal({
 }: GoalSetterModalProps) {
   const [inputBand, setInputBand] = useState<number>(currentGoals.input_band || 4.5);
   const [targetOverall, setTargetOverall] = useState<number>(currentGoals.target_band || 6.5);
-  const [testDate, setTestDate] = useState<string>(currentGoals.test_date || "2026-12-31");
+  // Chưa chọn ngày thi thì để trống, không tự điền ngày giả (spec 005)
+  const [testDate, setTestDate] = useState<string>(currentGoals.test_date || "");
 
   if (!isOpen) return null;
 
@@ -30,7 +31,7 @@ export function GoalSetterModal({
     const success = await onSave({
       input_band: Number(inputBand),
       target_overall: Number(targetOverall),
-      test_date: testDate,
+      ...(testDate ? { test_date: testDate } : {}),
     });
     if (success) {
       onClose();
