@@ -141,6 +141,8 @@ def test_tree(test_id: str) -> Optional[dict[str, Any]]:
     elif test["skill"] == "writing":
         from app.services.writing.writing_test_content import load_writing_test, to_writing_content
         sections = to_writing_content(load_writing_test(test_id))["sections"]
+        for sec in sections:  # ô "Đề bài Task" của CMS đọc passage_text; đề Writing nằm ở writing_tasks.task_prompt
+            sec["passage_text"] = sec["question_groups"][0]["questions"][0]["prompt"]
     else:
         from app.services.speaking.speaking_test_content import load_speaking_test, to_speaking_content
         sections = to_speaking_content(load_speaking_test(test_id))["sections"]
