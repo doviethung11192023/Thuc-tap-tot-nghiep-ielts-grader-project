@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from schemas.llm_output import AgentCriterionOutput
+from services.speaking import speaking_band_ceilings as ceilings
 from services.speaking import speaking_grading_pipeline as pipeline
 from services.speaking.answer_analysis import AnswerAnalysis
 from services.speaking.audio_signal import AudioQuality
@@ -73,7 +74,7 @@ def stubs(monkeypatch):
     monkeypatch.setattr(pipeline, "compute_lexical", lambda processed: {"ttr": 0.5})
     monkeypatch.setattr(pipeline, "preprocess", lambda essay: essay)
     # the stub answers are short; length ceilings have their own tests
-    monkeypatch.setattr(pipeline, "measure_length", lambda spoken, words: LengthLimits(90.0, words, None, None))
+    monkeypatch.setattr(ceilings, "measure_length", lambda spoken, words: LengthLimits(90.0, words, None, None))
     return calls
 
 
@@ -198,7 +199,7 @@ def test_coverage_ceilings(answered, total, ceiling):
 
 def test_unintelligible_audio_caps_every_criterion_before_the_reports(stubs, monkeypatch):
     from services.speaking.speaking_intelligibility_cap import Intelligibility
-    monkeypatch.setattr(pipeline, "measure_intelligibility", lambda comparison, quality: Intelligibility(0.46, 0.57, 4.0))
+    monkeypatch.setattr(ceilings, "measure_intelligibility", lambda comparison, quality: Intelligibility(0.46, 0.57, 4.0))
     result = _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
     assert all(c["band"] <= 4.0 for c in result["criteria"].values())
     assert stubs["overall_criteria"]["lr"]["band"] == 4.0
@@ -206,9 +207,54 @@ def test_unintelligible_audio_caps_every_criterion_before_the_reports(stubs, mon
 
 
 def test_short_test_caps_fluency_and_language_separately(stubs, monkeypatch):
-    monkeypatch.setattr(pipeline, "measure_length", measure_length)     # real rule: 80 words, Part 2 clip 30 s
+    monkeypatch.setattr(ceilings, "measure_length", measure_length)     # real rule: 80 words, Part 2 clip 30 s
     result = _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
     bands = {name: c["band"] for name, c in result["criteria"].items()}
     assert bands["fc"] == 5.0 and bands["lr"] == 5.0 and bands["gra"] == 5.0
     assert bands["pr"] == result["pronunciation"]["band"]          # P has its own evidence rules
     assert "30 giây" in result["length"]["note"] and "80 từ" in result["length"]["note"]
+
+
+def test_part_reports_run_beside_the_criteria(stubs, monkeypatch):
+    order = []
+
+    async def slow_parts(title, answers):
+        order.append("parts start")
+        await asyncio.sleep(0.05)
+        order.append("parts end")
+        return {}
+
+    async def criterion(name, compiled):
+        order.append(f"{name} start")
+        await asyncio.sleep(0.01)
+        return AgentCriterionOutput(band=6.0, summary=name)
+
+    monkeypatch.setattr(pipeline, "generate_part_feedback", slow_parts)
+    monkeypatch.setattr(pipeline, "evaluate_criterion", criterion)
+    _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
+    assert order.index("pr start") < order.index("parts end")
+
+
+def test_failed_criterion_stops_the_part_reports(stubs, monkeypatch):
+    finished = []
+
+    async def slow_parts(title, answers):
+        await asyncio.sleep(0.2)
+        finished.append(True)
+
+    async def broken(name, compiled):
+        raise RuntimeError("LLM down")
+
+    monkeypatch.setattr(pipeline, "generate_part_feedback", slow_parts)
+    monkeypatch.setattr(pipeline, "evaluate_criterion", broken)
+    results = iter([_spoken("r1", 1), _spoken("r2", 2)])
+    monkeypatch.setattr(pipeline, "analyze_answer", lambda *args: next(results))
+
+    async def scenario():
+        with pytest.raises(RuntimeError):
+            await pipeline.run_speaking_pipeline("Test", INPUTS)
+        # keep the loop alive past the Part reports' finish time: asyncio.run would cancel leftovers anyway
+        await asyncio.sleep(0.3)
+
+    asyncio.run(scenario())
+    assert finished == []

@@ -42,6 +42,11 @@ def clean_word(text: str) -> str:
     return re.sub(r"[^a-z']", "", text.lower())
 
 
+def load_model() -> None:
+    """Load Whisper at startup, so the first test after a restart does not wait for it."""
+    _get_model()
+
+
 def _get_model() -> WhisperModel:
     global _model
     with _model_lock:

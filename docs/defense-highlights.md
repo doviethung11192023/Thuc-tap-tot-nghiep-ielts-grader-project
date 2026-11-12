@@ -88,6 +88,19 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - Mới đo trên 1 bản ghi.
 - 90 s là bài 1 câu. Bài 7 câu chấm lại ngày 2026-11-11 mất 234 s (xử lý âm thanh 161 s trên CPU, LLM khoảng 66 s), vượt mục tiêu 120 s; cần đo lại trên máy có GPU trước khi nói đạt NFR-02.
 
+### Thời gian chấm Speaking đo theo từng bước (📏 2026-11-13, GPU, bài 7 câu)
+
+| Bước | Thời gian |
+|---|---|
+| Whisper + wav2vec2, 7 câu | 12 s |
+| LLM 4 tiêu chí song song (LR/GRA là đường găng) | ~39 s |
+| Nhận xét từng Part | 9,5 s, nay chạy song song với 4 tiêu chí |
+| Báo cáo tổng | 10 s |
+
+- Trước: 70 s (bài đầu sau khi khởi động engine 86 s vì nạp model). Sau: **62 s** ngay cả bài đầu, nhờ nạp sẵn model lúc khởi động và chạy nhận xét Part song song.
+- Đã thử đổi LR/GRA từ `qwen3.7-plus` sang `qwen-flash` trên 3 bài: nhanh gần gấp đôi (15–22 s so với 36–45 s) nhưng **không đổi**. `qwen-flash` bắt lỗi giả trên bài nói tốt (9 "lỗi" như "artefacts → artifacts", sửa dấu gạch nối, sửa thành chính nó) và hạ GRA 8 → 7; còn `qwen3.7-plus` bắt đúng lỗi do ASR nghe nhầm ("loop metal → loop pedal", "junior hair → ginger hair"). Chọn chất lượng lỗi gạch chân hơn tốc độ là quyết định có số liệu.
+- Thời gian LR/GRA tỉ lệ với số lỗi phải liệt kê: bài 1 lỗi 15 s, bài 17 lỗi 45 s.
+
 ## 2. Writing: chấm theo bài mẫu từng band (✅)
 
 - Task 2 phân loại dạng đề, đưa cho model một bài mẫu cùng dạng ở mỗi band, chấm 4 tiêu chí trong một lần gọi (ADR-22).
@@ -143,6 +156,7 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - RLS trên mọi bảng, **chỉ đọc**; mọi thao tác ghi qua Core API. Người khác xem bài trả 404 thay vì 403 để không lộ bài có tồn tại.
 - Đáp án L/R nằm ở bảng riêng, không bao giờ gửi xuống trình duyệt trước khi nộp. Transcript Listening (chứa đáp án) bị thu quyền đọc theo **cột**: Learner gọi thẳng Supabase cũng không đọc được (rà soát 2026-11-09 phát hiện lỗ này).
 - AI engine chỉ chạy trong mạng nội bộ, có secret header, không truy cập DB.
+- Access token kiểm bằng khoá công khai ES256 của Supabase (JWKS), không dùng secret dùng chung: lộ `.env` của backend cũng không ký được token admin; token HS256 hay `alg=none` bị từ chối, có test (ADR-32).
 - Giọng nói theo Nghị định 13/2023: xin đồng ý trước lần ghi đầu, bucket riêng tư, link ký ngắn hạn, tự xoá sau 180 ngày.
 
 ## 6. Luồng Expert sát thực tế vận hành (🔧, spec 003)
@@ -200,6 +214,7 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - Đo hiện trạng bằng k6 **trước** khi đổi, rồi đo lại **sau**: biểu đồ trước và sau là bằng chứng mạnh nhất.
 - Mỗi thành phần thêm vào gắn với một vấn đề cụ thể: client Postgres async có pool (event loop bị chặn), Redis Streams (tải ghi tự lưu), Traefik và nhiều bản sao Core API (mở rộng ngang), hàng đợi ưu tiên (bài Mock đến dồn), GPU thuê theo giờ (mở rộng chấm Speaking), OpenTelemetry + Prometheus + Grafana + Sentry (thấy và chứng minh).
 - Demo: chạy k6 và mở dashboard Grafana cùng lúc; bật thêm một pod GPU và cho thấy hàng đợi Speaking giảm nhanh hơn.
+- **Đã làm một bước (✅ 2026-11-13, ADR-32):** đo trên trình duyệt thấy lọc kỹ năng mất 0,5–1,1 s dù chỉ có 53 đề; cùng request không token chỉ 3 ms, 4 request song song mất 1 624 ms (xếp hàng). Nguyên nhân: mỗi request gọi GoTrue và `profiles` đồng bộ trong `async def`. Kiểm token bằng JWKS tại chỗ + cache hồ sơ 60 s: lọc (cache hit) 410 ms → 3 ms, 4 request song song → 8 ms, tải trang Luyện đề 6,9 s → 1,1 s. Ví dụ cụ thể cho "đo trước, sửa đúng chỗ, đo lại".
 - **Biết khi nào không dùng:** không Kubernetes, Kafka, Temporal (ADR-28) vì nhóm 3 người, 1 tháng, quy mô thiết kế không cần. Pattern đã có sẵn: `grading_runs` + cron quét lại chính là **transactional outbox**.
 - Chi phí: GPU thuê theo giờ, dự kiến dưới 200.000 đ cho load test và ngày bảo vệ.
 

@@ -54,6 +54,8 @@ from services.material_drafter import MaterialRequestError, draft_material  # no
 from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
 from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
+from services.speaking.phoneme_recognizer import load_model as load_phoneme_model  # noqa: E402
+from services.speaking.speech_transcriber import load_model as load_stt_model  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
 
@@ -66,6 +68,15 @@ async def lifespan(app: FastAPI):
         logger.info("NLP tools ready")
     except Exception as e:  # first request will retry the lazy initialisation
         logger.warning("NLP warm-up failed: %s", e, exc_info=True)
+    # about 10 s otherwise paid by the first Speaking test after each restart; the two models load side by
+    # side, and one failing does not stop the other (the first Speaking test loads a missing one lazily)
+    logger.info("Loading speech models (Whisper, wav2vec2)...")
+    outcomes = await asyncio.gather(asyncio.to_thread(load_stt_model), asyncio.to_thread(load_phoneme_model),
+                                    return_exceptions=True)
+    for name, outcome in zip(("Whisper", "wav2vec2"), outcomes):
+        if isinstance(outcome, Exception):
+            logger.warning("%s warm-up failed: %s", name, outcome, exc_info=outcome)
+    logger.info("Speech models warm-up finished")
     yield
 
 

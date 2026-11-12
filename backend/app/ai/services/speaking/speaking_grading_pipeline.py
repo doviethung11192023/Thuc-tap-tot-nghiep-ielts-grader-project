@@ -25,10 +25,9 @@ from services.speaking.answer_analysis import (
 from services.speaking.audio_signal import download_audio
 from services.speaking.phoneme_comparison import likely_mispronounced
 from services.speaking.pronunciation_rubric import assess_pronunciation
-from services.speaking.speaking_coverage_cap import UnansweredQuestion, capped, measure_coverage
+from services.speaking.speaking_band_ceilings import apply_ceilings
+from services.speaking.speaking_coverage_cap import UnansweredQuestion
 from services.speaking.speaking_criterion_evidence import evaluate_criterion_with_evidence
-from services.speaking.speaking_intelligibility_cap import measure_intelligibility
-from services.speaking.speaking_length_cap import measure_length
 from services.speaking.speaking_response_feedback import build_response_feedback, labelled_transcript
 from services.speaking.speaking_feedback import PartAnswer, generate_overall, generate_part_feedback
 from settings.config import get_settings
@@ -149,36 +148,37 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
     grammar, lexical = await asyncio.gather(asyncio.to_thread(check_grammar, processed),
                                             asyncio.to_thread(compute_lexical, processed))
     pronunciation_evidence = {**assessment.as_dict(), "words_possibly_mispronounced": weak_words}
+    # Part reports read only the answers, so they run beside the criteria instead of after them
+    parts_task = asyncio.create_task(generate_part_feedback(title, [
+        PartAnswer(a.part, a.question, a.transcript.text, a.quality.speech_seconds) for a in spoken]))
 
-    qa_transcript, spoken_numbers = _question_and_answer_transcript(answers, unanswered)
-    (fc_full, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
-        _criterion_with_evidence("fc", title, qa_transcript, word_count, speech_metrics=json.dumps(metrics)),
-        _criterion_with_evidence("lr", title, transcript, word_count, lexical_stats=str(lexical)),
-        _criterion_with_evidence("gra", title, transcript, word_count, grammar=str(grammar)),
-        _criterion("pr", title, transcript, word_count,
-                   pronunciation_assessment=json.dumps(_evidence_for_llm(pronunciation_evidence), ensure_ascii=False),
-                   pronunciation_band=assessment.band),
-    )
-    pr.band = assessment.band           # code owns this band, whatever the LLM returned
-    fc, lr, gra = fc_full.output, lr_full.output, gra_full.output
-    off_topic = len(spoken_numbers & set(fc_full.off_topic_answers))   # an off-topic answer counts as unanswered
-    coverage = measure_coverage(len(spoken) - off_topic, len(answers) + len(unanswered), off_topic)
-    intelligibility = measure_intelligibility(comparison, combine_quality(spoken))
-    length = measure_length(spoken, word_count)
-    for output, length_max in ((fc, length.fc_max), (lr, length.language_max), (gra, length.language_max), (pr, None)):
+    try:
+        qa_transcript, spoken_numbers = _question_and_answer_transcript(answers, unanswered)
+        (fc_full, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
+            _criterion_with_evidence("fc", title, qa_transcript, word_count, speech_metrics=json.dumps(metrics)),
+            _criterion_with_evidence("lr", title, transcript, word_count, lexical_stats=str(lexical)),
+            _criterion_with_evidence("gra", title, transcript, word_count, grammar=str(grammar)),
+            _criterion("pr", title, transcript, word_count,
+                       pronunciation_assessment=json.dumps(_evidence_for_llm(pronunciation_evidence),
+                                                           ensure_ascii=False),
+                       pronunciation_band=assessment.band),
+        )
+        pr.band = assessment.band           # code owns this band, whatever the LLM returned
+        fc, lr, gra = fc_full.output, lr_full.output, gra_full.output
+        off_topic = len(spoken_numbers & set(fc_full.off_topic_answers))   # an off-topic answer counts as unanswered
         # before the reports, so their text matches the final bands
-        output.band = capped(output.band, coverage)
-        for ceiling in (intelligibility.max_band, length_max):
-            if ceiling is not None:
-                output.band = min(output.band, ceiling)
-    feedback, anchoring = build_response_feedback(
-        spoken, gra_full.edits, lr_full.edits, lr_full.strength_spans + gra_full.strength_spans,
-        assessment.phoneme_usable)
+        ceilings = apply_ceilings({"fc": fc, "lr": lr, "gra": gra, "pr": pr}, spoken, len(answers) + len(unanswered),
+                                  off_topic, comparison, word_count)
+        feedback, anchoring = build_response_feedback(
+            spoken, gra_full.edits, lr_full.edits, lr_full.strength_spans + gra_full.strength_spans,
+            assessment.phoneme_usable)
 
-    parts = await generate_part_feedback(title, [
-        PartAnswer(a.part, a.question, a.transcript.text, a.quality.speech_seconds) for a in spoken])
-    criteria = {name: _criterion_payload(output) for name, output in (("fc", fc), ("lr", lr), ("gra", gra), ("pr", pr))}
-    overall = await generate_overall(title, criteria)
+        criteria = {name: _criterion_payload(output)
+                    for name, output in (("fc", fc), ("lr", lr), ("gra", gra), ("pr", pr))}
+        overall = await generate_overall(title, criteria)
+        parts = await parts_task
+    finally:
+        parts_task.cancel()     # no-op once awaited; on any failure the run is lost, so stop the Part reports too
 
     return {
         "no_speech": False,
@@ -186,9 +186,9 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
         "feedback_anchoring": anchoring,
         "criteria": criteria,
         "pronunciation": pronunciation_evidence,
-        "coverage": coverage.as_dict(),
-        "intelligibility": intelligibility.as_dict(),
-        "length": length.as_dict(),
+        "coverage": ceilings.coverage.as_dict(),
+        "intelligibility": ceilings.intelligibility.as_dict(),
+        "length": ceilings.length.as_dict(),
         "speech_metrics": metrics,
         "parts": parts,
         "overall": overall,

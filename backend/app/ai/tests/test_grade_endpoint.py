@@ -8,7 +8,9 @@ from services.langfuse.prompt_manager import PromptFetchError
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(serve, "warm_up_nlp_tools", lambda: None)
+    import main     # the lifespan lives in main: stub its warm-ups so tests never load NLP or speech models
+    for name in ("warm_up_nlp_tools", "load_stt_model", "load_phoneme_model"):
+        monkeypatch.setattr(main, name, lambda: None)
     calls = []
 
     async def fake_pipeline(**kwargs):
