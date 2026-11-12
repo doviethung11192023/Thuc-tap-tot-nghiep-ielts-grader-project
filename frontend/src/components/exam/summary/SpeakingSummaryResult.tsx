@@ -65,6 +65,21 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({ te
               <p className="text-xs text-slate-500">{data.title}</p>
               <p className="text-5xl font-black text-blue-700">{data.overall_band?.toFixed(1)}</p>
               <p className="text-xs font-semibold text-slate-600">Điểm ước lượng của AI (estimate), không phải điểm giám khảo</p>
+              {speaking.coverage?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-3">
+                  {speaking.coverage.note} Hãy trả lời đủ các câu để được chấm đầy đủ.
+                </p>
+              )}
+              {speaking.intelligibility?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-3">
+                  {speaking.intelligibility.note} Hãy nói chậm và rõ từng từ, thu âm nơi yên tĩnh.
+                </p>
+              )}
+              {speaking.length?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-3">
+                  {speaking.length.note}
+                </p>
+              )}
             </section>
 
             <CriteriaGrid criteria={speaking.criteria} />

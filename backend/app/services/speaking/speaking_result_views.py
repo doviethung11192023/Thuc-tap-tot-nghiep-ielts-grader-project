@@ -54,6 +54,9 @@ def build_speaking_summary(attempt: dict[str, Any]) -> dict[str, Any]:
             "overall": output.get("overall"),
             "pronunciation": output.get("pronunciation"),
             "speech_metrics": output.get("speech_metrics"),
+            "coverage": output.get("coverage"),     # trần theo số câu đã trả lời (BR-23); bài cũ: None
+            "intelligibility": output.get("intelligibility"),   # trần khi âm thanh khớp kém transcript (BR-24)
+            "length": output.get("length"),     # trần khi Part 2 quá ngắn hoặc cả bài quá ít từ (BR-25)
         },
     }
 

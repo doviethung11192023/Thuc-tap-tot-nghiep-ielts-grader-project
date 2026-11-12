@@ -1,8 +1,8 @@
 """
 Chạy lại chấm AI cho một bài Speaking, dùng tới khi có màn hình Admin (UC-24).
 
-Tạo evaluation mới, không ghi đè kết quả cũ. Chỉ dùng cho attempt grading_failed; attempt kẹt ở grading
-do worker chết thì cron recover_stale_runs_task tự chạy lại.
+Tạo evaluation mới, không ghi đè kết quả cũ. Dùng cho attempt grading_failed, hoặc scored khi luật chấm
+đổi (vd BR-23, BR-24); attempt kẹt ở grading do worker chết thì cron recover_stale_runs_task tự chạy lại.
 
     cd backend && .venv/bin/python scripts/regrade_speaking_attempt.py <attempt_id>
 """
@@ -16,7 +16,7 @@ from app.db.supabase import db  # noqa: E402
 from app.services.speaking.speaking_grading_service import grade_speaking_attempt  # noqa: E402
 from app.services.speaking.speaking_submission_service import create_grading_job  # noqa: E402
 
-REGRADABLE = ("grading_failed",)
+REGRADABLE = ("grading_failed", "scored")
 
 
 def main(attempt_id: str) -> None:

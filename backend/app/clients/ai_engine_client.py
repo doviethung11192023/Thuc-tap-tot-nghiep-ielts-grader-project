@@ -51,10 +51,12 @@ SPEAKING_TRIES = 2
 _RETRYABLE_STATUS = (502, 503, 504)
 
 
-async def call_ai_grade_speaking(title: str, answers: list[dict[str, Any]]) -> dict[str, Any]:
-    """Một lượt chấm Speaking tốn GPU và LLM nên chỉ thử lại lỗi tạm thời, không thử lại lỗi 4xx/500."""
+async def call_ai_grade_speaking(title: str, answers: list[dict[str, Any]],
+                                 unanswered: Optional[list[dict[str, Any]]] = None) -> dict[str, Any]:
+    """Một lượt chấm Speaking tốn GPU và LLM nên chỉ thử lại lỗi tạm thời, không thử lại lỗi 4xx/500.
+    unanswered: câu chưa có bản ghi [{part, question}], AI engine dùng để áp trần (BR-23)."""
     headers = {"Content-Type": "application/json", "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
-    payload = {"title": title, "answers": answers}
+    payload = {"title": title, "answers": answers, "unanswered": unanswered or []}
     last_error = ""
     for attempt in range(SPEAKING_TRIES):
         try:

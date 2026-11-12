@@ -9,6 +9,7 @@ import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
 import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
 import { closedAttemptMessage } from '@/utils/attempt-submission';
+import { notifyAttemptSubmitted } from '@/stores/notification-store';
 
 export default function SpeakingWorkspacePage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function SpeakingWorkspacePage() {
     const summaryPath = `/test-practice/speaking/${testId}/summary?attemptId=${attemptId}${returnQuery}`;
     try {
       await submitSpeakingAttempt(attemptId);
+      notifyAttemptSubmitted(attemptId, speakingData?.title || 'IELTS Speaking Test', summaryPath);
       router.push(summaryPath);
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;

@@ -13,7 +13,8 @@ Endpoints:
                     inline_annotations, overall_upgraded_essay, word_count, task_type)
     POST /draft-material  body: { kind, task_type, title, image_url?, answer_key? } → draft (spec 006)
     GET  /grading-fingerprint?task_type=  → hash of pipeline, models, production prompt versions
-    POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}] }
+    POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}],
+                                  "unanswered": [{part, question}] (optional) }
                   → transcripts, speech metrics, 4 criteria, feedback. Requires X-AI-Engine-Secret.
     GET  /health
     GET  /
@@ -52,6 +53,7 @@ from services.grading_fingerprint import grading_fingerprint  # noqa: E402
 from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
 from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
+from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
 
@@ -108,9 +110,15 @@ class SpeakingAnswerRequest(BaseModel):
     duration_ms: int | None = None
 
 
+class UnansweredQuestionRequest(BaseModel):
+    part: int = Field(..., ge=1, le=3)
+    question: str
+
+
 class GradeSpeakingRequest(BaseModel):
     title: str = ""
     answers: list[SpeakingAnswerRequest] = Field(..., min_length=1)
+    unanswered: list[UnansweredQuestionRequest] = []   # questions with no recording (BR-23)
 
 
 def require_engine_secret(x_ai_engine_secret: str | None = Header(default=None)) -> None:
@@ -184,7 +192,8 @@ async def grading_fingerprint_endpoint(task_type: str = "task2"):
 async def grade_speaking(req: GradeSpeakingRequest):
     """Speech layers, then LLM. Slow, so the Core API calls this from a background task."""
     try:
-        return await run_speaking_pipeline(req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers])
+        return await run_speaking_pipeline(req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers],
+                                           [UnansweredQuestion(q.part, q.question) for q in req.unanswered])
     except PromptFetchError as e:
         logger.error("Langfuse prompt missing: %s", e)
         raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")

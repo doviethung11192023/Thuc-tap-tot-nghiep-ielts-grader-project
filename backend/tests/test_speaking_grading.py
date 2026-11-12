@@ -40,8 +40,8 @@ def fake(monkeypatch):
                              "confirmed_at": "2026-11-06T00:01:00+00:00"},
                             {"id": "r2", "attempt_id": "a1", "speaking_question_id": "q2", "section_id": "s2",
                              "audio_key": "speaking/a1/q2.webm", "duration_ms": None, "confirmed_at": None}],
-        speaking_questions=[{"id": "q1", "order_no": 1, "prompt": "Describe a trip."},
-                            {"id": "q2", "order_no": 2, "prompt": "Unconfirmed question"}],
+        speaking_questions=[{"id": "q1", "speaking_part_id": "s2", "order_no": 1, "prompt": "Describe a trip."},
+                            {"id": "q2", "speaking_part_id": "s2", "order_no": 2, "prompt": "Unconfirmed question"}],
         sections=[{"id": "s2", "order_no": 1, "title": "Part 2", "test_id": "t1"}],
         attempt_sections=[{"attempt_id": "a1", "section_id": "s2"}],
         criteria=CRITERIA,
@@ -60,8 +60,8 @@ def _attempt(client):
 def _grade(client, monkeypatch, result=None, error=None):
     sent = {}
 
-    async def fake_call(title, answers):
-        sent.update(title=title, answers=answers)
+    async def fake_call(title, answers, unanswered=None):
+        sent.update(title=title, answers=answers, unanswered=unanswered)
         if error:
             raise error
         return result
@@ -93,6 +93,21 @@ def test_only_confirmed_answers_reach_the_ai_engine_with_signed_urls(fake, monke
     assert [a["response_id"] for a in sent["answers"]] == ["r1"]
     assert sent["answers"][0]["audio_url"].startswith("https://signed/")
     assert sent["answers"][0]["part"] == 2     # lấy từ tiêu đề, không phải order_no
+
+
+def test_questions_without_a_recording_are_sent_as_unanswered(fake, monkeypatch):
+    sent = _grade(fake, monkeypatch, RESULT)
+    assert sent["unanswered"] == [{"part": 2, "question": "Unconfirmed question"}]
+
+
+def test_summary_carries_the_ceiling_notes(fake, monkeypatch):
+    coverage = {"answered": 1, "total": 2, "max_band": 6.0, "note": "Bạn trả lời 1/2 câu nên điểm mỗi tiêu chí tối đa 6.0."}
+    intelligibility = {"clear_word_ratio": 0.46, "phoneme_accuracy": 0.57, "max_band": 4.0, "note": "Chỉ 46% từ…"}
+    length = {"part2_seconds": 40.0, "word_count": 300, "fc_max": 5.0, "language_max": None, "note": "Part 2…"}
+    _grade(fake, monkeypatch, {**RESULT, "coverage": coverage, "intelligibility": intelligibility, "length": length})
+    speaking = views.build_speaking_summary(_attempt(fake))["speaking"]
+    assert speaking["coverage"] == coverage and speaking["intelligibility"] == intelligibility
+    assert speaking["length"] == length
 
 
 def test_success_stores_everything_and_band_is_mean_of_four(fake, monkeypatch):
@@ -149,7 +164,15 @@ def test_summary_during_grading_has_no_band(fake):
     assert data["overall_band"] is None and data["speaking"]["grading_done"] is False
 
 
-def test_writing_finalizer_keeps_its_behaviour(fake):
+def _writing_scope(monkeypatch, client):
+    from app.services.writing import writing_task_scope
+    monkeypatch.setattr(writing_task_scope, "db", lambda: client)
+    monkeypatch.setattr(writing_task_scope, "load_writing_task_sections", lambda test_id: {1: "s-t1", 2: "s-t2"})
+
+
+def test_writing_finalizer_keeps_its_behaviour(fake, monkeypatch):
+    _writing_scope(monkeypatch, fake)
+    fake.tables["attempt_sections"] = [{"attempt_id": "a1", "section_id": "s-t2"}]   # Practice chọn riêng Task 2
     fake.tables["attempts"][0]["status"] = "grading"
     fake.tables["evaluations"] = [{"id": "e1", "attempt_id": "a1", "status": "pending", "evaluator_type": "ai"}]
     fake.tables["grading_runs"] = [{"evaluation_id": "e1", "task_no": 2, "status": "done"}]
@@ -157,6 +180,18 @@ def test_writing_finalizer_keeps_its_behaviour(fake):
     writing_finalizer.finalize_writing_evaluation("e1")
     assert fake.tables["evaluations"][0]["overall_band"] == 6.5
     assert fake.tables["attempts"][0]["status"] == "scored"
+
+
+def test_writing_finalizer_blank_task_in_scope_is_zero(fake, monkeypatch):
+    # Mở cả bài, chỉ viết Task 1 (band 6.0): Task 2 = 0 → (6 + 0) / 3 = 2.0 (BR-04)
+    _writing_scope(monkeypatch, fake)
+    fake.tables["attempt_sections"] = [{"attempt_id": "a1", "section_id": "s-t1"}, {"attempt_id": "a1", "section_id": "s-t2"}]
+    fake.tables["attempts"][0]["status"] = "grading"
+    fake.tables["evaluations"] = [{"id": "e1", "attempt_id": "a1", "status": "pending", "evaluator_type": "ai"}]
+    fake.tables["grading_runs"] = [{"evaluation_id": "e1", "task_no": 1, "status": "done"}]
+    fake.tables["criterion_scores"] = [{"evaluation_id": "e1", "task_no": 1, "band": 6} for _ in range(4)]
+    writing_finalizer.finalize_writing_evaluation("e1")
+    assert fake.tables["evaluations"][0]["overall_band"] == 2.0
 
 
 def _retention_world(monkeypatch, r2):

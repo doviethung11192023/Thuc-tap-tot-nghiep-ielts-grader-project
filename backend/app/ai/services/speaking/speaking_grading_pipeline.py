@@ -25,7 +25,10 @@ from services.speaking.answer_analysis import (
 from services.speaking.audio_signal import download_audio
 from services.speaking.phoneme_comparison import likely_mispronounced
 from services.speaking.pronunciation_rubric import assess_pronunciation
+from services.speaking.speaking_coverage_cap import UnansweredQuestion, capped, measure_coverage
 from services.speaking.speaking_criterion_evidence import evaluate_criterion_with_evidence
+from services.speaking.speaking_intelligibility_cap import measure_intelligibility
+from services.speaking.speaking_length_cap import measure_length
 from services.speaking.speaking_response_feedback import build_response_feedback, labelled_transcript
 from services.speaking.speaking_feedback import PartAnswer, generate_overall, generate_part_feedback
 from settings.config import get_settings
@@ -47,13 +50,25 @@ class SpeakingAnswerInput:
     duration_ms: int | None = None
 
 
-def _question_and_answer_transcript(answers: list[AnswerAnalysis]) -> str:
+_NO_ANSWER = "(no answer)"
+
+
+def _question_and_answer_transcript(answers: list[AnswerAnalysis],
+                                    unanswered: list[UnansweredQuestion]) -> tuple[str, set[int]]:
     """Coherence includes answering what was asked, so FC needs each question beside its answer.
 
-    LR and GRA keep the plain transcript: the wording of a question is not the learner's language.
+    Skipped and silent questions stay in, marked as unanswered, so FC sees how much of the test is
+    missing (BR-23). Each pair is numbered [Qn] so FC can name off-topic answers. Returns the text and
+    the numbers that carry a spoken answer. LR and GRA keep the plain transcript: a question is not
+    the learner's language.
     """
-    return "\n".join(f"P{a.part} question: {a.question}\nP{a.part} answer: {a.transcript.text}"
-                     for a in answers if a.transcript.text)
+    rows = [(a.part, a.question, a.transcript.text if not a.silent and a.transcript.text else _NO_ANSWER)
+            for a in answers]
+    rows += [(q.part, q.question, _NO_ANSWER) for q in unanswered]
+    rows.sort(key=lambda row: row[0])       # stable: keeps the question order inside each part
+    text = "\n".join(f"[Q{n}] P{part} question: {question}\n[Q{n}] P{part} answer: {answer}"
+                     for n, (part, question, answer) in enumerate(rows, 1))
+    return text, {n for n, row in enumerate(rows, 1) if row[2] != _NO_ANSWER}
 
 
 def _text_without_fillers(answers: list[AnswerAnalysis]) -> str:
@@ -108,7 +123,10 @@ def _criterion_payload(output: AgentCriterionOutput) -> dict:
             "issues": output.issues, "improvements": output.improvements}
 
 
-async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -> dict:
+async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
+                                unanswered: list[UnansweredQuestion] | None = None) -> dict:
+    """`unanswered`: questions of the test with no recording, for the coverage ceiling (BR-23)."""
+    unanswered = unanswered or []
     started = time.perf_counter()
     answers = await _analyze_all(inputs)
     speech_seconds = time.perf_counter() - started
@@ -132,9 +150,9 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
                                             asyncio.to_thread(compute_lexical, processed))
     pronunciation_evidence = {**assessment.as_dict(), "words_possibly_mispronounced": weak_words}
 
-    (fc, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
-        _criterion("fc", title, _question_and_answer_transcript(spoken), word_count,
-                   speech_metrics=json.dumps(metrics)),
+    qa_transcript, spoken_numbers = _question_and_answer_transcript(answers, unanswered)
+    (fc_full, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
+        _criterion_with_evidence("fc", title, qa_transcript, word_count, speech_metrics=json.dumps(metrics)),
         _criterion_with_evidence("lr", title, transcript, word_count, lexical_stats=str(lexical)),
         _criterion_with_evidence("gra", title, transcript, word_count, grammar=str(grammar)),
         _criterion("pr", title, transcript, word_count,
@@ -142,7 +160,17 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
                    pronunciation_band=assessment.band),
     )
     pr.band = assessment.band           # code owns this band, whatever the LLM returned
-    lr, gra = lr_full.output, gra_full.output
+    fc, lr, gra = fc_full.output, lr_full.output, gra_full.output
+    off_topic = len(spoken_numbers & set(fc_full.off_topic_answers))   # an off-topic answer counts as unanswered
+    coverage = measure_coverage(len(spoken) - off_topic, len(answers) + len(unanswered), off_topic)
+    intelligibility = measure_intelligibility(comparison, combine_quality(spoken))
+    length = measure_length(spoken, word_count)
+    for output, length_max in ((fc, length.fc_max), (lr, length.language_max), (gra, length.language_max), (pr, None)):
+        # before the reports, so their text matches the final bands
+        output.band = capped(output.band, coverage)
+        for ceiling in (intelligibility.max_band, length_max):
+            if ceiling is not None:
+                output.band = min(output.band, ceiling)
     feedback, anchoring = build_response_feedback(
         spoken, gra_full.edits, lr_full.edits, lr_full.strength_spans + gra_full.strength_spans,
         assessment.phoneme_usable)
@@ -158,6 +186,9 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
         "feedback_anchoring": anchoring,
         "criteria": criteria,
         "pronunciation": pronunciation_evidence,
+        "coverage": coverage.as_dict(),
+        "intelligibility": intelligibility.as_dict(),
+        "length": length.as_dict(),
         "speech_metrics": metrics,
         "parts": parts,
         "overall": overall,

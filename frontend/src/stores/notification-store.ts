@@ -61,6 +61,17 @@ export function sanitizeNotification(n: AppNotification): AppNotification {
   };
 }
 
+/** Thông báo sau khi nộp một bài thi (Writing, Speaking): bấm vào mở trang kết quả. */
+export function notifyAttemptSubmitted(attemptId: string, title: string, actionUrl: string) {
+  useNotificationStore.getState().addNotification({
+    attempt_id: attemptId,
+    title,
+    message: "Bài thi đã được nộp và ghi nhận kết quả đánh giá 4 tiêu chí.",
+    type: "grading_complete",
+    action_url: actionUrl,
+  });
+}
+
 export const useNotificationStore = create<NotificationState>()(
   persist(
     (set, get) => ({
