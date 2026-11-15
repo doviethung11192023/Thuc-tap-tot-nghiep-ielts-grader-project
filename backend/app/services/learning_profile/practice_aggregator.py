@@ -16,20 +16,29 @@ def compute_learning_profile_test_practice(user_id: str) -> Dict[str, Any]:
     one_week_ago = now - timedelta(days=7)
     two_weeks_ago = now - timedelta(days=14)
 
-    # 1. Điểm trung bình hàng tuần & Delta chuẩn IELTS
+    # 1. Điểm trung bình hàng tuần & Delta chuẩn IELTS (bỏ qua bài nộp trắng 0.0 nếu đã có bài làm thật)
     skill_stats = {}
     for sk in ["listening", "reading", "writing", "speaking"]:
         sk_attempts = [a for a in scored if str(a.get("skill", "")).lower() == sk]
-        avg_overall = round_to_ielts_band(sum(float(a["band"]) for a in sk_attempts) / len(sk_attempts)) if sk_attempts else None
+        valid_bands = [float(a["band"]) for a in sk_attempts if float(a["band"]) > 0]
+        avg_overall = (
+            round_to_ielts_band(sum(valid_bands) / len(valid_bands))
+            if valid_bands
+            else (0.0 if sk_attempts else None)
+        )
 
-        recent_week = [float(a["band"]) for a in sk_attempts if a.get("started_at") and str(a["started_at"]) >= one_week_ago.isoformat()[:10]]
-        prev_week = [float(a["band"]) for a in sk_attempts if a.get("started_at") and two_weeks_ago.isoformat()[:10] <= str(a["started_at"]) < one_week_ago.isoformat()[:10]]
+        recent_week = [
+            float(a["band"]) for a in sk_attempts
+            if float(a["band"]) > 0 and a.get("started_at") and str(a["started_at"]) >= one_week_ago.isoformat()[:10]
+        ]
+        prev_week = [
+            float(a["band"]) for a in sk_attempts
+            if float(a["band"]) > 0 and a.get("started_at") and two_weeks_ago.isoformat()[:10] <= str(a["started_at"]) < one_week_ago.isoformat()[:10]
+        ]
 
         delta = None
         if recent_week and prev_week:
             delta = round((sum(recent_week) / len(recent_week)) - (sum(prev_week) / len(prev_week)), 1)
-        elif recent_week and not prev_week:
-            delta = 0.5
 
         skill_stats[sk.capitalize()] = {
             "average": avg_overall,
@@ -37,18 +46,22 @@ def compute_learning_profile_test_practice(user_id: str) -> Dict[str, Any]:
             "delta": delta
         }
 
-    # 2. Line Chart: 30 bài test gần nhất
-    chronological = list(reversed(scored[:30]))
+    # 2. Line Chart: 30 bài test gần nhất (ưu tiên các bài có điểm thực > 0, giữ lại bài mock nếu ít dữ liệu)
+    scored_valid = [a for a in scored if float(a["band"]) > 0 or a.get("mode") in ("mock", "exam")] or scored
+    chronological = list(reversed(scored_valid[:30]))
     score_tracking = []
     for idx, a in enumerate(chronological):
         sk = str(a.get("skill", "")).lower()
         band = round_to_ielts_band(float(a["band"]))
+        t_info = a.get("tests") or {}
         score_tracking.append({
             "id": a["id"],
             "testNumber": idx + 1,
             "mode": a.get("mode") or "practice",
             "score": band,
             "skill": sk.capitalize(),
+            "title": t_info.get("title") or f"IELTS {sk.capitalize()}",
+            "date": str(a.get("submitted_at") or a.get("started_at") or "")[:10],
             sk: band,
         })
 
@@ -98,5 +111,5 @@ def compute_learning_profile_test_practice(user_id: str) -> Dict[str, Any]:
         "question_type_report": qtype_data["report"],
         "recent_history": recent_history,
     }
-    set_to_cache(cache_key, result, ttl_seconds=30)
+    set_to_cache(cache_key, result, ttl_seconds=180)
     return result

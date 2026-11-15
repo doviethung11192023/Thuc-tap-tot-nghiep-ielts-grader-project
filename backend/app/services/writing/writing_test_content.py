@@ -60,8 +60,8 @@ def to_writing_content(test: dict[str, Any]) -> dict[str, Any]:
             "id": t["section_id"],
             "order_no": t["order_no"],
             "title": t["title"] or f"Writing Task {t['task_no']}",
-            "passage_text": None,
-            "audio_key": None,
+            "passage_text": t["task_prompt"],
+            "audio_key": t.get("chart_image_key"),
             "question_groups": [{
                 "id": t["section_id"],
                 "order_no": 1,

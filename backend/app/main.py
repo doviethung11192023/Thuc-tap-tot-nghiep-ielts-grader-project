@@ -60,4 +60,10 @@ async def domain_error_handler(request: Request, exc: DomainError) -> JSONRespon
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Đảm bảo lỗi 500 vẫn đi qua CORSMiddleware để trình duyệt đọc được thông báo lỗi."""
+    return JSONResponse(status_code=500, content={"detail": f"Internal server error: {str(exc)}"})
+
+
 app.include_router(api_router, prefix="/api/v1")

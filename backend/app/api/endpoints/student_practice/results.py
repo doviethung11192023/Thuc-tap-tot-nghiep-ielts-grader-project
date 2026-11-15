@@ -21,7 +21,7 @@ def _attempt_or_404(attempt_id: str, current_user: Optional[User]) -> dict:
 
 
 @router.get("/attempts/{attempt_id}/summary")
-async def get_attempt_summary(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
+def get_attempt_summary(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Band, số câu đúng, thống kê dạng câu (L/R) hoặc trạng thái chấm từng task (Writing)."""
     attempt = _attempt_or_404(attempt_id, current_user)
     if attempt["skill"] == "writing":
@@ -34,7 +34,7 @@ async def get_attempt_summary(attempt_id: str, current_user: Optional[User] = De
 
 
 @router.get("/attempts/{attempt_id}/detail")
-async def get_attempt_detail_with_explanations(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
+def get_attempt_detail_with_explanations(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Đáp án và lời giải (L/R), hoặc transcript và phân tích từng câu (Speaking)."""
     attempt = _attempt_or_404(attempt_id, current_user)
     if attempt["skill"] == "speaking":

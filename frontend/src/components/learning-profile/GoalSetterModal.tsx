@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Target, Calendar, Award, Loader2, Save } from "lucide-react";
+import { X, Target, Calendar, Loader2, Save } from "lucide-react";
 import type { GoalUpdatePayload, LearningProfileGoals } from "@/types/learning-profile";
 
 interface GoalSetterModalProps {
@@ -19,9 +19,20 @@ export function GoalSetterModal({
   onSave,
   saving,
 }: GoalSetterModalProps) {
-  const [inputBand, setInputBand] = useState<number>(currentGoals.input_band || 4.5);
+  const [inputBand, setInputBand] = useState<number>(currentGoals.input_band || 4.0);
   const [targetOverall, setTargetOverall] = useState<number>(currentGoals.target_band || 6.5);
   const [testDate, setTestDate] = useState<string>(currentGoals.test_date || "2026-12-31");
+  const syncKey = `${isOpen}-${currentGoals.input_band}-${currentGoals.target_band}-${currentGoals.test_date}`;
+  const [prevKey, setPrevKey] = useState(syncKey);
+
+  if (prevKey !== syncKey) {
+    setPrevKey(syncKey);
+    if (isOpen) {
+      setInputBand(currentGoals.input_band || 4.0);
+      setTargetOverall(currentGoals.target_band || 6.5);
+      setTestDate(currentGoals.test_date || "2026-12-31");
+    }
+  }
 
   if (!isOpen) return null;
 

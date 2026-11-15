@@ -8,6 +8,7 @@ import { MatchingDropdownRenderer } from './MatchingDropdownRenderer';
 
 export const QUESTION_RENDERER_REGISTRY: Record<string, React.FC<any>> = {
   // Nhóm Điền từ (Completion)
+  completion: InlineFillBlankRenderer,
   sentence_completion: InlineFillBlankRenderer,
   note_completion: InlineFillBlankRenderer,
   form_completion: InlineFillBlankRenderer,
@@ -32,6 +33,7 @@ export const QUESTION_RENDERER_REGISTRY: Record<string, React.FC<any>> = {
   multiple_choice_multi: MultiSelectChoiceRenderer,
 
   // Nhóm Ghép nối (Matching - Type 7)
+  matching: MatchingDropdownRenderer,
   matching_headings: MatchingDropdownRenderer,
   matching_features: MatchingDropdownRenderer,
   matching_information: MatchingDropdownRenderer,

@@ -15,13 +15,15 @@ export function StudentPageLayout({ children }: { children: React.ReactNode }) {
 
   const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
   
-  // RD-05: Ẩn Header & Sidebar trong phòng thi và màn hình kết quả Test Practice
-  const isWorkspace = 
-    pathname?.includes('/test-practice/reading/') || 
-    pathname?.includes('/test-practice/listening/') || 
-    pathname?.includes('/test-practice/writing/') || 
-    pathname?.includes('/test-practice/speaking/') ||
-    pathname?.startsWith('/results/');
+  // RD-05: Ẩn Header & Sidebar trong phòng thi (trừ trang /summary cần header + scroll tự nhiên)
+  const isSummary = pathname?.includes('/summary');
+  const isWorkspace =
+    !isSummary &&
+    (pathname?.includes('/test-practice/reading/') ||
+      pathname?.includes('/test-practice/listening/') ||
+      pathname?.includes('/test-practice/writing/') ||
+      pathname?.includes('/test-practice/speaking/') ||
+      pathname?.startsWith('/results/'));
 
   const handleLogout = async () => {
     await signOut();

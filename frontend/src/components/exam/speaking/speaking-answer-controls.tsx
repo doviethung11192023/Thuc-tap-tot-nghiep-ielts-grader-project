@@ -1,10 +1,18 @@
 "use client";
 
 import React from 'react';
-import { ArrowRight, Check, RotateCcw, Square } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  Headphones,
+  Loader2,
+  RotateCcw,
+  Square,
+  Timer,
+} from 'lucide-react';
 import type { AnswerState } from '@/hooks/useSpeakingUploadQueue';
 import type { RoomPhase } from '@/hooks/useSpeakingRoomMachine';
-import { SpeakingRecordedAudio } from './speaking-recorded-audio';
+import { SpeakingDetailAudioPlayer } from './speaking-detail-audio-player';
 
 interface SpeakingAnswerControlsProps {
   phase: RoomPhase;
@@ -22,29 +30,56 @@ interface SpeakingAnswerControlsProps {
 const formatSeconds = (sec: number) =>
   `${Math.floor(sec / 60).toString().padStart(2, '0')}:${(sec % 60).toString().padStart(2, '0')}`;
 
-function StatusLine({ phase, secondsLeft, isPart2, answer }: Pick<SpeakingAnswerControlsProps, 'phase' | 'secondsLeft' | 'isPart2' | 'answer'>) {
-  if (phase === 'asking') return <span>🎧 Giám khảo đang đọc câu hỏi...</span>;
+function StatusLine({
+  phase,
+  secondsLeft,
+  isMock,
+  isPart2,
+  answer,
+}: Pick<SpeakingAnswerControlsProps, 'phase' | 'secondsLeft' | 'isMock' | 'isPart2' | 'answer'>) {
+  if (phase === 'asking') {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <Headphones className="w-3.5 h-3.5 text-blue-600" />
+        Giám khảo đang đọc câu hỏi...
+      </span>
+    );
+  }
   if (phase === 'preparing') {
     return (
-      <span>
-        ⏱️ {isPart2 ? 'Chuẩn bị' : 'Suy nghĩ'}: <strong className="text-blue-600 font-bold font-mono">{secondsLeft}s</strong>, sau đó tự bắt đầu ghi âm
+      <span className="inline-flex items-center gap-1.5">
+        <Timer className="w-3.5 h-3.5 text-amber-600" />
+        <span>
+          {isPart2 ? 'Chuẩn bị' : 'Suy nghĩ'}:{' '}
+          <strong className="text-blue-600 font-bold font-mono tabular-nums">{secondsLeft}s</strong>, sau đó tự bắt đầu ghi âm
+        </span>
       </span>
     );
   }
   if (phase === 'recording') {
     return (
       <span className="text-red-600 font-semibold flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-        Đang ghi âm, còn {formatSeconds(secondsLeft)}
+        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        Đang ghi âm, còn <span className="font-mono tabular-nums">{formatSeconds(secondsLeft)}</span>
       </span>
     );
   }
-  if (answer?.status === 'uploading') return <span>Đang lưu câu trả lời...</span>;
-  if (answer?.status === 'failed') return <span className="text-red-600 font-medium">{answer.error}</span>;
+  if (answer?.status === 'uploading') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-blue-700">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Đang lưu câu trả lời...
+      </span>
+    );
+  }
+  if (answer?.status === 'failed') {
+    return <span className="text-red-600 font-medium">{answer.error}</span>;
+  }
   if (answer?.status === 'saved') {
     return (
       <span className="text-emerald-700 font-medium flex items-center gap-1">
-        <Check className="w-3.5 h-3.5" /> Đã lưu câu trả lời
+        <Check className="w-3.5 h-3.5" />
+        {isMock ? 'Đã lưu — Đang chuyển câu tiếp theo...' : 'Đã lưu câu trả lời'}
       </span>
     );
   }
@@ -52,39 +87,72 @@ function StatusLine({ phase, secondsLeft, isPart2, answer }: Pick<SpeakingAnswer
 }
 
 export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
-  phase, secondsLeft, isMock, isPart2, answer, onStop, onSkipPreparation, onRerecord, onRetryUpload, onNext,
+  phase,
+  secondsLeft,
+  isMock,
+  isPart2,
+  answer,
+  onStop,
+  onSkipPreparation,
+  onRerecord,
+  onRetryUpload,
+  onNext,
 }) => (
   <div className="w-full flex flex-col items-center space-y-3 pt-2">
-    <div className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-full">
-      <StatusLine phase={phase} secondsLeft={secondsLeft} isPart2={isPart2} answer={answer} />
+    <div className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-white border border-slate-200/80 px-4 py-1.5 rounded-full shadow-2xs">
+      <StatusLine
+        phase={phase}
+        secondsLeft={secondsLeft}
+        isMock={isMock}
+        isPart2={isPart2}
+        answer={answer}
+      />
     </div>
 
-    <div className="w-full flex items-center justify-center gap-3 max-w-md">
+    <div className="w-full flex flex-wrap items-center justify-center gap-3 max-w-xl">
       {phase === 'finished' && answer?.blobUrl && !isMock && (
-        <SpeakingRecordedAudio src={answer.blobUrl} className="flex-1 min-w-0 h-10" />
+        <div className="flex-1 min-w-[240px]">
+          <SpeakingDetailAudioPlayer src={answer.blobUrl} durationMs={answer.durationMs} />
+        </div>
       )}
 
       {phase === 'preparing' && !isMock && (
-        <button onClick={onSkipPreparation} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs shrink-0">
+        <button
+          type="button"
+          onClick={onSkipPreparation}
+          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs shrink-0 shadow-xs transition-colors cursor-pointer"
+        >
           Bắt đầu nói ngay
         </button>
       )}
 
       {phase === 'recording' && (
-        <button onClick={onStop} className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md shadow-red-500/20 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onStop}
+          className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md shadow-red-500/20 flex items-center gap-2 transition-colors cursor-pointer"
+        >
           <Square className="w-3 h-3 fill-white" />
           <span>Đã nói xong</span>
         </button>
       )}
 
       {phase === 'finished' && answer?.status === 'failed' && (
-        <button onClick={onRetryUpload} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-bold text-xs shrink-0">
+        <button
+          type="button"
+          onClick={onRetryUpload}
+          className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-bold text-xs shrink-0 transition-colors cursor-pointer"
+        >
           Lưu lại
         </button>
       )}
 
       {phase === 'finished' && !isMock && (
-        <button onClick={onRerecord} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={onRerecord}
+          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+        >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>{answer ? 'Ghi âm lại' : 'Ghi âm'}</span>
         </button>
@@ -92,9 +160,11 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
 
       {phase === 'finished' && !isMock && (
         <button
+          type="button"
           onClick={onNext}
-          className="w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0"
+          className="w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
           title="Câu tiếp theo"
+          aria-label="Câu tiếp theo"
         >
           <ArrowRight className="w-4 h-4" />
         </button>

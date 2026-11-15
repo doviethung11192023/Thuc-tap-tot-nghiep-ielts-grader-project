@@ -25,17 +25,17 @@ interface OverviewChartsSectionProps {
 export function OverviewChartsSection({ radarData, donutData, totalTests }: OverviewChartsSectionProps) {
   const scoreMap: Record<string, { score: number; count?: number }> = {};
   for (const item of radarData) {
-    scoreMap[item.skill.toLowerCase()] = { score: item.score, count: (item as any).count };
+    scoreMap[item.skill.toLowerCase()] = { score: item.score, count: item.count };
   }
 
-  const overallScore = scoreMap["overview"]?.score ?? 4.5;
+  const overallScore = scoreMap["overview"]?.score ?? 0;
 
   const chartData = [
     { skill: "Overall", score: overallScore, count: scoreMap["overview"]?.count },
-    { skill: "Listening", score: scoreMap["listening"]?.score ?? 5.0, count: scoreMap["listening"]?.count },
-    { skill: "Reading", score: scoreMap["reading"]?.score ?? 5.0, count: scoreMap["reading"]?.count },
-    { skill: "Speaking", score: scoreMap["speaking"]?.score ?? 5.0, count: scoreMap["speaking"]?.count },
-    { skill: "Writing", score: scoreMap["writing"]?.score ?? 5.0, count: scoreMap["writing"]?.count },
+    { skill: "Listening", score: scoreMap["listening"]?.score ?? 0, count: scoreMap["listening"]?.count },
+    { skill: "Reading", score: scoreMap["reading"]?.score ?? 0, count: scoreMap["reading"]?.count },
+    { skill: "Speaking", score: scoreMap["speaking"]?.score ?? 0, count: scoreMap["speaking"]?.count },
+    { skill: "Writing", score: scoreMap["writing"]?.score ?? 0, count: scoreMap["writing"]?.count },
   ];
 
   return (
@@ -59,9 +59,9 @@ export function OverviewChartsSection({ radarData, donutData, totalTests }: Over
               <PolarGrid stroke="#e4e4e7" strokeDasharray="3 3" />
               <PolarAngleAxis
                 dataKey="skill"
-                tick={(props: any) => {
+                tick={(props: { x?: number | string; y?: number | string; payload?: { value?: string } }) => {
                   const { x, y, payload } = props;
-                  const skillName = payload.value;
+                  const skillName = payload?.value ?? "";
                   const found = chartData.find((d) => d.skill === skillName);
                   const val = found?.score ?? 0;
                   if (skillName === "Overall") return <g />;

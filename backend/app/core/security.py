@@ -1,3 +1,7 @@
+import asyncio
+import hashlib
+import time
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -7,6 +11,16 @@ from app.core.config import settings
 from app.db.supabase import db, supabase
 
 security = HTTPBearer()
+_TOKEN_CACHE_TTL = 120.0
+_PROFILE_CACHE_TTL = 60.0
+_token_cache: dict[str, tuple[str, float]] = {}
+_profile_cache: dict[tuple[str, str], tuple["User", float]] = {}
+_auth_lock = asyncio.Lock()
+
+
+def invalidate_auth_profile_cache(user_id: str) -> None:
+    _profile_cache.pop(("profile", user_id), None)
+
 
 class User(BaseModel):
     id: str
@@ -34,28 +48,57 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         )
     
     try:
-        user_id = None
-        # Xác thực token thông qua Supabase GoTrue API
-        try:
-            user_res = supabase.auth.get_user(token)
-            if user_res and user_res.user:
-                user_id = user_res.user.id
-        except Exception:
-            pass
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        now = time.monotonic()
+        cached_token = _token_cache.get(token_hash)
+        user_id = cached_token[0] if cached_token and now < cached_token[1] else None
 
-        # Fallback khi GoTrue không trả lời: chỉ chấp nhận token có CHỮ KÝ hợp lệ (HS256, JWT secret
-        # của project) và đúng audience. Không bao giờ dùng claims chưa kiểm chữ ký (token giả mạo).
         if not user_id:
+            # Ưu tiên xác thực chữ ký JWT HS256 cục bộ (< 0.1ms) để tránh round-trip mạng mỗi request
             user_id = _verified_sub(token)
+            if user_id:
+                _token_cache[token_hash] = (user_id, now + _TOKEN_CACHE_TTL)
+
+        # Fallback sang Supabase GoTrue API khi local decode không khả dụng (ví dụ ES256 JWKS), dùng singleflight lock
+        if not user_id:
+            async with _auth_lock:
+                now_locked = time.monotonic()
+                cached_token = _token_cache.get(token_hash)
+                if cached_token and now_locked < cached_token[1]:
+                    user_id = cached_token[0]
+                else:
+                    try:
+                        user_res = await asyncio.to_thread(lambda: db().auth.get_user(token))
+                        if user_res and user_res.user:
+                            user_id = user_res.user.id
+                            _token_cache[token_hash] = (user_id, time.monotonic() + _TOKEN_CACHE_TTL)
+                    except Exception:
+                        pass
 
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
-        
-        p = db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
-        if not p.data:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="User profile not found in database. Account may not be fully initialized.")
-        return User(id=p.data[0]["id"], role=p.data[0]["role"], is_active=p.data[0]["is_active"])
+
+        cache_key = ("profile", user_id)
+        now = time.monotonic()
+        cached = _profile_cache.get(cache_key)
+        if cached and now < cached[1]:
+            return cached[0]
+
+        async with _auth_lock:
+            now_locked = time.monotonic()
+            cached = _profile_cache.get(cache_key)
+            if cached and now_locked < cached[1]:
+                return cached[0]
+
+            p = await asyncio.to_thread(
+                lambda: db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
+            )
+            if not p.data:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                    detail="User profile not found in database. Account may not be fully initialized.")
+            user_obj = User(id=p.data[0]["id"], role=p.data[0]["role"], is_active=p.data[0]["is_active"])
+            _profile_cache[cache_key] = (user_obj, time.monotonic() + _PROFILE_CACHE_TTL)
+            return user_obj
 
     except HTTPException:
         raise

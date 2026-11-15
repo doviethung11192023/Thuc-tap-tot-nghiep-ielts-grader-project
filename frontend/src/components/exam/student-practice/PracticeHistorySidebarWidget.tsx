@@ -5,42 +5,44 @@ import Link from "next/link";
 import { ChevronRight, Bookmark } from "lucide-react";
 import { PracticeRadarMini } from "./PracticeRadarMini";
 import {
-  fetchPracticeHistoryData,
   getCachedPracticeHistory,
-  type PracticeHistorySummaryData,
 } from "@/services/practice-history-cache";
+import { getLearningProfileOverview } from "@/services/learning-profile";
 import type { SkillScore } from "@/types/learning-profile";
 
-const FALLBACK_RADAR: SkillScore[] = [
-  { skill: "Writing", score: 5.0 },
-  { skill: "Overview", score: 4.5 },
-  { skill: "Listening", score: 5.5 },
-  { skill: "Reading", score: 5.5 },
-  { skill: "Speaking", score: 5.0 },
+const EMPTY_RADAR: SkillScore[] = [
+  { skill: "Writing", score: 0 },
+  { skill: "Overview", score: 0 },
+  { skill: "Listening", score: 0 },
+  { skill: "Reading", score: 0 },
+  { skill: "Speaking", score: 0 },
 ];
 
 export function PracticeHistorySidebarWidget() {
-  const [data, setData] = useState<PracticeHistorySummaryData | null>(() => getCachedPracticeHistory());
+  const cached = getCachedPracticeHistory();
+  const [overallScore, setOverallScore] = useState<number>(() => cached?.overall_score ?? 0);
+  const [radarData, setRadarData] = useState<SkillScore[]>(() => cached?.radar_data || []);
+  const [loading, setLoading] = useState<boolean>(() => !cached);
 
   useEffect(() => {
     let mounted = true;
-    fetchPracticeHistoryData()
-      .then((res) => {
-        if (mounted && res) {
-          setData(res);
-        }
+    // Chỉ gọi endpoint nhẹ Overview thay vì tải toàn bộ 560 câu trả lời + 50 dòng lịch sử
+    getLearningProfileOverview()
+      .then((overview) => {
+        if (!mounted || !overview) return;
+        setOverallScore(Number(Number(overview.dashboard_stats?.avg_band ?? 0).toFixed(1)));
+        setRadarData(overview.radar_data?.length ? overview.radar_data : EMPTY_RADAR);
+        setLoading(false);
       })
       .catch((e) => {
         console.warn("Lỗi tải radar widget:", e);
+        if (mounted) setLoading(false);
       });
 
     return () => {
       mounted = false;
     };
   }, []);
-
-  const overallScore = data?.overall_score ?? 4.5;
-  const radarData = data?.radar_data && data.radar_data.length > 0 ? data.radar_data : FALLBACK_RADAR;
 
   return (
     <aside className="w-full lg:w-80 xl:w-84 shrink-0 space-y-4">
@@ -59,10 +61,17 @@ export function PracticeHistorySidebarWidget() {
           </Link>
         </div>
 
-        <PracticeRadarMini
-          radarData={radarData}
-          overallScore={overallScore}
-        />
+        {loading && radarData.length === 0 ? (
+          <div className="py-10 flex flex-col items-center justify-center space-y-3">
+            <div className="w-24 h-24 rounded-full border-3 border-zinc-100 border-t-blue-600 animate-spin" />
+            <span className="text-xs text-zinc-400 font-medium">Đang cập nhật điểm số...</span>
+          </div>
+        ) : (
+          <PracticeRadarMini
+            radarData={radarData.length > 0 ? radarData : EMPTY_RADAR}
+            overallScore={overallScore > 0 ? overallScore : 0}
+          />
+        )}
       </div>
 
       {/* 2. Bộ sưu tập của tôi Widget */}

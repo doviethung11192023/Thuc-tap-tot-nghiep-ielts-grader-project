@@ -11,12 +11,26 @@ interface CleanListeningScoreCardProps {
 }
 
 export function CleanListeningScoreCard({
-  userName = "long",
+  userName = "Học viên",
   submittedAt,
   overallBand,
   correctCount,
   totalQuestions
 }: CleanListeningScoreCardProps) {
+  const formattedDate = (() => {
+    const parsed = Date.parse(submittedAt);
+    if (!Number.isNaN(parsed) && submittedAt.includes('T')) {
+      return new Date(parsed).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+    return submittedAt;
+  })();
+
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 p-4 md:p-5 flex items-center justify-between shadow-2xs">
       <div className="flex items-center gap-3">
@@ -26,7 +40,7 @@ export function CleanListeningScoreCard({
         <div>
           <h4 className="font-bold text-sm md:text-base text-zinc-900">{userName}</h4>
           <p className="text-xs text-zinc-500">
-            Ngày làm bài {submittedAt}
+            Ngày làm bài: {formattedDate}
           </p>
         </div>
       </div>

@@ -33,10 +33,19 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
 
     duration = test.get("duration_minutes") or DEFAULT_MINUTES.get(test["skill"], 60)
     open_res = db().table("attempts").select("*").eq("learner_id", user_id).eq("test_id", test["id"]) \
-        .eq("status", "in_progress").limit(1).execute()
-    if open_res.data:
-        attempt = open_res.data[0]
-    else:
+        .eq("status", "in_progress").execute()
+    attempt = None
+    for row in open_res.data or []:
+        if past_deadline(row) or row.get("mode") != mode:
+            if row.get("mode") == "mock":
+                db().table("attempts").update({"status": "abandoned"}).eq("id", row["id"]).eq("status", "in_progress").execute()
+            else:
+                db().table("evaluations").delete().eq("attempt_id", row["id"]).execute()
+                db().table("attempts").delete().eq("id", row["id"]).eq("status", "in_progress").execute()
+            continue
+        if attempt is None:
+            attempt = row
+    if not attempt:
         start = now_utc()
         res = db().table("attempts").insert({
             "learner_id": user_id, "test_id": test["id"], "skill": test["skill"], "mode": mode,

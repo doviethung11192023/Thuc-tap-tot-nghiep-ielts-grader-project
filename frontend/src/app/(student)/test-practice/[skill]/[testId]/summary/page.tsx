@@ -29,7 +29,10 @@ export default function SkillSummaryResultPage() {
 
   const isReading = skill === 'reading';
   // Speaking và Writing có hook kết quả riêng; không gọi API lần hai rồi bỏ kết quả
-  const { data: cleanData, loading } = useAttemptSummary(skill === 'speaking' ? undefined : attemptId, skill);
+  const { data: cleanData, loading } = useAttemptSummary(
+    skill === 'speaking' || skill === 'writing' ? undefined : attemptId,
+    skill
+  );
 
   if (skill === 'writing') {
     return (
@@ -93,10 +96,13 @@ export default function SkillSummaryResultPage() {
             <span className="text-5xl font-black text-[#932120] tracking-tight my-1">
               {bandScore == null ? '—' : bandScore.toFixed(1)}
             </span>
-            <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-xs font-semibold text-emerald-700 flex items-center flex-wrap justify-center gap-1 text-center">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               {correctCount}/{totalQuestions} câu đúng
-              {bandScore == null && <span className="text-zinc-500 font-medium">· band chỉ tính khi làm đủ 40 câu</span>}
+              {bandScore == null && <span className="text-zinc-500 font-medium">· chưa có dữ liệu quy đổi band</span>}
+              {bandScore != null && totalQuestions > 0 && totalQuestions < 40 && (
+                <span className="text-zinc-600 font-medium">· Band quy đổi tương đương (thang 40 câu)</span>
+              )}
             </span>
           </div>
         </div>
@@ -108,11 +114,13 @@ export default function SkillSummaryResultPage() {
           </div>
           <div className="bg-red-50/70 p-3.5 rounded-2xl border border-red-200 text-red-800">
             <span className="text-xs font-bold block">Số câu sai</span>
-            <span className="text-2xl font-black block mt-0.5">{totalQuestions - correctCount}</span>
+            <span className="text-2xl font-black block mt-0.5">{Math.max(0, totalQuestions - correctCount)}</span>
           </div>
           <div className="bg-zinc-50 p-3.5 rounded-2xl border border-zinc-200 text-zinc-700">
             <span className="text-xs font-bold block">Độ chính xác</span>
-            <span className="text-2xl font-black block mt-0.5">{((correctCount / totalQuestions) * 100).toFixed(0)}%</span>
+            <span className="text-2xl font-black block mt-0.5">
+              {totalQuestions > 0 ? ((correctCount / totalQuestions) * 100).toFixed(0) : 0}%
+            </span>
           </div>
         </div>
       </div>

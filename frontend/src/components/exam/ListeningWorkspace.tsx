@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { CheckCircle2 } from 'lucide-react';
 import { ListeningTestData } from '@/mocks/exam-listening';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
@@ -25,8 +26,23 @@ interface ListeningWorkspaceProps {
 
 export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ListeningWorkspaceProps) {
   const router = useRouter();
+  const draftKey = `ielts_listening_draft_${testData.test_id}`;
   const [activeSection, setActiveSection] = useState<number>(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>(() => {
+    try {
+      if (typeof window === 'undefined') return {};
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {
+      // Ignore malformed draft
+    }
+    return {};
+  });
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
+  const [draftSavedNotice, setDraftSavedNotice] = useState<string | null>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isGrading, setIsGrading] = useState<boolean>(false);
@@ -44,6 +60,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
 
   const player = useListeningPlayer({
     audioUrl: currentSection?.audio_url,
+    sectionKey: String(currentSection?.sectionNumber || currentSection?.section_number || activeSection),
     defaultDuration: currentSection?.duration_seconds || 450,
   });
 
@@ -51,75 +68,138 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
   // (tests.duration_minutes = 30), nếu dài hơn thì bài tự nộp lúc hết giờ bị server từ chối 409.
   const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4);
   const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
-  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
-  useEffect(() => {
-    if (mode !== 'exam' || !deadlineMs) return;
-    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
-    setTimerSeconds(prev => Math.min(prev, remaining));
-  }, [mode, deadlineMs]);
+  const latestAnswersRef = useRef(userAnswers);
+  const latestOnSubmitRef = useRef(onSubmit);
+  const deadlineMsRef = useRef(deadlineMs);
+  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (mode === 'exam') {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(interval!);
-            setIsGrading(true);
-            onSubmit(userAnswers);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000);
+    latestAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  useEffect(() => {
+    latestOnSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+
+  useEffect(() => {
+    deadlineMsRef.current = deadlineMs;
+  }, [deadlineMs]);
+
+  useEffect(() => {
+    if (mode !== 'practice') return;
+    if (Object.keys(userAnswers).length === 0) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(userAnswers));
+    } catch {
+      // Ignore storage quota errors
     }
-    return () => { if (interval) clearInterval(interval); };
-  }, [mode, onSubmit, userAnswers]);
+  }, [userAnswers, mode, draftKey]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (mode !== 'exam') {
+          return prev + 1;
+        }
+        const serverRemaining = deadlineMsRef.current
+          ? Math.max(0, Math.floor((deadlineMsRef.current - Date.now()) / 1000))
+          : prev;
+        const nextVal = Math.min(prev <= 1 ? 0 : prev - 1, serverRemaining);
+        if (nextVal <= 0) {
+          if (!autoSubmittedRef.current) {
+            autoSubmittedRef.current = true;
+            setTimeout(() => {
+              setIsGrading(true);
+              Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current))
+                .then(() => {
+                  try {
+                    localStorage.removeItem(draftKey);
+                  } catch {
+                    // Ignore storage error
+                  }
+                })
+                .catch(() => setIsGrading(false));
+            }, 0);
+          }
+          return 0;
+        }
+        return nextVal;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, draftKey]);
+
+  const handleToggleFlag = (qNumber: number) => {
+    setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
+  };
 
   const handleQuestionPaletteClick = (qNumber: number) => {
-    const targetIdx = availableSections.findIndex(s => 
+    const targetIdx = availableSections.findIndex(s =>
       s.question_groups.some((g: any) => g.questions.some((item: any) => item.question_number === qNumber))
     );
     if (targetIdx !== -1 && targetIdx !== activeSection) {
       setActiveSection(targetIdx);
     }
+    setTimeout(() => {
+      const el =
+        document.getElementById(`reading-question-${qNumber}`) ||
+        document.querySelector(`[data-question-numbers~="${qNumber}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 90);
   };
-
-  const answeredCount = Object.keys(userAnswers).filter(k => {
-    const val = userAnswers[Number(k)];
-    return typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0;
-  }).length;
 
   const unansweredQuestionNumbers = useMemo(() => {
     return allQuestions.map(q => q.question_number).filter(qNum => {
       const val = userAnswers[qNum];
-      return !(typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0);
+      return !(typeof val === 'string'
+        ? val.trim().length > 0
+        : Array.isArray(val) && val.some((v) => String(v ?? '').trim().length > 0));
     });
   }, [allQuestions, userAnswers]);
+
+  const answeredCount = allQuestions.length - unansweredQuestionNumbers.length;
 
   const handleConfirmSubmit = async () => {
     setIsSubmitModalOpen(false);
     setIsGrading(true);
-    try { await onSubmit(userAnswers); } catch { setIsGrading(false); }
+    try {
+      await onSubmit(userAnswers);
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {
+        // Ignore storage error
+      }
+    } catch {
+      setIsGrading(false);
+    }
   };
 
   const formatTimer = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   const handleSaveDraft = () => {
     try {
-      localStorage.setItem(`ielts_listening_draft_${testData.test_id}`, JSON.stringify(userAnswers));
-      alert("💾 Đã lưu nháp tiến độ bài làm Listening thành công!");
-    } catch (e) { console.error("Save draft error:", e); }
+      localStorage.setItem(draftKey, JSON.stringify(userAnswers));
+      const now = new Date();
+      setDraftSavedNotice(`Đã lưu nháp lúc ${now.toTimeString().slice(0, 8)}`);
+    } catch (e) {
+      console.error("Save draft error:", e);
+    }
     setIsExitModalOpen(false);
     router.push(returnUrl || '/test-practice');
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200 relative">
+      {draftSavedNotice && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-900 shadow-lg"
+        >
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          <span>{draftSavedNotice}</span>
+        </div>
+      )}
+
       <ListeningWorkspaceHeader
         title={testData.title}
         mode={mode}
@@ -133,10 +213,13 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         audioRef={player.audioRef}
         audioUrl={currentSection?.audio_url}
         isPlaying={player.isPlaying}
+        isBuffering={player.isBuffering}
+        audioError={player.audioError}
         onTogglePlay={player.togglePlay}
         currentTime={player.currentTime}
         durationSeconds={player.duration}
         onRewind5s={() => player.rewind(5)}
+        onForward5s={() => player.forward(5)}
         playbackSpeed={player.playbackSpeed}
         onSpeedChange={player.changeSpeed}
         isMuted={player.isMuted}
@@ -156,9 +239,11 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
           allQuestions={allQuestions}
           answeredCount={answeredCount}
           userAnswers={userAnswers}
+          flaggedQuestions={flaggedQuestions}
           onSectionChange={(idx) => setActiveSection(idx)}
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onQuestionClick={handleQuestionPaletteClick}
+          onToggleFlag={handleToggleFlag}
         />
       </div>
 
@@ -166,7 +251,16 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={async () => { setIsExitModalOpen(false); if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); }}
+        onExitDiscard={async () => {
+          setIsExitModalOpen(false);
+          try {
+            localStorage.removeItem(draftKey);
+          } catch {
+            // Ignore storage error
+          }
+          if (mode === 'exam') await onAbandon?.();
+          router.push(returnUrl || '/test-practice');
+        }}
         onSaveDraftAndExit={handleSaveDraft}
       />
 

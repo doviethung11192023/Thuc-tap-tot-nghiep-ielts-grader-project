@@ -1,9 +1,11 @@
+import threading
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 from app.db.supabase import db
 from app.services.practice import learning_profile_readers
 
 _cache: Dict[str, Any] = {}
+_cache_lock = threading.Lock()
 
 def get_from_cache(key: str) -> Optional[Any]:
     """Lấy dữ liệu từ RAM Cache nếu còn hạn."""
@@ -40,23 +42,49 @@ def round_to_ielts_band(score: Optional[float]) -> float:
         return float(whole) + 1.0
 
 
+def invalidate_user_profile_cache(user_id: str) -> None:
+    """Xóa toàn bộ cache RAM liên quan đến hồ sơ học tập của học viên."""
+    for prefix in ("overview_", "practice_", "attempts_", "goal_"):
+        _cache.pop(f"{prefix}{user_id}", None)
+
+
 def get_user_attempts(user_id: str) -> List[Dict[str, Any]]:
-    """Các lần làm bài của học viên kèm thông tin đề (band = kết quả chính thức)."""
-    return learning_profile_readers.user_attempts(user_id)
+    """Các lần làm bài của học viên kèm thông tin đề (dùng lock chống truy vấn trùng khi tải song song)."""
+    cache_key = f"attempts_{user_id}"
+    cached = get_from_cache(cache_key)
+    if cached is not None:
+        return cached
+    with _cache_lock:
+        cached = get_from_cache(cache_key)
+        if cached is not None:
+            return cached
+        rows = learning_profile_readers.user_attempts(user_id)
+        set_to_cache(cache_key, rows, ttl_seconds=60)
+        return rows
 
 
 def get_learner_goal(user_id: str) -> Dict[str, Any]:
     """Mục tiêu học tập của học viên (giá trị mặc định khi chưa đặt)."""
-    goal = learning_profile_readers.learner_goal_row(user_id)
-    return {
-        "input_band": float(goal.get("input_band") or 4.0),
-        "target_overall": float(goal.get("target_overall") or 6.5),
-        "target_listening": float(goal.get("target_listening") or 7.0),
-        "target_reading": float(goal.get("target_reading") or 7.0),
-        "target_writing": float(goal.get("target_writing") or 6.0),
-        "target_speaking": float(goal.get("target_speaking") or 6.0),
-        "test_date": goal.get("test_date") or "2026-12-31"
-    }
+    cache_key = f"goal_{user_id}"
+    cached = get_from_cache(cache_key)
+    if cached is not None:
+        return cached
+    with _cache_lock:
+        cached = get_from_cache(cache_key)
+        if cached is not None:
+            return cached
+        goal = learning_profile_readers.learner_goal_row(user_id)
+        data = {
+            "input_band": float(goal.get("input_band") or 4.0),
+            "target_overall": float(goal.get("target_overall") or 6.5),
+            "target_listening": float(goal.get("target_listening") or 7.0),
+            "target_reading": float(goal.get("target_reading") or 7.0),
+            "target_writing": float(goal.get("target_writing") or 6.0),
+            "target_speaking": float(goal.get("target_speaking") or 6.0),
+            "test_date": str(goal.get("test_date") or "2026-12-31"),
+        }
+        set_to_cache(cache_key, data, ttl_seconds=120)
+        return data
 
 
 def get_all_published_tests() -> List[Dict[str, Any]]:

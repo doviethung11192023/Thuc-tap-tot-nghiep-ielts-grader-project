@@ -26,14 +26,14 @@ async def list_published_tests(
     return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}
 
 @router.get("/sets")
-async def list_exam_collections(current_user: Optional[User] = Depends(get_optional_user)):
+def list_exam_collections(current_user: Optional[User] = Depends(get_optional_user)):
     """Danh sách các bộ đề thi IELTS đã xuất bản kèm tiến độ học viên (Batch Optimized)."""
     test_sets, all_tests, completed_test_ids = practice_catalog.collections_source(current_user.id if current_user else None)
     collections = format_collection_cards(test_sets, all_tests, completed_test_ids)
     return {"meta": {"code": 200}, "data": collections}
 
 @router.get("/sets/{set_id}")
-async def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depends(get_optional_user)):
+def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Chi tiết bộ đề và danh sách các bài test phân rã theo 4 kỹ năng."""
     source = practice_catalog.collection_detail_source(set_id, current_user.id if current_user else None)
     if source is None:

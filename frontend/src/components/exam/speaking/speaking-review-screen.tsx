@@ -1,10 +1,18 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ArrowLeft, RotateCcw, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react';
 import type { SpeakingPartData } from '@/mocks/exam-speaking';
 import type { AnswerState } from '@/hooks/useSpeakingUploadQueue';
-import { SpeakingRecordedAudio } from './speaking-recorded-audio';
+import { SpeakingDetailAudioPlayer } from './speaking-detail-audio-player';
 
 interface SpeakingReviewScreenProps {
   testTitle: string;
@@ -36,134 +44,203 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
   const activePartData = parts.find((p) => p.part_number === selectedPart) || parts[0];
   const questions = activePartData.questions ?? [];
   const allQuestions = parts.flatMap((part) => part.questions ?? []);
-  const unanswered = allQuestions.filter((q) => !answers[q.id]).length;
+  const answeredCount = allQuestions.filter((q) => !!answers[q.id]).length;
+  const unanswered = allQuestions.length - answeredCount;
   const failed = allQuestions.filter((q) => answers[q.id]?.status === 'failed').length;
   const uploading = allQuestions.some((q) => answers[q.id]?.status === 'uploading');
 
   return (
-    <div className="min-h-screen bg-slate-900/90 text-white flex flex-col justify-between p-4 sm:p-6 relative select-none">
-      {/* Background stars */}
-      <div className="absolute top-12 left-16 text-white/30 text-2xl">✦</div>
-      <div className="absolute top-28 right-24 text-white/40 text-xl">✦</div>
-      <div className="absolute bottom-24 right-16 text-white/20 text-2xl">✦</div>
-
+    <div className="h-full w-full overflow-y-auto bg-slate-50 text-slate-900 flex flex-col">
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between pb-4 border-b border-white/10 relative z-10">
-        {isMock ? <div className="w-10" /> : (
-          <button
-            onClick={onBackToExam}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-            title="Quay lại phòng thi"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-        )}
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-6 py-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          {isMock ? (
+            <div className="w-10" />
+          ) : (
+            <button
+              type="button"
+              onClick={onBackToExam}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              title="Quay lại phòng thi"
+              aria-label="Quay lại phòng thi"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
 
-        <h1 className="text-xs sm:text-sm font-bold text-white/90 text-center max-w-2xl truncate px-4">
-          {testTitle}
-        </h1>
-
-        <div className="w-10" />
-      </div>
-
-      {/* Main Review Section */}
-      <div className="w-full max-w-3xl mx-auto flex-1 flex flex-col items-center justify-center py-6 relative z-10">
-        {/* Title & Pills */}
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-6 text-center">
-          Xem lại bài làm
-        </h2>
-
-        {/* Part Tabs and Question Count */}
-        <div className="w-full flex items-center justify-between mb-4 px-2">
-          <div className="flex items-center gap-2">
-            {parts.map(({ part_number: pn }) => (
-              <button
-                key={pn}
-                onClick={() => setSelectedPart(pn)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  selectedPart === pn
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                Part {pn}
-              </button>
-            ))}
+          <div className="text-center min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Kiểm tra trước khi nộp bài
+            </p>
+            <h1 className="text-sm font-bold text-slate-900 truncate max-w-2xl">{testTitle}</h1>
           </div>
 
-          <div className="text-xs font-medium text-white/60 bg-white/10 px-3 py-1 rounded-full">
-            {questions.length} question{questions.length > 1 ? 's' : ''}
-          </div>
+          <div className="w-10" />
         </div>
+      </header>
 
-        {/* Question Cards List */}
-        <div className="w-full space-y-3 max-h-[50vh] overflow-y-auto pr-1">
-          {questions.map((q, idx) => {
-            const answer = answers[q.id];
-            return (
-              <div
-                key={q.id || idx}
-                className="w-full bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 border border-white/15 transition-all space-y-2.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-300">Question {idx + 1}</span>
-                  {!isMock && (
-                    <button
-                      onClick={() => onRetakeQuestion(selectedPart, idx)}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-300 hover:text-blue-100 transition-colors px-2.5 py-1 rounded-lg hover:bg-white/10"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>{answer ? 'Làm lại' : 'Trả lời'}</span>
-                    </button>
-                  )}
-                </div>
+      {/* Main 2-Column Content */}
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Part Filter + Question Cards */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-slate-200/90 px-4 py-3 shadow-2xs">
+            <div className="flex items-center gap-2">
+              {parts.map(({ part_number: pn }) => (
+                <button
+                  key={pn}
+                  type="button"
+                  onClick={() => setSelectedPart(pn)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                    selectedPart === pn
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Part {pn}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs font-semibold text-slate-500">
+              {questions.length} câu hỏi
+            </span>
+          </div>
 
-                <p className="text-sm font-medium text-white leading-snug">{q.question}</p>
+          <div className="space-y-3">
+            {questions.map((q, idx) => {
+              const answer = answers[q.id];
+              return (
+                <article
+                  key={q.id || idx}
+                  className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold">
+                      Part {selectedPart} • Câu {idx + 1}
+                    </span>
 
-                {answer?.blobUrl && !isMock && <SpeakingRecordedAudio src={answer.blobUrl} className="w-full h-9" />}
-                {!answer && <p className="text-xs text-amber-300">Chưa có câu trả lời</p>}
-                {answer?.status === 'uploading' && <p className="text-xs text-white/70">Đang lưu...</p>}
-                {answer?.status === 'saved' && !answer.blobUrl && <p className="text-xs text-emerald-300">Đã lưu</p>}
-                {answer?.status === 'failed' && (
-                  <div className="flex items-center justify-between gap-2 text-xs text-red-300">
-                    <span>{answer.error}</span>
-                    {answer.blobUrl && (
-                      <button onClick={() => onRetryUpload(q.id)} className="font-semibold underline shrink-0">Lưu lại</button>
+                    {!isMock && (
+                      <button
+                        type="button"
+                        onClick={() => onRetakeQuestion(selectedPart, idx)}
+                        className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 px-3 py-1.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>{answer ? 'Ghi âm lại' : 'Trả lời ngay'}</span>
+                      </button>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  <p className="text-sm font-bold text-slate-800 leading-snug">{q.question}</p>
+
+                  {answer?.blobUrl && !isMock && (
+                    <SpeakingDetailAudioPlayer src={answer.blobUrl} durationMs={answer.durationMs} />
+                  )}
+                  {!answer && (
+                    <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                      Chưa có câu trả lời cho câu hỏi này.
+                    </p>
+                  )}
+                  {answer?.status === 'uploading' && (
+                    <p className="text-xs font-medium text-blue-700 flex items-center gap-1.5">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Đang tải âm thanh lên hệ thống...
+                    </p>
+                  )}
+                  {answer?.status === 'saved' && !answer.blobUrl && (
+                    <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Đã lưu bản ghi âm
+                    </p>
+                  )}
+                  {answer?.status === 'failed' && (
+                    <div className="flex items-center justify-between gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                      <span>{answer.error}</span>
+                      {answer.blobUrl && (
+                        <button
+                          type="button"
+                          onClick={() => onRetryUpload(q.id)}
+                          className="font-bold underline shrink-0 cursor-pointer"
+                        >
+                          Lưu lại
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Floating Bottom Action Bar */}
-      <div className="w-full max-w-md mx-auto relative z-10 pt-4 flex flex-col items-center space-y-2">
-        {unanswered > 0 && (
-          <div className="text-xs font-medium text-amber-300 flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>Còn {unanswered} câu chưa trả lời</span>
+        {/* Right: Sticky Submission Summary */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-20 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-base font-extrabold text-slate-900">Tổng kết bài thi</h2>
+            <p className="text-xs text-slate-500">
+              Hoàn thành các câu trả lời trước khi gửi sang hệ thống AI chấm điểm.
+            </p>
           </div>
-        )}
-        {failed > 0 && <p className="text-xs text-red-300 text-center">{failed} câu chưa lưu được và sẽ không được chấm nếu bạn nộp bây giờ.</p>}
-        {submitError && <p className="text-xs text-red-300 text-center">{submitError}</p>}
-        {unanswered === 0 && failed === 0 && !submitError && (
-          <div className="text-xs font-medium text-white/80 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-blue-300" />
-            <span>Đến lúc phân tích rồi</span>
-          </div>
-        )}
 
-        <button
-          onClick={onSubmitForAnalysis}
-          disabled={submitting || uploading}
-          className="w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2 transition-all text-sm sm:text-base"
-        >
-          <span>{submitting ? 'Đang nộp bài...' : uploading ? 'Đang lưu câu trả lời...' : 'Nộp bài để chấm'}</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="rounded-xl bg-slate-50 border border-slate-200/70 p-3">
+              <p className="text-[11px] font-semibold text-slate-500">Đã trả lời</p>
+              <p className="text-xl font-black text-blue-700 tabular-nums">
+                {answeredCount}/{allQuestions.length}
+              </p>
+            </div>
+            <div className="rounded-xl bg-slate-50 border border-slate-200/70 p-3">
+              <p className="text-[11px] font-semibold text-slate-500">Còn trống</p>
+              <p className="text-xl font-black text-slate-800 tabular-nums">{unanswered}</p>
+            </div>
+          </div>
+
+          {unanswered > 0 && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-xs font-medium text-amber-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>Còn {unanswered} câu chưa trả lời.</span>
+            </div>
+          )}
+
+          {failed > 0 && (
+            <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-xs font-medium text-red-700">
+              {failed} câu chưa lưu được và sẽ không được chấm nếu bạn nộp bây giờ.
+            </div>
+          )}
+
+          {submitError && (
+            <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-xs font-medium text-red-700">
+              {submitError}
+            </div>
+          )}
+
+          {unanswered === 0 && failed === 0 && !submitError && (
+            <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2.5 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>Tất cả câu trả lời đã sẵn sàng để chấm điểm!</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={onSubmitForAnalysis}
+            disabled={submitting || uploading}
+            className="w-full py-3.5 px-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors text-sm cursor-pointer"
+          >
+            {submitting || uploading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowRight className="w-4 h-4" />
+            )}
+            <span>
+              {submitting
+                ? 'Đang nộp bài...'
+                : uploading
+                  ? 'Đang lưu câu trả lời...'
+                  : 'Nộp bài để chấm'}
+            </span>
+          </button>
+        </aside>
+      </main>
     </div>
   );
 };

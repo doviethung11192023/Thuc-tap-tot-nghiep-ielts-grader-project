@@ -12,7 +12,7 @@ from app.core.domain_errors import ForbiddenError, InvalidRequestError
 
 from app.db.supabase import db
 
-GOAL_FIELDS = ("target_overall", "target_listening", "target_reading", "target_writing", "target_speaking", "test_date")
+GOAL_FIELDS = ("input_band", "target_overall", "target_listening", "target_reading", "target_writing", "target_speaking", "test_date")
 
 
 def get_profile(user_id: str) -> Optional[dict[str, Any]]:

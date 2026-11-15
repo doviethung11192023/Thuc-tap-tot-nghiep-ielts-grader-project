@@ -15,12 +15,19 @@ export const MultiSelectChoiceRenderer: React.FC<BaseRendererProps> = ({
   const qList = group.questions || [];
   const qNumbers = qList.map((q) => q.question_number);
   
-  // Detect max selectable choices (e.g. Choose TWO -> 2, Choose THREE -> 3)
+  // Detect max selectable choices: prefer server select_count, fallback to question count or instruction text
   const instrLower = (group.instruction || '').toLowerCase();
-  let maxSelect = qNumbers.length > 1 ? qNumbers.length : 2;
-  if (instrLower.includes('three') || instrLower.includes(' 3 ')) maxSelect = 3;
-  else if (instrLower.includes('two') || instrLower.includes(' 2 ')) maxSelect = 2;
-  else if (instrLower.includes('four') || instrLower.includes(' 4 ')) maxSelect = 4;
+  let maxSelect =
+    group.select_count && group.select_count > 0
+      ? group.select_count
+      : qNumbers.length > 1
+        ? qNumbers.length
+        : 2;
+  if (!group.select_count || group.select_count <= 0) {
+    if (instrLower.includes('three') || instrLower.includes(' 3 ')) maxSelect = 3;
+    else if (instrLower.includes('two') || instrLower.includes(' 2 ')) maxSelect = 2;
+    else if (instrLower.includes('four') || instrLower.includes(' 4 ')) maxSelect = 4;
+  }
 
   // Options pool
   const options = group.options_pool && group.options_pool.length > 0

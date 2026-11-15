@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAttemptSummary } from "@/services/student-test-practice";
 import { supabase } from "@/lib/supabase";
+import type { SpeakingTestSectionPrompt } from "@/components/exam/speaking/speaking-prompt-card";
 
 export interface SpeakingCriterionScore {
   code: "FC" | "LR" | "GRA" | "P";
@@ -36,6 +37,9 @@ export interface SpeakingAttemptSummary {
   status: string;
   mode: string;
   overall_band: number | null;
+  evaluator_type?: string | null;
+  expert_review_status?: string | null;
+  test_sections?: SpeakingTestSectionPrompt[];
   speaking: {
     grading_done: boolean;
     criteria: SpeakingCriterionScore[];
@@ -52,6 +56,11 @@ const POLL_INTERVAL_MS = 10_000;
 export function useSpeakingAttemptSummary(attemptId?: string) {
   const [data, setData] = useState<SpeakingAttemptSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  const reload = useCallback(() => {
+    setRefreshTick((t) => t + 1);
+  }, []);
 
   useEffect(() => {
     if (!attemptId) return;
@@ -89,7 +98,7 @@ export function useSpeakingAttemptSummary(attemptId?: string) {
       if (timer) clearTimeout(timer);
       void supabase.removeChannel(channel);
     };
-  }, [attemptId]);
+  }, [attemptId, refreshTick]);
 
-  return { data, error };
+  return { data, error, reload };
 }

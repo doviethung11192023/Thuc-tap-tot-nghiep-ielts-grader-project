@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Flag } from 'lucide-react';
 import { QuestionGroupRenderer } from '../renderers/QuestionGroupRenderer';
 
 interface ReadingQuestionsPaneProps {
@@ -12,6 +13,12 @@ interface ReadingQuestionsPaneProps {
   onAnswerChange: (questionNumber: number, value: any) => void;
   onSelectEvidence: (paragraphId: string, quote: string) => void;
   onQuestionClick: (questionNumber: number) => void;
+  onToggleFlag?: (questionNumber: number) => void;
+}
+
+function hasAnswerValue(val: string | string[] | undefined): boolean {
+  if (Array.isArray(val)) return val.length > 0;
+  return typeof val === 'string' && val.trim().length > 0;
 }
 
 export function ReadingQuestionsPane({
@@ -23,6 +30,7 @@ export function ReadingQuestionsPane({
   onAnswerChange,
   onSelectEvidence,
   onQuestionClick,
+  onToggleFlag,
 }: ReadingQuestionsPaneProps) {
   if (!currentPassage) return null;
 
@@ -43,17 +51,52 @@ export function ReadingQuestionsPane({
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6 pb-28">
-        {currentPassage.question_groups.map((group: any) => (
-          <div key={group.group_id} className="relative">
-            <QuestionGroupRenderer
-              group={group}
-              mode="exam"
-              userAnswers={userAnswers}
-              onAnswerChange={onAnswerChange}
-              onSelectEvidence={onSelectEvidence}
-            />
-          </div>
-        ))}
+        {currentPassage.question_groups.map((group: any) => {
+          const groupQNums: number[] = (group.questions || []).map((q: any) => q.question_number);
+          return (
+            <div
+              key={group.group_id}
+              id={`reading-question-group-${group.group_id}`}
+              data-question-numbers={groupQNums.join(' ')}
+              className="relative space-y-2.5"
+            >
+              {onToggleFlag && groupQNums.length > 0 && (
+                <div className="flex flex-wrap items-center justify-end gap-1.5">
+                  <span className="text-[11px] font-medium text-zinc-500 mr-0.5 flex items-center gap-1">
+                    <Flag className="w-3 h-3 text-amber-500" />
+                    Đánh dấu xem lại:
+                  </span>
+                  {groupQNums.map((qNum) => {
+                    const isFlagged = !!flaggedQuestions[qNum];
+                    return (
+                      <button
+                        key={qNum}
+                        type="button"
+                        onClick={() => onToggleFlag(qNum)}
+                        aria-pressed={isFlagged}
+                        title={isFlagged ? `Bỏ đánh dấu câu ${qNum}` : `Đánh dấu câu ${qNum}`}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all cursor-pointer ${
+                          isFlagged
+                            ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
+                            : 'bg-white text-zinc-600 border-zinc-200 hover:border-amber-400 hover:text-amber-700'
+                        }`}
+                      >
+                        {qNum}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <QuestionGroupRenderer
+                group={group}
+                mode="exam"
+                userAnswers={userAnswers}
+                onAnswerChange={onAnswerChange}
+                onSelectEvidence={onSelectEvidence}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Bottom Question Palette (Ghim đáy cột phải) */}
@@ -65,7 +108,7 @@ export function ReadingQuestionsPane({
         </div>
         <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto custom-scrollbar p-1">
           {allQuestions.map((q: any) => {
-            const isAnswered = !!userAnswers[q.question_number];
+            const isAnswered = hasAnswerValue(userAnswers[q.question_number]);
             const isFlagged = !!flaggedQuestions[q.question_number];
 
             return (
@@ -73,14 +116,14 @@ export function ReadingQuestionsPane({
                 key={q.question_number}
                 type="button"
                 onClick={() => onQuestionClick(q.question_number)}
-                className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center transition-all ${
+                className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
                   isFlagged
                     ? 'bg-amber-500 text-white shadow-xs ring-1 ring-amber-600'
                     : isAnswered
                     ? 'bg-[#932120] text-white shadow-xs'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 border border-zinc-200'
                 }`}
-                title={`Câu ${q.question_number}`}
+                title={`Câu ${q.question_number}${isFlagged ? ' (Đã đánh dấu)' : ''}`}
               >
                 {q.question_number}
               </button>

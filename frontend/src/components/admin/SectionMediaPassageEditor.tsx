@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Upload, Volume2, FileText, Loader2, PenTool, Mic } from "lucide-react";
+import { Upload, Volume2, FileText, Loader2, PenTool, Mic, Image as ImageIcon } from "lucide-react";
 import type { SkillType } from "@/types/exam";
 
 interface SectionMediaPassageEditorProps {
@@ -54,6 +54,43 @@ export function SectionMediaPassageEditor({
           </div>
           {audioKey && (
             <audio controls src={audioKey.startsWith("http") ? audioKey : undefined} className="w-full h-8 mt-2" />
+          )}
+        </div>
+      )}
+
+      {/* Biểu đồ / Hình minh họa Task 1 cho Writing */}
+      {skill === "writing" && (
+        <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-2.5 text-xs">
+          <label className="font-semibold text-zinc-700 flex items-center gap-1.5">
+            <ImageIcon className="w-4 h-4 text-[#932120]" />
+            Ảnh biểu đồ / Hình minh họa Writing Task 1 (R2 Key / URL):
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={audioKey}
+              onChange={(e) => onAudioKeyChange(e.target.value)}
+              placeholder="VD: images/general/cam19_test1_task1.png (để trống nếu là Task 2)"
+              className="flex-1 px-3 py-1.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#932120] font-mono text-[11px]"
+            />
+            <label className="px-3 py-1.5 bg-white border border-zinc-300 rounded-lg font-semibold text-zinc-700 hover:bg-zinc-100 cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0">
+              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+              <span>Upload Ảnh</span>
+              <input type="file" accept="image/*" onChange={onFileUpload} className="hidden" />
+            </label>
+          </div>
+          {audioKey && (
+            <div className="pt-1">
+              <img
+                src={
+                  audioKey.startsWith("http") || audioKey.startsWith("data:")
+                    ? audioKey
+                    : `${(process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "").replace(/\/$/, "")}/${audioKey.replace(/^\//, "")}`
+                }
+                alt="Preview biểu đồ Writing Task 1"
+                className="max-h-44 rounded-lg border border-zinc-200 bg-white p-1.5 object-contain"
+              />
+            </div>
           )}
         </div>
       )}

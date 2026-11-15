@@ -33,23 +33,21 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
 
     all_bands = [float(a["band"]) for a in scored_attempts]
 
-    def avg_s(arr: List[float], default: float) -> float:
-        if not arr:
-            return round_to_ielts_band(default)
-        non_zero = [b for b in arr if b > 0]
-        target = non_zero if non_zero else arr
-        return round_to_ielts_band(sum(target) / len(target))
+    def avg_s(arr: List[float]) -> float:
+        valid = [x for x in arr if x > 0]
+        if not valid:
+            return 0.0
+        return round_to_ielts_band(sum(valid) / len(valid))
 
-    base_band = float(goal.get("input_band") or 5.0)
-    w_score = avg_s(bands_by_skill["writing"], base_band)
-    l_score = avg_s(bands_by_skill["listening"], 0.0) if bands_by_skill["listening"] else 0.0
-    r_score = avg_s(bands_by_skill["reading"], 0.0) if bands_by_skill["reading"] else 0.0
-    # Chưa có điểm thì 0 và không tính vào Overall; band Learner tự nhập không phải kết quả chấm (E-02)
-    s_score = avg_s(bands_by_skill["speaking"], 0.0) if bands_by_skill["speaking"] else 0.0
+    # Đồng bộ với Tab Test Practice: loại bỏ lượt nộp trắng 0.0 khỏi trung bình kỹ năng
+    # khi đã có bài làm thực tế; kỹ năng chưa có điểm > 0 không tính vào Overall.
+    w_score = avg_s(bands_by_skill["writing"])
+    l_score = avg_s(bands_by_skill["listening"])
+    r_score = avg_s(bands_by_skill["reading"])
+    s_score = avg_s(bands_by_skill["speaking"])
 
-    active_scores = [s for s in [w_score, l_score, r_score, s_score] if s > 0]
-    calc_overall = round_to_ielts_band(sum(active_scores) / len(active_scores) if active_scores else base_band)
-    avg_band = calc_overall if calc_overall > 0 else (round_to_ielts_band(sum(all_bands) / len(all_bands)) if all_bands else 0.0)
+    practiced_scores = [sc for sc in (w_score, l_score, r_score, s_score) if sc > 0]
+    avg_band = round_to_ielts_band(sum(practiced_scores) / len(practiced_scores)) if practiced_scores else 0.0
     best_band = round_to_ielts_band(max(all_bands)) if all_bands else 0.0
     predicted_band = avg_band if avg_band > 0 else round_to_ielts_band(goal["input_band"])
 
@@ -64,18 +62,26 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     for a in attempts[:4]:
         b_val = round_to_ielts_band(float(a["band"])) if a.get("band") is not None else None
         sk = str(a.get("skill", "")).lower()
+        st = a.get("status") or "in_progress"
         t_id = a.get("test_id") or ""
-        t_link = f"/test-practice/{sk}/{t_id}/summary?attemptId={a['id']}&returnUrl=%2Flearning-profile" if (a.get("status") == "scored" and t_id) else (f"/results/{a['id']}" if a.get("status") == "scored" else "/test-practice/history")
+        if st == "scored" and t_id:
+            t_link = f"/test-practice/{sk}/{t_id}/summary?attemptId={a['id']}&returnUrl=%2Flearning-profile"
+        elif st == "in_progress" and t_id:
+            t_link = f"/test-practice/{sk}/{t_id}?mode={a.get('mode') or 'practice'}"
+        elif st == "scored":
+            t_link = f"/results/{a['id']}"
+        else:
+            t_link = "/test-practice/history"
         recent_submissions.append({
             "id": a["id"], "type": "test", "title": (a.get("tests") or {}).get("title") or f"IELTS {sk.capitalize()} Practice",
-            "date": str(a.get("submitted_at") or a.get("started_at", ""))[:10], "status": a.get("status") or "in_progress",
+            "date": str(a.get("submitted_at") or a.get("started_at", ""))[:10], "status": st,
             "band": b_val, "link": t_link,
         })
     recent_submissions.sort(key=lambda x: x.get("date") or "", reverse=True)
 
     radar_data = [
         {"skill": "Writing", "score": w_score, "count": len(bands_by_skill["writing"])},
-        {"skill": "Overview", "score": predicted_band, "count": len(attempts)},
+        {"skill": "Overview", "score": avg_band, "count": len(scored_attempts)},
         {"skill": "Listening", "score": l_score, "count": len(bands_by_skill["listening"])},
         {"skill": "Reading", "score": r_score, "count": len(bands_by_skill["reading"])},
         {"skill": "Speaking", "score": s_score, "count": len(bands_by_skill["speaking"])},
@@ -107,7 +113,7 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     result = {
         "kpis": {
             "total_time_hours": round(total_minutes / 60, 1), "total_time_minutes": total_minutes,
-            "total_cups": len(scored_attempts), "total_tests_taken": len(attempts),
+            "total_cups": sum(1 for b in all_bands if b >= 7.0), "total_tests_taken": len(attempts),
             "total_exercises_studied": len(scored_attempts),
         },
         "dashboard_stats": {
@@ -121,5 +127,5 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
         },
         "radar_data": radar_data, "donut_data": donut_data, "heatmap_weeks": weeks_data,
     }
-    set_to_cache(cache_key, result, ttl_seconds=30)
+    set_to_cache(cache_key, result, ttl_seconds=180)
     return result

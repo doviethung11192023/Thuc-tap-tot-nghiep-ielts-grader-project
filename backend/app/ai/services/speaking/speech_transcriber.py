@@ -42,19 +42,41 @@ def clean_word(text: str) -> str:
     return re.sub(r"[^a-z']", "", text.lower())
 
 
-def _get_model() -> WhisperModel:
+def _resolve_device_and_compute(settings) -> tuple[str, str]:
+    device = settings.speech_device
+    compute_type = settings.speech_stt_compute_type
+    if device == "auto":
+        try:
+            import torch
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        except Exception:
+            device = "cpu"
+    if device == "cpu" and compute_type == "auto":
+        compute_type = "int8"
+    return device, compute_type
+
+
+def _get_model(force_cpu: bool = False) -> WhisperModel:
     global _model
     with _model_lock:
-        if _model is None:
+        if _model is None or force_cpu:
             settings = get_settings()
-            _model = WhisperModel(settings.speech_stt_model, device=settings.speech_device,
-                                  compute_type=settings.speech_stt_compute_type)
+            if force_cpu:
+                device, compute_type = "cpu", "int8"
+            else:
+                device, compute_type = _resolve_device_and_compute(settings)
+            try:
+                _model = WhisperModel(settings.speech_stt_model, device=device, compute_type=compute_type)
+            except Exception as exc:
+                if device != "cpu" and any(k in str(exc).lower() for k in ("cublas", "cuda", "cudnn")):
+                    _model = WhisperModel(settings.speech_stt_model, device="cpu", compute_type="int8")
+                else:
+                    raise
         return _model
 
 
-def transcribe(samples: np.ndarray) -> Transcript:
-    settings = get_settings()
-    segments, _ = _get_model().transcribe(
+def _run_transcribe(model: WhisperModel, samples: np.ndarray, settings) -> Transcript:
+    segments, _ = model.transcribe(
         samples,
         language="en",
         beam_size=settings.speech_stt_beam_size,
@@ -68,6 +90,16 @@ def transcribe(samples: np.ndarray) -> Transcript:
     for segment in segments:
         words.extend(TimedWord(w.word.strip(), w.start, w.end, w.probability) for w in segment.words or [])
     return Transcript(" ".join(w.text for w in words), tuple(words))
+
+
+def transcribe(samples: np.ndarray) -> Transcript:
+    settings = get_settings()
+    try:
+        return _run_transcribe(_get_model(), samples, settings)
+    except Exception as exc:
+        if any(k in str(exc).lower() for k in ("cublas", "cuda", "cudnn")):
+            return _run_transcribe(_get_model(force_cpu=True), samples, settings)
+        raise
 
 
 def repair_metrics(transcript: Transcript, speaking_seconds: float) -> dict[str, float]:

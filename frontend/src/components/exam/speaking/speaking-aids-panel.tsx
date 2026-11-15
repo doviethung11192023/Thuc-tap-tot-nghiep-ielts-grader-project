@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Lightbulb, ChevronUp, ChevronDown, FileText, X } from 'lucide-react';
+import { Lightbulb, ChevronUp, ChevronDown, StickyNote, X } from 'lucide-react';
 import { SpeakingIdeaStep } from '@/mocks/exam-speaking';
 
 interface SpeakingAidsPanelProps {
@@ -23,12 +23,13 @@ export const SpeakingAidsPanel: React.FC<SpeakingAidsPanelProps> = ({
       {/* 💡 Ý tưởng Card */}
       <div className="bg-white rounded-3xl border border-slate-200/80 p-4 shadow-sm overflow-hidden">
         <button
+          type="button"
           onClick={() => setIsIdeasCollapsed(!isIdeasCollapsed)}
-          className="w-full flex items-center justify-between text-xs font-bold text-slate-800 pb-2 border-b border-slate-100"
+          className="w-full flex items-center justify-between text-xs font-bold text-slate-800 pb-2 border-b border-slate-100 cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <span className="text-amber-500 text-sm">💡</span>
-            <span>Ý tưởng</span>
+            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Ý tưởng gợi ý</span>
           </div>
           {isIdeasCollapsed ? (
             <ChevronDown className="w-4 h-4 text-slate-400" />
@@ -64,13 +65,15 @@ export const SpeakingAidsPanel: React.FC<SpeakingAidsPanelProps> = ({
         <div className="bg-[#fff9e6] rounded-3xl border-2 border-[#ffcf48] p-4 shadow-sm space-y-2 relative">
           <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-              <span className="text-sm">📝</span>
-              <span>Ghi chú</span>
+              <StickyNote className="w-4 h-4 text-amber-700 shrink-0" />
+              <span>Ghi chú câu này</span>
             </div>
             <button
+              type="button"
               onClick={() => setIsNotesVisible(false)}
-              className="p-1 rounded-lg text-amber-700/60 hover:text-amber-900 hover:bg-amber-200/50 transition-colors"
+              className="p-1 rounded-lg text-amber-700/60 hover:text-amber-900 hover:bg-amber-200/50 transition-colors cursor-pointer"
               title="Đóng ghi chú"
+              aria-label="Đóng ghi chú"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -86,10 +89,12 @@ export const SpeakingAidsPanel: React.FC<SpeakingAidsPanelProps> = ({
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => setIsNotesVisible(true)}
-          className="w-full py-2.5 px-3 bg-[#fff9e6] border border-[#ffcf48] text-amber-900 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#fff3c4] transition-colors"
+          className="w-full py-2.5 px-3 bg-[#fff9e6] border border-[#ffcf48] text-amber-900 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#fff3c4] transition-colors cursor-pointer"
         >
-          <span>📝 Mở lại sổ ghi chú</span>
+          <StickyNote className="w-3.5 h-3.5 text-amber-700" />
+          <span>Mở lại sổ ghi chú</span>
         </button>
       )}
     </div>

@@ -27,6 +27,10 @@ def _with_subtype(sec: dict[str, Any]) -> dict[str, Any]:
         lr = db().table("lr_sections").select("passage, audio_key, transcript").eq("section_id", sec["id"]).execute().data
         lr = lr[0] if lr else {}
         out.update(passage_text=lr.get("passage"), audio_key=lr.get("audio_key"), transcript=lr.get("transcript"))
+    elif sec["kind"] == "writing":
+        wt = db().table("writing_tasks").select("task_prompt, chart_image_key").eq("section_id", sec["id"]).execute().data
+        wt = wt[0] if wt else {}
+        out.update(passage_text=wt.get("task_prompt"), audio_key=wt.get("chart_image_key"), transcript=None)
     return out
 
 
@@ -44,9 +48,14 @@ def create_section(test_id: str, data: dict[str, Any]) -> dict[str, Any]:
                                               "transcript": data.get("transcript")}).execute()
         elif skill == "writing":
             task = "task1" if order_no == 1 else "task2"
-            db().table("writing_tasks").insert({"section_id": sec["id"], "task_type": task,
-                                                "task_prompt": data.get("passage_text") or "",
-                                                "min_words": 150 if task == "task1" else 250}).execute()
+            wt_payload: dict[str, Any] = {
+                "section_id": sec["id"], "task_type": task,
+                "task_prompt": data.get("passage_text") or "",
+                "min_words": 150 if task == "task1" else 250,
+            }
+            if data.get("audio_key"):
+                wt_payload["chart_image_key"] = data.get("audio_key")
+            db().table("writing_tasks").insert(wt_payload).execute()
         else:
             prep, answer = SPEAKING_DEFAULTS.get(order_no, (0, 45))
             db().table("speaking_parts").insert({"section_id": sec["id"], "topic": data.get("title"),
@@ -78,8 +87,14 @@ def update_section(section_id: str, data: dict[str, Any]) -> dict[str, Any]:
                                               ("transcript", "transcript")) if k in data}
             if lr:
                 db().table("lr_sections").update(lr).eq("section_id", section_id).execute()
-        elif sec["kind"] == "writing" and "passage_text" in data:
-            db().table("writing_tasks").update({"task_prompt": data["passage_text"] or ""}).eq("section_id", section_id).execute()
+        elif sec["kind"] == "writing":
+            wt = {}
+            if "passage_text" in data:
+                wt["task_prompt"] = data["passage_text"] or ""
+            if "audio_key" in data:
+                wt["chart_image_key"] = data["audio_key"] or None
+            if wt:
+                db().table("writing_tasks").update(wt).eq("section_id", section_id).execute()
         elif sec["kind"] == "speaking" and "title" in data:
             db().table("speaking_parts").update({"topic": data["title"]}).eq("section_id", section_id).execute()
     except Exception as e:

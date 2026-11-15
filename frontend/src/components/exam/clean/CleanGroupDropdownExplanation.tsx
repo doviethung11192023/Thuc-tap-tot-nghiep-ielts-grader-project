@@ -2,21 +2,23 @@
 
 import React, { useState } from 'react';
 import { Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
-import { CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
 import { CleanGroupEvidenceLocation } from './CleanGroupEvidenceLocation';
 import { CleanExplanationSteps } from './CleanExplanationSteps';
 
 interface CleanGroupDropdownExplanationProps {
   questions: CleanListeningQuestion[];
+  transcriptUtterances?: CleanListeningUtterance[];
   activeQuestionNumber: number;
   onSelectQuestion: (questionNumber: number) => void;
   onPlayAtTime: (seconds: number) => void;
-  onSelectEvidenceText?: (text: string) => void;
+  onSelectEvidenceText?: (text: string, questionNumber?: number) => void;
   defaultExpanded?: boolean;
 }
 
 export function CleanGroupDropdownExplanation({
   questions,
+  transcriptUtterances,
   activeQuestionNumber,
   onSelectQuestion,
   onPlayAtTime,
@@ -117,6 +119,7 @@ export function CleanGroupDropdownExplanation({
           {activeSubTab === 'location' && (
             <CleanGroupEvidenceLocation
               currentQ={currentQ}
+              transcriptUtterances={transcriptUtterances}
               onPlayAtTime={onPlayAtTime}
               onSelectEvidenceText={onSelectEvidenceText}
             />

@@ -1,7 +1,16 @@
 "use client";
 
 import React from 'react';
-import { CheckCircle2, AlertCircle, Clock, ArrowRight, Bell } from 'lucide-react';
+import {
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  ArrowRight,
+  Bell,
+  GraduationCap,
+  Send,
+  ClipboardCheck,
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { AppNotification, sanitizeNotification } from '@/stores/notification-store';
@@ -16,18 +25,40 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   const getStatusBadge = () => {
     switch (item.type) {
+      case 'expert_complete':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
+            {item.band_score ? `Chính thức · Band ${item.band_score.toFixed(1)}` : 'Chuyên gia đã chấm'}
+          </span>
+        );
+      case 'expert_assigned':
+      case 'expert_reassigned':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+            {item.type === 'expert_reassigned' ? 'Điều phối mới' : 'Bài chấm mới'}
+          </span>
+        );
+      case 'expert_requested':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+            Đã gửi Chuyên gia
+          </span>
+        );
+      case 'ai_complete':
       case 'grading_complete':
         return (
           <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-            {item.band_score ? `Band ${item.band_score.toFixed(1)}` : 'Đã chấm xong'}
+            {item.band_score ? `AI · Band ${item.band_score.toFixed(1)}` : 'AI đã chấm xong'}
           </span>
         );
+      case 'ai_failed':
       case 'grading_failed':
         return (
           <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-800 border border-red-200">
             Chưa chấm được
           </span>
         );
+      case 'ai_grading':
       case 'grading_pending':
         return (
           <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
@@ -41,18 +72,40 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   const getIcon = () => {
     switch (item.type) {
+      case 'expert_complete':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-teal-100 flex items-center justify-center shrink-0 text-teal-700">
+            <GraduationCap className="w-4 h-4" />
+          </div>
+        );
+      case 'expert_assigned':
+      case 'expert_reassigned':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-700">
+            <ClipboardCheck className="w-4 h-4" />
+          </div>
+        );
+      case 'expert_requested':
+        return (
+          <div className="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 text-sky-700">
+            <Send className="w-4 h-4" />
+          </div>
+        );
+      case 'ai_complete':
       case 'grading_complete':
         return (
           <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-700">
             <CheckCircle2 className="w-4 h-4" />
           </div>
         );
+      case 'ai_failed':
       case 'grading_failed':
         return (
           <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-700">
             <AlertCircle className="w-4 h-4" />
           </div>
         );
+      case 'ai_grading':
       case 'grading_pending':
         return (
           <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-amber-700">
@@ -66,6 +119,14 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
           </div>
         );
     }
+  };
+
+  const getCtaLabel = () => {
+    if (item.type === 'ai_failed' || item.type === 'grading_failed') return 'Kiểm tra & chấm lại';
+    if (item.type === 'expert_assigned' || item.type === 'expert_reassigned') return 'Mở trang chấm bài';
+    if (item.type === 'expert_complete') return 'Xem điểm chính thức';
+    if (item.type === 'expert_requested') return 'Theo dõi trạng thái';
+    return 'Xem kết quả chi tiết';
   };
 
   let formattedDate = 'Vừa xong';
@@ -103,7 +164,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
         </p>
 
         <div className="flex items-center gap-1 text-[11px] font-bold text-[#932120] hover:text-[#7a1a19] pt-0.5">
-          <span>{item.type === 'grading_failed' ? 'Thử lại bài viết' : 'Xem kết quả chi tiết'}</span>
+          <span>{getCtaLabel()}</span>
           <ArrowRight className="w-3 h-3" />
         </div>
       </div>

@@ -26,23 +26,33 @@ export function CleanMultipleChoiceOptionsList({
   isCorrect,
   normalize,
 }: CleanMultipleChoiceOptionsListProps) {
+  const splitTokens = (val: string) =>
+    val
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+  const correctTokens = splitTokens(correctAnsNorm);
+  const userTokens = splitTokens(userAnsNorm);
+
+  const matchesOption = (normVal: string, tokens: string[], optKeyNorm: string, optTextNorm: string) => {
+    const checkOne = (cand: string) =>
+      cand === optTextNorm ||
+      cand === optKeyNorm ||
+      (optKeyNorm.length > 0 && cand.startsWith(`${optKeyNorm}.`)) ||
+      (optTextNorm.length > 1 && cand.startsWith(optTextNorm));
+
+    return checkOne(normVal) || tokens.some(checkOne);
+  };
+
   return (
     <div className="space-y-2 pl-10">
       {options.map((opt, optIdx) => {
         const optTextNorm = normalize(opt.text);
         const optKeyNorm = normalize(opt.key);
 
-        const isCorrectOption =
-          correctAnsNorm === optTextNorm ||
-          correctAnsNorm === optKeyNorm ||
-          correctAnsNorm.startsWith(optKeyNorm + '.') ||
-          correctAnsNorm.startsWith(optTextNorm);
-
-        const isUserSelected =
-          userAnsNorm === optTextNorm ||
-          userAnsNorm === optKeyNorm ||
-          userAnsNorm.startsWith(optKeyNorm + '.') ||
-          userAnsNorm.startsWith(optTextNorm);
+        const isCorrectOption = matchesOption(correctAnsNorm, correctTokens, optKeyNorm, optTextNorm);
+        const isUserSelected = matchesOption(userAnsNorm, userTokens, optKeyNorm, optTextNorm);
 
         let cardStyle = "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800";
         let radioStyle = "border-zinc-300 text-zinc-400";
@@ -74,7 +84,10 @@ export function CleanMultipleChoiceOptionsList({
 
             <div className="flex-1">
               <span>{opt.text}</span>
-              {isCorrectOption && (
+              {isCorrectOption && isUserSelected && (
+                <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng • Bạn đã chọn)</span>
+              )}
+              {isCorrectOption && !isUserSelected && (
                 <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng)</span>
               )}
               {isUserSelected && !isCorrectOption && (

@@ -12,18 +12,14 @@ export function TestPracticeScoreLineChart({ scoreTracking }: TestPracticeScoreL
   const [chartMode, setChartMode] = useState<'all' | 'practice' | 'exam'>('all');
   const [selectedSkill, setSelectedSkill] = useState<string>('All');
 
-  const filteredData = scoreTracking.filter((d) => {
-    if (chartMode !== 'all' && d.mode !== chartMode) return false;
-    if (selectedSkill !== 'All' && d.skill !== selectedSkill) return false;
-    return true;
-  });
-
-  const SKILL_COLORS: Record<string, string> = {
-    Listening: '#f59e0b',
-    Reading: '#10b981',
-    Writing: '#3b82f6',
-    Speaking: '#ef4444',
-  };
+  const filteredData = scoreTracking
+    .filter((d) => {
+      if (chartMode === 'practice' && d.mode !== 'practice') return false;
+      if (chartMode === 'exam' && d.mode !== 'exam' && d.mode !== 'mock') return false;
+      if (selectedSkill !== 'All' && d.skill !== selectedSkill) return false;
+      return true;
+    })
+    .map((d, idx) => ({ ...d, displayIndex: idx + 1 }));
 
   return (
     <div className="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-2xs space-y-4">
@@ -84,7 +80,7 @@ export function TestPracticeScoreLineChart({ scoreTracking }: TestPracticeScoreL
             <LineChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
               <XAxis
-                dataKey="testNumber"
+                dataKey="displayIndex"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: '#71717a', fontSize: 11 }}
@@ -104,6 +100,16 @@ export function TestPracticeScoreLineChart({ scoreTracking }: TestPracticeScoreL
                   border: '1px solid #e4e4e7',
                   boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
                   fontSize: '12px',
+                }}
+                labelFormatter={(_label, payload) => {
+                  const row = payload?.[0]?.payload;
+                  if (!row) return '';
+                  return `#${row.displayIndex} · ${row.skill || ''}${row.date ? ` (${row.date})` : ''}`;
+                }}
+                formatter={(value, _name, item) => {
+                  const payload = item?.payload as TestScoreTracking | undefined;
+                  const title = payload?.title || 'Bài test';
+                  return [`Band ${Number(value ?? 0).toFixed(1)}`, title];
                 }}
               />
               <Line

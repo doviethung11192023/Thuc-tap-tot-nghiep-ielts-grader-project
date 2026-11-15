@@ -36,3 +36,11 @@ def test_attempt_band_task2_weighs_double():
 def test_attempt_band_single_task_practice():
     assert attempt_band({2: 7.5}) == 7.5
     assert attempt_band({1: 6.0}) == 6.0
+    assert attempt_band({1: 8.0}, mode="practice") == 8.0
+    assert attempt_band({2: 7.5}, mode="practice") == 7.5
+
+
+def test_attempt_band_mock_missing_task_penalized_zero():
+    assert attempt_band({1: 8.0}, mode="mock") == 2.5    # (8 + 0)/3 = 2.67 -> 2.5
+    assert attempt_band({2: 6.0}, mode="mock") == 4.0    # (0 + 12)/3 = 4.0
+    assert attempt_band({1: 7.0, 2: 6.0}, mode="mock") == 6.5

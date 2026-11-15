@@ -131,7 +131,7 @@ export const EssayHighlighter = React.memo(function EssayHighlighter({
               styleClass = "bg-green-100 text-green-900 border-b-2 border-green-200";
               break;
             case "upgrade":
-              styleClass = "border-b-2 border-dotted border-purple-500 font-medium text-purple-900 bg-purple-50/30";
+              styleClass = "border-b-2 border-dotted border-teal-600 font-medium text-teal-900 bg-teal-50/50";
               break;
           }
 
@@ -169,7 +169,7 @@ export const HighlightLegend = React.memo(function HighlightLegend({
   const items = [
     { type: "error", bg: "bg-red-100", border: "border-red-400", text: "text-red-700", label: "Lỗi cần sửa" },
     { type: "logic_issue", bg: "bg-orange-100", border: "border-orange-400", text: "text-orange-800", label: "Lập luận / Logic" },
-    { type: "upgrade", bg: "bg-purple-50 border-dotted", border: "border-purple-500", text: "text-purple-700", label: "Nâng cấp từ vựng" },
+    { type: "upgrade", bg: "bg-teal-50 border-dotted", border: "border-teal-600", text: "text-teal-800", label: "Nâng cấp từ vựng" },
     { type: "strength", bg: "bg-green-100", border: "border-green-400", text: "text-green-800", label: "Điểm sáng" },
   ];
 

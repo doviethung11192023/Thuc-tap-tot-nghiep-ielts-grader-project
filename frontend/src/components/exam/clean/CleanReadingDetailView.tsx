@@ -147,6 +147,7 @@ export function CleanReadingDetailView({
                     <CleanQuestionItemRenderer
                       key={question.question_number}
                       question={question}
+                      optionsPool={group.optionsPool}
                       onSelectEvidence={handleSelectEvidence}
                     />
                   ))}

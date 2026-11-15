@@ -37,6 +37,8 @@ def finalize_writing_evaluation(evaluation_id: str) -> None:
         print(f"❌ [Worker] attempt {attempt_id}: missing criterion scores")
         return
 
-    band = attempt_band({t: task_band(by_task[t]) for t in graded_tasks})
+    att_rows = conn.table("attempts").select("id, mode").eq("id", attempt_id).execute().data or []
+    att_mode = (att_rows[0].get("mode") if att_rows else None) or "practice"
+    band = attempt_band({t: task_band(by_task[t]) for t in graded_tasks}, mode=att_mode)
     publish_ai_evaluation(evaluation_id, attempt_id, band)
     print(f"✅ [Worker] attempt {attempt_id} -> scored (band {band}, tasks {sorted(graded_tasks)})")

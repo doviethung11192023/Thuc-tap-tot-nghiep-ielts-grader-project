@@ -9,16 +9,28 @@ interface RecentSubmissionsListProps {
   submissions?: RecentSubmissionItem[];
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  scored: "Đã chấm",
+  completed: "Đã chấm",
+  in_progress: "Đang làm",
+  grading_failed: "Lỗi chấm",
+  failed: "Lỗi chấm",
+  waiting_expert: "Chờ C.Gia",
+  pending: "Đang chấm",
+  submitted: "Đang chấm",
+  grading: "Đang chấm",
+};
+
 export function RecentSubmissionsList({ submissions = [] }: RecentSubmissionsListProps) {
   return (
     <div className="bg-white rounded-3xl border border-zinc-200/90 shadow-2xs overflow-hidden w-full">
       <div className="p-5 sm:p-6 border-b border-zinc-200/80 flex justify-between items-center">
         <div>
           <h3 className="font-black text-zinc-900 text-sm tracking-tight">Bài làm gần đây</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">Lịch sử bài thi và bài viết tự do đã nộp</p>
+          <p className="text-xs text-zinc-500 mt-0.5">Lịch sử bài thi thử và luyện tập gần nhất</p>
         </div>
         <Link
-          href="/history"
+          href="/test-practice/history"
           className="text-xs font-bold text-[#932120] hover:text-[#7a1a19] flex items-center gap-1 transition-colors"
         >
           <span>Xem tất cả</span>
@@ -58,12 +70,14 @@ export function RecentSubmissionsList({ submissions = [] }: RecentSubmissionsLis
                     className={`px-2 py-0.5 rounded font-bold uppercase tracking-wider text-[10px] ${
                       item.status === "completed" || item.status === "scored"
                         ? "bg-emerald-100 text-emerald-800"
-                        : item.status === "failed"
+                        : item.status === "failed" || item.status === "grading_failed"
                         ? "bg-rose-100 text-rose-800"
+                        : item.status === "in_progress"
+                        ? "bg-amber-100 text-amber-800"
                         : "bg-blue-100 text-blue-800"
                     }`}
                   >
-                    {item.status}
+                    {STATUS_LABELS[item.status] || item.status}
                   </span>
                 </div>
               </div>

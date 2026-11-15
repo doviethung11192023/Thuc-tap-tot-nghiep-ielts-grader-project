@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, History, RefreshCw, BarChart2 } from "lucide-react";
 import {
   fetchPracticeHistoryData,
+  fetchMorePracticeHistoryPage,
   getCachedPracticeHistory,
   PracticeHistorySummaryData,
 } from "@/services/practice-history-cache";
@@ -17,6 +18,8 @@ export default function TestPracticeHistoryPage() {
   const [data, setData] = useState<PracticeHistorySummaryData | null>(() => getCachedPracticeHistory());
   const [loading, setLoading] = useState<boolean>(!getCachedPracticeHistory());
   const [statusFilter, setStatusFilter] = useState<"all" | "scored" | "in_progress">("all");
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const loadData = async (force = false) => {
@@ -161,7 +164,11 @@ export default function TestPracticeHistoryPage() {
                 if (statusFilter === "all") return data.timeline_groups;
                 const filtered: Record<string, typeof data.timeline_groups[string]> = {};
                 for (const [m, items] of Object.entries(data.timeline_groups)) {
-                  const mItems = items.filter((it) => it.status === statusFilter);
+                  const mItems = items.filter((it) =>
+                    statusFilter === "scored"
+                      ? it.status === "scored" || it.status === "waiting_expert"
+                      : it.status === statusFilter
+                  );
                   if (mItems.length > 0) filtered[m] = mItems;
                 }
                 return filtered;
@@ -169,6 +176,30 @@ export default function TestPracticeHistoryPage() {
               loading={loading && !data}
               onDeleteItem={handleDeleteItem}
             />
+
+            {data && data.loaded_count < data.total_attempts && (
+              <div className="pt-2 flex justify-center">
+                <button
+                  type="button"
+                  disabled={loadingMore}
+                  onClick={async () => {
+                    if (!data || loadingMore) return;
+                    setLoadingMore(true);
+                    try {
+                      const nextPage = page + 1;
+                      const updated = await fetchMorePracticeHistoryPage(data, nextPage);
+                      setData(updated);
+                      setPage(nextPage);
+                    } finally {
+                      setLoadingMore(false);
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 shadow-2xs transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {loadingMore ? "Đang tải..." : `Tải thêm lịch sử (${data.loaded_count}/${data.total_attempts})`}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

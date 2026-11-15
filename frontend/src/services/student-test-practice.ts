@@ -191,3 +191,10 @@ export async function getQuestionTypesSummary(skill: string = "reading") {
   return res.data?.data || [];
 }
 
+export async function retryAiGrading(attemptId: string) {
+  const res = await apiClient.post<{ meta: { code: number; message?: string }; data: unknown }>(
+    `/api/v1/test-practice/attempts/${attemptId}/retry-ai-grading`
+  );
+  return res.data?.data;
+}
+

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Activity, AlertTriangle, Users, FileText, Clock, Bot, Loader2 } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Activity, AlertTriangle, Users, FileText, Clock, Bot, Loader2, RotateCcw } from "lucide-react";
 import { getSystemStatistics, getEvaluationLogs } from "@/services/users";
+import { retryAiGrading } from "@/services/student-test-practice";
 import toast from "react-hot-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { KpiCard } from "@/components/admin/KpiCard";
@@ -11,25 +12,40 @@ export default function AdminStatisticsPage() {
   const [stats, setStats] = useState<any>(null);
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [retryingAttemptId, setRetryingAttemptId] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [statsData, logsData] = await Promise.all([
+        getSystemStatistics(),
+        getEvaluationLogs({ limit: 15 }),
+      ]);
+      setStats(statsData);
+      setLogs(logsData.items || logsData || []);
+    } catch {
+      toast.error("Không thể tải số liệu hệ thống và lịch sử AI");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [statsData, logsData] = await Promise.all([
-          getSystemStatistics(),
-          getEvaluationLogs({ limit: 10 }),
-        ]);
-        setStats(statsData);
-        setLogs(logsData.items || logsData || []);
-      } catch (error) {
-        toast.error("Failed to load statistics and logs");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  const handleRetryAi = async (attemptId: string) => {
+    try {
+      setRetryingAttemptId(attemptId);
+      await retryAiGrading(attemptId);
+      toast.success("Đã đưa bài viết vào hàng đợi AI chấm lại!");
+      await fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Không thể kích hoạt chấm lại bằng AI");
+    } finally {
+      setRetryingAttemptId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -47,13 +63,12 @@ export default function AdminStatisticsPage() {
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Giám sát hiệu suất, độ ổn định và chi phí vận hành mô hình AI IELTS Grader</p>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <select disabled title="Chưa hỗ trợ: số liệu hiện là toàn thời gian" className="bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-zinc-700 focus:outline-none focus:border-[#932120] shadow-xs">
-            <option>Hôm nay</option>
-            <option>7 ngày qua</option>
-            <option>Tháng này</option>
-          </select>
-          <button disabled title="Chưa hỗ trợ xuất báo cáo" className="bg-[#932120] text-white px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-[#7a1a19] transition-all text-xs sm:text-sm whitespace-nowrap">
-            Xuất Báo Cáo
+          <button
+            type="button"
+            onClick={fetchData}
+            className="min-h-[44px] bg-white border border-zinc-200 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold text-zinc-700 hover:bg-zinc-50 shadow-xs inline-flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" /> Làm mới
           </button>
         </div>
       </div>
@@ -91,33 +106,66 @@ export default function AdminStatisticsPage() {
           <table className="w-full text-xs sm:text-sm text-left text-zinc-600">
             <thead className="text-xs text-zinc-600 uppercase bg-zinc-50 border-b border-zinc-200 font-bold">
               <tr>
-                <th scope="col" className="px-6 py-4">#</th>
-                <th scope="col" className="px-6 py-4">Học viên</th>
-                <th scope="col" className="px-6 py-4">Đề thi</th>
-                <th scope="col" className="px-6 py-4">Status</th>
-                <th scope="col" className="px-6 py-4">Processing Time</th>
-                <th scope="col" className="px-6 py-4">Created At</th>
+                <th scope="col" className="px-4 py-4">#</th>
+                <th scope="col" className="px-4 py-4">Học viên</th>
+                <th scope="col" className="px-4 py-4">Đề thi</th>
+                <th scope="col" className="px-4 py-4">Task</th>
+                <th scope="col" className="px-4 py-4">Status</th>
+                <th scope="col" className="px-4 py-4">Processing Time</th>
+                <th scope="col" className="px-4 py-4">Created At</th>
+                <th scope="col" className="px-4 py-4 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {logs.length > 0 ? (
-                logs.map((log: any, index: number) => (
-                  <tr key={log.id} className="bg-white hover:bg-zinc-50/70 transition-colors">
-                    <td className="px-6 py-4 font-bold text-zinc-900 whitespace-nowrap">{index + 1}</td>
-                    <td className="px-6 py-4 font-medium">{log.essay?.user?.email || "N/A"}</td>
-                    <td className="px-6 py-4 font-medium">{log.essay?.topic?.title || "N/A"}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${log.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800" : log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                        {log.status || "UNKNOWN"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono">{log.processing_time ? `${log.processing_time}s` : "-"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{log.created_at ? new Date(log.created_at).toLocaleString("vi-VN") : "-"}</td>
-                  </tr>
-                ))
+                logs.map((log: any, index: number) => {
+                  const procSeconds = log.processing_time ?? (log.latency_ms ? Math.round((log.latency_ms / 1000) * 10) / 10 : null);
+                  const canRetry = log.status === "FAILED" && Boolean(log.attempt_id);
+                  return (
+                    <tr key={log.id} className="bg-white hover:bg-zinc-50/70 transition-colors">
+                      <td className="px-4 py-4 font-bold text-zinc-900 whitespace-nowrap">{index + 1}</td>
+                      <td className="px-4 py-4 font-medium">{log.essay?.user?.email || "N/A"}</td>
+                      <td className="px-4 py-4 font-medium">{log.essay?.topic?.title || "N/A"}</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-semibold text-zinc-800">
+                        {log.task_no ? `Task ${log.task_no}` : "-"}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${log.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800" : log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                          {log.status || "UNKNOWN"}
+                        </span>
+                        {log.status === "FAILED" && log.error_message && (
+                          <p title={log.error_message} className="mt-1 text-[11px] text-red-700 line-clamp-2 max-w-[240px]">
+                            {log.error_message}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 font-mono">{procSeconds ? `${procSeconds}s` : "-"}</td>
+                      <td className="px-4 py-4 whitespace-nowrap">{log.created_at ? new Date(log.created_at).toLocaleString("vi-VN") : "-"}</td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap">
+                        {canRetry ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRetryAi(log.attempt_id)}
+                            disabled={retryingAttemptId === log.attempt_id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-colors disabled:opacity-60"
+                          >
+                            {retryingAttemptId === log.attempt_id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            )}
+                            Chấm lại AI
+                          </button>
+                        ) : (
+                          <span className="text-zinc-400 text-xs">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-400">Chưa có nhật ký chấm thi nào gần đây</td>
+                  <td colSpan={8} className="px-6 py-8 text-center text-zinc-400">Chưa có nhật ký chấm thi nào gần đây</td>
                 </tr>
               )}
             </tbody>

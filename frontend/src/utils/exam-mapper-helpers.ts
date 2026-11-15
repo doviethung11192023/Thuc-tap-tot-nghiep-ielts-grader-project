@@ -70,6 +70,8 @@ export function mapQuestionGroup(grp: any): QuestionGroupData {
     template: content.template || undefined,
     table_data: content.table_data || undefined,
     diagram_image_url: grp.image_key || content.diagram_image_url || undefined,
+    select_count: content.select_count ?? undefined,
+    max_words: content.max_words ?? undefined,
     questions,
   };
 }

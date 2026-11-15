@@ -18,7 +18,7 @@ export function PracticeHistoryTimeline({ history }: PracticeHistoryTimelineProp
           <p className="text-xs text-zinc-500 mt-0.5">Dựa trên các bài thi thực tế gần nhất của bạn</p>
         </div>
         <Link
-          href="/history"
+          href="/test-practice/history"
           className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
         >
           <span>Xem tất cả</span>
@@ -36,13 +36,36 @@ export function PracticeHistoryTimeline({ history }: PracticeHistoryTimelineProp
           }) : "Gần đây";
 
           const skillLower = (item.skill || "").toLowerCase();
+          const isOpen = item.status === "in_progress";
           const isTestPractice = skillLower === "reading" || skillLower === "listening" || skillLower === "speaking" || !!item.test_id;
 
-          const resultHref = isTestPractice && item.test_id
+          const resultHref = isOpen && item.test_id
+            ? `/test-practice/${skillLower}/${item.test_id}`
+            : isTestPractice && item.test_id
             ? `/test-practice/${skillLower}/${item.test_id}/summary?attemptId=${item.id}&returnUrl=${encodeURIComponent('/learning-profile?tab=test-practice')}`
             : item.id
             ? `/results/${item.id}`
-            : "/history";
+            : "/test-practice/history";
+
+          const statusBadge =
+            item.band > 0
+              ? `Band ${item.band.toFixed(1)}`
+              : item.status === "in_progress"
+              ? "Đang làm"
+              : item.status === "grading"
+              ? "Đang chấm"
+              : item.status === "grading_failed"
+              ? "Lỗi chấm"
+              : item.status === "waiting_expert"
+              ? "Chờ C.Gia"
+              : "Band 0.0";
+
+          const badgeColor =
+            item.band > 0 || item.status === "scored"
+              ? "bg-emerald-100 text-emerald-800"
+              : item.status === "grading_failed"
+              ? "bg-red-100 text-red-700"
+              : "bg-amber-100 text-amber-800";
 
           return (
             <div key={item.id} className="relative group">
@@ -56,8 +79,8 @@ export function PracticeHistoryTimeline({ history }: PracticeHistoryTimelineProp
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-200/80 text-zinc-700">
                         {item.type_badge}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">
-                        {item.band > 0 ? `Band ${item.band.toFixed(1)}` : `${item.score_percent}%`}
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${badgeColor}`}>
+                        {statusBadge}
                       </span>
                       <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                         {item.skill}

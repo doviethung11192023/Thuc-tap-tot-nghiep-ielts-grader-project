@@ -47,6 +47,7 @@ export async function updateLearnerGoals(payload: {
 // API: Xem log AI (GET /api/v1/admin/evaluations/logs) — Admin only
 export async function getEvaluationLogs(params?: {
   essay_id?: string;
+  skill?: string;
   status?: string;
   page?: number;
   limit?: number;

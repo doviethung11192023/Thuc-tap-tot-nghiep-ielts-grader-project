@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Compass } from 'lucide-react';
 import { BaseRendererProps, ReviewEvidenceAccordion } from './shared';
 
 export const DiagramLabellingRenderer: React.FC<BaseRendererProps> = ({
@@ -86,8 +87,14 @@ export const DiagramLabellingRenderer: React.FC<BaseRendererProps> = ({
             })}
         </div>
       ) : (
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
-          ⚠️ Không tìm thấy ảnh sơ đồ (diagram_image_url). Vui lòng kiểm tra lại dữ liệu bài thi.
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-sm">
+          <Compass className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <p className="font-semibold text-slate-900">Câu hỏi định hướng bản đồ / sơ đồ theo băng nghe</p>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Lắng nghe chỉ dẫn vị trí trong audio và đối chiếu trực tiếp với danh sách địa điểm / lời thoại bên dưới.
+            </p>
+          </div>
         </div>
       )}
 
@@ -117,7 +124,8 @@ export const DiagramLabellingRenderer: React.FC<BaseRendererProps> = ({
             return (
               <div
                 key={q.question_number}
-                className={`p-3 rounded-xl border transition-all ${
+                id={`reading-question-${q.question_number}`}
+                className={`p-3 rounded-xl border transition-all scroll-mt-24 ${
                   isReview
                     ? isCorrect
                       ? 'border-emerald-200 bg-emerald-50/20'

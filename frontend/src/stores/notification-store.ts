@@ -1,7 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type NotificationType = 'grading_pending' | 'grading_complete' | 'grading_failed';
+export type NotificationType =
+  | 'grading_pending'
+  | 'grading_complete'
+  | 'grading_failed'
+  | 'ai_grading'
+  | 'ai_complete'
+  | 'ai_failed'
+  | 'expert_requested'
+  | 'expert_assigned'
+  | 'expert_reassigned'
+  | 'expert_complete';
 
 export interface AppNotification {
   id: string;
@@ -17,6 +27,7 @@ export interface AppNotification {
   action_url?: string;
   read: boolean;
   created_at: string;
+  source?: 'local' | 'server';
 }
 
 interface NotificationState {

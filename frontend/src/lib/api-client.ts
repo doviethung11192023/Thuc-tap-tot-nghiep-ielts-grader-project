@@ -10,20 +10,38 @@ const apiClient = axios.create({
   },
 });
 
+function isTokenFresh(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now() + 30_000;
+  } catch {
+    return false;
+  }
+}
+
 // Interceptor: Tự động gắn JWT token vào mọi request
-// (Lấy token trực tiếp từ Supabase session để đảm bảo luôn cập nhật khi token refresh)
+// Ưu tiên đọc token còn hạn từ localStorage trước khi gọi supabase.auth.getSession()
 apiClient.interceptors.request.use(async (config) => {
   if (typeof window !== "undefined") {
+    const cachedToken = localStorage.getItem("supabase_access_token");
+    if (cachedToken && isTokenFresh(cachedToken)) {
+      config.headers.Authorization = `Bearer ${cachedToken}`;
+      return config;
+    }
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || localStorage.getItem("supabase_access_token");
+      const token = session?.access_token || cachedToken;
       if (token) {
+        if (session?.access_token) {
+          localStorage.setItem("supabase_access_token", session.access_token);
+        }
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch {
-      const token = localStorage.getItem("supabase_access_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (cachedToken) {
+        config.headers.Authorization = `Bearer ${cachedToken}`;
       }
     }
   }

@@ -60,11 +60,16 @@ def _save_writing(sec: dict[str, Any], grp: dict[str, Any]) -> None:
 
 def _save_speaking_question(part_id: str, q: dict[str, Any], question_id: Optional[str] = None) -> str:
     row = {"order_no": q["number"], "prompt": q.get("prompt") or "", "audio_key": q.get("prompt_audio_key")}
+    timing = {k: q[s] for k, s in (("prep_seconds", "prep_time_sec"), ("answer_seconds", "answer_time_sec")) if q.get(s) is not None}
     if question_id:
+        if not part_id:
+            existing = db().table("speaking_questions").select("speaking_part_id").eq("id", question_id).execute().data
+            part_id = existing[0]["speaking_part_id"] if existing else ""
+        if timing and part_id:
+            db().table("speaking_parts").update(timing).eq("section_id", part_id).execute()
         db().table("speaking_questions").update(row).eq("id", question_id).execute()
         return question_id
-    timing = {k: q[s] for k, s in (("prep_seconds", "prep_time_sec"), ("answer_seconds", "answer_time_sec")) if q.get(s)}
-    if timing:
+    if timing and part_id:
         db().table("speaking_parts").update(timing).eq("section_id", part_id).execute()
     return db().table("speaking_questions").insert({**row, "speaking_part_id": part_id}).execute().data[0]["id"]
 

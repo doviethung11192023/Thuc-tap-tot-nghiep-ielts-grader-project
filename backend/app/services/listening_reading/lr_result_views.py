@@ -4,12 +4,25 @@ Kết quả Listening/Reading:
 - GET /test-practice/attempts/{id}/detail  : đáp án, lời giải, dẫn chứng, transcript (FR-14, chỉ sau khi nộp)
 """
 from collections import defaultdict
-from typing import Any
+from datetime import datetime
+from typing import Any, Optional
 
 from app.core.domain_errors import InvalidRequestError, NotFoundError
 
 from app.services.listening_reading.lr_test_content import build_lr_sections, load_lr_test
 from app.db.supabase import db
+
+
+def _compute_time_spent_sec(attempt: dict[str, Any]) -> Optional[int]:
+    started, submitted = attempt.get("started_at"), attempt.get("submitted_at")
+    if not started or not submitted:
+        return None
+    try:
+        start_dt = datetime.fromisoformat(str(started).replace("Z", "+00:00"))
+        sub_dt = datetime.fromisoformat(str(submitted).replace("Z", "+00:00"))
+        return max(0, int((sub_dt - start_dt).total_seconds()))
+    except (ValueError, TypeError):
+        return None
 
 def _title(test_id: str) -> str:
     rows = db().table("tests").select("title").eq("id", test_id).execute().data
@@ -39,9 +52,10 @@ def build_lr_summary(attempt: dict[str, Any]) -> dict[str, Any]:
         "attempt_id": attempt["id"], "test_id": attempt["test_id"], "title": _title(attempt["test_id"]),
         "skill": attempt["skill"], "mode": attempt["mode"],
         "status": attempt["status"],
-        "overall_band": _band(attempt),                      # None khi chưa đủ 40 câu (BR-03)
+        "overall_band": _band(attempt),
         "correct_count": attempt.get("raw_score") or 0,
         "total_questions": attempt.get("question_count") or len(rows),
+        "time_spent_sec": _compute_time_spent_sec(attempt),
         "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"),
         "task_formats_result": formats,
     }

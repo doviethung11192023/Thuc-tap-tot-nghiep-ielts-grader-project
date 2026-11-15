@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BookOpen, GraduationCap, User as UserIcon, LogOut, ArrowLeft, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 export default function ExpertLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
@@ -113,8 +114,25 @@ export default function ExpertLayout({ children }: { children: React.ReactNode }
                 </span>
               </div>
             </div>
+
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1">
+              <Link
+                href="/expert/assignments"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white hover:bg-white/15 transition-colors"
+              >
+                Hàng đợi bài chấm
+              </Link>
+              <Link
+                href="/expert/profile"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white hover:bg-white/15 transition-colors"
+              >
+                Hồ sơ & Trạng thái
+              </Link>
+            </nav>
             
             <div className="flex items-center gap-4">
+              <NotificationBell />
               <div className="text-right hidden sm:block">
                 <div className="text-xs font-bold text-white">{user.full_name || user.email}</div>
                 <div className="text-[10px] text-red-200">{user.email}</div>

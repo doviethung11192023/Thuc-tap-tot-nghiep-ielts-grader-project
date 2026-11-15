@@ -27,6 +27,7 @@ from services.llm_evaluator import evaluate_all_criteria
 from services.prompt_builder import build_criterion_prompts, get_prompt_manager
 from services.synthesis_service import SynthesisService
 from services.task2_reference_pipeline import run_task2_reference_pipeline
+from services.reference_corpus import ReferenceCorpusError
 from services.task1_type_knowledge import get_task1_type
 from services.task_type_classifier import classify_task_type
 from handlers.grammar_checker import check as check_grammar
@@ -62,7 +63,13 @@ async def run_grading_pipeline(
     """`pipeline` overrides WRITING_TASK2_PIPELINE, so one run can compare both Task 2 flows."""
     task = normalize_task(task_type)
     if task == "task2" and (pipeline or get_settings().writing_task2_pipeline) == "reference":
-        return await run_task2_reference_pipeline(title, essay)
+        try:
+            return await run_task2_reference_pipeline(title, essay)
+        except ReferenceCorpusError as ref_err:
+            logger.warning(
+                "Reference corpus not found or unavailable (%s). Falling back to 4-criteria pipeline for Task 2.",
+                ref_err,
+            )
 
     started = time.perf_counter()
     logger.info("Grading pipeline started — %s | essay: %d chars", task, len(essay))

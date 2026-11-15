@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { CleanListeningExerciseGroup, CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { Compass } from 'lucide-react';
+import { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
 import { CleanListeningScoreCard } from './CleanListeningScoreCard';
 import { CleanListeningTableRenderer } from './CleanListeningTableRenderer';
 import { CleanQuestionItemRenderer } from './CleanQuestionItemRenderer';
@@ -16,20 +17,22 @@ interface CleanListeningExerciseGroupsPaneProps {
   totalQuestions: number;
   currentExerciseGroups: CleanListeningExerciseGroup[];
   currentSectionQuestions: CleanListeningQuestion[];
+  transcriptUtterances?: CleanListeningUtterance[];
   activeQuestionNumber: number;
   onSelectQuestion: (num: number) => void;
   onPlayAtTime: (seconds: number) => void;
-  onSelectEvidenceText: (text: string) => void;
+  onSelectEvidenceText: (text: string, questionNumber?: number) => void;
 }
 
 export function CleanListeningExerciseGroupsPane({
-  userName = "long",
+  userName = "Học viên",
   submittedAt,
   overallBand,
   correctCount,
   totalQuestions,
   currentExerciseGroups,
   currentSectionQuestions,
+  transcriptUtterances,
   activeQuestionNumber,
   onSelectQuestion,
   onPlayAtTime,
@@ -73,6 +76,7 @@ export function CleanListeningExerciseGroupsPane({
                 />
                 <CleanGroupDropdownExplanation
                   questions={groupQuestions}
+                  transcriptUtterances={transcriptUtterances}
                   activeQuestionNumber={activeQuestionNumber}
                   onSelectQuestion={onSelectQuestion}
                   onPlayAtTime={onPlayAtTime}
@@ -82,6 +86,23 @@ export function CleanListeningExerciseGroupsPane({
               </div>
             ) : (
               <div className="space-y-4">
+                {group.diagram_image_url ? (
+                  <div className="rounded-xl border border-zinc-200 bg-white p-3 shadow-2xs">
+                    <img
+                      src={group.diagram_image_url}
+                      alt={`Sơ đồ ${group.question_start}-${group.question_end}`}
+                      className="w-full h-auto max-h-[420px] object-contain mx-auto rounded-lg"
+                    />
+                  </div>
+                ) : /\b(map|plan|diagram)\b/i.test(group.title || '') ? (
+                  <div className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700">
+                    <Compass className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-slate-900">Câu hỏi nghe định hướng bản đồ / sơ đồ:</strong> Đối chiếu trực tiếp vị trí các đáp án với lời thoại transcript ở cột bên trái.
+                    </span>
+                  </div>
+                ) : null}
+
                 {/* LS-03: Render đoạn văn ghi chú gốc (Complete the notes) nếu group có template */}
                 {group.template && (
                   <CleanDetailSummaryCard
@@ -104,6 +125,7 @@ export function CleanListeningExerciseGroupsPane({
                 </div>
                 <CleanGroupDropdownExplanation
                   questions={groupQuestions}
+                  transcriptUtterances={transcriptUtterances}
                   activeQuestionNumber={activeQuestionNumber}
                   onSelectQuestion={onSelectQuestion}
                   onPlayAtTime={onPlayAtTime}

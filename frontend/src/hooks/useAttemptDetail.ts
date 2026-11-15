@@ -15,6 +15,7 @@ export interface DetailExerciseGroup {
   title: string;
   content: string;
   template?: string;
+  optionsPool?: { key: string; text: string }[] | null;
   question_start?: number;
   question_end?: number;
   questions?: CleanReadingQuestion[];
@@ -91,6 +92,7 @@ export function useAttemptDetail(attemptId?: string) {
               title: g.instructions || (qStart && qEnd ? `Questions ${qStart}-${qEnd}` : `Questions in Section ${s.order_no || sIdx + 1}`),
               content: templateText || g.instructions || "",
               template: templateText || undefined,
+              optionsPool: Array.isArray(g.content?.options_pool) ? g.content.options_pool : null,
               question_start: qStart,
               question_end: qEnd,
               questions: groupQuestions,

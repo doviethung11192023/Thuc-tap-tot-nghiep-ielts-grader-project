@@ -1,30 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@/types";
 
 // ============================================================
 // HOOK: useAuth
-// Quản lý trạng thái đăng nhập toàn ứng dụng
+// Quản lý trạng thái đăng nhập toàn ứng dụng (kèm module cache tránh fetch 3x)
 // ============================================================
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+let cachedAuthUser: User | null = null;
+let authResolved = false;
+let initPromise: Promise<User | null> | null = null;
+const profileFetchMap = new Map<string, Promise<User | null>>();
+let authListenerBound = false;
+const subscribers = new Set<() => void>();
 
-  async function fetchUserProfile(userId: string, authUser?: any) {
+function notifySubscribers() {
+  subscribers.forEach((cb) => cb());
+}
+
+async function fetchUserProfileOnce(userId: string, authUser?: SupabaseUser | null): Promise<User | null> {
+  if (cachedAuthUser && cachedAuthUser.id === userId) {
+    return cachedAuthUser;
+  }
+  const existing = profileFetchMap.get(userId);
+  if (existing) return existing;
+
+  const task = (async () => {
     try {
-      // profiles: chỉ đọc hồ sơ của chính mình (RLS own_read); avatar_key là ảnh đại diện
       const { data } = await supabase
         .from("profiles")
         .select("id, email, full_name, role, avatar_key, is_active, created_at")
         .eq("id", userId)
         .single();
       if (data) {
-        setUser({ ...data, avatar_url: data.avatar_key ?? null, updated_at: data.created_at } as User);
+        cachedAuthUser = { ...data, avatar_url: data.avatar_key ?? null, updated_at: data.created_at } as User;
       } else if (authUser) {
-        setUser({
+        cachedAuthUser = {
           id: authUser.id,
           email: authUser.email,
           full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
@@ -32,14 +46,14 @@ export function useAuth() {
           is_active: true,
           created_at: authUser.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        } as User);
+        } as User;
       } else {
-        setUser(null);
+        cachedAuthUser = null;
       }
     } catch (err) {
       console.error("fetchUserProfile error:", err);
       if (authUser) {
-        setUser({
+        cachedAuthUser = {
           id: authUser.id,
           email: authUser.email,
           full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
@@ -47,48 +61,81 @@ export function useAuth() {
           is_active: true,
           created_at: authUser.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        } as User);
+        } as User;
       } else {
-        setUser(null);
+        cachedAuthUser = null;
       }
     } finally {
-      setLoading(false);
+      authResolved = true;
+      profileFetchMap.delete(userId);
+      notifySubscribers();
     }
-  }
+    return cachedAuthUser;
+  })();
 
-  useEffect(() => {
-    // Lấy session hiện tại khi trang load
-    supabase.auth.getSession().then(({ data: { session } }) => {
+  profileFetchMap.set(userId, task);
+  return task;
+}
+
+function ensureAuthInitialized() {
+  if (!authListenerBound && typeof window !== "undefined") {
+    authListenerBound = true;
+    supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // Lấy thông tin user từ bảng public.users (kèm fallback authUser)
-        fetchUserProfile(session.user.id, session.user);
-        // Lưu token để axios interceptor dùng
         localStorage.setItem("supabase_access_token", session.access_token);
+        void fetchUserProfileOnce(session.user.id, session.user);
       } else {
-        setLoading(false);
+        cachedAuthUser = null;
+        authResolved = true;
+        localStorage.removeItem("supabase_access_token");
+        notifySubscribers();
       }
     });
+  }
 
-    // Lắng nghe thay đổi auth state (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+  if (!initPromise && !authResolved) {
+    initPromise = supabase.auth
+      .getSession()
+      .then(async ({ data: { session } }) => {
         if (session?.user) {
-          fetchUserProfile(session.user.id, session.user);
           localStorage.setItem("supabase_access_token", session.access_token);
-        } else {
-          setUser(null);
-          localStorage.removeItem("supabase_access_token");
-          setLoading(false);
+          return fetchUserProfileOnce(session.user.id, session.user);
         }
-      }
-    );
+        cachedAuthUser = null;
+        authResolved = true;
+        notifySubscribers();
+        return null;
+      })
+      .finally(() => {
+        initPromise = null;
+      });
+  }
+}
 
-    return () => subscription.unsubscribe();
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(() => cachedAuthUser);
+  const [loading, setLoading] = useState<boolean>(() => !authResolved);
+
+  useEffect(() => {
+    const sync = () => {
+      setUser(cachedAuthUser);
+      setLoading(!authResolved);
+    };
+    subscribers.add(sync);
+    ensureAuthInitialized();
+    sync();
+
+    return () => {
+      subscribers.delete(sync);
+    };
   }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
+    cachedAuthUser = null;
+    authResolved = true;
     localStorage.removeItem("supabase_access_token");
+    notifySubscribers();
   }
 
   return { user, loading, signOut };

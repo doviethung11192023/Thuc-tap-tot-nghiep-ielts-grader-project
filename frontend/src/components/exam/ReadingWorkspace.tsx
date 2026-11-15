@@ -24,9 +24,22 @@ interface ReadingWorkspaceProps {
 
 export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
   const router = useRouter();
+  const draftKey = `ielts_reading_draft_${testData.test_id}`;
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>(() => {
+    try {
+      if (typeof window === 'undefined') return {};
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {
+      // Ignore malformed draft
+    }
+    return {};
+  });
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [highlightedEvidence, setHighlightedEvidence] = useState<{ paragraph: string; quote: string } | null>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
@@ -50,34 +63,57 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
 
   const initialExamSeconds = Math.max(1, availablePassages.length) * 20 * 60;
   const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Tải lại trang hoặc tải đề chậm thì đồng hồ
-  // client bắt đầu muộn hơn hạn server, nên giới hạn thời gian còn lại theo hạn server để bài tự nộp không bị từ chối.
-  useEffect(() => {
-    if (mode !== 'exam' || !deadlineMs) return;
-    const remaining = Math.max(1, Math.floor((deadlineMs - Date.now()) / 1000));
-    setTimerSeconds(prev => Math.min(prev, remaining));
-  }, [mode, deadlineMs]);
+  const latestAnswersRef = useRef(userAnswers);
+  const latestOnSubmitRef = useRef(onSubmit);
+  const deadlineMsRef = useRef(deadlineMs);
+  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (mode === 'exam') {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(interval!);
-            setIsGrading(true);
-            onSubmit(userAnswers);
-            return 0;
+    latestAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  useEffect(() => {
+    latestOnSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+
+  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Cập nhật ref để interval tự kẹp theo deadline server.
+  useEffect(() => {
+    deadlineMsRef.current = deadlineMs;
+  }, [deadlineMs]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (mode !== 'exam') {
+          return prev + 1;
+        }
+        const serverRemaining = deadlineMsRef.current
+          ? Math.max(0, Math.floor((deadlineMsRef.current - Date.now()) / 1000))
+          : prev;
+        const nextVal = Math.min(prev <= 1 ? 0 : prev - 1, serverRemaining);
+        if (nextVal <= 0) {
+          if (!autoSubmittedRef.current) {
+            autoSubmittedRef.current = true;
+            setTimeout(() => {
+              setIsGrading(true);
+              Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current))
+                .then(() => {
+                  try {
+                    localStorage.removeItem(draftKey);
+                  } catch {
+                    // Ignore storage error
+                  }
+                })
+                .catch(() => setIsGrading(false));
+            }, 0);
           }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000);
-    }
-    return () => { if (interval) clearInterval(interval); };
-  }, [mode, onSubmit, userAnswers]);
+          return 0;
+        }
+        return nextVal;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, draftKey]);
 
   const handleSelectEvidence = (paragraphId: string, quote: string) => {
     setHighlightedEvidence({ paragraph: paragraphId, quote });
@@ -86,20 +122,25 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
     }
   };
 
+  const handleToggleFlag = (qNumber: number) => {
+    setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
+  };
+
   const handleQuestionPaletteClick = (qNumber: number) => {
-    const targetIdx = availablePassages.findIndex(p => 
+    const targetIdx = availablePassages.findIndex(p =>
       p.question_groups.some((g: any) => g.questions.some((item: any) => item.question_number === qNumber))
     );
     if (targetIdx !== -1 && targetIdx !== activePassage) {
       setActivePassage(targetIdx);
       setHighlightedEvidence(null);
     }
+    setTimeout(() => {
+      const el =
+        document.getElementById(`reading-question-${qNumber}`) ||
+        document.querySelector(`[data-question-numbers~="${qNumber}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 90);
   };
-
-  const answeredCount = Object.keys(userAnswers).filter(k => {
-    const val = userAnswers[Number(k)];
-    return typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0;
-  }).length;
 
   const unansweredQuestionNumbers = useMemo(() => {
     return allQuestions
@@ -110,11 +151,18 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
       });
   }, [allQuestions, userAnswers]);
 
+  const answeredCount = allQuestions.length - unansweredQuestionNumbers.length;
+
   const handleConfirmSubmit = async () => {
     setIsSubmitModalOpen(false);
     setIsGrading(true);
     try {
       await onSubmit(userAnswers);
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {
+        // Ignore storage error
+      }
     } catch {
       setIsGrading(false);
     }
@@ -162,6 +210,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onSelectEvidence={handleSelectEvidence}
           onQuestionClick={handleQuestionPaletteClick}
+          onToggleFlag={handleToggleFlag}
         />
       </div>
 
@@ -171,13 +220,17 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
         onContinue={() => setIsExitModalOpen(false)}
         onExitDiscard={async () => {
           setIsExitModalOpen(false);
+          try {
+            localStorage.removeItem(draftKey);
+          } catch {
+            // Ignore storage error
+          }
           if (mode === 'exam') await onAbandon?.();
           router.push(returnUrl || '/test-practice');
         }}
         onSaveDraftAndExit={() => {
           try {
-            localStorage.setItem(`ielts_reading_draft_${testData.test_id}`, JSON.stringify(userAnswers));
-            alert("💾 Đã lưu nháp tiến độ bài làm Reading thành công!");
+            localStorage.setItem(draftKey, JSON.stringify(userAnswers));
           } catch (e) {
             console.error("Failed to save draft:", e);
           }

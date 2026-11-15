@@ -53,7 +53,7 @@ export function SpeakingWorkspace({
   const [viewPhase, setViewPhase] = useState<ViewPhase>('intro');
   const [currentPart, setCurrentPart] = useState<PartNumber>(parts[0]?.part_number ?? 1);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [notes, setNotes] = useState('');
+  const [notesByQuestion, setNotesByQuestion] = useState<Record<string, string>>({});
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [micLost, setMicLost] = useState(false);
@@ -204,8 +204,19 @@ export function SpeakingWorkspace({
     </span>
   );
 
+  const answeredCount = useMemo(
+    () => allQuestions.filter(({ question }) => !!answers[question.id]).length,
+    [allQuestions, answers],
+  );
+
+  const currentNotes = currentQuestion ? (notesByQuestion[currentQuestion.id] ?? '') : '';
+  const handleNotesChange = (val: string) => {
+    if (!currentQuestion) return;
+    setNotesByQuestion((prev) => ({ ...prev, [currentQuestion.id]: val }));
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
+    <div className="h-full w-full overflow-y-auto bg-slate-50 flex flex-col justify-between">
       <SpeakingIntroModal
         isOpen={viewPhase === 'intro' && !introDismissed()}
         onClose={handleExit}
@@ -254,16 +265,36 @@ export function SpeakingWorkspace({
 
       {viewPhase === 'testing' && activePartData && (
         <div className="flex-1 flex flex-col justify-between">
-          <header className="w-full bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-            <button
-              onClick={handleExit}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-              title="Rời khỏi phòng thi"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <h1 className="text-xs sm:text-sm font-bold text-slate-800 text-center max-w-2xl truncate px-3">{exam.title}</h1>
-            <div className="min-w-8 flex justify-end">{clock}</div>
+          <header className="w-full bg-white/95 backdrop-blur-xs border-b border-slate-200/80 px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <button
+                type="button"
+                onClick={handleExit}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
+                title="Rời khỏi phòng thi"
+                aria-label="Rời khỏi phòng thi"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <span
+                className={`hidden sm:inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${
+                  isMock
+                    ? 'bg-red-50 text-[#932120] border-red-200'
+                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                }`}
+              >
+                {isMock ? 'Thi thử IELTS' : 'Luyện tập'}
+              </span>
+            </div>
+            <h1 className="text-xs sm:text-sm font-bold text-slate-800 text-center max-w-2xl truncate px-2">
+              {exam.title}
+            </h1>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold tabular-nums">
+                Đã trả lời {answeredCount}/{allQuestions.length}
+              </span>
+              {clock}
+            </div>
           </header>
 
           <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col lg:flex-row gap-4 items-stretch">
@@ -287,6 +318,7 @@ export function SpeakingWorkspace({
               secondsLeft={room.secondsLeft}
               isMock={isMock}
               answer={currentQuestion ? answers[currentQuestion.id] : undefined}
+              getLevel={recorder.getLevel}
               onReplayPrompt={room.replayPrompt}
               onStop={() => void room.stopManually()}
               onSkipPreparation={room.skipPreparation}
@@ -298,8 +330,8 @@ export function SpeakingWorkspace({
             {!isMock && (
               <SpeakingAidsPanel
                 ideas={currentQuestion?.ideas || activePartData.cue_card?.ideas}
-                notes={notes}
-                onNotesChange={setNotes}
+                notes={currentNotes}
+                onNotesChange={handleNotesChange}
               />
             )}
           </main>

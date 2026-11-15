@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Eye, Sparkles } from 'lucide-react';
+import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Eye, Sparkles, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { prefetchExamContent } from '@/services/exam-content-cache';
+import { getLearnerExpertQuota } from '@/services/expert';
+import type { LearnerQuota } from '@/types';
 
 interface TestPrepModalProps {
   testId: string;
@@ -18,9 +20,19 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
   const [mode, setMode] = useState<'exam' | 'practice'>('practice');
   const getAllParts = (s: string) => s === 'Listening' ? [1, 2, 3, 4] : s === 'Reading' ? [1, 2, 3] : [1, 2];
   const [selectedParts, setSelectedParts] = useState<number[]>(() => getAllParts(skill));
+  const [quota, setQuota] = useState<LearnerQuota | null>(null);
 
   useEffect(() => {
     setSelectedParts(getAllParts(skill));
+  }, [skill]);
+
+  // Nạp quota chuyên gia nếu là Writing hoặc Speaking
+  useEffect(() => {
+    if (skill === 'Writing' || skill === 'Speaking') {
+      getLearnerExpertQuota()
+        .then(setQuota)
+        .catch(() => {});
+    }
   }, [skill]);
 
   // Nạp ngầm trước đề thi ngay khi thí sinh mở modal để khi bấm "Vào phòng thi" là mở tức thì 0s
@@ -91,8 +103,8 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
                   mode === 'practice' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
                 }`}
               >
-                <h4 className={`font-bold mb-1 ${mode === 'practice' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện tập</h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">Thời gian đếm tiến, không giới hạn. Cho phép lưu nháp và thoát tự do.</p>
+                <h4 className={`font-bold mb-1 ${mode === 'practice' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện tập (Practice)</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">Thời gian đếm tiến, tự do chọn phần. Nhận điểm AI tức thì 0s, có thể xin Chuyên gia chấm sau.</p>
               </button>
               
               <button
@@ -104,8 +116,19 @@ export function TestPrepModal({ testId, testTitle, skill, returnUrl, onClose }: 
                   mode === 'exam' ? 'border-[#932120] bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 bg-white'
                 }`}
               >
-                <h4 className={`font-bold mb-1 ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>Luyện thi</h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">Đếm ngược thời gian. Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần.</p>
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className={`font-bold ${mode === 'exam' ? 'text-[#932120]' : 'text-zinc-700'}`}>Thi thử (Mock Test)</h4>
+                  {(skill === 'Writing' || skill === 'Speaking') && quota?.can_reserve_mock && (
+                    <span className="text-[10px] bg-rose-100 text-[#932120] px-1.5 py-0.5 rounded font-bold">
+                      Bảo lưu Expert
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Đếm ngược chuẩn thi thật. {(skill === 'Writing' || skill === 'Speaking') 
+                    ? `Bảo lưu suất Chuyên gia chấm (Còn ${quota?.mock_remaining ?? 2}/2 tuần này).` 
+                    : "Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần."}
+                </p>
               </button>
             </div>
           </div>

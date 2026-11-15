@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, ShieldCheck, UserPlus } from "lucide-react";
 import { getAdminUsers, updateUserStatus, resendUserInvite } from "@/services/users";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,9 +13,7 @@ import { UserCreateModal } from "@/components/admin/UserCreateModal";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
@@ -32,23 +31,23 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["admin-users", page, pageSize, debouncedSearch, selectedRole],
+    queryFn: () => {
       const params: any = { page, limit: pageSize };
       if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
       if (selectedRole !== "all") params.role = selectedRole;
-      const data = await getAdminUsers(params);
-      setUsers(data.items || []);
-      setTotal(data.total || 0);
-    } catch (error: any) {
-      toast.error(error.response?.status === 403 ? "403 Forbidden: Cần quyền Admin" : "Không thể tải người dùng");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, selectedRole]);
+      return getAdminUsers(params);
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
+  });
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  const users: User[] = data?.items || [];
+  const total: number = data?.total || 0;
+  const fetchUsers = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+  };
 
   const handleToggleStatus = async (targetUser: User) => {
     if (currentUser?.id === targetUser.id) {
@@ -59,7 +58,7 @@ export default function AdminUsersPage() {
       const newStatus = !targetUser.is_active;
       await updateUserStatus(targetUser.id, { is_active: newStatus });
       toast.success(`Đã ${newStatus ? "mở khóa" : "khóa"} tài khoản thành công`);
-      setUsers((prev) => prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: newStatus } : u)));
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Lỗi khi cập nhật trạng thái");
     }
