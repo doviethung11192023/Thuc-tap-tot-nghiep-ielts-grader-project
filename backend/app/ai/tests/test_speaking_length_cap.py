@@ -6,13 +6,21 @@ from services.speaking.audio_signal import AudioQuality
 from services.speaking.speaking_length_cap import measure_length
 
 
-def _answer(part, seconds):
-    return AnswerAnalysis(f"r{part}", part, "q", False, AudioQuality(seconds, seconds * 0.8, -20.0, 0.0, 30.0))
+def _answer(part, seconds, clip_seconds=None):
+    """`seconds`: first word to last; `clip_seconds`: the whole recording, silence included."""
+    quality = AudioQuality(clip_seconds or seconds, seconds * 0.8, -20.0, 0.0, 30.0, speech_span_seconds=seconds)
+    return AnswerAnalysis(f"r{part}", part, "q", False, quality)
 
 
 @pytest.mark.parametrize("seconds, fc_max", [(20.0, 4.0), (45.0, 5.0), (75.0, None)])
 def test_part2_length_caps_fluency(seconds, fc_max):
     assert measure_length([_answer(1, 10.0), _answer(2, seconds)], 400).fc_max == fc_max
+
+
+def test_silence_left_on_the_mic_does_not_lengthen_part2():
+    limits = measure_length([_answer(2, 20.0, clip_seconds=120.0)], 400)    # 20 s of talk, then quiet until the timer
+    assert limits.part2_seconds == 20.0 and limits.fc_max == 4.0
+    assert "20 giây" in limits.note()
 
 
 def test_skipped_part2_is_not_counted_twice():

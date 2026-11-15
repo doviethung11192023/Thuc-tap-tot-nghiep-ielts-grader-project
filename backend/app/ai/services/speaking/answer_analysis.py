@@ -73,6 +73,7 @@ def combine_quality(answers: list[AnswerAnalysis]) -> AudioQuality:
         rms_dbfs=float(np.average([a.quality.rms_dbfs for a in spoken], weights=weights)),
         clipping_ratio=max(a.quality.clipping_ratio for a in spoken),
         snr_db=float(np.average([a.quality.snr_db for a in spoken], weights=weights)),
+        speech_span_seconds=sum(a.quality.speech_span_seconds for a in spoken),
     )
 
 

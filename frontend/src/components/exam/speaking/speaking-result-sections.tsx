@@ -18,7 +18,8 @@ const RELIABILITY_NOTES: Record<string, string> = {
   too_few_words: 'bài nói quá ngắn',
   noisy_recording: 'bản ghi nhiều tạp âm',
   clipped_recording: 'bản ghi bị rè do micro quá to',
-  channels_disagree: 'âm thanh có vẻ bị méo hoặc phát qua loa',
+  // Không biết là do bản ghi (loa, phòng vọng) hay do phát âm khó nghe, nên nêu cả hai
+  channels_disagree: 'âm thanh khớp kém với lời máy nhận dạng, do bản ghi (loa, phòng vọng) hoặc do phát âm khó nghe',
 };
 
 const METRICS: { key: string; label: string; unit: string }[] = [
@@ -58,7 +59,7 @@ export function PronunciationEvidence({ evidence }: { evidence: SpeakingPronunci
       </p>
       {!evidence.reliable && (
         <p className="text-xs text-amber-800 bg-amber-50 rounded-xl px-3 py-2">
-          Bản ghi chưa đủ tốt ({notes.join(', ')}), nên điểm được giới hạn ở mức 6.0. Hãy nói trực tiếp, gần micro, không mở loa khi ghi âm.
+          Bằng chứng âm thanh chưa đủ tin cậy ({notes.join(', ')}), nên điểm Pronunciation tối đa 6.0. Nếu do bản ghi, hãy thu lại: nói trực tiếp, gần micro, không mở loa khi ghi âm.
         </p>
       )}
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">

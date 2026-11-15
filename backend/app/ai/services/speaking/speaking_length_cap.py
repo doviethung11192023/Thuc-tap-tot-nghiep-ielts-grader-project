@@ -44,8 +44,9 @@ class LengthLimits:
 
 def measure_length(spoken: list[AnswerAnalysis], word_count: int) -> LengthLimits:
     part2 = [a for a in spoken if a.part == 2]
-    # the length of the turn as an examiner hears it, pauses included
-    seconds = sum(a.quality.duration_seconds for a in part2) if part2 else None
+    # The turn as an examiner hears it: first word to last, pauses inside included. Not the clip
+    # length: speaking 20 s and then leaving the mic on until the timer ends is still a 20 s turn.
+    seconds = sum(a.quality.speech_span_seconds for a in part2) if part2 else None
     fc_max = next((band for limit, band in _PART2_CEILINGS if seconds < limit), None) \
         if seconds is not None else None
     language_max = _THIN_SAMPLE_BAND if word_count < _MIN_WORDS_FOR_RANGE else None

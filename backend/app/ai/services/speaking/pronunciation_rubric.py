@@ -32,8 +32,11 @@ _MIN_SNR_DB = 10.0
 _MAX_CLIPPING = 0.01
 _MONOTONE_SEMITONES = 3.0
 _LIVELY_SEMITONES = 8.0
-# The transcript reads as confident speech while the audio matches it badly. A person who is truly
-# hard to understand lowers both, so this points at the recording: replay through speakers, reverb.
+# The transcript reads as confident speech while the audio matches it badly. Two causes look the same
+# here: a bad recording (replay through speakers, reverb) or speech Whisper smoothed into likely words.
+# Real tests showed both: a video replayed through speakers (confidence 0.88, accuracy 0.45) and a
+# learner who rated their own test band 2-3 (0.83, 0.57). So this note never blames the recording
+# alone: P is capped and the hint is to re-record, and BR-24 still caps every criterion on a clean file.
 _DISAGREE_MAX_ACCURACY = 0.6
 _DISAGREE_MIN_CONFIDENCE = 0.7
 

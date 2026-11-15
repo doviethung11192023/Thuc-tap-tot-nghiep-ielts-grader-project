@@ -41,6 +41,9 @@ class AudioQuality:
     rms_dbfs: float
     clipping_ratio: float
     snr_db: float
+    # First word to last word, pauses inside included. Silence before the first word or after the
+    # last is not part of the turn, so a learner cannot pad a short answer by leaving the mic on.
+    speech_span_seconds: float = 0.0
 
 
 async def download_audio(url: str) -> bytes:
@@ -93,4 +96,5 @@ def measure_quality(samples: np.ndarray, segments: list[SpeechSegment]) -> Audio
         rms_dbfs=float(10 * np.log10(np.mean(energies))),
         clipping_ratio=float(np.mean(np.abs(samples) >= _CLIP_LEVEL)),
         snr_db=float(10 * np.log10(speech / noise)),
+        speech_span_seconds=segments[-1].end - segments[0].start if segments else 0.0,
     )

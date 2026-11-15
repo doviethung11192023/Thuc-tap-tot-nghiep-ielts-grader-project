@@ -21,7 +21,14 @@
 - Trong điều kiện chấm thật, tương quan với tỉ lệ lỗi do người gán: Whisper −0,441, âm vị −0,339. Chênh lệch có khoảng tin cậy 95% là 0,02–0,19 (bootstrap).
 - Kết quả: kênh âm vị **thua**, nên không vào band. Nhóm giữ nó cho việc nó làm tốt: gợi ý từ có thể sai (precision 0,964) và phát hiện bản ghi hỏng.
 
-**Bằng chứng thật:** một bài thử phát video qua loa. Hai kênh lệch nhau, hệ thống gắn nhãn `channels_disagree`, giới hạn P và nhắc thu lại thay vì kết luận người học phát âm kém.
+**Bằng chứng thật (chấm lại 2026-11-16):** một bài thử phát video qua loa. Ba lớp độc lập cùng bắt được bài này:
+- hai kênh lệch nhau (`channels_disagree`);
+- FC đánh 5/7 câu là lạc đề (BR-23);
+- chỉ 31% từ nghe rõ (BR-24).
+
+Cả 4 tiêu chí ra 4,0, kèm lý do và lời nhắc thu lại. Trước khi có BR-23 và BR-24, bài này được P 6,0, LR 6,5 và GRA 6,0.
+
+**Đã tự sửa một giả định sai (2026-11-16):** trước đây nhóm hiểu `channels_disagree` là "lỗi do bản ghi". Một học viên nói trực tiếp, tự đánh giá band 2–3, cho số đo gần giống bài phát qua loa (0,83 và 0,57 so với 0,88 và 0,45). Như vậy tín hiệu này không phân biệt được bản ghi hỏng với lời nói khó nghe. Kết quả và prompt `pr` v4 giờ nêu cả hai khả năng. Đây là một ví dụ "dữ liệu thật bác bỏ giả định, sửa theo dữ liệu".
 
 **Tự nêu giới hạn:** band P ước lượng độ dễ hiểu, chưa chấm từng âm; ngưỡng là tạm, chưa hiệu chuẩn với giám khảo.
 

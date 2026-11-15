@@ -16,7 +16,7 @@ from services.speaking.speaking_length_cap import LengthLimits, measure_length
 from services.speaking.speech_transcriber import TimedWord, Transcript
 from services.speaking.acoustic_features import AcousticFeatures
 
-QUALITY = AudioQuality(30.0, 25.0, -20.0, 0.0, 30.0)
+QUALITY = AudioQuality(30.0, 25.0, -20.0, 0.0, 30.0, speech_span_seconds=30.0)
 ACOUSTIC = AcousticFeatures(100, 3.0, 4.0, 0.25, 3, 1, 0.2, 0.6, 12.0, 5.0, 2.0, 45.0, 3.0)
 INPUTS = [pipeline.SpeakingAnswerInput("r1", 1, "Do you like music?", "https://r2.test/a"),
           pipeline.SpeakingAnswerInput("r2", 2, "Describe a trip.", "https://r2.test/b")]
