@@ -8,7 +8,7 @@ import { ExamPageNotice, SubmitErrorBanner } from '@/components/exam/ExamPageNot
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { autosaveLabel, useServerAutosave } from '@/hooks/useServerAutosave';
 import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';
-import { useNotificationStore } from '@/stores/notification-store';
+import { notifyAttemptSubmitted } from '@/stores/notification-store';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/utils/attempt-submission';
 
 export default function WritingWorkspacePage() {
@@ -49,13 +49,8 @@ export default function WritingWorkspacePage() {
       }
       if (!currentAttemptId) throw new Error('no attempt');
       await submitWritingAttempt(currentAttemptId, { essay_text: text, task1_text: task1Text, task2_text: task2Text, parts });
-      useNotificationStore.getState().addNotification({
-        attempt_id: currentAttemptId,
-        title: writingData?.title || "IELTS Academic Writing Test",
-        message: "Bài thi đã được nộp và ghi nhận kết quả đánh giá 4 tiêu chí.",
-        type: "grading_complete",
-        action_url: summaryPath(currentAttemptId),
-      });
+      notifyAttemptSubmitted(currentAttemptId, writingData?.title || "IELTS Academic Writing Test",
+        summaryPath(currentAttemptId));
       router.push(summaryPath(currentAttemptId));
     } catch (err) {
       if (currentAttemptId && isAlreadySubmitted(err)) {     // nộp ở tab khác hoặc đã tự nộp: kết quả là bài đó

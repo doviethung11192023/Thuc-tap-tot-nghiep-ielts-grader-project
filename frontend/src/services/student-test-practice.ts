@@ -23,6 +23,30 @@ export async function getStudentPublishedTests(params: GetPublishedTestsParams =
   }
 }
 
+/** Trang tối đa backend cho phép (`limit` ≤ 100) khi tải cả danh mục. */
+const CATALOG_PAGE_SIZE = 100;
+
+/** Tải mọi trang của một danh mục phân trang. Ném lỗi khi request hỏng (không trả rỗng để khỏi bị cache). */
+async function fetchAllPages<T>(fetchPage: (page: number) => Promise<{ items: T[]; total: number }>): Promise<T[]> {
+  const all: T[] = [];
+  for (let page = 1; ; page++) {
+    const { items, total } = await fetchPage(page);
+    all.push(...items);
+    if (items.length === 0 || all.length >= total) return all;
+  }
+}
+
+/** Toàn bộ đề Practice đã xuất bản, để lọc kỹ năng / độ khó / tìm kiếm ngay trên trình duyệt. */
+export async function getAllStudentPublishedTests(): Promise<PublishedTestItem[]> {
+  return fetchAllPages(async (page) => {
+    const res = await apiClient.get<{
+      meta: { code: number };
+      data: { items: PublishedTestItem[]; total: number };
+    }>("/api/v1/test-practice/tests", { params: { page, limit: CATALOG_PAGE_SIZE } });
+    return { items: res.data?.data?.items || [], total: res.data?.data?.total || 0 };
+  });
+}
+
 export async function getStudentExamCollections(): Promise<ExamCollection[]> {
   try {
     const res = await apiClient.get<{ meta: { code: number }; data: ExamCollection[] }>(
@@ -224,6 +248,11 @@ export async function getSkillExercises(params: {
     data: { items: PracticeExerciseItem[]; total: number; page: number; limit: number };
   }>("/api/v1/test-practice/exercises", { params });
   return res.data?.data || { items: [], total: 0, page: 1, limit: 12 };
+}
+
+/** Toàn bộ bài tập theo dạng của một kỹ năng, để lọc dạng bài ngay trên trình duyệt. */
+export async function getAllSkillExercises(skill: string): Promise<PracticeExerciseItem[]> {
+  return fetchAllPages((page) => getSkillExercises({ skill, page, limit: CATALOG_PAGE_SIZE }));
 }
 
 export async function getQuestionTypesSummary(skill: string = "reading") {

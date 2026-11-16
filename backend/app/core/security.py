@@ -1,9 +1,13 @@
+from typing import Any, Optional
+
 from fastapi import Depends, HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from jose import jwt, JWTError
 
-from app.core.config import settings
+from app.core.supabase_access_token_verifier import (
+    JwksUnavailable, cached_profile, remember_profile, verify_access_token,
+)
 from app.db.supabase import db, supabase
 
 security = HTTPBearer()
@@ -13,16 +17,28 @@ class User(BaseModel):
     role: str                 # learner | expert | admin (profiles.role)
     is_active: bool = True
 
-def _verified_sub(token: str) -> str | None:
-    """sub của access token Supabase sau khi kiểm chữ ký + hạn + audience; sai → None."""
-    secret = (settings.SUPABASE_JWT_SECRET or "").strip()
-    if not secret:
-        return None
+
+def _user_id_from_gotrue(token: str) -> Optional[str]:
+    """Dự phòng khi chưa tải được JWKS: hỏi GoTrue như cách cũ (chậm, gọi mạng)."""
     try:
-        payload = jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
-    except JWTError:
+        res = supabase.auth.get_user(token)
+        return res.user.id if res and res.user else None
+    except Exception:
         return None
-    return payload.get("sub") if payload.get("role") == "authenticated" else None
+
+
+async def _authenticated_user_id(token: str) -> Optional[str]:
+    """Kiểm token bằng khoá công khai (ADR-32). Chạy trong threadpool vì lần tải JWKS có gọi mạng."""
+    try:
+        return await run_in_threadpool(verify_access_token, token)
+    except JwksUnavailable as e:
+        print(f"⚠️ [Auth] không tải được JWKS, hỏi GoTrue: {e}")
+        return await run_in_threadpool(_user_id_from_gotrue, token)
+
+
+def _load_profile(user_id: str) -> Optional[dict[str, Any]]:
+    rows = db().table("profiles").select("id, role, is_active").eq("id", user_id).execute().data
+    return rows[0] if rows else None
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
@@ -32,30 +48,20 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing Token"
         )
-    
+
     try:
-        user_id = None
-        # Xác thực token thông qua Supabase GoTrue API
-        try:
-            user_res = supabase.auth.get_user(token)
-            if user_res and user_res.user:
-                user_id = user_res.user.id
-        except Exception:
-            pass
-
-        # Fallback khi GoTrue không trả lời: chỉ chấp nhận token có CHỮ KÝ hợp lệ (HS256, JWT secret
-        # của project) và đúng audience. Không bao giờ dùng claims chưa kiểm chữ ký (token giả mạo).
-        if not user_id:
-            user_id = _verified_sub(token)
-
+        user_id = await _authenticated_user_id(token)
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
-        
-        p = db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
-        if not p.data:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="User profile not found in database. Account may not be fully initialized.")
-        return User(id=p.data[0]["id"], role=p.data[0]["role"], is_active=p.data[0]["is_active"])
+
+        profile = cached_profile(user_id)
+        if profile is None:
+            profile = await run_in_threadpool(_load_profile, user_id)
+            if profile is None:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                    detail="User profile not found in database. Account may not be fully initialized.")
+            remember_profile(profile)
+        return User(id=profile["id"], role=profile["role"], is_active=profile["is_active"])
 
     except HTTPException:
         raise

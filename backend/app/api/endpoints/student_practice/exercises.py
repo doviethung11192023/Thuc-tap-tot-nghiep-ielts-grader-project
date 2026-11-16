@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Query, Request
 from typing import Optional, List, Dict, Any
-from app.core.security import get_optional_user, User
 from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
 
@@ -109,9 +108,9 @@ async def list_practice_exercises(
     difficulty: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=100),
-    current_user: Optional[User] = Depends(get_optional_user)
 ):
-    """Danh sách bài tập thực chiến theo dạng bài bóc tách từ các đề thi đã xuất bản."""
+    """Danh sách bài tập thực chiến theo dạng bài bóc tách từ các đề thi đã xuất bản. Không cần đăng nhập
+    (ADR-32)."""
     skill_lower = (skill or "reading").lower()
     type_filter = question_type.lower() if question_type and question_type.lower() != "all" else None
     diff_filter = difficulty.lower() if difficulty and difficulty.lower() != "all" else None

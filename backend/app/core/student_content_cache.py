@@ -8,6 +8,7 @@ import json
 from typing import Any, Awaitable, Callable, Tuple
 
 from fastapi import Request, Response
+from fastapi.concurrency import run_in_threadpool
 from fastapi.routing import APIRoute
 
 VERSION_KEY = "student-content:version"
@@ -22,7 +23,9 @@ async def _versioned_key(redis: Any, namespace: str, key: str) -> str:
 
 async def get_or_load(redis: Any, namespace: str, key: str, ttl_seconds: int,
                       load: Callable[[], Any]) -> Tuple[Any, bool]:
-    """Trả (dữ liệu, có_từ_cache). `load` trả None nghĩa là không có dữ liệu, kết quả đó không được cache."""
+    """Trả (dữ liệu, có_từ_cache). `load` trả None nghĩa là không có dữ liệu, kết quả đó không được cache.
+
+    `load` là hàm đồng bộ (supabase-py), chạy trong threadpool để cache miss không chặn event loop."""
     cache_key = None
     try:
         cache_key = await _versioned_key(redis, namespace, key)
@@ -32,7 +35,7 @@ async def get_or_load(redis: Any, namespace: str, key: str, ttl_seconds: int,
     except Exception as e:
         print(f"⚠️ [Cache] không đọc được {namespace}: {e}")
 
-    data = load()
+    data = await run_in_threadpool(load)
     if data is not None and cache_key:
         try:
             await redis.setex(cache_key, ttl_seconds, json.dumps(data))

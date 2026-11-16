@@ -9,7 +9,7 @@ không đổi được vai trò (attempts tham chiếu learner_profiles).
 from typing import Any, Optional
 
 from app.core.domain_errors import ConflictError, InvalidRequestError, NotFoundError
-
+from app.core.supabase_access_token_verifier import forget_profile
 from app.db.supabase import db, supabase
 
 REDIRECT_TARGET = "http://localhost:3000/auth/callback?next=/reset-password"
@@ -43,6 +43,7 @@ def set_role(user_id: str, role: str, full_name: Optional[str] = None, expert_fi
                 raise ConflictError("Expert đã có lịch sử chấm, không đổi vai trò được")
             db().table("expert_profiles").delete().eq("user_id", user_id).execute()
         db().table("profiles").update({"role": role}).eq("id", user_id).execute()
+        forget_profile(user_id)     # role mới có hiệu lực ngay ở tiến trình này (ADR-32)
     if full_name:
         db().table("profiles").update({"full_name": full_name}).eq("id", user_id).execute()
     if role == "expert":

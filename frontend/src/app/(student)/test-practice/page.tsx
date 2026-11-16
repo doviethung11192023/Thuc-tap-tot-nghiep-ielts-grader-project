@@ -24,6 +24,9 @@ export default function TestPracticePage() {
     setSearch,
     tests,
     total,
+    catalogTotal,
+    skillCounts,
+    difficultyCounts,
     loading,
   } = useStudentPublishedTests(12);
 
@@ -108,7 +111,7 @@ export default function TestPracticePage() {
 
             {activeTab === "explore" && (
               <div className="text-xs font-semibold text-zinc-500 hidden sm:block">
-                Đang phục vụ <strong className="text-zinc-800">{total}</strong> đề thi chuẩn hóa
+                Đang phục vụ <strong className="text-zinc-800">{catalogTotal}</strong> đề thi chuẩn hóa
               </div>
             )}
           </div>
@@ -129,6 +132,8 @@ export default function TestPracticePage() {
                 setPage={setPage}
                 limit={limit}
                 loading={loading}
+                skillCounts={skillCounts}
+                difficultyCounts={difficultyCounts}
                 onOpenTestPrep={handleOpenTestPrep}
               />
             </div>
