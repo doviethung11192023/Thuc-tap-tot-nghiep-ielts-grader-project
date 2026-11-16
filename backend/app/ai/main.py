@@ -19,8 +19,8 @@ Endpoints:
     GET  /health
     GET  /
 
-Env (see .env.example): PORT (default 8001), LOG_LEVEL, ENABLE_NGROK (default false),
-NGROK_AUTH_TOKEN, NGROK_STATIC_DOMAIN, SERVER_RELOAD (default false).
+Env (see .env.example): PORT (default 8001), LOG_LEVEL, SERVER_RELOAD (default false),
+AI_ENGINE_SECRET (required; same value as the Core API), ALLOW_NO_SECRET (local only, default false).
 """
 
 import asyncio
@@ -62,6 +62,12 @@ MAX_ESSAY_CHARS = 20_000
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings = get_settings()
+    if not settings.ai_engine_secret.strip():
+        if settings.allow_no_secret:
+            logger.warning("AI_ENGINE_SECRET empty and ALLOW_NO_SECRET=true: grading endpoints are open (local only)")
+        else:
+            logger.error("AI_ENGINE_SECRET is not set: /grade, /grade-speaking, /draft-material will return 503")
     try:
         logger.info("Warming up LanguageTool + spaCy...")
         await asyncio.to_thread(warm_up_nlp_tools)
@@ -134,8 +140,14 @@ class GradeSpeakingRequest(BaseModel):
 
 def require_engine_secret(x_ai_engine_secret: str | None = Header(default=None)) -> None:
     """Only the Core API may spend LLM quota here (STRIDE: direct calls to the AI engine)."""
-    expected = get_settings().ai_engine_secret
-    if expected and not secrets.compare_digest(x_ai_engine_secret or "", expected):
+    settings = get_settings()
+    expected = settings.ai_engine_secret.strip()
+    if not expected:
+        # Fail closed: a deploy that forgot the secret must not serve grading to anyone who can reach it.
+        if settings.allow_no_secret:
+            return
+        raise HTTPException(status_code=503, detail="AI_ENGINE_SECRET is not configured")
+    if not secrets.compare_digest(x_ai_engine_secret or "", expected):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
@@ -213,42 +225,12 @@ async def grade_speaking(req: GradeSpeakingRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── Ngrok Tunnel Helper ───────────────────────────────────────────────────────
-def start_ngrok(port: int) -> str | None:
-    settings = get_settings()
-    token = settings.ngrok_auth_token or os.getenv("NGROK_AUTH_TOKEN")
-    domain = settings.ngrok_static_domain or os.getenv("NGROK_STATIC_DOMAIN")
-
-    if not token:
-        logger.warning("[ngrok] NGROK_AUTH_TOKEN not set — skipping ngrok tunnel")
-        return None
-
-    try:
-        from pyngrok import conf, ngrok
-
-        conf.get_default().auth_token = token
-        kwargs = {"domain": domain} if domain else {}
-        tunnel = ngrok.connect(port, "http", **kwargs)
-        public_url = tunnel.public_url
-        logger.info("[ngrok] Tunnel active: %s -> http://localhost:%d", public_url, port)
-        return public_url
-    except ImportError:
-        logger.error("[ngrok] pyngrok not installed. Run: uv add pyngrok")
-    except Exception as e:
-        logger.error("[ngrok] Failed to start tunnel: %s", e, exc_info=True)
-    return None
-
-
 def run_server():
     settings = get_settings()
     port = int(os.getenv("PORT", 8001))
 
     logger.info("=" * 60)
     logger.info("  IELTS Grader API — local: http://localhost:%d (POST /grade, /docs)", port)
-    if settings.enable_ngrok:
-        public_url = start_ngrok(port)
-        if public_url:
-            logger.info("  ngrok public URL: %s/grade", public_url)
     logger.info("=" * 60)
 
     uvicorn.run(

@@ -665,7 +665,7 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 - Tự đổi role thành admin bằng anon key: không có policy ghi; trigger chỉ đọc `app_metadata`; FK `(id, role)`.
 - Đọc attempt của người khác: RLS chỉ cho đọc dòng của mình; endpoint của người không sở hữu trả **404** (không trả 403).
 - Đọc đáp án qua DevTools hoặc REST: bảng `question_keys` riêng; DTO trả trước khi nộp không chứa đáp án.
-- Gọi thẳng AI engine `/grade` để đốt quota Qwen: chỉ mạng Docker nội bộ, có secret header, không mở CORS.
+- Gọi thẳng AI engine `/grade` để đốt quota Qwen: chỉ mạng Docker nội bộ, có secret header, không mở CORS. Secret là bắt buộc (2026-11-13): `/grade`, `/grade-speaking`, `/draft-material` trả 503 khi chưa đặt `AI_ENGINE_SECRET`, chỉ mở khi bật rõ `ALLOW_NO_SECRET=true` trên máy local. Bỏ ngrok, engine không mở cổng ra ngoài.
 - Lộ service role key, key Qwen hay Langfuse: chỉ dùng ở server; **không commit `.env`**; bật secret scanning.
 - Spam nộp bài để tốn chi phí AI: rate limit theo user trong Redis; bắt buộc xác minh email; mỗi đề chỉ 1 attempt đang mở.
 - Audio chỉ truy cập qua signed URL ngắn hạn.

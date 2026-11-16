@@ -32,6 +32,8 @@ cd backend
 arq app.worker.tasks.SpeakingWorkerSettings
 ```
 
+Chấm Writing và Speaking cần **cùng một `AI_ENGINE_SECRET`** trong `backend/.env` và `backend/app/ai/.env` (tạo bằng `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`). Thiếu thì AI engine trả 503 cho mọi lượt chấm. Đổi secret thì khởi động lại AI engine, API và cả hai worker.
+
 Chấm Writing và Speaking **cần Redis và worker đang chạy**. Thiếu chúng thì bài vẫn được lưu nhưng nằm ở trạng thái đang chấm; cron sẽ đẩy lại khi worker hoạt động.
 
 ### 2. Khởi chạy Frontend

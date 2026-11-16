@@ -27,8 +27,7 @@ async def call_ai_grade(title: str, essay: str, task_no: Optional[int], image_ur
     if answer_key:
         payload["answer_key"] = answer_key
     # Secret nội bộ: /grade của AI engine từ chối request không có (giống /grade-speaking)
-    headers = {"Content-Type": "application/json", "ngrok-skip-browser-warning": "true",
-               "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
+    headers = {"Content-Type": "application/json", "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
 
     last_error = ""
     for attempt in range(MAX_RETRIES):

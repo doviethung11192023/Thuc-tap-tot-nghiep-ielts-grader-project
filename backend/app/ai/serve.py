@@ -12,7 +12,6 @@ from main import (
     lifespan,
     root,
     run_server,
-    start_ngrok,
     warm_up_nlp_tools,
     run_grading_pipeline,
 )
