@@ -14,6 +14,7 @@ export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState({ active: 0, locked: 0 });   // trên toàn bộ kết quả lọc, không chỉ trang này
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -41,6 +42,7 @@ export default function AdminUsersPage() {
       const data = await getAdminUsers(params);
       setUsers(data.items || []);
       setTotal(data.total || 0);
+      setCounts({ active: data.active_count ?? 0, locked: data.locked_count ?? 0 });
     } catch (error: any) {
       toast.error(error.response?.status === 403 ? "403 Forbidden: Cần quyền Admin" : "Không thể tải người dùng");
     } finally {
@@ -60,6 +62,7 @@ export default function AdminUsersPage() {
       await updateUserStatus(targetUser.id, { is_active: newStatus });
       toast.success(`Đã ${newStatus ? "mở khóa" : "khóa"} tài khoản thành công`);
       setUsers((prev) => prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: newStatus } : u)));
+      setCounts((c) => ({ active: c.active + (newStatus ? 1 : -1), locked: c.locked + (newStatus ? -1 : 1) }));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Lỗi khi cập nhật trạng thái");
     }
@@ -81,9 +84,6 @@ export default function AdminUsersPage() {
     setModalRole(role);
     setIsModalOpen(true);
   };
-
-  const activeCount = users.filter((u) => u.is_active).length;
-  const bannedCount = users.filter((u) => !u.is_active).length;
 
   return (
     <div className="space-y-6 sm:space-y-8 w-full">
@@ -123,8 +123,8 @@ export default function AdminUsersPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs sm:text-sm font-semibold text-zinc-700 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg">Tổng: {total}</span>
-            <span className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">Hoạt động: {activeCount}</span>
-            <span className="text-xs sm:text-sm font-semibold text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">Bị khóa: {bannedCount}</span>
+            <span className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">Hoạt động: {counts.active}</span>
+            <span className="text-xs sm:text-sm font-semibold text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">Bị khóa: {counts.locked}</span>
           </div>
         </div>
 

@@ -11,6 +11,7 @@ import {
 import type { BandConversion, SystemSetting } from "@/types/exam";
 import { BandConversionsTable } from "@/components/admin/BandConversionsTable";
 import { SystemSettingsCards } from "@/components/admin/SystemSettingsCards";
+import { apiErrorDetail } from "@/utils/attempt-submission";
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<"band" | "settings">("band");
@@ -52,9 +53,10 @@ export default function AdminSettingsPage() {
       });
       alert("Cập nhật quy đổi điểm thành công!");
     } catch (err) {
-      alert("Lỗi khi cập nhật quy đổi điểm");
-      loadData();   // đưa ô nhập về giá trị đang lưu
+      alert(apiErrorDetail(err) || "Lỗi khi cập nhật quy đổi điểm");
     }
+    // Luôn tải lại: mã dòng là "skill:raw_min", đổi raw_min thì mã đổi theo; lỗi thì đưa ô nhập về giá trị đang lưu
+    loadData();
   };
 
   const handleSettingSave = async (key: string, value: Record<string, any>) => {

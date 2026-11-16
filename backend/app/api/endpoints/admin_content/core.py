@@ -4,6 +4,7 @@ from typing import Optional
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
+from app.services.admin.staff_accounts import write_audit   # UC-38: sửa bảng quy đổi và cấu hình phải ghi audit
 from app.schemas.exam_content import SkillType
 from app.schemas.system_settings import (
     BandConversionCreate, SystemSettingUpdate
@@ -68,6 +69,8 @@ async def create_band_conversion(
         res = db().table("band_conversions").insert(payload).execute()
     except Exception as e:
         raise _band_error(e)
+    write_audit(str(current_user.id), "create_band_conversion", "band_conversions", _with_id(res.data[0])["id"],
+                after=payload)
     return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": _with_id(res.data[0])}
 
 @router.put("/core/band-conversions/{item_id}")
@@ -86,12 +89,16 @@ async def update_band_conversion(
         "band": data.band
     }
     skill_key, raw_min = _parse_id(item_id)
+    before = db().table("band_conversions").select("skill, raw_min, raw_max, band") \
+        .eq("skill", skill_key).eq("raw_min", raw_min).execute().data
     try:
         res = db().table("band_conversions").update(payload).eq("skill", skill_key).eq("raw_min", raw_min).execute()
     except Exception as e:
         raise _band_error(e)
     if not res.data:
         raise HTTPException(status_code=404, detail="Bản ghi quy đổi không tồn tại")
+    write_audit(str(current_user.id), "update_band_conversion", "band_conversions", item_id,
+                before=before[0] if before else None, after=payload)
     return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": _with_id(res.data[0])}
 
 @router.delete("/core/band-conversions/{item_id}")
@@ -104,6 +111,7 @@ async def delete_band_conversion(
     res = db().table("band_conversions").delete().eq("skill", skill_key).eq("raw_min", raw_min).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Bản ghi quy đổi không tồn tại")
+    write_audit(str(current_user.id), "delete_band_conversion", "band_conversions", item_id, before=res.data[0])
     return {"meta": {"code": 200, "message": "Xóa thành công"}}
 
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
@@ -120,7 +128,8 @@ async def update_system_setting(
     current_user: User = Depends(require_admin)
 ):
     """Cập nhật giá trị một cấu hình hệ thống (JSON)."""
-    if not db().table("system_settings").select("key").eq("key", key).execute().data:
+    existing = db().table("system_settings").select("key, value").eq("key", key).execute().data
+    if not existing:
         raise HTTPException(status_code=404, detail=f"Không có cấu hình '{key}'")
     payload = {
         "value": data.value,
@@ -131,4 +140,6 @@ async def update_system_setting(
     res = db().table("system_settings").upsert({"key": key, **payload}).execute()
     if not res.data:
         raise HTTPException(status_code=500, detail="Không thể lưu cấu hình")
+    write_audit(str(current_user.id), "update_system_setting", "system_settings", key,
+                before={"value": existing[0]["value"]}, after={"value": data.value})
     return {"meta": {"code": 200, "message": f"Cập nhật cấu hình '{key}' thành công"}, "data": res.data[0]}

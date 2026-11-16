@@ -88,7 +88,7 @@ export default function AdminTestsPage() {
       </div>
 
       {/* Mode Switcher: Full Tests vs Question Type Exercises */}
-      <AdminModeSwitcher viewMode={viewMode} onChange={setViewMode} fullCount={total} />
+      <AdminModeSwitcher viewMode={viewMode} onChange={setViewMode} />
 
       {viewMode === "exercises" ? (
         <AdminExerciseTypeManager

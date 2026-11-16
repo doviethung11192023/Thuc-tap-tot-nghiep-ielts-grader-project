@@ -3,7 +3,8 @@ Quản lý đề thi cho Admin (UC-21, UC-36, FR-26/27, BR-10, BR-18, BR-19).
 
 API giữ hình dạng cũ mà giao diện admin dùng (duration_min, origin, created_by, reviewed_by,
 test_sections lồng nhau); bảng thật là tests / sections / lr_sections / writing_tasks / speaking_parts.
-- Publish: ghi reviewer + thời điểm (DB yêu cầu khi status khác draft).
+- Publish: kiểm tra nội dung trước (FR-27, cms_publish_validation), ghi reviewer + thời điểm (DB yêu cầu
+  khi status khác draft). Đề đã published mà publish lại thì giữ nguyên, không kiểm tra lại.
 - Đề published/archived bị DB khoá sửa (trigger block_published_edit, BR-10) → 409.
 - Nội dung do AI tạo bị từ chối (BR-19).
 """
@@ -13,6 +14,7 @@ from typing import Any, Optional
 from app.core.domain_errors import ConflictError, DomainError, InvalidRequestError, NotFoundError
 from app.db.supabase import db
 from app.services.admin.staff_accounts import write_audit
+from app.services.cms.cms_publish_validation import publish_errors
 
 ORIGIN_TO_SOURCE = {"manual": "original", "open_license": "open_licence"}
 SOURCE_TO_ORIGIN = {v: k for k, v in ORIGIN_TO_SOURCE.items()} | {"public_domain": "open_license"}
@@ -71,21 +73,43 @@ def list_tests(page: int, limit: int, filters: dict[str, Any], sort_by: Optional
 
 
 def create_test(admin_id: str, data: dict[str, Any]) -> dict[str, Any]:
-    status = data.get("status") or "draft"
+    """Đề mới luôn là nháp: lúc tạo chưa có nội dung nên không qua được kiểm tra publish (FR-27)."""
     try:
         row = db().table("tests").insert({**_payload(data), "status": "draft", "author_id": admin_id,
                                           "author_role": "admin"}).execute().data[0]
     except Exception as e:   # FR-36 (UNIQUE test_set_id+skill), khoá ngoại bộ đề, kiểu số: trả 409/400 thay vì 500
         raise db_error(e)
     write_audit(admin_id, "create_test", "tests", row["id"], after={"title": row["title"], "skill": row["skill"]})
-    if status == "published":
-        return set_status(admin_id, row["id"], "published")
     return to_api(row)
 
 
+def _raise_if_not_publishable(test_id: str, test: dict[str, Any]) -> None:
+    errors = publish_errors(test_id, test)
+    if errors:
+        raise InvalidRequestError("Chưa publish được: " + "; ".join(errors))
+
+
+def _read_test(test_id: str) -> dict[str, Any]:
+    rows = db().table("tests").select("*").eq("id", test_id).execute().data
+    if not rows:
+        raise NotFoundError("Bài thi không tồn tại")
+    return rows[0]
+
+
 def update_test(admin_id: str, test_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    """Sửa thông tin đề, có thể kèm đổi trạng thái.
+
+    Kèm publish thì kiểm tra trên dữ liệu đã gộp (dòng hiện tại + thay đổi trong cùng request, ví dụ thêm
+    giấy phép) TRƯỚC khi ghi: không qua thì không lưu gì, tránh "lưu một nửa" mà giao diện báo thất bại."""
     status = data.pop("status", None)
+    status = "draft" if status == "pending_review" else status
     payload = _payload(data)
+    prechecked = False
+    if status == "published":
+        current = _read_test(test_id)
+        if current["status"] != "published":
+            _raise_if_not_publishable(test_id, {**current, **payload})
+            prechecked = True
     row = None
     if payload:
         try:
@@ -97,16 +121,22 @@ def update_test(admin_id: str, test_id: str, data: dict[str, Any]) -> dict[str, 
         row = res.data[0]
         write_audit(admin_id, "update_test", "tests", test_id, after=payload)
     if status:
-        return set_status(admin_id, test_id, status)
+        return set_status(admin_id, test_id, status, prechecked=prechecked)
     if row is None:
         raise InvalidRequestError("Không có dữ liệu cập nhật")
     return to_api(row)
 
 
-def set_status(admin_id: str, test_id: str, status: str) -> dict[str, Any]:
+def set_status(admin_id: str, test_id: str, status: str, prechecked: bool = False) -> dict[str, Any]:
+    """prechecked=True: người gọi đã chạy kiểm tra publish trên đúng dữ liệu sắp ghi (update_test)."""
     status = "draft" if status == "pending_review" else status
     payload: dict[str, Any] = {"status": status}
     if status == "published":
+        current = _read_test(test_id)
+        if current["status"] == "published":
+            return to_api(current)
+        if not prechecked:
+            _raise_if_not_publishable(test_id, current)
         payload.update(reviewer_id=admin_id, reviewer_role="admin", reviewed_at=datetime.now(timezone.utc).isoformat())
     try:
         res = db().table("tests").update(payload).eq("id", test_id).execute()

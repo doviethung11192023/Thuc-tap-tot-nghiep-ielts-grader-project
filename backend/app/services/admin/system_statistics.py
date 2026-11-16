@@ -1,15 +1,22 @@
 """
 Dashboard hệ thống (UC-23, FR-29) và giám sát chấm AI (UC-24, FR-30: lượt chạy lỗi, độ trễ).
 
-Bài viết = essays (bài Writing trong attempt).
-Tỉ lệ lỗi AI và thời gian xử lý lấy từ grading_runs (NFR-05).
+- "Hôm nay" và các ngày trong biểu đồ tính theo giờ Việt Nam (UTC+7), không theo UTC.
+- Bài Writing = lượt làm Writing đã nộp (attempts skill=writing, submitted_at có giá trị); tổng và hôm nay
+  cùng đơn vị. Biểu đồ xu hướng đếm lượt nộp của cả 4 kỹ năng.
+- Tỉ lệ lỗi và thời gian xử lý tính trên grading_runs (NFR-05: một lượt = một task Writing hoặc một bài
+  Speaking), gồm cả lượt lỗi rồi được chạy lại; trả kèm số lượt để giao diện ghi rõ mẫu số.
 """
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any
 
 from app.db.supabase import db
+from app.services.learner_journey.journey_constants import VN_TZ
 
 RUN_STATUS_LABEL = {"done": "COMPLETED", "failed": "FAILED", "running": "RUNNING"}
+TREND_DAYS = 7
+PAGE_SIZE = 1000   # PostgREST trả tối đa 1000 dòng mỗi lần
+EPOCH = datetime(1970, 1, 1, tzinfo=VN_TZ)
 
 
 def _count(table: str, **filters) -> int:
@@ -20,27 +27,44 @@ def _count(table: str, **filters) -> int:
     return res.count or 0
 
 
+def _submitted(since: datetime, until: datetime | None = None, skill: str | None = None) -> int:
+    q = db().table("attempts").select("id", count="exact").gte("submitted_at", since.isoformat())
+    if until is not None:
+        q = q.lt("submitted_at", until.isoformat())
+    if skill:
+        q = q.eq("skill", skill)
+    return q.limit(1).execute().count or 0
+
+
+def _done_latencies() -> list[int]:
+    out, offset = [], 0
+    while True:
+        rows = (db().table("grading_runs").select("latency_ms").eq("status", "done")
+                .range(offset, offset + PAGE_SIZE - 1).execute().data or [])
+        out += [r["latency_ms"] for r in rows if r.get("latency_ms")]
+        if len(rows) < PAGE_SIZE:
+            return out
+        offset += PAGE_SIZE
+
+
 def system_statistics() -> dict[str, Any]:
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    runs = db().table("grading_runs").select("status, latency_ms").execute().data or []
-    finished = [r for r in runs if r["status"] in ("done", "failed")]
-    failed = sum(1 for r in finished if r["status"] == "failed")
-    latencies = [r["latency_ms"] for r in runs if r["status"] == "done" and r.get("latency_ms")]
-
+    today = datetime.now(VN_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
     trend = []
-    for i in range(6, -1, -1):
+    for i in range(TREND_DAYS - 1, -1, -1):
         day = today - timedelta(days=i)
-        n = db().table("attempts").select("id", count="exact").gte("submitted_at", day.isoformat()) \
-            .lt("submitted_at", (day + timedelta(days=1)).isoformat()).limit(1).execute().count or 0
-        trend.append({"date": day.strftime("%d/%m"), "count": n})
+        trend.append({"date": day.strftime("%d/%m"), "count": _submitted(day, day + timedelta(days=1))})
 
-    essays_today = (db().table("attempts").select("id", count="exact").eq("skill", "writing")
-                    .gte("submitted_at", today.isoformat()).limit(1).execute().count or 0)
+    done_runs = _count("grading_runs", status=("eq", "done"))
+    failed_runs = _count("grading_runs", status=("eq", "failed"))
+    finished_runs = done_runs + failed_runs
+    latencies = _done_latencies()
     return {
         "total_users": _count("profiles"),
-        "total_essays": _count("essays"),
-        "essays_today": essays_today,
-        "ai_error_rate": round(failed / len(finished) * 100, 2) if finished else 0.0,
+        "total_essays": _submitted(EPOCH, skill="writing"),
+        "essays_today": _submitted(today, skill="writing"),
+        "ai_error_rate": round(failed_runs / finished_runs * 100, 2) if finished_runs else 0.0,
+        "failed_runs": failed_runs,
+        "finished_runs": finished_runs,
         "avg_processing_time": round(sum(latencies) / len(latencies) / 1000, 1) if latencies else 0.0,
         "submissions_trend": trend,
     }

@@ -7,6 +7,7 @@ import { ArrowLeft, Save, Plus, Loader2, Clock, ShieldAlert } from "lucide-react
 import { getTestDetail, updateTest, createSection } from "@/services/admin-content";
 import { SectionEditor } from "@/components/admin/SectionEditor";
 import type { TestItem, ContentStatus, AllowedMode, TestDifficulty } from "@/types/exam";
+import { apiErrorDetail } from "@/utils/attempt-submission";
 
 export default function ExamBuilderPage() {
   const params = useParams();
@@ -52,7 +53,7 @@ export default function ExamBuilderPage() {
       alert("Đã lưu thông tin bài thi thành công!");
       loadTest();
     } catch (err: any) {
-      alert("Lỗi khi lưu thông tin bài thi");
+      alert(apiErrorDetail(err) || "Lỗi khi lưu thông tin bài thi");
     } finally {
       setSaving(false);
     }

@@ -46,29 +46,19 @@ export default function AdminStatisticsPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">AI System Health & Metrics</h1>
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Giám sát hiệu suất, độ ổn định và chi phí vận hành mô hình AI IELTS Grader</p>
         </div>
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <select disabled title="Chưa hỗ trợ: số liệu hiện là toàn thời gian" className="bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-zinc-700 focus:outline-none focus:border-[#932120] shadow-xs">
-            <option>Hôm nay</option>
-            <option>7 ngày qua</option>
-            <option>Tháng này</option>
-          </select>
-          <button disabled title="Chưa hỗ trợ xuất báo cáo" className="bg-[#932120] text-white px-5 py-2.5 rounded-xl font-bold shadow-xs hover:bg-[#7a1a19] transition-all text-xs sm:text-sm whitespace-nowrap">
-            Xuất Báo Cáo
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
         <KpiCard title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-blue-600" />} subtext="Total registered users" />
-        <KpiCard title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Bài Writing trong đề + bài chấm tự do" />
-        <KpiCard title="Essays Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Essays submitted today" />
-        <KpiCard title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext="Evaluation error rate" />
-        <KpiCard title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Average evaluation time" />
+        <KpiCard title="Writing Submissions" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng lượt làm Writing đã nộp (toàn thời gian)" />
+        <KpiCard title="Writing Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Lượt Writing nộp từ 0h hôm nay (giờ VN)" />
+        <KpiCard title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext={`${stats?.failed_runs ?? 0}/${stats?.finished_runs ?? 0} lượt chấm lỗi (Writing + Speaking, tính cả lượt đã chạy lại)`} />
+        <KpiCard title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Trung bình mỗi lượt chấm thành công (1 task Writing hoặc 1 bài Speaking)" />
       </div>
 
       <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full">
         <h3 className="text-base sm:text-lg font-bold text-zinc-900 mb-5 flex items-center gap-2.5">
-          <Activity className="w-5 h-5 text-[#932120]" /> Biểu đồ xu hướng nộp bài
+          <Activity className="w-5 h-5 text-[#932120]" /> Lượt nộp bài 7 ngày qua (cả 4 kỹ năng, giờ VN)
         </h3>
         <div className="h-72 sm:h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -105,13 +95,17 @@ export default function AdminStatisticsPage() {
                   <tr key={log.id} className="bg-white hover:bg-zinc-50/70 transition-colors">
                     <td className="px-6 py-4 font-bold text-zinc-900 whitespace-nowrap">{index + 1}</td>
                     <td className="px-6 py-4 font-medium">{log.essay?.user?.email || "N/A"}</td>
-                    <td className="px-6 py-4 font-medium">{log.essay?.topic?.title || "N/A"}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {log.essay?.topic?.title || "N/A"}
+                      {/* Writing: mỗi task một lượt chấm; Speaking không có task_no */}
+                      {log.task_no ? <span className="ml-1.5 text-xs font-bold text-zinc-500">· Task {log.task_no}</span> : null}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${log.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800" : log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
                         {log.status || "UNKNOWN"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-mono">{log.processing_time ? `${log.processing_time}s` : "-"}</td>
+                    <td className="px-6 py-4 font-mono">{log.latency_ms ? `${(log.latency_ms / 1000).toFixed(1)}s` : "-"}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{log.created_at ? new Date(log.created_at).toLocaleString("vi-VN") : "-"}</td>
                   </tr>
                 ))

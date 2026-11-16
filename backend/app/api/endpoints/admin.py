@@ -10,6 +10,7 @@ from app.schemas.expert import AdminCreateExpertRequest
 from app.services.admin import staff_accounts, system_statistics, user_admin
 
 router = APIRouter()
+STATISTICS_CACHE_KEY = "admin:statistics:v2"   # v2: giờ VN, cùng đơn vị bài Writing, kèm số lượt chấm
 
 
 @router.get("/users")
@@ -58,11 +59,11 @@ async def create_admin(admin_req: AdminCreateAdminRequest, current_user: User = 
 async def get_statistics(request: Request, current_user: User = Depends(require_admin)):
     """Người dùng, bài viết, tỉ lệ lỗi AI, thời gian chấm, xu hướng 7 ngày (FR-29)."""
     redis = request.app.state.redis
-    cached = await redis.get("admin:statistics")
+    cached = await redis.get(STATISTICS_CACHE_KEY)
     if cached:
         return json.loads(cached)
     result = {"meta": {"code": 200}, "data": system_statistics.system_statistics()}
-    await redis.setex("admin:statistics", 300, json.dumps(result))
+    await redis.setex(STATISTICS_CACHE_KEY, 300, json.dumps(result))
     return result
 
 
