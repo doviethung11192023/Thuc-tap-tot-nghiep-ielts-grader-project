@@ -18,6 +18,7 @@ class WritingSubmissionRequest(BaseModel):
     task2_text: Optional[str] = None
     essay_text: Optional[str] = None
     time_spent_sec: Optional[int] = None
+    parts: Optional[str] = None       # Practice: task đã chọn ("1", "2", "1,2"); trống = cả bài, task bỏ trống = band 0
 
 
 @router.post("/attempts/{attempt_id}/submit-writing")
@@ -25,7 +26,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
                                  current_user: Optional[User] = Depends(get_optional_user)):
     """Nộp Task 1 / Task 2; bài đã lưu và job đã tạo trong DB, worker chấm từng task sau."""
     attempt = require_owned_attempt(attempt_id, current_user, "writing")
-    sub = submit_writing(attempt, req.task1_text, req.task2_text, req.essay_text)
+    sub = submit_writing(attempt, req.task1_text, req.task2_text, req.essay_text, parts=req.parts)
     for run_id in sub["run_ids"]:
         await enqueue_grading_run(request.app.state.redis, run_id, "writing")
     essays = sub["essays"]           # rỗng khi bài Mock nộp muộn mà chưa lưu chữ nào (abandoned)

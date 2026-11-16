@@ -79,6 +79,7 @@ export interface SaveAttemptWorkPayload {
   answers?: Record<string | number, string | string[]>;
   task1_text?: string;
   task2_text?: string;
+  parts?: string;           // Writing Practice: task đã chọn ("1", "2", "1,2"); trống = cả bài
 }
 
 export async function saveAttemptWork(attemptId: string, payload: SaveAttemptWorkPayload) {
@@ -143,7 +144,7 @@ export async function submitReadingListeningAnswers(
 
 export async function submitWritingAttempt(
   attemptId: string,
-  payload: { task1_text?: string; task2_text?: string; essay_text?: string; time_spent_sec?: number }
+  payload: { task1_text?: string; task2_text?: string; essay_text?: string; time_spent_sec?: number; parts?: string }
 ) {
   const res = await apiClient.post<{ meta: { code: number }; data: any }>(
     `/api/v1/test-practice/attempts/${attemptId}/submit-writing`,

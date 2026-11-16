@@ -13,6 +13,7 @@ from app.core.domain_errors import InvalidRequestError
 
 from app.db.supabase import db
 from app.services.practice.practice_attempt_lifecycle import past_deadline, require_submitted
+from app.services.writing.writing_task_scope import task_scope
 from app.services.writing.writing_test_content import load_writing_task_sections
 
 
@@ -24,15 +25,17 @@ def _pick_task_texts(sections: dict[int, str], task1: str, task2: str, essay_tex
 
 
 def submit_writing(attempt: dict[str, Any], task1: Optional[str], task2: Optional[str], essay_text: Optional[str],
-                   auto: bool = False) -> dict[str, Any]:
+                   auto: bool = False, parts: Optional[str] = None) -> dict[str, Any]:
     late = auto or past_deadline(attempt)
     tasks = None                      # None: DB chấm bài đã lưu
     if not late:
         sections = load_writing_task_sections(attempt["test_id"])        # {task_no: section_id}
-        texts = _pick_task_texts(sections, task1, task2, essay_text)
+        scope = task_scope(attempt.get("mode"), set(sections), parts)
+        texts = {no: t for no, t in _pick_task_texts(sections, task1, task2, essay_text).items() if no in scope}
         if not texts:
             raise InvalidRequestError("Bài viết trống")
-        tasks = [{"task_no": no, "section_id": sections[no], "content": text} for no, text in sorted(texts.items())]
+        # Task trong phạm vi mà bỏ trống vẫn ghi (nội dung rỗng, không có job chấm) để tính band 0 (BR-04)
+        tasks = [{"task_no": no, "section_id": sections[no], "content": texts.get(no, "")} for no in sorted(scope)]
     result = require_submitted(db().rpc("submit_writing_attempt", {
         "p_attempt_id": attempt["id"], "p_tasks": tasks, "p_auto": late,
     }).execute().data)

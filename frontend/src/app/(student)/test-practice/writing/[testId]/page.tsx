@@ -27,7 +27,8 @@ export default function WritingWorkspacePage() {
     useExamWorkspaceContent(testId, 'writing', mode);
   // Tự lưu bài viết lên server (FR-11, NFR-03)
   const [essays, setEssays] = useState<Record<1 | 2, string> | null>(null);
-  const autosavePayload = useMemo(() => (essays ? { task1_text: essays[1], task2_text: essays[2] } : null), [essays]);
+  // parts: backend chỉ lưu task trong phạm vi; task trong phạm vi mà bỏ trống tính band 0 (BR-04)
+  const autosavePayload = useMemo(() => (essays ? { task1_text: essays[1], task2_text: essays[2], parts } : null), [essays, parts]);
   const autosave = useServerAutosave(attemptId, autosavePayload);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -47,7 +48,7 @@ export default function WritingWorkspacePage() {
         currentAttemptId = attempt?.attempt_id || null;
       }
       if (!currentAttemptId) throw new Error('no attempt');
-      await submitWritingAttempt(currentAttemptId, { essay_text: text, task1_text: task1Text, task2_text: task2Text });
+      await submitWritingAttempt(currentAttemptId, { essay_text: text, task1_text: task1Text, task2_text: task2Text, parts });
       useNotificationStore.getState().addNotification({
         attempt_id: currentAttemptId,
         title: writingData?.title || "IELTS Academic Writing Test",

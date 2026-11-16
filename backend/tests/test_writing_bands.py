@@ -36,3 +36,16 @@ def test_attempt_band_task2_weighs_double():
 def test_attempt_band_single_task_practice():
     assert attempt_band({2: 7.5}) == 7.5
     assert attempt_band({1: 6.0}) == 6.0
+
+
+def test_attempt_band_blank_task_in_scope_counts_as_zero():
+    # Mở cả bài, chỉ viết Task 1: Task 2 = 0 → (6 + 0) / 3 = 2.0 (BR-04, chốt 2026-11-12)
+    assert attempt_band({1: 6.0}, {1, 2}) == 2.0
+    assert attempt_band({2: 6.0}, {1, 2}) == 4.0          # bỏ Task 1: (0 + 12) / 3
+    assert attempt_band({1: 7.0, 2: 6.0}, {1, 2}) == 6.5  # đủ 2 task: như cũ
+
+
+def test_attempt_band_chosen_single_task_keeps_its_band():
+    assert attempt_band({1: 6.0}, {1}) == 6.0
+    assert attempt_band({2: 7.5}, {2}) == 7.5
+    assert attempt_band({1: 6.0}, set()) == 6.0           # bài cũ chưa ghi phạm vi

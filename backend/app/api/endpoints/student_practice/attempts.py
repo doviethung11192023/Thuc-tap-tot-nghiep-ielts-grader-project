@@ -65,6 +65,7 @@ class SaveWorkRequest(BaseModel):
     answers: Optional[Dict[str, Any]] = None      # L/R: số câu hoặc question_id -> câu trả lời
     task1_text: Optional[str] = None              # Writing; None = không đổi task đó
     task2_text: Optional[str] = None
+    parts: Optional[str] = None                   # Writing Practice: task đã chọn ("1", "2", "1,2"); trống = cả bài
 
 
 @router.put("/attempts/{attempt_id}/work")
@@ -74,7 +75,7 @@ async def save_attempt_work(attempt_id: str, req: SaveWorkRequest,
     attempt = get_owned_attempt(attempt_id, current_user.id if current_user else None)
     if not current_user or not attempt:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
-    saved_at = save_work(attempt, req.answers, req.task1_text, req.task2_text)
+    saved_at = save_work(attempt, req.answers, req.task1_text, req.task2_text, req.parts)
     return {"meta": {"code": 200}, "data": {"saved_at": saved_at}}
 
 
@@ -103,8 +104,7 @@ def _load_published_content(test_id: str, skill: Optional[str]) -> Optional[dict
 
 
 @router.get("/tests/{test_id}/content")
-async def get_test_exam_content_direct(test_id: str, request: Request, skill: Optional[str] = None,
-                                       current_user: Optional[User] = Depends(get_optional_user)):
+async def get_test_exam_content_direct(test_id: str, request: Request, skill: Optional[str] = None):
     """Nội dung đề Practice theo test_id (hoặc slug), có cache Redis. Đề Mock chỉ xem qua attempt
     (/attempts/{id}/content) để không ai đọc trước đề thi thử."""
     test = resolve_test(test_id, skill)

@@ -16,6 +16,7 @@ from app.core.domain_errors import ConflictError, InvalidRequestError
 from app.db.supabase import db
 from app.services.listening_reading.lr_test_content import load_lr_test, lr_part
 from app.services.practice.practice_attempt_lifecycle import past_deadline
+from app.services.writing.writing_task_scope import task_scope
 from app.services.writing.writing_test_content import load_writing_task_sections
 
 MAX_ESSAY_CHARS = 20000     # ~3.000 từ: chặn request quá cỡ (spec 004 FR-020)
@@ -60,7 +61,7 @@ def _run_save(function: str, params: dict[str, Any]) -> str:
 
 
 def save_work(attempt: dict[str, Any], answers: Optional[dict[str, Any]],
-              task1_text: Optional[str], task2_text: Optional[str]) -> str:
+              task1_text: Optional[str], task2_text: Optional[str], parts: Optional[str] = None) -> str:
     if attempt["status"] != "in_progress":
         raise ConflictError("Bài thi đã được nộp")
     if past_deadline(attempt):
@@ -78,8 +79,9 @@ def save_work(attempt: dict[str, Any], answers: Optional[dict[str, Any]],
 
     if attempt["skill"] == "writing":
         sections = load_writing_task_sections(attempt["test_id"])
+        scope = task_scope(attempt.get("mode"), set(sections), parts)   # task ngoài phạm vi không ghi (BR-04)
         tasks = [{"section_id": sections[no], "content": text}
-                 for no, text in ((1, task1_text), (2, task2_text)) if text is not None and no in sections]
+                 for no, text in ((1, task1_text), (2, task2_text)) if text is not None and no in scope]
         if any(len(t["content"]) > MAX_ESSAY_CHARS for t in tasks):
             raise InvalidRequestError("Bài viết quá dài")
         if not tasks:

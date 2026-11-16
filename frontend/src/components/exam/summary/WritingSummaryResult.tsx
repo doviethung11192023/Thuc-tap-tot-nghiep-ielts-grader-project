@@ -166,7 +166,8 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
                     <span className={t.word_count >= min ? 'font-bold text-emerald-700' : 'font-bold text-amber-700'}>
                       {t.word_count} từ (Chuẩn ≥ {min})
                     </span>
-                    <strong className="text-[#932120]">Band {formatBand(t.scores?.overall_band)}</strong>
+                    {/* Task bỏ trống trong bài làm cả 2 task tính band 0 (BR-04) */}
+                    <strong className="text-[#932120]">Band {t.status === 'not_attempted' ? '0.0' : formatBand(t.scores?.overall_band)}</strong>
                   </div>
                 </div>
               );

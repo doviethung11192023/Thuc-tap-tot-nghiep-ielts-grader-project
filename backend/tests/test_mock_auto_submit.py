@@ -52,7 +52,9 @@ def test_on_time_submit_uses_the_text_sent_by_the_learner(fake):
     attempt = _writing_mock(fake, _iso(minutes=30), essays=[(2, "old draft")])
     sub = writing_attempt_service.submit_writing(attempt, None, "final text", None)
     assert sub["status"] == "grading"
-    assert [e["content"] for e in fake.tables["essays"]] == ["final text"]
+    # Mock luôn gồm cả 2 task: Task 1 bỏ trống vẫn được ghi (rỗng, không chấm) để tính band 0 (BR-04)
+    assert sorted(e["content"] for e in fake.tables["essays"]) == ["", "final text"]
+    assert len(sub["run_ids"]) == 1
     assert fake.tables["attempts"][0]["auto_submitted"] is False
 
 
