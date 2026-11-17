@@ -5,9 +5,14 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.core.security import User, require_admin
-from app.schemas.admin import AdminCreateAdminRequest, UserStatusUpdate
+from app.schemas.admin import AdminAssignReviewRequest, AdminCreateAdminRequest, UserStatusUpdate
 from app.schemas.expert import AdminCreateExpertRequest
 from app.services.admin import staff_accounts, system_statistics, user_admin
+from app.services.expert.admin_review_dispatch_service import (
+    admin_assign_review_request,
+    list_admin_reviews,
+)
+from app.services.expert.dispatcher import auto_dispatch_pending_requests
 
 router = APIRouter()
 STATISTICS_CACHE_KEY = "admin:statistics:v2"   # v2: giờ VN, cùng đơn vị bài Writing, kèm số lượt chấm
@@ -68,6 +73,54 @@ async def get_statistics(request: Request, current_user: User = Depends(require_
 
 
 @router.get("/evaluations/logs")
-async def get_eval_logs(page: int = 1, limit: int = 10, current_user: User = Depends(require_admin)):
+async def get_eval_logs(page: int = 1, limit: int = 10,
+                        skill: Optional[str] = Query(None, description="writing | speaking"),
+                        status: Optional[str] = Query(None, description="done | failed | running"),
+                        current_user: User = Depends(require_admin)):
     """Các lượt chấm AI (grading_runs) mới nhất: trạng thái, lỗi, độ trễ, trace (FR-30)."""
-    return {"meta": {"code": 200, "message": "Success"}, "data": system_statistics.grading_run_logs(page, limit)}
+    return {"meta": {"code": 200, "message": "Success"}, "data": system_statistics.grading_run_logs(page, limit, skill, status)}
+
+
+@router.get("/reviews")
+async def get_admin_reviews(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    status_filter: Optional[str] = Query(None, alias="status", description="waiting | assigned | completed | cancelled"),
+    skill: Optional[str] = Query(None, description="writing | speaking"),
+    expert_id: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(require_admin),
+):
+    """Danh sách yêu cầu chấm Chuyên gia kèm tải hiện tại của từng Expert."""
+    data = list_admin_reviews(page=page, limit=limit, status_filter=status_filter, skill=skill, expert_id=expert_id, search=search)
+    return {"meta": {"code": 200, "message": "Success"}, "data": data}
+
+
+@router.post("/reviews/auto-dispatch")
+async def trigger_admin_auto_dispatch(current_user: User = Depends(require_admin)):
+    """Admin kích hoạt phân bổ tự động (Least-Loaded) cho các yêu cầu đang waiting."""
+    assigned_count = await auto_dispatch_pending_requests()
+    return {
+        "meta": {"code": 200, "message": f"Đã phân bổ tự động {assigned_count} bài chấm"},
+        "data": {"assigned_count": assigned_count},
+    }
+
+
+@router.post("/reviews/{request_id}/assign")
+async def assign_review_to_expert(
+    request_id: str,
+    payload: AdminAssignReviewRequest,
+    current_user: User = Depends(require_admin),
+):
+    """Admin toàn quyền gán mới hoặc chuyển giao bài chấm sang bất kỳ Expert nào."""
+    data = admin_assign_review_request(
+        request_id=request_id,
+        target_expert_id=payload.expert_id,
+        admin_user_id=current_user.id,
+        note=payload.note,
+    )
+    action_label = "chuyển giao" if data.get("reassigned") else "gán"
+    return {
+        "meta": {"code": 200, "message": f"Đã {action_label} bài chấm cho {data.get('expert_email')}"},
+        "data": data,
+    }

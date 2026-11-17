@@ -15,7 +15,8 @@ const STATUS_LABELS: Record<string, string> = {
   grading: "Đang chấm",
   grading_failed: "Lỗi chấm",
   no_speech: "Không có tiếng",
-  scored: "Chưa có điểm",
+  waiting_expert: "Chờ C.Gia",
+  scored: "Đã nộp",
 };
 
 export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemCardProps) {
@@ -43,7 +44,8 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
     }
   };
 
-  const isScored = item.status === "scored" && item.band !== null;
+  const isScored = (item.status === "scored" || item.status === "waiting_expert") && item.band !== null;
+  const hasRawOnly = item.status === "scored" && item.band === null && item.raw_score != null;
   const isOpen = item.status === "in_progress";
   const statusLabel = STATUS_LABELS[item.status] ?? "Đang làm";
 
@@ -62,13 +64,18 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
         <div className={`w-14 h-12 rounded-2xl flex flex-col items-center justify-center font-black shrink-0 shadow-xs transition-colors ${
           (item.band ?? 0) >= 5.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
           (item.band ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-          isScored ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+          isScored || hasRawOnly ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
           'bg-amber-50 text-amber-800 border border-amber-200 text-xs'
         }`}>
           {isScored ? (
             <>
               <span className="text-sm font-black leading-tight">{item.band?.toFixed(1)}</span>
               <span className="text-[9px] font-bold uppercase opacity-75">Band</span>
+            </>
+          ) : hasRawOnly ? (
+            <>
+              <span className="text-xs font-black leading-tight">{item.raw_score}/{item.total_questions || "?"}</span>
+              <span className="text-[9px] font-bold uppercase opacity-75">Câu</span>
             </>
           ) : (
             <span className="text-[11px] font-bold text-center leading-tight">{statusLabel}</span>

@@ -28,14 +28,28 @@ def _error_type(category: str) -> str:
 
 _tool: language_tool_python.LanguageTool | None = None
 _tool_lock = threading.Lock()
+_tool_failed: bool = False
 
 
-def _get_tool() -> language_tool_python.LanguageTool:
-    """Return the shared LanguageTool instance, initialising it on first call."""
-    global _tool
-    with _tool_lock:  # each instance starts its own Java server, so concurrent first calls must share one
-        if _tool is None:
-            _tool = language_tool_python.LanguageTool("en-US")
+def _get_tool() -> language_tool_python.LanguageTool | None:
+    """Return the shared LanguageTool instance, initialising it on first call.
+    Falls back gracefully if Java is missing or fails to initialise.
+    """
+    global _tool, _tool_failed
+    if _tool_failed:
+        return None
+    with _tool_lock:
+        if _tool is None and not _tool_failed:
+            try:
+                _tool = language_tool_python.LanguageTool("en-US")
+            except Exception as exc:
+                _tool_failed = True
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"LanguageTool could not be initialized (Java missing or error: {exc}). "
+                    "Skipping heuristic grammar pre-check; AI LLM evaluator will handle grammar grading directly."
+                )
+                return None
     return _tool
 
 
@@ -56,9 +70,17 @@ def _to_finding(m: language_tool_python.Match) -> GrammarFinding:
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def check(processed: ProcessedEssay) -> list[GrammarFinding]:
-    matches = _get_tool().check(processed.essay_raw)
-    return [
-        _to_finding(m)
-        for m in matches
-        if m.rule_id not in DISABLED_GRAMMAR_RULES
-    ]
+    tool = _get_tool()
+    if tool is None:
+        return []
+    try:
+        matches = tool.check(processed.essay_raw)
+        return [
+            _to_finding(m)
+            for m in matches
+            if m.rule_id not in DISABLED_GRAMMAR_RULES
+        ]
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning(f"Grammar check failed ({exc}), skipping LanguageTool matches.")
+        return []

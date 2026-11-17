@@ -65,7 +65,7 @@ export function QuestionTypeHighlights({ highlights }: QuestionTypeHighlightsPro
 
             <div className="space-y-1.5 pt-2 border-t border-zinc-200/50 text-xs">
               <div className="flex items-center justify-between text-zinc-500 font-medium">
-                <span>Tổng số lượt làm bài</span>
+                <span>Tổng số câu đã làm</span>
                 <strong className="text-zinc-800 font-bold">{item.total_attempts}</strong>
               </div>
               <div className="flex items-center justify-between text-zinc-500 font-medium">

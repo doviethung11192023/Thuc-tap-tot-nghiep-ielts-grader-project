@@ -6,11 +6,17 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
 from app.core.supabase_access_token_verifier import (
-    JwksUnavailable, cached_profile, remember_profile, verify_access_token,
+    JwksUnavailable, cached_profile, forget_profile, remember_profile, verify_access_token,
 )
 from app.db.supabase import db, supabase
 
 security = HTTPBearer()
+
+
+def invalidate_auth_profile_cache(user_id: str) -> None:
+    """Tên cũ của forget_profile (ADR-32): xoá cache hồ sơ sau khi đổi role hoặc is_active."""
+    forget_profile(user_id)
+
 
 class User(BaseModel):
     id: str

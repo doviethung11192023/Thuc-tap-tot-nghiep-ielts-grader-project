@@ -37,7 +37,9 @@ export function CleanListeningTranscriptPane({
 
   useEffect(() => {
     if (!scrollRef.current) return;
-    const activeEl = scrollRef.current.querySelector('#active-listening-evidence');
+    const activeEl =
+      scrollRef.current.querySelector('#active-listening-evidence') ||
+      scrollRef.current.querySelector('#active-listening-utterance');
     if (activeEl) {
       activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }

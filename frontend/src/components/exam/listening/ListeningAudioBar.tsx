@@ -1,16 +1,19 @@
 "use client";
 
 import React from 'react';
-import { Play, Pause, RotateCcw, Volume2, Volume1, VolumeX } from 'lucide-react';
+import { Play, Pause, RotateCcw, RotateCw, Volume2, Volume1, VolumeX, Loader2, AlertCircle } from 'lucide-react';
 
 interface ListeningAudioBarProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   audioUrl?: string;
   isPlaying: boolean;
+  isBuffering?: boolean;
+  audioError?: string | null;
   onTogglePlay: () => void;
   currentTime: number;
   durationSeconds: number;
   onRewind5s: () => void;
+  onForward5s?: () => void;
   playbackSpeed: number;
   onSpeedChange: (speed: number) => void;
   isMuted: boolean;
@@ -22,6 +25,9 @@ interface ListeningAudioBarProps {
   audioEventHandlers?: {
     onTimeUpdate: () => void;
     onLoadedMetadata: () => void;
+    onCanPlay?: () => void;
+    onWaiting?: () => void;
+    onError?: () => void;
     onEnded: () => void;
   };
 }
@@ -30,10 +36,13 @@ export function ListeningAudioBar({
   audioRef,
   audioUrl,
   isPlaying,
+  isBuffering = false,
+  audioError = null,
   onTogglePlay,
   currentTime,
   durationSeconds,
   onRewind5s,
+  onForward5s,
   playbackSpeed,
   onSpeedChange,
   isMuted,
@@ -67,29 +76,70 @@ export function ListeningAudioBar({
         preload="auto"
         onTimeUpdate={audioEventHandlers?.onTimeUpdate}
         onLoadedMetadata={audioEventHandlers?.onLoadedMetadata}
+        onCanPlay={audioEventHandlers?.onCanPlay}
+        onWaiting={audioEventHandlers?.onWaiting}
+        onError={audioEventHandlers?.onError}
         onEnded={audioEventHandlers?.onEnded}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <button
+          type="button"
           onClick={onTogglePlay}
+          aria-label={isPlaying ? 'Tạm dừng audio' : 'Phát audio'}
           className="w-10 h-10 rounded-full bg-[#932120] hover:bg-red-700 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer"
           title={isPlaying ? 'Tạm dừng' : 'Phát âm thanh thực tế'}
         >
-          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+          {isBuffering ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isPlaying ? (
+            <Pause className="w-5 h-5" />
+          ) : (
+            <Play className="w-5 h-5 ml-0.5" />
+          )}
         </button>
 
-        <button
-          onClick={onRewind5s}
-          className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-          title="Tua lùi 5 giây"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
+        {mode === 'practice' && (
+          <>
+            <button
+              type="button"
+              onClick={onRewind5s}
+              aria-label="Tua lùi 5 giây"
+              className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold"
+              title="Tua lùi 5 giây"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="hidden sm:inline">-5s</span>
+            </button>
+
+            {onForward5s && (
+              <button
+                type="button"
+                onClick={onForward5s}
+                aria-label="Tua tới 5 giây"
+                className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold"
+                title="Tua tới 5 giây"
+              >
+                <RotateCw className="w-4 h-4" />
+                <span className="hidden sm:inline">+5s</span>
+              </button>
+            )}
+          </>
+        )}
 
         <span className="text-xs font-mono font-bold text-zinc-300">
           {formatAudioTime(currentTime)} / {formatAudioTime(durationSeconds)}
         </span>
+
+        {audioError && (
+          <span
+            role="status"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 bg-amber-950/70 border border-amber-700/60 px-2 py-0.5 rounded-md"
+          >
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            {audioError}
+          </span>
+        )}
       </div>
 
       {/* Visual Waveform + Interactive Progress Track */}
@@ -121,6 +171,7 @@ export function ListeningAudioBar({
           {mode === 'practice' && (
             <input
               type="range"
+              aria-label="Tiến độ âm thanh"
               min={0}
               max={durationSeconds || 450}
               step={1}
@@ -132,14 +183,15 @@ export function ListeningAudioBar({
         </div>
       </div>
 
-      {/* Controls: Speed & Volume Adjustment */}
+      {/* Controls: Speed, Exam Status & Volume Adjustment */}
       <div className="flex items-center gap-3">
-        {mode === 'practice' && (
+        {mode === 'practice' ? (
           <div className="flex items-center gap-1 bg-zinc-800 px-2 py-1 rounded-lg text-xs font-bold text-zinc-300">
             <span className="text-zinc-500 mr-1">Tốc độ:</span>
             {[0.8, 1.0, 1.2].map((speed) => (
               <button
                 key={speed}
+                type="button"
                 onClick={() => onSpeedChange(speed)}
                 className={`px-2 py-0.5 rounded cursor-pointer ${
                   playbackSpeed === speed ? 'bg-[#932120] text-white' : 'hover:text-white'
@@ -149,12 +201,18 @@ export function ListeningAudioBar({
               </button>
             ))}
           </div>
+        ) : (
+          <span className="hidden lg:inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-800 text-[11px] font-semibold text-zinc-300 border border-zinc-700">
+            Phòng thi • Tự động giữ vị trí từng Section
+          </span>
         )}
 
         {/* Volume Controller */}
         <div className="flex items-center gap-1.5 pl-2 border-l border-zinc-800">
           <button
+            type="button"
             onClick={onToggleMute}
+            aria-label={isMuted ? 'Bật âm lượng' : 'Tắt tiếng'}
             className="p-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
             title={isMuted ? 'Bật âm lượng' : 'Tắt tiếng'}
           >
@@ -179,6 +237,7 @@ export function ListeningAudioBar({
             </div>
             <input
               type="range"
+              aria-label="Âm lượng"
               min={0}
               max={1}
               step={0.01}

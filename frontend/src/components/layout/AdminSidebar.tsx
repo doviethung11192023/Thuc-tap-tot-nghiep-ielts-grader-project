@@ -10,6 +10,7 @@ import {
   LogOut, 
   FileText,
   Sliders,
+  UserCheck,
   X,
   ChevronLeft,
   ChevronRight
@@ -36,6 +37,7 @@ export function AdminSidebar({
   const navItems = [
     { href: "/admin/statistics", label: "Thống kê", icon: BarChart },
     { href: "/admin/tests", label: "Đề thi 4 Kỹ năng", icon: FileText },
+    { href: "/admin/reviews", label: "Điều phối Chấm bài", icon: UserCheck },
     { href: "/admin/users", label: "Quản lý Học viên", icon: Users },
     { href: "/admin/settings", label: "Dữ liệu Lõi & Cài đặt", icon: Sliders },
   ];

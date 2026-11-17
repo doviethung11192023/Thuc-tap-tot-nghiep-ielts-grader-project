@@ -78,20 +78,25 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
     }
   };
 
+  const handleToggleFlag = (qNumber: number) => {
+    setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
+  };
+
   const handleQuestionPaletteClick = (qNumber: number) => {
-    const targetIdx = availablePassages.findIndex(p => 
+    const targetIdx = availablePassages.findIndex(p =>
       p.question_groups.some((g: any) => g.questions.some((item: any) => item.question_number === qNumber))
     );
     if (targetIdx !== -1 && targetIdx !== activePassage) {
       setActivePassage(targetIdx);
       setHighlightedEvidence(null);
     }
+    setTimeout(() => {
+      const el =
+        document.getElementById(`reading-question-${qNumber}`) ||
+        document.querySelector(`[data-question-numbers~="${qNumber}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 90);
   };
-
-  const answeredCount = Object.keys(userAnswers).filter(k => {
-    const val = userAnswers[Number(k)];
-    return typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0;
-  }).length;
 
   const unansweredQuestionNumbers = useMemo(() => {
     return allQuestions
@@ -101,6 +106,8 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
         return !(typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0);
       });
   }, [allQuestions, userAnswers]);
+
+  const answeredCount = allQuestions.length - unansweredQuestionNumbers.length;
 
   const handleConfirmSubmit = async () => {
     setIsSubmitModalOpen(false);
@@ -154,6 +161,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onSelectEvidence={handleSelectEvidence}
           onQuestionClick={handleQuestionPaletteClick}
+          onToggleFlag={handleToggleFlag}
         />
       </div>
 
@@ -167,12 +175,6 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
           router.push(returnUrl || '/test-practice');
         }}
         onSaveDraftAndExit={() => {
-          try {
-            localStorage.setItem(`ielts_reading_draft_${testData.test_id}`, JSON.stringify(userAnswers));
-            alert("💾 Đã lưu nháp tiến độ bài làm Reading thành công!");
-          } catch (e) {
-            console.error("Failed to save draft:", e);
-          }
           setIsExitModalOpen(false);
           router.push(returnUrl || '/test-practice');
         }}

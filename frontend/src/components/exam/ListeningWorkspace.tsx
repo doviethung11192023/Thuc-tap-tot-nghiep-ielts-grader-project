@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ListeningTestData } from '@/mocks/exam-listening';
@@ -43,6 +43,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
     setUserAnswers(prev => ({ ...restored, ...prev }));
   }
   useEffect(() => { onAnswersChange?.(userAnswers); }, [userAnswers, onAnswersChange]);
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isGrading, setIsGrading] = useState<boolean>(false);
@@ -60,6 +61,7 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
 
   const player = useListeningPlayer({
     audioUrl: currentSection?.audio_url,
+    sectionKey: String(currentSection?.sectionNumber || currentSection?.section_number || activeSection),
     defaultDuration: currentSection?.duration_seconds || 450,
   });
 
@@ -72,46 +74,56 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
     Promise.resolve(onSubmit(userAnswers)).catch(() => setIsGrading(false));
   });
 
+  const handleToggleFlag = (qNumber: number) => {
+    setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
+  };
+
   const handleQuestionPaletteClick = (qNumber: number) => {
-    const targetIdx = availableSections.findIndex(s => 
+    const targetIdx = availableSections.findIndex(s =>
       s.question_groups.some((g: any) => g.questions.some((item: any) => item.question_number === qNumber))
     );
     if (targetIdx !== -1 && targetIdx !== activeSection) {
       setActiveSection(targetIdx);
     }
+    setTimeout(() => {
+      const el =
+        document.getElementById(`reading-question-${qNumber}`) ||
+        document.querySelector(`[data-question-numbers~="${qNumber}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 90);
   };
-
-  const answeredCount = Object.keys(userAnswers).filter(k => {
-    const val = userAnswers[Number(k)];
-    return typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0;
-  }).length;
 
   const unansweredQuestionNumbers = useMemo(() => {
     return allQuestions.map(q => q.question_number).filter(qNum => {
       const val = userAnswers[qNum];
-      return !(typeof val === 'string' ? val.trim().length > 0 : Array.isArray(val) && val.length > 0);
+      return !(typeof val === 'string'
+        ? val.trim().length > 0
+        : Array.isArray(val) && val.some((v) => String(v ?? '').trim().length > 0));
     });
   }, [allQuestions, userAnswers]);
+
+  const answeredCount = allQuestions.length - unansweredQuestionNumbers.length;
 
   const handleConfirmSubmit = async () => {
     setIsSubmitModalOpen(false);
     setIsGrading(true);
-    try { await onSubmit(userAnswers); } catch { setIsGrading(false); }
+    try {
+      await onSubmit(userAnswers);
+    } catch {
+      setIsGrading(false);
+    }
   };
 
   const formatTimer = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
+  // Bài đã tự lưu lên server (FR-11): thoát rồi quay lại vẫn làm tiếp được
   const handleSaveDraft = () => {
-    try {
-      localStorage.setItem(`ielts_listening_draft_${testData.test_id}`, JSON.stringify(userAnswers));
-      alert("💾 Đã lưu nháp tiến độ bài làm Listening thành công!");
-    } catch (e) { console.error("Save draft error:", e); }
     setIsExitModalOpen(false);
     router.push(returnUrl || '/test-practice');
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200 relative">
       <ListeningWorkspaceHeader
         title={testData.title}
         mode={mode}
@@ -125,10 +137,13 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         audioRef={player.audioRef}
         audioUrl={currentSection?.audio_url}
         isPlaying={player.isPlaying}
+        isBuffering={player.isBuffering}
+        audioError={player.audioError}
         onTogglePlay={player.togglePlay}
         currentTime={player.currentTime}
         durationSeconds={player.duration}
         onRewind5s={() => player.rewind(5)}
+        onForward5s={() => player.forward(5)}
         playbackSpeed={player.playbackSpeed}
         onSpeedChange={player.changeSpeed}
         isMuted={player.isMuted}
@@ -148,9 +163,11 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
           allQuestions={allQuestions}
           answeredCount={answeredCount}
           userAnswers={userAnswers}
+          flaggedQuestions={flaggedQuestions}
           onSectionChange={(idx) => setActiveSection(idx)}
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onQuestionClick={handleQuestionPaletteClick}
+          onToggleFlag={handleToggleFlag}
         />
       </div>
 
@@ -158,7 +175,11 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         isOpen={isExitModalOpen}
         mode={mode}
         onContinue={() => setIsExitModalOpen(false)}
-        onExitDiscard={async () => { setIsExitModalOpen(false); if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); }}
+        onExitDiscard={async () => {
+          setIsExitModalOpen(false);
+          if (mode === 'exam') await onAbandon?.();
+          router.push(returnUrl || '/test-practice');
+        }}
         onSaveDraftAndExit={handleSaveDraft}
       />
 

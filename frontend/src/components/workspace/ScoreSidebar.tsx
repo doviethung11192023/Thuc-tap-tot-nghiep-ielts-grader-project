@@ -30,9 +30,11 @@ export const ScoreSidebar = React.memo(function ScoreSidebar({ result, activeCri
     }
   }, [activeAnnotationId, activeCriterion]);
 
+  const isTask1 = result.task_no === 1 || result.task_type === "task1";
+
   const tabs: { id: CriterionTab; label: string; tooltip: string }[] = [
     { id: "OVERALL", label: "Tổng quan", tooltip: "Điểm tổng" },
-    { id: "TR", label: "TR", tooltip: "Task Response" },
+    { id: "TR", label: isTask1 ? "TA" : "TR", tooltip: isTask1 ? "Task Achievement" : "Task Response" },
     { id: "CC", label: "CC", tooltip: "Coherence & Cohesion" },
     { id: "LR", label: "LR", tooltip: "Lexical Resource" },
     { id: "GRA", label: "GRA", tooltip: "Grammar & Accuracy" },
@@ -101,19 +103,31 @@ export const ScoreSidebar = React.memo(function ScoreSidebar({ result, activeCri
 // ────────────────────────────────────────────────────────────
 // TAB: OVERALL
 function OverallTab({ result }: { result: GradingResult }) {
+  const isTask1 = result.task_no === 1 || result.task_type === "task1";
   const scores = [
-    { label: "Task Response", val: result.scores.task_response, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "Coherence & Cohesion", val: result.scores.coherence_cohesion, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Lexical Resource", val: result.scores.lexical_resource, color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "Grammatical Range", val: result.scores.grammatical_range_and_accuracy, color: "text-red-600", bg: "bg-red-50" },
+    { label: isTask1 ? "Task Achievement" : "Task Response", val: result.scores.task_response, color: "text-orange-700", bg: "bg-orange-50" },
+    { label: "Coherence & Cohesion", val: result.scores.coherence_cohesion, color: "text-blue-700", bg: "bg-blue-50" },
+    { label: "Lexical Resource", val: result.scores.lexical_resource, color: "text-teal-700", bg: "bg-teal-50" },
+    { label: "Grammatical Range", val: result.scores.grammatical_range_and_accuracy, color: "text-red-700", bg: "bg-red-50" },
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-10">
       <div className="text-center py-6">
-        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-1">Overall Band</p>
+        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-1">Overall Band</p>
         <div className="text-6xl font-black text-[#932120] tracking-tighter">{result.scores.overall_band.toFixed(1)}</div>
       </div>
+
+      {result.expert_feedback && (
+        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 space-y-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+            Nhận xét tổng quát của Chuyên gia
+          </p>
+          <p className="text-sm text-emerald-950 leading-relaxed whitespace-pre-line">
+            {result.expert_feedback}
+          </p>
+        </div>
+      )}
 
       <div>
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-4 flex items-center gap-2">
@@ -122,24 +136,24 @@ function OverallTab({ result }: { result: GradingResult }) {
         <div className="grid grid-cols-2 gap-3 mb-6">
           {scores.map(s => (
             <div key={s.label} className={`p-4 rounded-xl border border-zinc-100 ${s.bg}`}>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">{s.label}</p>
+              <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider mb-1">{s.label}</p>
               <p className={`text-2xl font-black ${s.color}`}>{s.val.toFixed(1)}</p>
             </div>
           ))}
         </div>
       </div>
       
-      <div className="bg-zinc-100 p-4 rounded-xl text-sm text-zinc-600">
-        <p>Vui lòng click vào các tab <strong>TR, CC, LR, GRA</strong> phía trên để xem phân tích chi tiết và các lỗi trong bài.</p>
+      <div className="bg-zinc-100 p-4 rounded-xl text-sm text-zinc-700">
+        <p>Vui lòng click vào các tab <strong>{isTask1 ? "TA" : "TR"}, CC, LR, GRA</strong> phía trên để xem phân tích chi tiết và các lỗi trong bài.</p>
       </div>
 
       {result.overall_upgraded_essay && (
         <div>
           <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-3 flex items-center gap-2">
-            <Quote className="w-4 h-4 text-indigo-500" /> Bài mẫu nâng cấp (Band 8.0+)
+            <Quote className="w-4 h-4 text-teal-600" /> Bài mẫu nâng cấp (Band 8.0+)
           </h3>
-          <div className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-xl whitespace-pre-wrap">
-            <p className="text-sm text-indigo-900 leading-relaxed italic">
+          <div className="bg-teal-50/50 border border-teal-200 p-5 rounded-xl whitespace-pre-wrap">
+            <p className="text-sm text-zinc-800 leading-relaxed italic">
               {result.overall_upgraded_essay}
             </p>
           </div>
@@ -239,11 +253,11 @@ function AnnotationCard({ annotation, isActive }: { annotation: InlineAnnotation
   
   const colorCls = isError ? "border-red-200 bg-red-50/50" 
     : isLogic ? "border-orange-200 bg-orange-50/50"
-    : isUpgrade ? "border-purple-200 bg-purple-50/50"
+    : isUpgrade ? "border-teal-200 bg-teal-50/50"
     : "border-green-200 bg-green-50/50";
     
-  const textCls = isError ? "text-red-800" : isLogic ? "text-orange-800" : isUpgrade ? "text-purple-800" : "text-green-800";
-  const badgeCls = isError ? "bg-red-100 text-red-700" : isLogic ? "bg-orange-100 text-orange-700" : isUpgrade ? "bg-purple-100 text-purple-700" : "bg-green-100 text-green-700";
+  const textCls = isError ? "text-red-800" : isLogic ? "text-orange-800" : isUpgrade ? "text-teal-800" : "text-green-800";
+  const badgeCls = isError ? "bg-red-100 text-red-700" : isLogic ? "bg-orange-100 text-orange-700" : isUpgrade ? "bg-teal-100 text-teal-800" : "bg-green-100 text-green-700";
 
   return (
     <div id={`ann-${annotation.id}`} className={`p-4 rounded-xl border transition-all duration-300 ${colorCls} ${isActive ? "ring-2 ring-[#932120] shadow-md scale-[1.02]" : "hover:shadow-sm"}`}>

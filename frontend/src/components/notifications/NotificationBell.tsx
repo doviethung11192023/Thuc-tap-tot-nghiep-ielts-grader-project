@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Bell, Check, Trash2 } from 'lucide-react';
 import { useNotificationStore, AppNotification } from '@/stores/notification-store';
+import {
+  mapServerNotification,
+  useNotificationMutations,
+  useNotificationsQuery,
+} from '@/services/notifications';
 import { useRouter } from 'next/navigation';
 import { NotificationItem } from './NotificationItem';
 
@@ -12,14 +17,43 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
-    notifications,
-    getUnreadCount,
-    markAsRead,
-    markAllAsRead,
-    clearAll,
+    notifications: localNotifications,
+    markAsRead: markLocalAsRead,
+    markAllAsRead: markAllLocalAsRead,
+    clearAll: clearLocalAll,
   } = useNotificationStore();
 
-  const unreadCount = getUnreadCount();
+  const { data: serverData } = useNotificationsQuery(true);
+  const { markReadMutation, markAllReadMutation } = useNotificationMutations();
+
+  // Merge server notifications with active local pending notifications (avoid stale stuck pending when server completed)
+  const notifications = useMemo(() => {
+    const serverItems = (serverData?.items || []).map(mapServerNotification);
+    const serverAttemptIds = new Set(
+      serverItems.map((n) => n.attempt_id).filter((id): id is string => Boolean(id))
+    );
+    const serverEssayIds = new Set(
+      serverItems.map((n) => n.essay_id).filter((id): id is string => Boolean(id))
+    );
+    const filteredLocal = localNotifications
+      .map((n) => ({ ...n, source: 'local' as const }))
+      .filter((n) => {
+        if (n.type === 'grading_pending' || n.type === 'ai_grading') {
+          if (n.attempt_id && serverAttemptIds.has(n.attempt_id)) return false;
+          if (n.essay_id && serverEssayIds.has(n.essay_id)) return false;
+        }
+        return !serverItems.some((s) => s.id === n.id);
+      });
+
+    return [...serverItems, ...filteredLocal].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [serverData, localNotifications]);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -32,15 +66,26 @@ export function NotificationBell() {
   }, []);
 
   const handleNotificationClick = (notification: AppNotification) => {
-    markAsRead(notification.id);
+    if (!notification.read) {
+      if (notification.source === 'server') {
+        markReadMutation.mutate(notification.id);
+      } else {
+        markLocalAsRead(notification.id);
+      }
+    }
     setIsOpen(false);
     if (notification.action_url) {
       router.push(notification.action_url);
-    } else if (notification.type === 'grading_complete') {
+    } else if (notification.essay_id) {
       router.push(`/results/${notification.essay_id}`);
     } else {
       router.push('/history');
     }
+  };
+
+  const handleMarkAllRead = () => {
+    markAllLocalAsRead();
+    markAllReadMutation.mutate();
   };
 
   return (
@@ -60,13 +105,13 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div 
+        <div
           id="popover-notification-panel"
           className="absolute right-0 mt-2 w-88 sm:w-96 bg-white rounded-2xl shadow-2xl border border-zinc-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/80">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-zinc-900 text-sm">Thông báo học tập</h3>
+              <h3 className="font-bold text-zinc-900 text-sm">Thông báo</h3>
               {unreadCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-[#932120]">
                   {unreadCount} mới
@@ -77,7 +122,7 @@ export function NotificationBell() {
             <div className="flex items-center gap-2 text-xs">
               {unreadCount > 0 && (
                 <button
-                  onClick={() => markAllAsRead()}
+                  onClick={handleMarkAllRead}
                   className="text-zinc-600 hover:text-[#932120] font-medium flex items-center gap-1 transition-colors cursor-pointer"
                   title="Đánh dấu đã đọc tất cả"
                 >
@@ -85,14 +130,14 @@ export function NotificationBell() {
                   <span>Đã đọc</span>
                 </button>
               )}
-              {notifications.length > 0 && (
+              {localNotifications.length > 0 && (
                 <button
-                  onClick={() => clearAll()}
+                  onClick={() => clearLocalAll()}
                   className="text-zinc-400 hover:text-red-600 font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                  title="Xóa tất cả thông báo"
+                  title="Xóa thông báo tạm trên máy"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Xóa hết</span>
+                  <span>Xóa tạm</span>
                 </button>
               )}
             </div>
@@ -106,7 +151,7 @@ export function NotificationBell() {
                 </div>
                 <p className="text-sm font-bold text-zinc-800">Hộp thông báo trống</p>
                 <p className="text-xs text-zinc-400 max-w-xs">
-                  Kết quả chấm điểm AI, nhận xét bài viết và thông báo hệ thống sẽ xuất hiện tại đây.
+                  Kết quả chấm điểm AI, nhận xét Chuyên gia và thông báo hệ thống sẽ xuất hiện tại đây.
                 </p>
               </div>
             ) : (

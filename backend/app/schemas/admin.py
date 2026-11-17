@@ -36,3 +36,8 @@ class EvaluationLogResponse(BaseModel):
     phoenix_trace_id: Optional[str] = None
     created_at: datetime
 
+
+class AdminAssignReviewRequest(BaseModel):
+    expert_id: str = Field(..., min_length=1)
+    note: Optional[str] = Field(None, max_length=500)
+

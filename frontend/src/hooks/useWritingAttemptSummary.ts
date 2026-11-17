@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAttemptSummary } from "@/services/student-test-practice";
 
 // Shape of `data.writing` returned by GET /api/v1/test-practice/attempts/{id}/summary
 export interface WritingTaskSummary {
   task: "task1" | "task2" | string;
+  task_no?: number;
   essay_id: string;
   status: "pending" | "evaluating" | "completed" | "failed" | "not_attempted" | string;
   word_count: number;
+  content?: string;
+  task_prompt?: string;
+  chart_image_url?: string | null;
+  prompt_category?: string | null;
+  min_words?: number;
   scores: {
     overall_band: number;
     task_response: number;
@@ -24,12 +30,15 @@ export interface WritingTaskSummary {
 export interface WritingAttemptSummary {
   title: string;
   status: string;
+  mode?: string;   // "mock": đề không làm lại được
   overallBand: number;
   submittedAt?: string;
   gradingDone: boolean;
   /** AI chấm lỗi (grading_failed): Admin chạy lại, bài làm vẫn được lưu */
   gradingFailed: boolean;
-  mode?: string;   // "mock": đề không làm lại được
+  evaluatorType?: "ai" | "expert" | string | null;
+  evaluationStatus?: string | null;
+  expertFeedback?: string | null;
   tasks: WritingTaskSummary[];
 }
 
@@ -42,6 +51,11 @@ const POLL_INTERVAL_MS = 5000;
 export function useWritingAttemptSummary(attemptId?: string) {
   const [data, setData] = useState<WritingAttemptSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reloadNonce, setReloadNonce] = useState(0);
+
+  const reload = useCallback(() => {
+    setReloadNonce((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     if (!attemptId) return;
@@ -56,11 +70,14 @@ export function useWritingAttemptSummary(attemptId?: string) {
         const next: WritingAttemptSummary = {
           title: res?.title ?? "",
           status: res?.status ?? "",
+          mode: res?.mode,
           overallBand: Number(res?.overall_band ?? 0),
           submittedAt: res?.submitted_at,
           gradingDone: Boolean(writing.grading_done) && res?.status !== "grading",
           gradingFailed: res?.status === "grading_failed",
-          mode: res?.mode,
+          evaluatorType: writing.evaluator_type ?? res?.evaluator_type ?? null,
+          evaluationStatus: res?.evaluation_status ?? null,
+          expertFeedback: writing.expert_feedback ?? res?.expert_feedback ?? null,
           tasks: writing.tasks ?? [],
         };
         setData(next);
@@ -79,7 +96,7 @@ export function useWritingAttemptSummary(attemptId?: string) {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [attemptId]);
+  }, [attemptId, reloadNonce]);
 
-  return { data, error };
+  return { data, error, reload };
 }

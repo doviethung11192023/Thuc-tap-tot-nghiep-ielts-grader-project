@@ -53,11 +53,19 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     for a in attempts[:4]:
         b_val = round_to_ielts_band(float(a["band"])) if a.get("band") is not None else None
         sk = str(a.get("skill", "")).lower()
+        st = a.get("status") or "in_progress"
         t_id = a.get("test_id") or ""
-        t_link = f"/test-practice/{sk}/{t_id}/summary?attemptId={a['id']}&returnUrl=%2Flearning-profile" if (a.get("status") == "scored" and t_id) else (f"/results/{a['id']}" if a.get("status") == "scored" else "/test-practice/history")
+        if st == "scored" and t_id:
+            t_link = f"/test-practice/{sk}/{t_id}/summary?attemptId={a['id']}&returnUrl=%2Flearning-profile"
+        elif st == "in_progress" and t_id:
+            t_link = f"/test-practice/{sk}/{t_id}?mode={a.get('mode') or 'practice'}"
+        elif st == "scored":
+            t_link = f"/results/{a['id']}"
+        else:
+            t_link = "/test-practice/history"
         recent_submissions.append({
             "id": a["id"], "type": "test", "title": (a.get("tests") or {}).get("title") or f"IELTS {sk.capitalize()} Practice",
-            "date": str(a.get("submitted_at") or a.get("started_at", ""))[:10], "status": a.get("status") or "in_progress",
+            "date": str(a.get("submitted_at") or a.get("started_at", ""))[:10], "status": st,
             "band": b_val, "link": t_link,
         })
     recent_submissions.sort(key=lambda x: x.get("date") or "", reverse=True)
@@ -96,7 +104,7 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     result = {
         "kpis": {
             "total_time_hours": round(total_minutes / 60, 1), "total_time_minutes": total_minutes,
-            "total_cups": len(scored_attempts), "total_tests_taken": len(attempts),
+            "total_cups": sum(1 for b in all_bands if b >= 7.0), "total_tests_taken": len(attempts),
             "total_exercises_studied": len(scored_attempts),
         },
         "dashboard_stats": {
@@ -112,5 +120,5 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
         "current_bands": cb, "exam": journey["exam"],
         "radar_data": radar_data, "donut_data": donut_data, "heatmap_weeks": weeks_data,
     }
-    set_to_cache(cache_key, result, ttl_seconds=30)
+    set_to_cache(cache_key, result, ttl_seconds=180)
     return result

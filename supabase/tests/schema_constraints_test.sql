@@ -133,8 +133,10 @@ SELECT pg_temp.expect_fail('C2b essay on a section not in the attempt',
 -- L/R attempt cho C4
 INSERT INTO public.attempts (id, learner_id, test_id, skill, mode, deadline_at) VALUES
   ('70000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-00000000000a', 'reading', 'mock', now() + interval '1 hour');
-SELECT pg_temp.expect_fail('BR-03 lr_band without 40 questions',
-  $$UPDATE public.attempts SET raw_score = 1, question_count = 1, lr_band = 5 WHERE id = '70000000-0000-0000-0000-000000000002'$$);
+-- BR-03 do RPC submit_lr_attempt giữ (20261116100000); constraint chỉ chặn band khi không có câu nào,
+-- vì 13 bài cũ có band quy đổi tỉ lệ được giữ lại (20261114210000)
+SELECT pg_temp.expect_fail('BR-03 lr_band without questions',
+  $$UPDATE public.attempts SET raw_score = 0, question_count = 0, lr_band = 5 WHERE id = '70000000-0000-0000-0000-000000000002'$$);
 SELECT pg_temp.expect_fail('BR-01 band 6.3',
   $$UPDATE public.attempts SET raw_score = 30, question_count = 40, lr_band = 6.3 WHERE id = '70000000-0000-0000-0000-000000000002'$$);
 

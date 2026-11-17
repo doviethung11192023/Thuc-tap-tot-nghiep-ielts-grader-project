@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ListeningWorkspace } from '@/components/exam/ListeningWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
-import { ExamPageNotice, SubmitErrorBanner } from '@/components/exam/ExamPageNotice';
+import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { useServerAutosave } from '@/hooks/useServerAutosave';
 import { AutosaveStatusBadge } from '@/components/exam/AutosaveStatusBadge';
@@ -30,7 +30,12 @@ export default function ListeningWorkspacePage() {
   const [answers, setAnswers] = useState<Record<number, string | string[]> | null>(null);
   const autosavePayload = useMemo(() => (answers ? { answers } : null), [answers]);
   const autosave = useServerAutosave(attemptId, autosavePayload);
+  const startedAtRef = useRef<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+  }, [testId, mode]);
 
   // Bài Mock đã kết thúc (tự nộp khi hết giờ): tới thẳng kết quả (spec 004 US2)
   useEffect(() => {
@@ -47,8 +52,13 @@ export default function ListeningWorkspacePage() {
         const attempt = await startTestAttempt(testId, mode === 'exam' ? 'mock' : 'practice', 'listening');
         currentAttemptId = attempt?.attempt_id || null;
       }
-      if (!currentAttemptId) throw new Error('no attempt');
-      await submitReadingListeningAnswers(currentAttemptId, { answers, parts: parts.map(Number) });
+      if (!currentAttemptId) throw new Error("Không khởi tạo được phiên làm bài để nộp.");
+      const elapsedMs = startedAtRef.current ? Date.now() - startedAtRef.current : 1000;
+      await submitReadingListeningAnswers(currentAttemptId, {
+        answers,
+        parts: parts.map(Number),
+        time_spent_sec: Math.max(1, Math.round(elapsedMs / 1000)),
+      });
       router.push(summaryPath(currentAttemptId));
     } catch (err) {
       if (currentAttemptId && isAlreadySubmitted(err)) {     // nộp ở tab khác hoặc đã tự nộp: kết quả là bài đó
@@ -70,20 +80,34 @@ export default function ListeningWorkspacePage() {
   }
 
   return (
-    <>
-    <ListeningWorkspace
-      testData={listeningData}
-      initialAnswers={savedWork?.answers}
-      onAnswersChange={setAnswers}
-      mode={mode}
-      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
-      deadlineMs={mode === 'exam' ? deadlineMs : null}
-      selectedParts={parts}
-      returnUrl={returnUrl || undefined}
-      onSubmit={handleSubmit}
-    />
-    <AutosaveStatusBadge status={autosave.status} savedAt={autosave.savedAt} />
-    <SubmitErrorBanner message={submitError} onClose={() => setSubmitError(null)} />
-    </>
+    <div className="space-y-3">
+      {submitError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-900 shadow-2xs"
+        >
+          <span>{submitError}</span>
+          <button
+            type="button"
+            onClick={() => setSubmitError(null)}
+            className="px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-100 rounded-md cursor-pointer"
+          >
+            Đóng
+          </button>
+        </div>
+      )}
+      <ListeningWorkspace
+        testData={listeningData}
+        initialAnswers={savedWork?.answers}
+        onAnswersChange={setAnswers}
+        mode={mode}
+        onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
+        deadlineMs={mode === 'exam' ? deadlineMs : null}
+        selectedParts={parts}
+        returnUrl={returnUrl || undefined}
+        onSubmit={handleSubmit}
+      />
+      <AutosaveStatusBadge status={autosave.status} savedAt={autosave.savedAt} />
+    </div>
   );
 }

@@ -34,16 +34,39 @@ const METRICS: { key: string; label: string; unit: string }[] = [
 
 export function CriteriaGrid({ criteria }: { criteria: SpeakingCriterionScore[] }) {
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {criteria.map((item) => (
-        <div key={item.code} className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1.5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-bold text-slate-800">{CRITERION_LABELS[item.code] ?? item.name}</h3>
-            <span className="text-lg font-black text-blue-700">{item.band.toFixed(1)}</span>
+    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      {criteria.map((item) => {
+        const pct = Math.min(100, Math.max(0, (item.band / 9) * 100));
+        return (
+          <div
+            key={item.code}
+            className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 space-y-2.5 shadow-2xs"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">
+                  {item.code}
+                </span>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {CRITERION_LABELS[item.code] ?? item.name}
+                </h3>
+              </div>
+              <span className="px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-lg font-black text-blue-700 tabular-nums shrink-0">
+                {item.band.toFixed(1)}
+              </span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-all duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            {item.comment && (
+              <p className="text-xs text-slate-600 leading-relaxed">{item.comment}</p>
+            )}
           </div>
-          {item.comment && <p className="text-xs text-slate-600 leading-relaxed">{item.comment}</p>}
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }

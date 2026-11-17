@@ -27,6 +27,7 @@ class UserProfileResponse(BaseModel):
     created_at: Optional[datetime] = None
 
 class LearnerGoalUpdate(BaseModel):
+    input_band: Optional[float] = Field(None, ge=0.0, le=9.0)
     target_overall: Optional[float] = Field(None, ge=0.0, le=9.0)
     target_listening: Optional[float] = Field(None, ge=0.0, le=9.0)
     target_reading: Optional[float] = Field(None, ge=0.0, le=9.0)
@@ -34,6 +35,7 @@ class LearnerGoalUpdate(BaseModel):
     target_speaking: Optional[float] = Field(None, ge=0.0, le=9.0)
     test_date: Optional[date] = None
 
+    _check_input = validator("input_band", allow_reuse=True)(validate_band_score)
     _check_overall = validator("target_overall", allow_reuse=True)(validate_band_score)
     _check_listening = validator("target_listening", allow_reuse=True)(validate_band_score)
     _check_reading = validator("target_reading", allow_reuse=True)(validate_band_score)
@@ -48,6 +50,7 @@ class LearnerGoalUpdate(BaseModel):
 
 class LearnerGoalResponse(BaseModel):
     user_id: str
+    input_band: Optional[float] = None
     target_overall: Optional[float] = None
     target_listening: Optional[float] = None
     target_reading: Optional[float] = None

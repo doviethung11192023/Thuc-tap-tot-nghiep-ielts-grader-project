@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BaseRendererProps, ReviewEvidenceAccordion } from './shared';
+import { Check } from 'lucide-react';
 
 export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   group,
@@ -12,36 +13,69 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   const isReview = mode === 'review';
   const [activeBlank, setActiveBlank] = useState<number | null>(null);
 
+  const usedOptionTokens = useMemo(() => {
+    const used = new Set<string>();
+    for (const q of group.questions || []) {
+      const val = String(userAnswers[q.question_number] || '').trim().toUpperCase();
+      if (val) used.add(val);
+    }
+    return used;
+  }, [group.questions, userAnswers]);
+
+  const allowsNumber = /and\s*\/\s*or\s+(?:a\s+)?numbers?/i.test(group.instruction || '');
+  const displayMaxWords = group.max_words && allowsNumber ? Math.max(1, group.max_words - 1) : group.max_words;
+  const maxWordsBadge = group.max_words && group.max_words > 0 && options.length === 0 && (
+    <div className="mb-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
+      <span>
+        {allowsNumber
+          ? `Giới hạn đáp án: Tối đa ${displayMaxWords} từ và/hoặc số`
+          : `Giới hạn đáp án: Tối đa ${group.max_words} từ`}
+      </span>
+    </div>
+  );
+
   const wordlistCard = options.length > 0 && (
     <div className="mb-6 bg-zinc-50 border border-zinc-200 rounded-xl p-4 shadow-2xs">
-      <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3 flex items-center justify-between">
+      <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3 flex items-center justify-between flex-wrap gap-2">
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#932120]"></span>
           Danh sách từ gợi ý (Wordlist)
         </span>
         {activeBlank && mode === 'exam' && (
           <span className="text-[11px] font-semibold text-[#932120] bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
-            Bấm từ để điền vào Câu {activeBlank}
+            Bấm chữ cái để điền vào Câu {activeBlank}
           </span>
         )}
       </h4>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-        {options.map((opt) => (
-          <button
-            key={opt.key}
-            type="button"
-            onClick={() => {
-              if (activeBlank && mode === 'exam' && onAnswerChange) {
-                onAnswerChange(activeBlank, opt.key);
-              }
-            }}
-            className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-[#932120] hover:bg-red-50/40 text-xs md:text-sm transition-all text-left cursor-pointer"
-            title={`Chọn ${opt.key}: ${opt.text}`}
-          >
-            <span className="font-bold text-[#932120] shrink-0">{opt.key}.</span>
-            <span className="text-zinc-800 font-medium truncate">{opt.text}</span>
-          </button>
-        ))}
+        {options.map((opt) => {
+          const isUsed =
+            usedOptionTokens.has(opt.key.trim().toUpperCase()) ||
+            usedOptionTokens.has(opt.text.trim().toUpperCase());
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => {
+                if (activeBlank && mode === 'exam' && onAnswerChange) {
+                  onAnswerChange(activeBlank, opt.key);
+                }
+              }}
+              className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border text-xs md:text-sm transition-all text-left cursor-pointer ${
+                isUsed
+                  ? 'bg-red-50/70 border-[#932120]/40 text-zinc-900 shadow-2xs'
+                  : 'bg-white border-zinc-200 hover:border-[#932120] hover:bg-red-50/40'
+              }`}
+              title={`Chọn ${opt.key}: ${opt.text}`}
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="font-bold text-[#932120] shrink-0">{opt.key}.</span>
+                <span className="text-zinc-800 font-medium truncate">{opt.text}</span>
+              </span>
+              {isUsed && <Check className="w-3.5 h-3.5 text-[#932120] shrink-0" />}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -49,6 +83,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   if (!group.template) {
     return (
       <div className="space-y-3">
+        {maxWordsBadge}
         {wordlistCard}
         {group.questions.map((q) => {
           const answer = (userAnswers[q.question_number] as string) || '';
@@ -57,11 +92,11 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
           if (isReview) {
             inputClass += isCorrect ? "border-green-500 bg-green-50 text-green-700" : "border-red-500 bg-red-50 text-red-700";
           } else {
-            inputClass += "border-zinc-300 focus:border-[#932120] focus:ring-1 focus:ring-[#932120] bg-white";
+            inputClass += "border-zinc-300 focus:border-[#932120] focus:ring-2 focus:ring-[#932120]/20 bg-white";
           }
 
           return (
-            <div key={q.question_number} className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2">
+            <div key={q.question_number} id={`reading-question-${q.question_number}`} className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-2">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="w-7 h-7 shrink-0 bg-white border border-zinc-200 flex items-center justify-center rounded-full text-xs text-[#932120] font-mono shadow-2xs font-bold">
                   {q.question_number}
@@ -99,6 +134,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
 
   return (
     <div className="text-zinc-800 leading-relaxed text-sm md:text-base whitespace-pre-wrap">
+      {maxWordsBadge}
       {wordlistCard}
       {parts.map((part, index) => {
         const match = part.match(/{{(\d+)}}/);
@@ -127,7 +163,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
           }
 
           return (
-            <span key={index} className={containerClass}>
+            <span key={index} id={`reading-question-${qNumber}`} className={containerClass}>
               <span className={badgeClass}>{qNumber}</span>
               <input
                 type="text"

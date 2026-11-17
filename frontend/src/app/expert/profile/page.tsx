@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   GraduationCap, 
   CheckCircle, 
@@ -21,8 +22,7 @@ import { ExpertProfile } from '@/types';
 
 export default function ExpertProfilePage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<ExpertProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
 
   // Form state
@@ -30,24 +30,18 @@ export default function ExpertProfilePage() {
   const [maxReviews, setMaxReviews] = useState(5);
   const [bio, setBio] = useState('');
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  const { data: profile = null, isLoading: loading } = useQuery<ExpertProfile>({
+    queryKey: ['expert-profile'],
+    queryFn: getExpertProfile,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  async function fetchProfile() {
-    try {
-      setLoading(true);
-      const data = await getExpertProfile();
-      setProfile(data);
-      setIsAvailable(data.is_available);
-      setMaxReviews(data.max_active_reviews);
-      setBio(data.bio || '');
-    } catch (err: any) {
-      toast.error('Không thể tải thông tin hồ sơ Chuyên gia');
-    } finally {
-      setLoading(false);
-    }
-  }
+  useEffect(() => {
+    if (!profile) return;
+    setIsAvailable(profile.is_available);
+    setMaxReviews(profile.max_active_reviews);
+    setBio(profile.bio || '');
+  }, [profile]);
 
   const handleSaveAvailability = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +52,7 @@ export default function ExpertProfilePage() {
         max_active_reviews: Number(maxReviews),
         bio: bio.trim() || undefined
       });
-      setProfile(updated);
+      queryClient.setQueryData(['expert-profile'], updated);
       toast.success('Đã cập nhật trạng thái khả dụng thành công!');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Lỗi khi cập nhật trạng thái');

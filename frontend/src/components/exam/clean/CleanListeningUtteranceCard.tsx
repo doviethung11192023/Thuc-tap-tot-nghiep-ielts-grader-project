@@ -97,6 +97,7 @@ export function CleanListeningUtteranceCard({
 
   return (
     <div
+      id={isCurrentActive ? 'active-listening-utterance' : undefined}
       data-utterance-text={utterance.text}
       className={`p-4 rounded-xl border transition-all ${
         isCurrentActive

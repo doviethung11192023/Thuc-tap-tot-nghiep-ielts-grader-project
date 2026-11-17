@@ -47,12 +47,29 @@ def _done_latencies() -> list[int]:
         offset += PAGE_SIZE
 
 
+def _submitted_per_vn_day(since: datetime, until: datetime) -> dict[Any, int]:
+    """Số lượt nộp theo ngày giờ VN trong [since, until): một lượt đọc thay vì một query mỗi ngày."""
+    counts: dict[Any, int] = {}
+    offset = 0
+    while True:
+        rows = (db().table("attempts").select("submitted_at")
+                .gte("submitted_at", since.isoformat()).lt("submitted_at", until.isoformat())
+                .order("submitted_at").range(offset, offset + PAGE_SIZE - 1).execute().data or [])
+        for r in rows:
+            day = datetime.fromisoformat(r["submitted_at"].replace("Z", "+00:00")).astimezone(VN_TZ).date()
+            counts[day] = counts.get(day, 0) + 1
+        if len(rows) < PAGE_SIZE:
+            return counts
+        offset += PAGE_SIZE
+
+
 def system_statistics() -> dict[str, Any]:
     today = datetime.now(VN_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    day_counts = _submitted_per_vn_day(today - timedelta(days=TREND_DAYS - 1), today + timedelta(days=1))
     trend = []
     for i in range(TREND_DAYS - 1, -1, -1):
         day = today - timedelta(days=i)
-        trend.append({"date": day.strftime("%d/%m"), "count": _submitted(day, day + timedelta(days=1))})
+        trend.append({"date": day.strftime("%d/%m"), "count": day_counts.get(day.date(), 0)})
 
     done_runs = _count("grading_runs", status=("eq", "done"))
     failed_runs = _count("grading_runs", status=("eq", "failed"))
@@ -70,22 +87,31 @@ def system_statistics() -> dict[str, Any]:
     }
 
 
-def grading_run_logs(page: int, limit: int) -> dict[str, Any]:
+def grading_run_logs(page: int, limit: int, skill: str | None = None, run_status: str | None = None) -> dict[str, Any]:
     offset = (page - 1) * limit
-    res = db().table("grading_runs").select(
+    q = db().table("grading_runs").select(
         "id, task_no, status, model, trace_id, error, latency_ms, started_at, "
-        "evaluations(attempt_id, attempts(learner_id, tests(title)))", count="exact"
-    ).order("started_at", desc=True).range(offset, offset + limit - 1).execute()
+        "evaluations!inner(attempt_id, attempts!inner(skill, learner_id, tests(title)))", count="exact"
+    )
+    if skill in ("writing", "speaking"):
+        q = q.eq("evaluations.attempts.skill", skill)
+    if run_status in ("done", "failed", "running"):
+        q = q.eq("status", run_status)
+    res = q.order("started_at", desc=True).range(offset, offset + limit - 1).execute()
     rows = res.data or []
     learner_ids = {((r.get("evaluations") or {}).get("attempts") or {}).get("learner_id") for r in rows} - {None}
     emails = {p["id"]: p["email"] for p in db().table("profiles").select("id, email")
               .in_("id", list(learner_ids)).execute().data or []} if learner_ids else {}
     items = []
     for r in rows:
-        attempt = (r.get("evaluations") or {}).get("attempts") or {}
+        eval_info = r.get("evaluations") or {}
+        attempt = eval_info.get("attempts") or {}
+        latency_ms = r.get("latency_ms")
         items.append({
-            "id": r["id"], "status": RUN_STATUS_LABEL.get(r["status"], r["status"]), "created_at": r["started_at"],
-            "task_no": r.get("task_no"), "error_message": r.get("error"), "latency_ms": r.get("latency_ms"),
+            "id": r["id"], "attempt_id": eval_info.get("attempt_id"), "skill": attempt.get("skill"),
+            "status": RUN_STATUS_LABEL.get(r["status"], r["status"]), "created_at": r["started_at"],
+            "task_no": r.get("task_no"), "error_message": r.get("error"), "latency_ms": latency_ms,
+            "processing_time": round(latency_ms / 1000, 1) if latency_ms else None,
             "trace_id": r.get("trace_id"), "model": r.get("model"),
             "essay": {"user": {"email": emails.get(attempt.get("learner_id"))},
                       "topic": {"title": (attempt.get("tests") or {}).get("title")}},

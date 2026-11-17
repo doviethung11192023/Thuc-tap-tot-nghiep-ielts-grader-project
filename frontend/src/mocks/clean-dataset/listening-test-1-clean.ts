@@ -45,13 +45,14 @@ export interface CleanListeningSection {
 }
 
 export interface CleanListeningExerciseGroup {
-  id: number;
+  id: number | string;
   section_number: number;
   type: string | number;
   title: string;
   content: string;
   template?: string;
   options_pool?: Array<{ key: string; text: string }>;
+  diagram_image_url?: string;
   table_data?: any;
   question_start: number;
   question_end: number;

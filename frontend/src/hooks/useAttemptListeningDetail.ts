@@ -55,16 +55,14 @@ export function useAttemptListeningDetail(attemptId?: string) {
 
         const rawSections = res.sections || [];
         const sections: CleanListeningSection[] = rawSections.map((s: any, idx: number) => {
-          const utterances = parseUtterances(s.passage_text);
+          const utterances = parseUtterances(s.transcript || s.passage_text);
           return {
             section_number: s.order_no || idx + 1,
             title: s.title || `Part ${idx + 1}`,
             audio_url: s.audio_key || "",
             playtime_string: "07:30",
             duration_seconds: s.duration_seconds || 450,
-            transcript_utterances: utterances.length > 0
-              ? utterances
-              : cleanListeningTest1Data.sections[idx]?.transcript_utterances || []
+            transcript_utterances: utterances
           };
         });
 
@@ -110,6 +108,7 @@ export function useAttemptListeningDetail(attemptId?: string) {
               content: templateText || g.instructions || "",
               template: templateText || undefined,
               options_pool: g.content?.options_pool || undefined,
+              diagram_image_url: g.content?.diagram_image_url || g.image_key || undefined,
               table_data: g.content?.table_data || undefined,
               question_start: qStart,
               question_end: qEnd

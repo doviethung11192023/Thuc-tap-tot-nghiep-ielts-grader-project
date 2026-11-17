@@ -1,6 +1,7 @@
 export interface SkillScore {
   skill: string;
   score: number;
+  count?: number;
 }
 
 export interface ActivityDay {
@@ -173,9 +174,11 @@ export interface TestScoreTracking {
   reading?: number;
   writing?: number;
   speaking?: number;
-  mode: 'practice' | 'exam' | string;
+  mode: 'practice' | 'exam' | 'mock' | string;
   score?: number;
   skill?: string;
+  title?: string;
+  date?: string;
 }
 
 export interface AIDiagnosticFeedback {
@@ -214,6 +217,7 @@ export interface QuestionTypeReportRow {
 export interface PracticeHistoryItem {
   id: string;
   test_id?: string;
+  status?: string;
   testName: string;
   type_badge: string;
   band: number;

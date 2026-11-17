@@ -37,13 +37,12 @@ interface WritingWorkspaceProps {
 export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, onAbandon, deadlineMs, onSubmit, initialEssays, onEssaysChange, saveStatusLabel }: WritingWorkspaceProps) {
   const router = useRouter();
   const activeDataset = testData || mockWritingExamDataset;
-  const draftKey = `ielts_writing_draft_${activeDataset.test_id || 'default'}`;
 
-  const [activeTab, setActiveTab] = useState<'timed' | 'paste'>('timed');
-  const [activeTaskNum, setActiveTaskNum] = useState<1 | 2>(() => parts === '2' ? 2 : 1);
+  const availableTasks: (1 | 2)[] = parts === '1' ? [1] : parts === '2' ? [2] : [1, 2];
+  const [activeTaskNum, setActiveTaskNum] = useState<1 | 2>(() => (parts === '2' ? 2 : 1));
   const [taskEssays, setTaskEssays] = useState<Record<1 | 2, string>>({ 1: '', 2: '' });
-  const [autoSaveTime, setAutoSaveTime] = useState<string>('Vừa xong');
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
 
   // Khôi phục bài đã lưu trên server cho task còn trống (mở lại trên máy bất kỳ)
   // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
@@ -56,52 +55,49 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
 
   const initialSeconds = mode === 'exam' ? (parts === '2' ? 2400 : parts === '1' ? 1200 : 3600) : 0;
 
+  // Practice chọn 1 task: luôn đứng ở task đó
+  useEffect(() => {
+    if (parts === '1' && activeTaskNum !== 1) setActiveTaskNum(1);
+    else if (parts === '2' && activeTaskNum !== 2) setActiveTaskNum(2);
+  }, [parts, activeTaskNum]);
+
   const currentTask = activeTaskNum === 1 ? activeDataset.task1 : activeDataset.task2;
   const currentEssayText = taskEssays[activeTaskNum] || '';
   const wordCount = currentEssayText.trim() ? currentEssayText.trim().split(/\s+/).length : 0;
   const isWordCountMet = wordCount >= currentTask.min_words;
 
-  // Xóa nháp mock cũ rò rỉ nếu có
-  useEffect(() => { try { localStorage.removeItem('ielts_writing_draft_mock'); } catch (_) {} }, []);
-
-  useEffect(() => {
-    if (mode !== 'practice') return;
-    try {
-      const saved = localStorage.getItem(draftKey);
-      if (saved) {
-        const p = JSON.parse(saved);
-        setTaskEssays(typeof p === 'object' && p ? { 1: p[1] || '', 2: p[2] || '' } : { 1: '', 2: String(p) });
-      }
-    } catch {}
-  }, [mode, draftKey]);
-
   // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
   const timerSeconds = useExamCountdown(mode, initialSeconds, deadlineMs,
     () => onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]));
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setAutoSaveTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    }, 15000);
-    return () => clearInterval(timer);
-  }, []);
-
   const formatDisplayTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   const handleExitDiscard = async () => { setIsExitModalOpen(false); if (mode === 'exam') await onAbandon?.(); router.push(returnUrl || '/test-practice'); };
+  // Bài đã tự lưu lên server (FR-11): thoát rồi quay lại vẫn làm tiếp được
   const handleSaveDraftAndExit = () => {
-    try { localStorage.setItem(draftKey, JSON.stringify(taskEssays)); alert("💾 Đã lưu nháp tiến độ bài làm Writing thành công!"); } catch (e) { console.error(e); }
     setIsExitModalOpen(false);
     router.push(returnUrl || '/test-practice');
   };
+
   const handleSubmitAll = () => {
-    try { localStorage.removeItem(draftKey); } catch (_) {}
+    if (mode === 'exam' && (!parts || parts === '1,2')) {
+      const hasTask1 = (taskEssays[1] || '').trim().length > 10;
+      const hasTask2 = (taskEssays[2] || '').trim().length > 10;
+      if (!hasTask1 || !hasTask2) {
+        setShowIncompleteWarning(true);
+        return;
+      }
+    }
+    doFinalSubmit();
+  };
+
+  const doFinalSubmit = () => {
+    setShowIncompleteWarning(false);
     onSubmit(taskEssays[2] || taskEssays[1] || '', taskEssays[1], taskEssays[2]);
   };
 
   return (
     <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
-      {/* Top Header */}
       <div className="bg-white border-b border-zinc-200 px-5 py-2.5 h-14 flex items-center justify-between shadow-xs shrink-0 z-20">
         <div className="flex items-center gap-3">
           <button
@@ -109,27 +105,14 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
             onClick={() => setIsExitModalOpen(true)}
             className="w-9 h-9 flex items-center justify-center hover:bg-zinc-100 rounded-xl transition-colors text-zinc-600 hover:text-zinc-900"
             title="Thoát phòng thi"
+            aria-label="Thoát phòng thi"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <div className="flex bg-zinc-100 p-1 rounded-xl text-xs font-bold">
-            <button
-              onClick={() => setActiveTab('timed')}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                activeTab === 'timed' ? 'bg-white text-[#932120] shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
-              }`}
-            >
-              Phòng thi giới hạn giờ
-            </button>
-            <button
-              onClick={() => setActiveTab('paste')}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                activeTab === 'paste' ? 'bg-white text-[#932120] shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
-              }`}
-            >
-              Dán bài chấm ngay
-            </button>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-100 text-xs font-bold text-zinc-800 border border-zinc-200">
+            <span className="w-2 h-2 rounded-full bg-[#932120]" aria-hidden="true" />
+            <span>{mode === 'exam' ? 'Phòng thi giới hạn giờ' : 'Chế độ Luyện tập Writing'}</span>
           </div>
         </div>
 
@@ -153,6 +136,7 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
           </div>
 
           <button
+            type="button"
             onClick={handleSubmitAll}
             className="flex items-center gap-2 bg-[#932120] text-white h-9 px-5 rounded-xl text-sm font-bold hover:bg-[#7a1a19] shadow-xs transition-all active:scale-95"
           >
@@ -161,15 +145,14 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
         </div>
       </div>
 
-      {/* Main Workspace (38% Prompt / 62% Editor) */}
       <div className="flex-1 flex overflow-hidden">
         <WritingPromptColumn
           activeTaskNum={activeTaskNum}
+          availableTasks={availableTasks}
           onSelectTask={setActiveTaskNum}
           currentTask={currentTask}
         />
 
-        {/* Right Column (62%): Academic Essay Editor */}
         <div className="w-[62%] flex flex-col h-full bg-white">
           <div className="px-6 py-2.5 border-b border-zinc-200 bg-zinc-50/50 flex items-center justify-between shrink-0">
             <span className="text-xs font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-2">
@@ -177,7 +160,7 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
               Academic Essay Editor
             </span>
             <span className="text-xs text-zinc-500 font-medium">
-              {saveStatusLabel ? <strong className="text-zinc-700">{saveStatusLabel}</strong> : <>Tự động lưu nháp: <strong className="text-zinc-700">{autoSaveTime}</strong></>}
+              {saveStatusLabel ? <strong className="text-zinc-700">{saveStatusLabel}</strong> : <>Chưa lưu</>}
             </span>
           </div>
 
@@ -197,6 +180,51 @@ export function WritingWorkspace({ testData, mode = 'exam', parts, returnUrl, on
         isOpen={isExitModalOpen} mode={mode} onContinue={() => setIsExitModalOpen(false)}
         onExitDiscard={handleExitDiscard} onSaveDraftAndExit={handleSaveDraftAndExit}
       />
+
+      {showIncompleteWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 text-amber-600">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-amber-700" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-zinc-900">Cảnh báo nộp thiếu Task</h3>
+                <p className="text-xs text-zinc-500">Chế độ Phòng thi (Mock Test) chuẩn IELTS</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-600 leading-relaxed">
+              Bạn đang nộp bài khi một trong hai Task (Task 1 hoặc Task 2) còn bỏ trống.
+              Theo quy chuẩn Cambridge, phần bỏ trống sẽ nhận <strong>0 điểm</strong> và kéo tụt điểm Overall Writing theo công thức trọng số <strong>(Task 1 + 2 × Task 2) / 3</strong>.
+            </p>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs space-y-1.5 font-medium">
+              <div className="flex justify-between">
+                <span>Task 1:</span>
+                <span className={(taskEssays[1] || '').trim().length > 10 ? "text-emerald-700 font-bold" : "text-red-600 font-bold"}>
+                  {(taskEssays[1] || '').trim().length > 10 ? "Đã viết" : "Bỏ trống (0đ)"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Task 2:</span>
+                <span className={(taskEssays[2] || '').trim().length > 10 ? "text-emerald-700 font-bold" : "text-red-600 font-bold"}>
+                  {(taskEssays[2] || '').trim().length > 10 ? "Đã viết" : "Bỏ trống (0đ)"}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setShowIncompleteWarning(false)} className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl">
+                Quay lại viết tiếp
+              </button>
+              <button type="button" onClick={doFinalSubmit} className="px-4 py-2 bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold rounded-xl shadow-xs">
+                Vẫn xác nhận nộp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

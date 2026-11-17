@@ -104,6 +104,19 @@ export function CleanListeningDetailView({
     }
   };
 
+  const handleSelectQuestion = (num: number) => {
+    setActiveQuestionNumber(num);
+    const targetQ = currentSectionQuestions.find((q) => q.question_number === num);
+    setHighlightedEvidenceText(targetQ?.evidence_text ?? null);
+  };
+
+  const handleSelectEvidence = (text: string, questionNumber?: number) => {
+    if (typeof questionNumber === 'number') {
+      setActiveQuestionNumber(questionNumber);
+    }
+    setHighlightedEvidenceText(text);
+  };
+
   const handlePlayAtTime = (seconds: number) => {
     if (!audioRef.current) return;
     audioRef.current.currentTime = seconds;
@@ -164,22 +177,22 @@ export function CleanListeningDetailView({
           currentSectionQuestions={currentSectionQuestions}
           activeQuestionNumber={activeQuestionNumber}
           highlightedEvidenceText={highlightedEvidenceText}
-          onSelectQuestion={(num) => setActiveQuestionNumber(num)}
+          onSelectQuestion={handleSelectQuestion}
           onPlayAtTime={handlePlayAtTime}
         />
 
         <CleanListeningExerciseGroupsPane
-          userName="long"
           submittedAt={data.submitted_at}
           overallBand={data.overall_band}
           correctCount={calculatedCorrectCount}
           totalQuestions={filteredQuestions.length || 40}
           currentExerciseGroups={currentExerciseGroups}
           currentSectionQuestions={currentSectionQuestions}
+          transcriptUtterances={currentSection.transcript_utterances}
           activeQuestionNumber={activeQuestionNumber}
-          onSelectQuestion={(num) => setActiveQuestionNumber(num)}
+          onSelectQuestion={handleSelectQuestion}
           onPlayAtTime={handlePlayAtTime}
-          onSelectEvidenceText={(text) => setHighlightedEvidenceText(text)}
+          onSelectEvidenceText={handleSelectEvidence}
         />
       </div>
 

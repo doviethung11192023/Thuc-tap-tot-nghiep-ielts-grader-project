@@ -3,35 +3,58 @@ Kết quả Writing cho trang tổng kết và trang chi tiết essay:
 - GET /test-practice/attempts/{id}/summary  (WritingSummaryResult, useWritingAttemptSummary)
 - GET /essays/{essay_id}/results            (trang /results/{essayId}, lib/adapters.ts)
 """
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Optional
 
 from app.db.supabase import db
 from app.services.writing.writing_bands import task_band
 from app.services.writing.writing_task_materials import approved_sample
+from app.services.writing.writing_test_content import chart_image_url
 
 RUN_TO_ESSAY_STATUS = {"running": "evaluating", "done": "completed", "failed": "failed"}
-CODE_TO_SCORE_KEY = {"TA": "task_response", "TR": "task_response", "CC": "coherence_cohesion",
-                     "LR": "lexical_resource", "GRA": "grammatical_range_and_accuracy"}
+CODE_TO_SCORE_KEY = {
+    "TA": "task_response",
+    "TR": "task_response",
+    "CC": "coherence_cohesion",
+    "LR": "lexical_resource",
+    "GRA": "grammatical_range_and_accuracy",
+}
+_ESSAY_SELECT = (
+    "id, attempt_id, section_id, content, word_count, updated_at, "
+    "writing_tasks(task_type, prompt_category, task_prompt, chart_image_key, min_words)"
+)
 
 
-def _current_evaluation(attempt_id: str) -> Optional[dict[str, Any]]:
-    """Bản chính thức nếu có, nếu không thì bản AI mới nhất."""
-    rows = db().table("evaluations").select("id, status, overall_band, is_official, evaluator_type, created_at") \
+def _load_evaluations(attempt_id: str) -> tuple[Optional[dict[str, Any]], Optional[dict[str, Any]]]:
+    """Trả về (evaluation đang áp dụng [official > AI mới nhất], evaluation AI mới nhất)."""
+    rows = db().table("evaluations") \
+        .select("id, status, overall_band, feedback, is_official, evaluator_type, created_at") \
         .eq("attempt_id", attempt_id).order("created_at", desc=True).execute().data or []
-    return next((e for e in rows if e["is_official"]), None) or next(
-        (e for e in rows if e["evaluator_type"] == "ai"), None)
+    official = next((e for e in rows if e.get("is_official")), None)
+    ai_eval = next((e for e in rows if e.get("evaluator_type") == "ai"), None)
+    return (official or ai_eval), ai_eval
 
 
-def _task_scores(evaluation_id: str) -> dict[int, dict[str, float]]:
-    rows = db().table("criterion_scores").select("task_no, band, criteria(code)") \
+def _task_scores_and_comments(
+    evaluation_id: str,
+) -> tuple[dict[int, dict[str, float]], dict[int, dict[str, str]]]:
+    rows = db().table("criterion_scores").select("task_no, band, comment, criteria(code)") \
         .eq("evaluation_id", evaluation_id).execute().data or []
-    out: dict[int, dict[str, float]] = {}
+    scores: dict[int, dict[str, float]] = {}
+    comments: dict[int, dict[str, str]] = {}
     for r in rows:
-        out.setdefault(r["task_no"], {})[CODE_TO_SCORE_KEY[r["criteria"]["code"]]] = float(r["band"])
-    for scores in out.values():
-        if len(scores) == 4:
-            scores["overall_band"] = task_band(list(scores.values()))
-    return out
+        code = (r.get("criteria") or {}).get("code")
+        key = CODE_TO_SCORE_KEY.get(code or "")
+        if not key:
+            continue
+        tno = r.get("task_no") or 1
+        scores.setdefault(tno, {})[key] = float(r["band"])
+        if isinstance(r.get("comment"), str) and r["comment"].strip():
+            comments.setdefault(tno, {})[key] = r["comment"].strip()
+    for sc in scores.values():
+        if len(sc) == 4:
+            sc["overall_band"] = task_band(list(sc.values()))
+    return scores, comments
 
 
 def _runs(evaluation_id: str) -> dict[int, dict[str, Any]]:
@@ -44,101 +67,184 @@ def _feedback(output: dict, key: str, limit: int = 2) -> list[str]:
     items = []
     for crit in (output.get("criteria_analysis") or {}).values():
         crit = crit or {}
-        source = crit.get("feedback") if isinstance(crit.get("feedback"), dict) else crit   # AI: {feedback: {strengths: [...]}}
+        source = crit.get("feedback") if isinstance(crit.get("feedback"), dict) else crit
         items += [s.strip() for s in source.get(key) or [] if isinstance(s, str) and s.strip()]
     return items[:limit]
 
 
+def _resolve_status(current: Optional[dict[str, Any]], run: dict[str, Any], scores: dict[str, float]) -> str:
+    if current and current.get("evaluator_type") == "expert":
+        if current.get("status") == "done" and len(scores) >= 4:
+            return "completed"
+        if current.get("status") == "failed":
+            return "failed"
+    if run.get("status") in RUN_TO_ESSAY_STATUS:
+        return RUN_TO_ESSAY_STATUS[run["status"]]
+    if current and current.get("status") == "done" and len(scores) >= 4:
+        return "completed"
+    if current and current.get("status") == "failed":
+        return "failed"
+    return "pending"
+
+
 def _essays_with_task(attempt_id: str) -> list[dict[str, Any]]:
-    rows = db().table("essays").select("id, content, word_count, updated_at, writing_tasks(task_type)") \
-        .eq("attempt_id", attempt_id).execute().data or []
+    rows = db().table("essays").select(_ESSAY_SELECT).eq("attempt_id", attempt_id).execute().data or []
     for e in rows:
         e["task_no"] = 1 if (e.get("writing_tasks") or {}).get("task_type") == "task1" else 2
+    # Giữ cả task bỏ trống: essays chỉ có task trong phạm vi bài, task trống hiện "Chưa làm" và tính band 0 (BR-04)
     return sorted(rows, key=lambda e: e["task_no"])
+
+
+def _build_criteria_analysis(raw: dict[str, Any], comments: dict[str, str], is_expert: bool) -> dict[str, Any]:
+    alias_pairs = [
+        ("task_response", ("task_response", "task_achievement")),
+        ("coherence_cohesion", ("coherence_cohesion",)),
+        ("lexical_resource", ("lexical_resource",)),
+        ("grammar_accuracy", ("grammatical_range_and_accuracy", "grammar_accuracy")),
+    ]
+    out: dict[str, Any] = dict(raw)
+    for target_key, candidates in alias_pairs:
+        base = next((dict(raw[c]) for c in candidates if isinstance(raw.get(c), dict)), {})
+        comment_key = "grammatical_range_and_accuracy" if target_key == "grammar_accuracy" else target_key
+        expert_note = comments.get(comment_key)
+        if expert_note and is_expert:
+            sub = dict(base.get("sub_criteria") or {})
+            sub["Nhận xét chính thức của Chuyên gia"] = expert_note
+            base["sub_criteria"] = sub
+        out[target_key] = base
+    return out
 
 
 def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
     test = db().table("tests").select("title").eq("id", attempt["test_id"]).execute().data
-    evaluation = _current_evaluation(attempt["id"])
-    scores = _task_scores(evaluation["id"]) if evaluation else {}
-    runs = _runs(evaluation["id"]) if evaluation else {}
+    current, ai_eval = _load_evaluations(attempt["id"])
+    scores_map, comments_map = _task_scores_and_comments(current["id"]) if current else ({}, {})
+    cur_runs = _runs(current["id"]) if current else {}
+    ai_runs = _runs(ai_eval["id"]) if ai_eval and (not current or ai_eval["id"] != current["id"]) else {}
+    is_expert = bool(current and current.get("evaluator_type") == "expert")
     tasks = []
     for e in _essays_with_task(attempt["id"]):
-        run = runs.get(e["task_no"]) or {}
+        tno = e["task_no"]
+        wt = e.get("writing_tasks") or {}
+        run = cur_runs.get(tno) or ai_runs.get(tno) or {}
         output = run.get("output") or {}
-        # Task không có lượt chấm và không có chữ: Learner bỏ trống, không phải "đang chờ chấm"
-        status = RUN_TO_ESSAY_STATUS.get(run["status"], "pending") if run else \
-            ("not_attempted" if not (e.get("word_count") or 0) else "pending")
+        tscores = scores_map.get(tno) or {}
+        status = _resolve_status(current, run, tscores)
+        if not run and not (e.get("word_count") or 0) and status == "pending":
+            status = "not_attempted"     # task không có lượt chấm và không có chữ: Learner bỏ trống, không phải đang chờ chấm
+        strengths = _feedback(output, "strengths")
         tasks.append({
-            "task": f"task{e['task_no']}", "essay_id": e["id"],
-            "status": status,
-            "word_count": e.get("word_count") or 0,
-            "scores": scores.get(e["task_no"]) if run.get("status") == "done" else None,
+            "task": f"task{tno}", "task_no": tno, "essay_id": e["id"], "status": status,
+            "word_count": e.get("word_count") or 0, "content": e.get("content") or "",
+            "task_prompt": wt.get("task_prompt") or "",
+            "chart_image_url": chart_image_url(wt.get("chart_image_key")),
+            "prompt_category": wt.get("prompt_category"),
+            "min_words": wt.get("min_words") or (150 if tno == 1 else 250),
+            "scores": tscores if status == "completed" else None,
             "task_subtype": output.get("task_subtype"),
-            "strengths": _feedback(output, "strengths"),
-            "areas_to_improve": _feedback(output, "areas_to_improve"),
+            "strengths": strengths, "areas_to_improve": _feedback(output, "areas_to_improve"),
         })
-    done = bool(tasks) and evaluation is not None and evaluation["status"] in ("done", "failed")
+    done = bool(tasks) and current is not None and current["status"] in ("done", "failed")
+    eval_type = (current or {}).get("evaluator_type")
+    expert_fb = (current or {}).get("feedback") if is_expert else None
     return {
         "attempt_id": attempt["id"], "test_id": attempt["test_id"],
         "title": (test[0]["title"] if test else None) or "IELTS Practice Test",
-        "skill": "writing", "mode": attempt["mode"],
-        "status": attempt["status"],
-        "overall_band": float((evaluation or {}).get("overall_band") or 0.0) if done else 0.0,
+        "skill": "writing", "mode": attempt["mode"], "status": attempt["status"],
+        "overall_band": float((current or {}).get("overall_band") or 0.0) if done else 0.0,
         "correct_count": 0, "total_questions": 0,
         "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"),
-        "task_formats_result": [],
-        "writing": {"grading_done": done, "tasks": tasks},
+        "task_formats_result": [], "evaluator_type": eval_type,
+        "evaluation_status": (current or {}).get("status"), "expert_feedback": expert_fb,
+        "writing": {"grading_done": done, "evaluator_type": eval_type, "expert_feedback": expert_fb, "tasks": tasks},
     }
 
 
 def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[dict[str, Any]]:
     """None khi không có essay hoặc người xem không phải chủ (API trả 404)."""
-    rows = db().table("essays").select("id, attempt_id, section_id, content, word_count, updated_at, "
-                                       "writing_tasks(task_type)").eq("id", essay_id).execute().data
+    rows = db().table("essays").select(_ESSAY_SELECT).eq("id", essay_id).execute().data
     if not rows:
         return None
     essay = rows[0]
-    owner = db().table("attempts").select("learner_id").eq("id", essay["attempt_id"]).execute().data
-    if not is_admin and (not owner or str(owner[0]["learner_id"]) != str(user_id)):
-        return None
-    task_no = 1 if (essay.get("writing_tasks") or {}).get("task_type") == "task1" else 2
-    evaluation = _current_evaluation(essay["attempt_id"])
-    run = (_runs(evaluation["id"]) if evaluation else {}).get(task_no) or {}
-    scores = (_task_scores(evaluation["id"]) if evaluation else {}).get(task_no) or {}
-    status = RUN_TO_ESSAY_STATUS.get(run.get("status"), "pending")
+    attempt_id = essay["attempt_id"]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_owner = pool.submit(
+            lambda: db().table("attempts").select("learner_id, test_id, tests(title)").eq("id", attempt_id).execute().data
+        )
+        f_evals = pool.submit(_load_evaluations, attempt_id)
+        f_siblings = pool.submit(_essays_with_task, attempt_id)
+        owner = f_owner.result()
+        if not is_admin and (not owner or str(owner[0]["learner_id"]) != str(user_id)):
+            return None
+        current, ai_eval = f_evals.result()
+        sibling_rows = f_siblings.result()
 
+        att = owner[0] if owner else {}
+        wt = essay.get("writing_tasks") or {}
+        task_type = wt.get("task_type") or "task2"
+        task_no = 1 if task_type == "task1" else 2
+
+        f_scores = pool.submit(_task_scores_and_comments, current["id"]) if current else None
+        f_cur_runs = pool.submit(_runs, current["id"]) if current else None
+        f_ai_runs = (
+            pool.submit(_runs, ai_eval["id"])
+            if ai_eval and (not current or ai_eval["id"] != current["id"])
+            else None
+        )
+        f_anns = (
+            pool.submit(
+                lambda: db().table("annotations").select("*").eq("evaluation_id", current["id"])
+                .eq("essay_id", essay_id).order("start_pos").execute().data or []
+            )
+            if current
+            else None
+        )
+        scores_map, comments_map = f_scores.result() if f_scores else ({}, {})
+        cur_runs = f_cur_runs.result() if f_cur_runs else {}
+        ai_runs = f_ai_runs.result() if f_ai_runs else {}
+        ann_rows = f_anns.result() if f_anns else []
+
+    scores = scores_map.get(task_no) or {}
+    run = cur_runs.get(task_no) or ai_runs.get(task_no) or {}
+    status = _resolve_status(current, run, scores)
+    is_expert = bool(current and current.get("evaluator_type") == "expert")
     result, annotations = None, []
-    if status == "completed" and len(scores) == 5:
+    if status == "completed" and len(scores) >= 4:
         output = run.get("output") or {}
-        analysis = output.get("criteria_analysis") or {}
         result = {
-            "overall_band": scores["overall_band"],
-            "task_response_score": scores["task_response"],
-            "coherence_cohesion_score": scores["coherence_cohesion"],
-            "lexical_resource_score": scores["lexical_resource"],
-            "grammar_accuracy_score": scores["grammatical_range_and_accuracy"],
+            "overall_band": scores.get("overall_band") or float((current or {}).get("overall_band") or 0.0),
+            "task_response_score": scores.get("task_response", 0.0),
+            "coherence_cohesion_score": scores.get("coherence_cohesion", 0.0),
+            "lexical_resource_score": scores.get("lexical_resource", 0.0),
+            "grammar_accuracy_score": scores.get("grammatical_range_and_accuracy", 0.0),
             "overall_upgraded_essay": output.get("overall_upgraded_essay"),
-            "criteria_analysis": {**analysis, "grammar_accuracy": analysis.get("grammatical_range_and_accuracy", {})},
-            "is_score_overridden": False,
+            "criteria_analysis": _build_criteria_analysis(output.get("criteria_analysis") or {}, comments_map.get(task_no, {}), is_expert),
+            "is_score_overridden": is_expert,
+            "evaluator_type": (current or {}).get("evaluator_type") or "ai",
+            "expert_feedback": (current or {}).get("feedback") if is_expert else None,
             # spec 006: bài mẫu đã duyệt, danh sách ý chính (Task 1 có đáp án), nguồn số liệu biểu đồ
-            "sample_essay": approved_sample(essay["section_id"]),
+            "sample_essay": approved_sample(essay["section_id"]) if essay.get("section_id") else None,
             "key_point_check": output.get("key_point_check"),
             "chart_source": output.get("chart_source"),
         }
-        ann_rows = db().table("annotations").select("*").eq("evaluation_id", evaluation["id"]) \
-            .eq("essay_id", essay_id).order("start_pos").execute().data or []
         annotations = [{
             "id": a["id"], "type": a["type"], "category": "TR" if a["category"] == "TA" else a["category"],
             "title": a.get("title") or "", "original_text": a["original_text"],
             "corrected_text": a.get("corrected_text"), "explanation": a["explanation"], "recommendation": None,
             "position_start": a["start_pos"], "position_end": a["end_pos"],
         } for a in ann_rows]
-
+    siblings = [{"essay_id": s["id"], "task_no": s["task_no"], "task_type": f"task{s['task_no']}", "word_count": s.get("word_count") or 0}
+                for s in sibling_rows]
     return {
-        "essay": {"id": essay["id"], "content": essay["content"], "word_count": essay.get("word_count") or 0,
-                  "status": status, "evaluated_at": run.get("finished_at")},
-        "result": result,
-        "inline_annotations": annotations,
-        "trace_info": None,
+        "essay": {
+            "id": essay["id"], "attempt_id": attempt_id, "test_id": att.get("test_id"),
+            "test_title": (att.get("tests") or {}).get("title") or "IELTS Writing Practice",
+            "task_no": task_no, "task_type": task_type, "task_prompt": wt.get("task_prompt") or "",
+            "chart_image_url": chart_image_url(wt.get("chart_image_key")),
+            "prompt_category": wt.get("prompt_category"),
+            "min_words": wt.get("min_words") or (150 if task_no == 1 else 250),
+            "content": essay["content"], "word_count": essay.get("word_count") or 0,
+            "status": status, "evaluated_at": run.get("finished_at") or (current.get("created_at") if current else None),
+        },
+        "result": result, "inline_annotations": annotations, "sibling_essays": siblings, "trace_info": None,
     }

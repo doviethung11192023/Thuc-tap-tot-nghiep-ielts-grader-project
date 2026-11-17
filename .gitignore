@@ -63,7 +63,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
+tools/browser-automation/lib/
 lib64/
 parts/
 sdist/

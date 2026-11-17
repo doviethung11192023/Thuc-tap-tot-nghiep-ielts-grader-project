@@ -35,7 +35,7 @@ def published_tests() -> list[dict[str, Any]]:
 
 def learner_goal_row(user_id: str) -> dict[str, Any]:
     rows = db().table("learner_profiles").select(
-        "target_overall, target_listening, target_reading, target_writing, target_speaking, test_date"
+        "input_band, target_overall, target_listening, target_reading, target_writing, target_speaking, test_date"
     ).eq("user_id", user_id).execute().data
     return rows[0] if rows else {}
 

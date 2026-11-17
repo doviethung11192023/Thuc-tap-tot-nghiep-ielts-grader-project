@@ -159,6 +159,8 @@ export interface QuestionGroupData {
   template?: string;
   table_data?: any;
   diagram_image_url?: string;
+  select_count?: number | null;
+  max_words?: number | null;
   questions: BaseQuestion[];
 }
 

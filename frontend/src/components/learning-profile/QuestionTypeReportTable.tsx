@@ -56,7 +56,13 @@ export function QuestionTypeReportTable({ reportRows }: QuestionTypeReportTableP
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 font-medium">
-            {filtered.map((row) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-10 px-5 text-center text-xs text-zinc-400">
+                  Chưa có dữ liệu thống kê dạng bài cho kỹ năng {selectedSkill}.
+                </td>
+              </tr>
+            ) : filtered.map((row) => (
               <tr key={row.type_name} className="hover:bg-zinc-50/60 transition-colors">
                 <td className="py-3.5 px-5 font-bold text-zinc-900">{row.type_name}</td>
                 <td className="py-3.5 px-4 text-center text-zinc-700">{row.total_questions}</td>

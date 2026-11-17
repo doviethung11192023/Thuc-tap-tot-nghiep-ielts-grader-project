@@ -29,7 +29,7 @@ export function SpeakingQuestionFields({
     setUploading(true);
     try {
       const res = await uploadMedia(file, "audio/speaking");
-      onPromptAudioKeyChange(res.key || res.url);
+      onPromptAudioKeyChange(res.url || res.key);
     } catch (err: any) {
       alert("Lỗi tải file audio lên Cloudflare R2");
     } finally {

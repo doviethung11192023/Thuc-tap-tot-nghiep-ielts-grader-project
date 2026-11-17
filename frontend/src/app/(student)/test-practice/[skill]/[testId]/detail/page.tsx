@@ -1,12 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { WritingResultsView } from '@/components/exam/WritingResultsView';
 import { SpeakingResultsView } from '@/components/exam/SpeakingResultsView';
 import { CleanReadingDetailView } from '@/components/exam/clean/CleanReadingDetailView';
 import { CleanListeningDetailView } from '@/components/exam/clean/CleanListeningDetailView';
-import { mockWritingExamDataset } from '@/mocks/exam-writing';
 
 export default function SkillDetailedResultPage() {
   const params = useParams();
@@ -38,14 +36,23 @@ export default function SkillDetailedResultPage() {
     router.push(`/test-practice/${skill}/${testId}${query ? `?${query}` : ''}`);
   };
 
+  const essayId = searchParams.get('essayId') || undefined;
+
+  useEffect(() => {
+    if (skill !== 'writing') return;
+    if (essayId) {
+      router.replace(`/results/${essayId}`);
+      return;
+    }
+    const query = [
+      attemptId ? `attemptId=${attemptId}` : '',
+      returnUrl ? `returnUrl=${encodeURIComponent(returnUrl)}` : '',
+    ].filter(Boolean).join('&');
+    router.replace(`/test-practice/writing/${testId}/summary${query ? `?${query}` : ''}`);
+  }, [skill, essayId, attemptId, testId, returnUrl, router]);
+
   if (skill === 'writing') {
-    return (
-      <WritingResultsView
-        essayText={mockWritingExamDataset.sample_student_submission}
-        onRetake={handleRetake}
-        returnUrl={returnUrl}
-      />
-    );
+    return null;
   }
 
   if (skill === 'speaking') {

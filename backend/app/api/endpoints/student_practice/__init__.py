@@ -7,6 +7,7 @@ from app.api.endpoints.student_practice.results import router as results_router
 from app.api.endpoints.student_practice.speaking_uploads import router as speaking_uploads_router
 from app.api.endpoints.student_practice.analytics import router as analytics_router
 from app.api.endpoints.student_practice.exercises import router as exercises_router
+from app.api.endpoints.student_practice.expert_requests import router as expert_requests_router
 
 student_practice_router = APIRouter()
 
@@ -19,4 +20,6 @@ student_practice_router.include_router(speaking_uploads_router, prefix="/test-pr
 student_practice_router.include_router(results_router, prefix="/test-practice", tags=["Student Exam Results"])
 student_practice_router.include_router(analytics_router, prefix="/student", tags=["Student Analytics"])
 student_practice_router.include_router(analytics_router, prefix="/test-practice", tags=["Student Practice Analytics"])
+student_practice_router.include_router(expert_requests_router, prefix="/student", tags=["Student Expert Quota"])
+student_practice_router.include_router(expert_requests_router, prefix="/test-practice", tags=["Student Expert Requests"])
 

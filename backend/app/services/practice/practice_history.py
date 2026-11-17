@@ -14,6 +14,14 @@ from app.core.domain_errors import ConflictError, NotFoundError
 from app.db.supabase import db
 from app.services.speaking.speaking_audio_retention import delete_attempt_audio
 
+
+def _invalidate_profile(user_id: str) -> None:
+    try:
+        from app.services.learning_profile.common import invalidate_user_profile_cache
+        invalidate_user_profile_cache(str(user_id))
+    except Exception:
+        pass
+
 def list_history(user_id: str, page: int, limit: int, skill: Optional[str], status: Optional[str]) -> dict[str, Any]:
     q = db().table("attempts").select(
         "id, test_id, skill, mode, status, raw_score, question_count, started_at, submitted_at, "
@@ -64,9 +72,11 @@ def discard_attempt(user_id: str, attempt_id: str) -> str:
         raise ConflictError("Bài đã nộp không xoá được (kết quả chấm cần được lưu lại)")
     if attempt["mode"] == "mock":
         db().table("attempts").update({"status": "abandoned"}).eq("id", attempt_id).eq("status", "in_progress").execute()
+        _invalidate_profile(user_id)
         return "abandoned"
     # Chỉ xoá khi vẫn in_progress: bài vừa được nộp ở request khác thì không bị xoá nhầm.
     delete_attempt_audio(attempt_id)
     db().table("attempts").delete().eq("id", attempt_id).eq("learner_id", user_id) \
         .eq("mode", "practice").eq("status", "in_progress").execute()
+    _invalidate_profile(user_id)
     return "deleted"

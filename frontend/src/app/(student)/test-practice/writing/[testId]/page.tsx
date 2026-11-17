@@ -10,6 +10,8 @@ import { autosaveLabel, useServerAutosave } from '@/hooks/useServerAutosave';
 import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/utils/attempt-submission';
+import { invalidatePracticeHistoryCache } from '@/services/practice-history-cache';
+import toast from 'react-hot-toast';
 
 export default function WritingWorkspacePage() {
   const router = useRouter();
@@ -47,10 +49,13 @@ export default function WritingWorkspacePage() {
         const attempt = await startTestAttempt(testId, mode === 'exam' ? 'mock' : 'practice', 'writing');
         currentAttemptId = attempt?.attempt_id || null;
       }
-      if (!currentAttemptId) throw new Error('no attempt');
+      if (!currentAttemptId) throw new Error("Không thể khởi tạo phiên làm bài");
+      // parts: task Learner đã chọn; task trong phạm vi mà bỏ trống tính band 0 (BR-04)
       await submitWritingAttempt(currentAttemptId, { essay_text: text, task1_text: task1Text, task2_text: task2Text, parts });
       notifyAttemptSubmitted(currentAttemptId, writingData?.title || "IELTS Academic Writing Test",
         summaryPath(currentAttemptId));
+      toast.success("Nộp bài thi thành công! Hệ thống AI đang tiến hành chấm điểm.");
+      invalidatePracticeHistoryCache();
       router.push(summaryPath(currentAttemptId));
     } catch (err) {
       if (currentAttemptId && isAlreadySubmitted(err)) {     // nộp ở tab khác hoặc đã tự nộp: kết quả là bài đó
@@ -71,20 +76,26 @@ export default function WritingWorkspacePage() {
   }
 
   return (
-    <>
-    <WritingWorkspace
-      testData={writingData}
-      mode={mode}
-      initialEssays={savedWork?.essays}
-      onEssaysChange={setEssays}
-      saveStatusLabel={attemptId ? autosaveLabel(autosave.status, autosave.savedAt) : undefined}
-      onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
-      deadlineMs={mode === 'exam' ? deadlineMs : null}
-      parts={parts}
-      returnUrl={returnUrl || undefined}
-      onSubmit={handleSubmit}
-    />
-    <SubmitErrorBanner message={submitError} onClose={() => setSubmitError(null)} />
-    </>
+    <div className="flex flex-col h-full w-full">
+      {attemptError && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-800 flex items-center gap-2 shrink-0">
+          <span className="font-semibold">⚠️ Lưu ý phân quyền:</span>
+          <span>{attemptError}. Hãy đăng nhập bằng tài khoản Học viên để nộp bài và nhận điểm AI.</span>
+        </div>
+      )}
+      <WritingWorkspace
+        testData={writingData}
+        mode={mode}
+        initialEssays={savedWork?.essays}
+        onEssaysChange={setEssays}
+        saveStatusLabel={attemptId ? autosaveLabel(autosave.status, autosave.savedAt) : undefined}
+        onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
+        deadlineMs={mode === 'exam' ? deadlineMs : null}
+        parts={parts}
+        returnUrl={returnUrl || undefined}
+        onSubmit={handleSubmit}
+      />
+      <SubmitErrorBanner message={submitError} onClose={() => setSubmitError(null)} />
+    </div>
   );
 }
