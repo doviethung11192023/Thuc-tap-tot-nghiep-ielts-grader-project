@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.core.security import User, get_optional_user
 from app.db.supabase import db
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt, require_owned_attempt
+from app.services.expert.mock_expert_review_request import request_mock_expert_review
 from app.services.grading.grading_queue import enqueue_grading_run
 from app.services.speaking.speaking_submission_service import submit_speaking
 from app.services.writing.writing_attempt_service import submit_writing
@@ -32,19 +33,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
         await enqueue_grading_run(request.app.state.redis, run_id, "writing")
     essays = sub["essays"]           # rỗng khi bài Mock nộp muộn mà chưa lưu chữ nào (abandoned)
 
-    # Mock: tạo yêu cầu Expert nếu đã giữ chỗ / còn quota (BR-15, UC-32); bài bỏ trống không gửi Expert
-    has_expert_review = False
-    if attempt.get("mode") == "mock" and current_user and essays:
-        try:
-            from app.services.expert.quota_manager import confirm_mock_submission_slot
-            from app.services.expert.dispatcher import auto_dispatch_pending_requests
-            has_expert_review = await confirm_mock_submission_slot(
-                current_user.id, attempt_id, "writing", getattr(request.app.state, "redis", None)
-            )
-            if has_expert_review:
-                await auto_dispatch_pending_requests()
-        except Exception as e:
-            print(f"[MockExpertReview] Warning: {e}")
+    has_expert_review = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
 
     return {
         "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
@@ -118,19 +107,5 @@ async def submit_speaking_attempt(attempt_id: str, request: Request,
     if job:
         await enqueue_grading_run(request.app.state.redis, job["runs"][0]["run_id"], "speaking")
 
-    # Nếu là Mock Test và có audio hợp lệ, tạo yêu cầu chấm Expert (BR-15, UC-32)
-    has_expert_review = False
-    if attempt.get("mode") == "mock" and current_user and sub.get("status") != "no_speech":
-        try:
-            from app.services.expert.quota_manager import confirm_mock_submission_slot
-            from app.services.expert.dispatcher import auto_dispatch_pending_requests
-            has_expert_review = await confirm_mock_submission_slot(
-                current_user.id, attempt_id, "speaking", getattr(request.app.state, "redis", None)
-            )
-            if has_expert_review:
-                await auto_dispatch_pending_requests()
-        except Exception as e:
-            print(f"[MockExpertSpeaking] Warning: {e}")
-
-    sub["has_expert_review"] = has_expert_review
+    sub["has_expert_review"] = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
     return {"meta": {"code": 200, "message": "Bài thi nói đã được ghi nhận"}, "data": sub}

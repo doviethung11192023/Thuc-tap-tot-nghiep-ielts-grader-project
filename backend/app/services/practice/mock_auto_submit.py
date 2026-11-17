@@ -2,7 +2,8 @@
 Tự nộp bài Mock quá hạn (FR-12, BR-21, UC-26; spec 004 US3).
 
 Cron chạy mỗi phút: mọi attempt Mock còn in_progress quá deadline + 30 s được nộp bằng phần đã lưu trên
-server, dù Learner còn mở trang hay không. Chấm như nộp tay: L/R chấm ngay, W/S đẩy job chấm AI.
+server, dù Learner còn mở trang hay không. Chấm như nộp tay: L/R chấm ngay, W/S đẩy job chấm AI và tạo
+yêu cầu Expert như khi Learner tự nộp (BR-15, UC-32; bài không có nội dung thì không).
 
 Nộp tay và cron cùng lúc: function submit_* của DB khoá dòng attempt, chỉ lần đầu có hiệu lực, lần sau
 nhận NULL (ConflictError) và được bỏ qua ở đây.
@@ -12,6 +13,7 @@ from typing import Any
 
 from app.core.domain_errors import ConflictError
 from app.db.supabase import db
+from app.services.expert.mock_expert_review_request import request_mock_expert_review
 from app.services.grading.grading_queue import enqueue_grading_run
 from app.services.listening_reading.lr_grading_service import submit_lr
 from app.services.practice.practice_attempt_lifecycle import LATE_GRACE_SECONDS, now_utc
@@ -36,10 +38,11 @@ async def _submit(redis: Any, attempt: dict[str, Any]) -> str:
         sub = submit_writing(attempt, None, None, None, auto=True)
         for run_id in sub["run_ids"]:
             await enqueue_grading_run(redis, run_id, "writing")
-        return sub["status"]
-    sub = submit_speaking(attempt, auto=True)
-    if sub.get("job"):
-        await enqueue_grading_run(redis, sub["job"]["runs"][0]["run_id"], "speaking")
+    else:
+        sub = submit_speaking(attempt, auto=True)
+        if sub.get("job"):
+            await enqueue_grading_run(redis, sub["job"]["runs"][0]["run_id"], "speaking")
+    await request_mock_expert_review(attempt, sub, redis)
     return sub["status"]
 
 

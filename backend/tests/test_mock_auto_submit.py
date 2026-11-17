@@ -108,6 +108,52 @@ def test_one_broken_attempt_does_not_block_the_others(monkeypatch):
     assert counts == {"failed": 1, "abandoned": 1}
 
 
+def test_cron_creates_expert_request_only_for_mock_with_work(monkeypatch):
+    """Bài Mock tự nộp lúc hết giờ cũng tạo yêu cầu Expert như nộp tay; bài trống thì không."""
+    from app.services.expert import mock_expert_review_request as review
+    attempts = [
+        {"id": "w1", "skill": "writing", "mode": "mock", "learner_id": "u1"},
+        {"id": "w2", "skill": "writing", "mode": "mock", "learner_id": "u2"},     # không lưu chữ nào
+        {"id": "s1", "skill": "speaking", "mode": "mock", "learner_id": "u3"},
+        {"id": "s2", "skill": "speaking", "mode": "mock", "learner_id": "u4"},    # không có câu trả lời
+        {"id": "r1", "skill": "reading", "mode": "mock", "learner_id": "u5"},     # L/R không có Expert
+    ]
+    monkeypatch.setattr(mock_auto_submit, "overdue_mock_attempts", lambda: attempts)
+    monkeypatch.setattr(mock_auto_submit, "submit_lr", lambda *a, **k: None)
+    monkeypatch.setattr(mock_auto_submit, "submit_writing", lambda a, *_, auto: (
+        {"status": "grading", "run_ids": ["run-" + a["id"]], "essays": [{"essay_id": "e1"}]} if a["id"] == "w1"
+        else {"status": "abandoned", "run_ids": [], "essays": []}))
+    monkeypatch.setattr(mock_auto_submit, "submit_speaking", lambda a, auto: (
+        {"status": "grading", "job": {"runs": [{"run_id": "run-s1"}]}} if a["id"] == "s1"
+        else {"status": "no_speech", "job": None}))
+    requested, dispatched = [], []
+
+    async def fake_slot(learner_id, attempt_id, skill, redis):
+        requested.append((learner_id, attempt_id, skill))
+        return True
+
+    async def fake_dispatch():
+        dispatched.append(1)
+        return 1
+    monkeypatch.setattr(review, "confirm_mock_submission_slot", fake_slot)
+    monkeypatch.setattr(review, "auto_dispatch_pending_requests", fake_dispatch)
+
+    counts = asyncio.run(mock_auto_submit.auto_submit_overdue_mocks(RecordingRedis()))
+    assert counts == {"grading": 2, "abandoned": 1, "no_speech": 1, "scored": 1}
+    assert requested == [("u1", "w1", "writing"), ("u3", "s1", "speaking")]
+    assert len(dispatched) == 2
+
+
+def test_expert_request_error_does_not_fail_the_submit(monkeypatch):
+    from app.services.expert import mock_expert_review_request as review
+
+    async def broken_slot(*_):
+        raise RuntimeError("redis down")
+    monkeypatch.setattr(review, "confirm_mock_submission_slot", broken_slot)
+    attempt = {"id": "w1", "skill": "writing", "mode": "mock", "learner_id": "u1"}
+    assert asyncio.run(review.request_mock_expert_review(attempt, {"essays": [{"essay_id": "e1"}]}, None)) is False
+
+
 # ---------- Lưu bài ----------
 @pytest.mark.parametrize("value", ["library", ["A", "C"], None])
 def test_saved_answer_round_trips_with_its_type(value):
