@@ -112,5 +112,3 @@ dataset_clean/
 private/
 tools/browser-automation/node_modules/
 dataset_clean/
-# Kết quả chạy backend/run_pytest.py
-pytest_output.txt
