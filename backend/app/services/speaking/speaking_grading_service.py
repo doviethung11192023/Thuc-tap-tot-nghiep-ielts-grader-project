@@ -9,12 +9,12 @@ from typing import Any
 
 from app.db.supabase import db
 from app.services.practice.ai_evaluation_outcome import fail_ai_evaluation
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 from app.services.speaking.speaking_evaluation_finalizer import finalize_speaking_evaluation
 from app.services.speaking.speaking_test_content import speaking_part_number
 from app.services.writing.writing_bands import to_half_band
-from app.clients.ai_engine_client import call_ai_grade_speaking
-from app.clients.ai_engine_run_usage import run_context
+from app.clients.ai_engine.grading_client import call_ai_grade_speaking
+from app.clients.ai_engine.run_usage import run_context
 from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
 
 # Khoá trong JSON AI engine → mã tiêu chí trong bảng criteria

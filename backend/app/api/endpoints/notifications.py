@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.security import User, get_current_active_user
-from app.services.notification_service import (
+from app.services.notifications.notification_service import (
     list_user_notifications,
     mark_all_notifications_read,
     mark_notification_read,

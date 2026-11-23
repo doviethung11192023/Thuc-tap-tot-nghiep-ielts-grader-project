@@ -7,7 +7,7 @@ và chỉ của chính chủ bài vì endpoint đã kiểm quyền.
 from typing import Any, Optional
 
 from app.db.supabase import db
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 from app.services.speaking.speaking_grading_service import CRITERION_CODES, load_answers
 from app.services.speaking.speaking_test_content import speaking_part, speaking_part_number
 

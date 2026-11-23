@@ -5,7 +5,7 @@ sections[i].question_groups[0].questions[0].prompt, question_groups[0].image_key
 """
 from typing import Any, Optional
 
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 from app.db.supabase import db
 
 _TASK_NO = {"task1": 1, "task2": 2}

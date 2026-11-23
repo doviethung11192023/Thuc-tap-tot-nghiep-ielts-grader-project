@@ -1,6 +1,6 @@
 """Sức khoẻ service AI (US11) và việc trang Cài đặt chung không còn thấy/sửa khoá AI (FR-052)."""
 from ai_services_test_support import as_role, client, fake_db, fake_engine  # noqa: F401
-from app.clients import ai_engine_admin_client as engine_client
+from app.clients.ai_engine import admin_client as engine_client
 
 HEALTH = "/api/v1/admin/ai-services/health"
 SETTINGS = "/api/v1/admin/core/settings"

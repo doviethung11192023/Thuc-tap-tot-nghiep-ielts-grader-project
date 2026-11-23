@@ -13,8 +13,8 @@ from app.services.writing.writing_bands import to_half_band
 from app.services.writing.writing_evaluation_finalizer import finalize_writing_evaluation
 from app.services.writing.writing_test_content import chart_image_url
 from app.services.writing.annotation_alignment import align_annotation_coordinates
-from app.clients.ai_engine_client import call_ai_grade, call_ai_grading_fingerprint
-from app.clients.ai_engine_run_usage import run_context
+from app.clients.ai_engine.grading_client import call_ai_grade, call_ai_grading_fingerprint
+from app.clients.ai_engine.run_usage import run_context
 from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
 from app.services.writing.writing_grading_cache import find_cached_output, input_hash, is_first_ai_evaluation
 from app.services.writing.writing_task_materials import approved_answer_key

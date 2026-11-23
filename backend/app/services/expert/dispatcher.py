@@ -14,7 +14,7 @@ from app.services.expert.sla_service import (
     TZ_VN
 )
 from app.services.learning_profile.common import invalidate_user_profile_cache
-from app.services.notification_service import notify_expert_assigned, notify_expert_completed
+from app.services.notifications.notification_service import notify_expert_assigned, notify_expert_completed
 from app.core.domain_errors import DomainError
 from app.services.ai_monitoring.ai_expert_gap_scores import schedule_expert_gap_scores
 

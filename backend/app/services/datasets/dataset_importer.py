@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from app.db.supabase import db
 from app.schemas.exam_content import SkillType
-from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
-from app.services.importers.rl_importer import process_single_rl_exam
-from app.services.importers.writing_importer import import_writing_tests, import_single_writing_test
-from app.services.importers.speaking_importer import import_speaking_tests, import_single_speaking_test
+from app.services.datasets.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
+from app.services.datasets.rl_importer import process_single_rl_exam
+from app.services.datasets.writing_importer import import_writing_tests, import_single_writing_test
+from app.services.datasets.speaking_importer import import_speaking_tests, import_single_speaking_test
 
 class DatasetImporter:
     """Import IELTS test dataset from clean dataset into Supabase."""
@@ -31,7 +31,7 @@ class DatasetImporter:
                     self.admin_id = adm.data[0]["id"]
 
             test_set_id = None   # bộ đề Mock chỉ có 1 đề/kỹ năng (FR-36): đề nhập vào là đề độc lập
-            from app.services.dataset_scanner import scan_dataset
+            from app.services.datasets.dataset_scanner import scan_dataset
             self.stats["duplicate_titles"] = {f"{t['title'].lower()[:280]}|{t['skill']}"
                                                for t in scan_dataset(str(self.root))["tests"] if t.get("duplicate_title")}
             if selected_tests:

@@ -9,7 +9,7 @@ from typing import Any
 
 import httpx
 
-from app.clients.ai_engine_client import _engine_url, _headers
+from app.clients.ai_engine.grading_client import _engine_url, _headers
 from app.db.supabase import db
 from app.services.admin.staff_accounts import write_audit
 from app.services.ai_monitoring.ai_monitoring_time import now_vn

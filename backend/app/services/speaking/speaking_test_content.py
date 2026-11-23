@@ -10,7 +10,7 @@ import re
 from typing import Any, Optional
 
 from app.db.supabase import db
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 
 SPEAKING_TREE_SELECT = (
     "id, title, skill, status, duration_minutes, "

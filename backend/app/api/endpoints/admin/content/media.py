@@ -3,7 +3,7 @@ from typing import Optional
 import uuid
 import os
 from app.core.security import require_admin, User
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 
 router = APIRouter()
 

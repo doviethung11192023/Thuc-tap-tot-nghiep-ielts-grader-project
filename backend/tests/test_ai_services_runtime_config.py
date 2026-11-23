@@ -2,7 +2,7 @@
 from ai_services_test_support import (  # noqa: F401
     ADMIN_ID, EFFECTIVE, as_role, audit_rows, client, fake_db, fake_engine,
 )
-from app.clients import ai_engine_admin_client as engine_client
+from app.clients.ai_engine import admin_client as engine_client
 
 BASE = "/api/v1/admin/ai-services/runtime-config"
 

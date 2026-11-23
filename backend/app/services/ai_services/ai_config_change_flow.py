@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Iterable, Optional
 
-from app.clients import ai_engine_admin_client as engine
+from app.clients.ai_engine import admin_client as engine
 from app.services.ai_services.ai_service_errors import BadGatewayError, UnprocessableError
 from app.services.ai_services.secret_redaction import redact_secrets
 

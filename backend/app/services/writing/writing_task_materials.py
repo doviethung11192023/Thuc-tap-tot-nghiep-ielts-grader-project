@@ -7,7 +7,7 @@ Learner chỉ nhận phần đã duyệt qua các hàm approved_* (FR-007); bả
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from app.clients.ai_engine_client import call_ai_draft_material
+from app.clients.ai_engine.grading_client import call_ai_draft_material
 from app.core.domain_errors import DomainError, NotFoundError
 from app.db.supabase import db
 from app.services.writing.writing_test_content import chart_image_url

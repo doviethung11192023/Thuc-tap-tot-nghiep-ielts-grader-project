@@ -1,7 +1,7 @@
 """Proxy quản lý prompt tới AI engine (US5): Core kiểm model cho phép và ghi audit khi thành công (FR-022, FR-024)."""
 from typing import Any
 
-from app.clients import ai_engine_admin_client as engine
+from app.clients.ai_engine import admin_client as engine
 from app.core.domain_errors import NotFoundError
 from app.services.admin.staff_accounts import write_audit
 from app.services.ai_services.ai_allowed_models import get_allowed_models

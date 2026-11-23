@@ -1,7 +1,12 @@
 from fastapi import APIRouter
-from app.api.endpoints import essays, users, admin, auth, expert, notifications
-from app.api.endpoints import admin_ai_monitoring, admin_ai_services, internal_ai_engine
-from app.api.endpoints.admin_content import (
+from app.api.endpoints import essays, users, auth, expert, notifications
+from app.api.endpoints.admin import (
+    ai_monitoring as admin_ai_monitoring,
+    ai_services as admin_ai_services,
+    users_reviews_statistics as admin,
+)
+from app.api.endpoints.internal import ai_engine as internal_ai_engine
+from app.api.endpoints.admin.content import (
     tests as admin_tests,
     sections as admin_sections,
     questions as admin_questions,

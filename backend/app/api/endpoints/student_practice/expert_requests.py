@@ -12,7 +12,7 @@ from app.services.expert.quota_manager import (
     release_mock_expert_slot
 )
 from app.services.expert.dispatcher import auto_dispatch_pending_requests
-from app.services.notification_service import notify_expert_requested
+from app.services.notifications.notification_service import notify_expert_requested
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt
 from app.db.supabase import db
 

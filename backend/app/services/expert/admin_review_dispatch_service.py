@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from app.core.domain_errors import DomainError
 from app.db.supabase import db
 from app.services.expert.sla_service import TZ_VN, calculate_review_due_at
-from app.services.notification_service import notify_expert_assigned
+from app.services.notifications.notification_service import notify_expert_assigned
 
 
 def _build_experts_workload() -> List[Dict[str, Any]]:

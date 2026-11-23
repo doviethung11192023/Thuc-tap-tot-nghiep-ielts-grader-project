@@ -5,7 +5,7 @@ import logging
 from ai_services_test_support import (  # noqa: F401
     ADMIN_ID, ENV_KEY_LAST4, as_role, audit_rows, client, encryption_key, fake_db, fake_engine,
 )
-from app.clients import ai_engine_admin_client as engine_client
+from app.clients.ai_engine import admin_client as engine_client
 from app.services.ai_services.ai_secret_cipher import decrypt_secret
 
 BASE = "/api/v1/admin/ai-services/keys"

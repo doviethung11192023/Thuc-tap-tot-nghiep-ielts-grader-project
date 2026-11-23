@@ -8,7 +8,7 @@ from app.core.security import User, get_current_user
 from app.services.learner_journey.next_step_builder import compute_next_step
 from app.services.learning_profile.common import _cache
 from app.services.learning_profile.common import invalidate_user_profile_cache
-from app.services.learning_profile_aggregator import (
+from app.services.learning_profile.learning_profile_aggregator import (
     compute_learning_profile_overview,
     compute_learning_profile_test_practice,
 )

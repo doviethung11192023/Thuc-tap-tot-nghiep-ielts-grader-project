@@ -12,7 +12,7 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
 
-from app.services.dataset_importer import DatasetImporter
+from app.services.datasets.dataset_importer import DatasetImporter
 
 def main():
     parser = argparse.ArgumentParser(description="Import crawled IELTS dataset into Supabase")

@@ -7,7 +7,7 @@ Xoá thất bại thì không ghi audio_deleted_at, nên lượt chạy sau th�
 from datetime import datetime, timedelta, timezone
 
 from app.db.supabase import db
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 
 DEFAULT_RETENTION_DAYS = 180
 BATCH_SIZE = 500

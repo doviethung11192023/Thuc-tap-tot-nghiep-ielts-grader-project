@@ -6,7 +6,7 @@ Evaluation AI chính thức nếu attempt chưa có điểm Expert chính thức
 Mỗi thao tác là một function DB để evaluation và attempt đổi trạng thái trong cùng transaction.
 """
 from app.db.supabase import db
-from app.services.notification_service import notify_ai_grading_result
+from app.services.notifications.notification_service import notify_ai_grading_result
 
 
 def _drop_learner_profile_cache(attempt_id: str) -> None:

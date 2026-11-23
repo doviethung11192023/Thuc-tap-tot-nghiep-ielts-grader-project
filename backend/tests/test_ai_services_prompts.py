@@ -1,6 +1,6 @@
 """Proxy prompt: Core kiểm model cho phép, ghi audit khi thành công, engine lỗi thì 502 và không ghi (US5)."""
 from ai_services_test_support import as_role, audit_rows, client, fake_db, fake_engine  # noqa: F401
-from app.clients import ai_engine_admin_client as engine_client
+from app.clients.ai_engine import admin_client as engine_client
 
 BASE = "/api/v1/admin/prompts"
 BODY = {"name": "writing/task2/grade", "prompt": [{"role": "system", "content": "Hi {{essay}}"}],

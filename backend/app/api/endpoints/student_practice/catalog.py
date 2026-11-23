@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from app.core.security import get_optional_user, User
 from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
-from app.services.catalog_formatter import format_collection_cards, DEFAULT_COVER_IMAGES
+from app.services.practice.catalog_formatter import format_collection_cards, DEFAULT_COVER_IMAGES
 
 router = APIRouter()
 _CATALOG_TTL_SECONDS = 60

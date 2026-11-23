@@ -5,7 +5,7 @@ import pytest
 from cryptography.fernet import Fernet
 from fastapi.testclient import TestClient
 
-from app.clients import ai_engine_admin_client as engine_client
+from app.clients.ai_engine import admin_client as engine_client
 from app.core.config import settings
 from app.core.security import User, get_current_active_user
 from app.main import app
@@ -65,7 +65,7 @@ def fake_db(monkeypatch):
         profiles=[{"id": ADMIN_ID, "email": "admin@example.com", "role": "admin"}])
     from app.services.admin import staff_accounts
     from app.services.ai_services import ai_allowed_models, ai_runtime_config_store
-    from app.api.endpoints.admin_content import core
+    from app.api.endpoints.admin.content import core
     for module in (staff_accounts, ai_runtime_config_store, ai_allowed_models, core):
         monkeypatch.setattr(module, "db", lambda: db)
     from app.services.ai_monitoring import model_pricing

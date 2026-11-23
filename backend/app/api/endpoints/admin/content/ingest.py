@@ -11,9 +11,9 @@ from app.schemas.system_settings import (
     CrawledDatasetIngestRequest, CrawledDatasetIngestResponse,
     DatasetScanResponse
 )
-from app.services.dataset_importer import DatasetImporter
-from app.services.dataset_scanner import scan_dataset
-from app.services.dataset_path_resolver import resolve_dataset_paths
+from app.services.datasets.dataset_importer import DatasetImporter
+from app.services.datasets.dataset_scanner import scan_dataset
+from app.services.datasets.dataset_path_resolver import resolve_dataset_paths
 from starlette.concurrency import run_in_threadpool
 
 router = APIRouter(route_class=StudentContentMutationRoute)

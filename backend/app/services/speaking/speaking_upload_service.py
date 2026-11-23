@@ -16,7 +16,7 @@ from app.core.domain_errors import ConflictError, ForbiddenError, InvalidRequest
 
 from app.db.supabase import db
 from app.services.practice.practice_attempt_lifecycle import past_deadline
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 
 MAX_AUDIO_BYTES = 15 * 1024 * 1024     # 120 s Opus chỉ khoảng 3 MB; 15 MB chặn file bất thường
 MAX_DURATION_MS = 5 * 60 * 1000

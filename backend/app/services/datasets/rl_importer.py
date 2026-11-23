@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 from typing import Optional, Dict, Any
-from app.services.importers import import_writer
+from app.services.datasets import import_writer
 from app.schemas.exam_content import SkillType
-from app.services.importers.rl_parser_helpers import (
+from app.services.datasets.rl_parser_helpers import (
     clean_html, extract_section_payload, parse_exercise_group
 )
 

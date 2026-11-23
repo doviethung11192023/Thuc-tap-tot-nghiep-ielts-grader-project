@@ -1,7 +1,7 @@
 """Xem và sửa ghi đè cấu hình chạy (US9): kiểm → gọi thử → lưu → audit → báo engine nạp lại (FR-033..039)."""
 from typing import Any, Optional
 
-from app.clients import ai_engine_admin_client as engine
+from app.clients.ai_engine import admin_client as engine
 from app.core.domain_errors import NotFoundError
 from app.services.admin.staff_accounts import write_audit
 from app.services.ai_services import ai_runtime_config_store as store

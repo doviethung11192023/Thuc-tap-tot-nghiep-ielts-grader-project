@@ -20,7 +20,7 @@ from app.services.expert.dispatcher import (
     submit_expert_final_review
 )
 from app.services.expert.expert_draft_service import save_expert_grading_draft
-from app.services.r2_storage import r2_storage
+from app.services.storage.r2_storage import r2_storage
 from app.services.speaking.speaking_test_content import speaking_part_number
 from app.services.writing.writing_test_content import chart_image_url
 

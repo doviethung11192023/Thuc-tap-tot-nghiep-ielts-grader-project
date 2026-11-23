@@ -2,9 +2,9 @@ import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from app.services.importers import import_writer
+from app.services.datasets import import_writer
 from app.schemas.exam_content import SkillType
-from app.services.dataset_path_resolver import resolve_dataset_paths
+from app.services.datasets.dataset_path_resolver import resolve_dataset_paths
 
 @lru_cache(maxsize=4)
 def _r2_chart_keys(root: str) -> Dict[str, str]:

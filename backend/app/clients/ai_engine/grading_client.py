@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import httpx
 
-from app.clients.ai_engine_run_usage import (
+from app.clients.ai_engine.run_usage import (
     AIEngineError, absorb_failed_response, current_run_context, finish_success,
 )
 from app.core.config import settings

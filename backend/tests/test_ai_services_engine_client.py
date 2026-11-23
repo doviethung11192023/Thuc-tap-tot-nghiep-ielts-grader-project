@@ -4,7 +4,7 @@ import asyncio
 import httpx
 import pytest
 
-from app.clients import ai_engine_admin_client as client_module
+from app.clients.ai_engine import admin_client as client_module
 from app.core.config import settings
 
 

@@ -9,7 +9,7 @@ from typing import Any
 
 import httpx
 
-from app.clients.ai_engine_client import _engine_url, _headers
+from app.clients.ai_engine.grading_client import _engine_url, _headers
 from app.services.ai_monitoring.ai_expert_gap_pairs import EvalPair, load_pairs, load_runs
 
 logger = logging.getLogger(__name__)

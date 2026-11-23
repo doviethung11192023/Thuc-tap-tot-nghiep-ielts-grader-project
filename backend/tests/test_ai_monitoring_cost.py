@@ -4,8 +4,8 @@ import asyncio
 import httpx
 import pytest
 
-from app.clients import ai_engine_client as client
-from app.clients.ai_engine_run_usage import AIEngineError, merge_usage, run_context
+from app.clients.ai_engine import grading_client as client
+from app.clients.ai_engine.run_usage import AIEngineError, merge_usage, run_context
 from app.services.ai_monitoring import ai_usage_report, model_pricing, run_usage_recorder
 from app.services.speaking import speaking_grading_service as speaking
 from app.services.writing import writing_grading_service as writing
@@ -204,7 +204,7 @@ def test_speaking_failure_records_tokens_trace_and_cost(monkeypatch):
     seen = {}
 
     async def failing(title, answers, unanswered=None):
-        from app.clients.ai_engine_run_usage import current_run_context
+        from app.clients.ai_engine.run_usage import current_run_context
         seen.update(current_run_context())
         raise AIEngineError("AI engine speaking grading failed: HTTP 500", [
             {"model": "qwen-flash", "input_tokens": 1_000_000, "output_tokens": 0}], "trace-7")

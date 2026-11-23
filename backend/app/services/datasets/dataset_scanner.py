@@ -4,7 +4,7 @@ from typing import Dict, Any, List, Optional
 from collections import Counter
 from app.core.domain_errors import NotFoundError
 from app.db.supabase import db
-from app.services.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
+from app.services.datasets.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
 
 def _scan_rl_tests(de_bai_dir: Path, existing: set, summary: dict, pending: list, all_tests: list):
     rl_dir = de_bai_dir / "listening_reading" / "445_Recent_Actual_Test"
