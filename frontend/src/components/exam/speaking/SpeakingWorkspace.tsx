@@ -8,15 +8,15 @@ import { useSpeakingRecorder, type RecordedAnswer } from '@/hooks/useSpeakingRec
 import { useSpeakingRoomMachine, type RoomQuestion } from '@/hooks/useSpeakingRoomMachine';
 import { useSpeakingUploadQueue } from '@/hooks/useSpeakingUploadQueue';
 import { getVoiceConsentAt } from '@/services/speaking-room';
-import { SpeakingIntroModal } from './speaking/speaking-intro-modal';
-import { SpeakingConsentGate } from './speaking/speaking-consent-gate';
-import { SpeakingMicCheck } from './speaking/speaking-mic-check';
-import { SpeakingPartGuideline } from './speaking/speaking-part-guideline';
-import { SpeakingQuestionSidebar } from './speaking/speaking-question-sidebar';
-import { SpeakingVirtualRoomStage } from './speaking/speaking-virtual-room-stage';
-import { SpeakingAidsPanel } from './speaking/speaking-aids-panel';
-import { SpeakingReviewScreen } from './speaking/speaking-review-screen';
-import { ExitConfirmModal } from './ExitConfirmModal';
+import { SpeakingIntroModal } from '@/components/exam/speaking/speaking-intro-modal';
+import { SpeakingConsentGate } from '@/components/exam/speaking/speaking-consent-gate';
+import { SpeakingMicCheck } from '@/components/exam/speaking/speaking-mic-check';
+import { SpeakingPartGuideline } from '@/components/exam/speaking/speaking-part-guideline';
+import { SpeakingQuestionSidebar } from '@/components/exam/speaking/speaking-question-sidebar';
+import { SpeakingVirtualRoomStage } from '@/components/exam/speaking/speaking-virtual-room-stage';
+import { SpeakingAidsPanel } from '@/components/exam/speaking/speaking-aids-panel';
+import { SpeakingReviewScreen } from '@/components/exam/speaking/speaking-review-screen';
+import { ExitConfirmModal } from '@/components/exam/shared/ExitConfirmModal';
 
 type ViewPhase = 'intro' | 'consent' | 'mic_check' | 'guideline' | 'testing' | 'review';
 type PartNumber = 1 | 2 | 3;

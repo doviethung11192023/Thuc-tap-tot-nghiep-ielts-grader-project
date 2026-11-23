@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Home, ChevronRight, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { useExamCollectionDetail } from "@/hooks/useExamCollection";
-import { TestPrepModal } from "@/components/exam/TestPrepModal";
+import { TestPrepModal } from "@/components/exam/shared/TestPrepModal";
 import { SkillItemCard } from "@/components/exam/student-practice/SkillItemCard";
 
 export default function TestSkillsListPage() {

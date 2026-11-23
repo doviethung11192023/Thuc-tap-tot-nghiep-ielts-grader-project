@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { SpeakingWorkspace } from '@/components/exam/SpeakingWorkspace';
-import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
+import { SpeakingWorkspace } from '@/components/exam/speaking/SpeakingWorkspace';
+import { ExamWorkspaceSkeleton } from '@/components/exam/shared/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
-import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
+import { ExamPageNotice } from '@/components/exam/shared/ExamPageNotice';
 import { closedAttemptMessage } from '@/lib/attempt-submission';
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
 

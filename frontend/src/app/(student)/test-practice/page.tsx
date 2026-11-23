@@ -8,7 +8,7 @@ import { StudentMockLauncherSection } from "@/components/exam/student-practice/S
 import { StudentDirectTestsSection } from "@/components/exam/student-practice/StudentDirectTestsSection";
 import { StudentSkillExercisesSection } from "@/components/exam/student-practice/StudentSkillExercisesSection";
 import { PracticeHistorySidebarWidget } from "@/components/exam/student-practice/PracticeHistorySidebarWidget";
-import { TestPrepModal } from "@/components/exam/TestPrepModal";
+import { TestPrepModal } from "@/components/exam/shared/TestPrepModal";
 import type { PublishedTestItem } from "@/types/test-practice";
 
 export default function TestPracticePage() {

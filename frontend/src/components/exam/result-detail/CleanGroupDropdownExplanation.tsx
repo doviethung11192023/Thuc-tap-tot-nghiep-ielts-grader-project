@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
 import { CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
-import { CleanGroupEvidenceLocation } from './CleanGroupEvidenceLocation';
-import { CleanExplanationSteps } from './CleanExplanationSteps';
+import { CleanGroupEvidenceLocation } from '@/components/exam/result-detail/CleanGroupEvidenceLocation';
+import { CleanExplanationSteps } from '@/components/exam/result-detail/CleanExplanationSteps';
 
 interface CleanGroupDropdownExplanationProps {
   questions: CleanListeningQuestion[];

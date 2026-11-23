@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { X, Loader2, Save } from "lucide-react";
 import { createQuestion, updateQuestion } from "@/services/admin-content";
-import { SpeakingQuestionFields } from "@/components/admin/SpeakingQuestionFields";
-import { QuestionAnswerKeyEditor } from "@/components/admin/QuestionAnswerKeyEditor";
+import { SpeakingQuestionFields } from "@/components/admin/test-editor/SpeakingQuestionFields";
+import { QuestionAnswerKeyEditor } from "@/components/admin/test-editor/QuestionAnswerKeyEditor";
 import type { Question, SkillType } from "@/types/exam";
 
 interface QuestionEditorModalProps {

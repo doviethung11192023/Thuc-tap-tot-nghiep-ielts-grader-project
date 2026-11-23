@@ -2,12 +2,12 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { ReadingWorkspace } from '@/components/exam/ReadingWorkspace';
-import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
-import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
+import { ReadingWorkspace } from '@/components/exam/reading/ReadingWorkspace';
+import { ExamWorkspaceSkeleton } from '@/components/exam/shared/ExamWorkspaceSkeleton';
+import { ExamPageNotice } from '@/components/exam/shared/ExamPageNotice';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { useServerAutosave } from '@/hooks/useServerAutosave';
-import { AutosaveStatusBadge } from '@/components/exam/AutosaveStatusBadge';
+import { AutosaveStatusBadge } from '@/components/exam/shared/AutosaveStatusBadge';
 import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/lib/attempt-submission';
 

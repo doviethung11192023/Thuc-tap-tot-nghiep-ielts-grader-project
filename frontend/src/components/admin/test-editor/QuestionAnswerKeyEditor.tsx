@@ -2,12 +2,12 @@
 
 import React from "react";
 import type { SkillType } from "@/types/exam";
-import { TrueFalseAnswerEditor } from "./answer-editors/TrueFalseAnswerEditor";
-import { MultipleChoiceAnswerEditor } from "./answer-editors/MultipleChoiceAnswerEditor";
-import { CompletionSmartBuilder } from "./answer-editors/CompletionSmartBuilder";
-import { MatchingHeadingsEditor } from "./answer-editors/MatchingHeadingsEditor";
-import { WritingModelAnswerEditor } from "./answer-editors/WritingModelAnswerEditor";
-import { SpeakingCueCardEditor } from "./answer-editors/SpeakingCueCardEditor";
+import { TrueFalseAnswerEditor } from "@/components/admin/answer-editors/TrueFalseAnswerEditor";
+import { MultipleChoiceAnswerEditor } from "@/components/admin/answer-editors/MultipleChoiceAnswerEditor";
+import { CompletionSmartBuilder } from "@/components/admin/answer-editors/CompletionSmartBuilder";
+import { MatchingHeadingsEditor } from "@/components/admin/answer-editors/MatchingHeadingsEditor";
+import { WritingModelAnswerEditor } from "@/components/admin/answer-editors/WritingModelAnswerEditor";
+import { SpeakingCueCardEditor } from "@/components/admin/answer-editors/SpeakingCueCardEditor";
 
 interface QuestionAnswerKeyEditorProps {
   skill: SkillType;

@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { mockWritingExamDataset } from "@/data/fallback/writing-exam";
-import { WritingResultsHeader } from './writing-results/WritingResultsHeader';
-import { WritingEssayHighlightsPane } from './writing-results/WritingEssayHighlightsPane';
-import { WritingScoreCriteriaPane } from './writing-results/WritingScoreCriteriaPane';
+import { WritingResultsHeader } from '@/components/exam/writing-results/WritingResultsHeader';
+import { WritingEssayHighlightsPane } from '@/components/exam/writing-results/WritingEssayHighlightsPane';
+import { WritingScoreCriteriaPane } from '@/components/exam/writing-results/WritingScoreCriteriaPane';
 
 interface WritingResultsViewProps {
   essayText?: string;

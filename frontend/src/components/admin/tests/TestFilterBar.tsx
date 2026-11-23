@@ -3,7 +3,7 @@
 import React from "react";
 import { Search, RefreshCw, X } from "lucide-react";
 import type { SkillType, ContentStatus, AllowedMode, TestSet } from "@/types/exam";
-import { TestFilterChips } from "@/components/admin/TestFilterChips";
+import { TestFilterChips } from "@/components/admin/tests/TestFilterChips";
 
 const SKILL_LABELS: Record<string, string> = {
   reading: "Reading",

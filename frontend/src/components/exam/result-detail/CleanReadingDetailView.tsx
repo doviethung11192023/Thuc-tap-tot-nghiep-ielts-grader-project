@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useMemo } from 'react';
-import { CleanQuestionItemRenderer } from './CleanQuestionItemRenderer';
-import { CleanReadingDetailPassagePane, HighlightTarget } from './CleanReadingDetailPassagePane';
-import { CleanReadingDetailBottomBar } from './CleanReadingDetailBottomBar';
-import { CleanReadingDetailScoreCard } from './CleanReadingDetailScoreCard';
-import { CleanReadingDetailHeader } from './CleanReadingDetailHeader';
-import { CleanDetailSummaryCard } from './CleanDetailSummaryCard';
-import { CleanReadingDetailSkeleton } from './CleanReadingDetailSkeleton';
+import { CleanQuestionItemRenderer } from '@/components/exam/result-detail/CleanQuestionItemRenderer';
+import { CleanReadingDetailPassagePane, HighlightTarget } from '@/components/exam/result-detail/CleanReadingDetailPassagePane';
+import { CleanReadingDetailBottomBar } from '@/components/exam/result-detail/CleanReadingDetailBottomBar';
+import { CleanReadingDetailScoreCard } from '@/components/exam/result-detail/CleanReadingDetailScoreCard';
+import { CleanReadingDetailHeader } from '@/components/exam/result-detail/CleanReadingDetailHeader';
+import { CleanDetailSummaryCard } from '@/components/exam/result-detail/CleanDetailSummaryCard';
+import { CleanReadingDetailSkeleton } from '@/components/exam/result-detail/CleanReadingDetailSkeleton';
 import { useAttemptDetail } from '@/hooks/useAttemptDetail';
 
 interface CleanReadingDetailViewProps {

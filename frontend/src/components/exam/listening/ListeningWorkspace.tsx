@@ -4,12 +4,12 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ListeningTestData } from "@/types/exam-listening";
-import { ExitConfirmModal } from './ExitConfirmModal';
-import { SubmitConfirmModal } from './SubmitConfirmModal';
-import { GradingProgressOverlay } from './GradingProgressOverlay';
-import { ListeningWorkspaceHeader } from './listening/ListeningWorkspaceHeader';
-import { ListeningAudioBar } from './listening/ListeningAudioBar';
-import { ListeningQuestionsPane } from './listening/ListeningQuestionsPane';
+import { ExitConfirmModal } from '@/components/exam/shared/ExitConfirmModal';
+import { SubmitConfirmModal } from '@/components/exam/shared/SubmitConfirmModal';
+import { GradingProgressOverlay } from '@/components/exam/shared/GradingProgressOverlay';
+import { ListeningWorkspaceHeader } from '@/components/exam/listening/ListeningWorkspaceHeader';
+import { ListeningAudioBar } from '@/components/exam/listening/ListeningAudioBar';
+import { ListeningQuestionsPane } from '@/components/exam/listening/ListeningQuestionsPane';
 import { useListeningPlayer } from '@/hooks/useListeningPlayer';
 
 interface ListeningWorkspaceProps {

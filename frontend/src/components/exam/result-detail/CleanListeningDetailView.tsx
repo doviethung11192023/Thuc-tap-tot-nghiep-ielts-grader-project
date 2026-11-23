@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { CleanListeningDetailHeader } from './CleanListeningDetailHeader';
-import { CleanListeningAudioBar } from './CleanListeningAudioBar';
-import { CleanListeningTranscriptPane } from './CleanListeningTranscriptPane';
-import { CleanListeningExerciseGroupsPane } from './CleanListeningExerciseGroupsPane';
-import { CleanListeningDetailBottomBar } from './CleanListeningDetailBottomBar';
-import { CleanListeningDetailSkeleton } from './CleanListeningDetailSkeleton';
+import { CleanListeningDetailHeader } from '@/components/exam/result-detail/CleanListeningDetailHeader';
+import { CleanListeningAudioBar } from '@/components/exam/result-detail/CleanListeningAudioBar';
+import { CleanListeningTranscriptPane } from '@/components/exam/result-detail/CleanListeningTranscriptPane';
+import { CleanListeningExerciseGroupsPane } from '@/components/exam/result-detail/CleanListeningExerciseGroupsPane';
+import { CleanListeningDetailBottomBar } from '@/components/exam/result-detail/CleanListeningDetailBottomBar';
+import { CleanListeningDetailSkeleton } from '@/components/exam/result-detail/CleanListeningDetailSkeleton';
 import { useAttemptListeningDetail } from '@/hooks/useAttemptListeningDetail';
 
 interface CleanListeningDetailViewProps {

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, MinusCircle, Play, RotateCcw, Volume2, FileText, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { ListeningTestData } from "@/types/exam-listening";
-import { QuestionGroupRenderer } from './renderers/QuestionGroupRenderer';
+import { QuestionGroupRenderer } from '@/components/exam/renderers/QuestionGroupRenderer';
 
 interface ListeningResultsViewProps {
   testData: ListeningTestData;

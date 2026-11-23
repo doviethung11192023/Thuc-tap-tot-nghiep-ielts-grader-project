@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, MinusCircle, Award, RotateCcw, Search, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { ReadingTestData } from '@/types/exam';
-import { QuestionGroupRenderer } from './renderers/QuestionGroupRenderer';
+import { QuestionGroupRenderer } from '@/components/exam/renderers/QuestionGroupRenderer';
 
 interface ReadingResultsViewProps {
   testData: ReadingTestData;

@@ -2,9 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { WritingWorkspace } from '@/components/exam/WritingWorkspace';
-import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
-import { ExamPageNotice, SubmitErrorBanner } from '@/components/exam/ExamPageNotice';
+import { WritingWorkspace } from '@/components/exam/writing/WritingWorkspace';
+import { ExamWorkspaceSkeleton } from '@/components/exam/shared/ExamWorkspaceSkeleton';
+import { ExamPageNotice, SubmitErrorBanner } from '@/components/exam/shared/ExamPageNotice';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { autosaveLabel, useServerAutosave } from '@/hooks/useServerAutosave';
 import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';

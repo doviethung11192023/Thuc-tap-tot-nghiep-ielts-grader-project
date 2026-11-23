@@ -9,8 +9,8 @@ import {
   updateSystemSetting,
 } from "@/services/admin-content";
 import type { BandConversion, SystemSetting } from "@/types/exam";
-import { BandConversionsTable } from "@/components/admin/BandConversionsTable";
-import { SystemSettingsCards } from "@/components/admin/SystemSettingsCards";
+import { BandConversionsTable } from "@/components/admin/settings/BandConversionsTable";
+import { SystemSettingsCards } from "@/components/admin/settings/SystemSettingsCards";
 import { apiErrorDetail } from "@/lib/attempt-submission";
 
 export default function AdminSettingsPage() {

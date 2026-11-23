@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { CheckCircle2, Trash2, Plus, Loader2 } from "lucide-react";
 import { updateSection, deleteSection, uploadMedia } from "@/services/admin-content";
-import { QuestionGroupModal } from "@/components/admin/QuestionGroupModal";
-import { QuestionEditorModal } from "@/components/admin/QuestionEditorModal";
-import { QuestionGroupItem } from "@/components/admin/QuestionGroupItem";
-import { SectionMediaPassageEditor } from "@/components/admin/SectionMediaPassageEditor";
+import { QuestionGroupModal } from "@/components/admin/test-editor/QuestionGroupModal";
+import { QuestionEditorModal } from "@/components/admin/test-editor/QuestionEditorModal";
+import { QuestionGroupItem } from "@/components/admin/test-editor/QuestionGroupItem";
+import { SectionMediaPassageEditor } from "@/components/admin/test-editor/SectionMediaPassageEditor";
 import { WritingTaskMaterialEditor } from "@/components/admin/writing-material/WritingTaskMaterialEditor";
 import type { TestSection, SkillType, Question } from "@/types/exam";
 

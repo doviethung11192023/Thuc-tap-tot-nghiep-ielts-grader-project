@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import { FileText, Plus, Database, Loader2, RotateCcw, FolderKanban } from "lucide-react";
-import { DatasetIngestModal } from "@/components/admin/DatasetIngestModal";
-import { CreateTestModal } from "@/components/admin/CreateTestModal";
-import { AdminTestSetManagerModal } from "@/components/admin/AdminTestSetManagerModal";
-import { TestTableRow } from "@/components/admin/TestTableRow";
-import { TestFilterBar } from "@/components/admin/TestFilterBar";
-import { TestPagination } from "@/components/admin/TestPagination";
-import { TestBulkActionBar } from "@/components/admin/TestBulkActionBar";
-import { AdminModeSwitcher, type AdminTestViewMode } from "@/components/admin/AdminModeSwitcher";
-import { AdminExerciseTypeManager } from "@/components/admin/AdminExerciseTypeManager";
+import { DatasetIngestModal } from "@/components/admin/dataset-ingest/DatasetIngestModal";
+import { CreateTestModal } from "@/components/admin/tests/CreateTestModal";
+import { AdminTestSetManagerModal } from "@/components/admin/tests/AdminTestSetManagerModal";
+import { TestTableRow } from "@/components/admin/tests/TestTableRow";
+import { TestFilterBar } from "@/components/admin/tests/TestFilterBar";
+import { TestPagination } from "@/components/admin/tests/TestPagination";
+import { TestBulkActionBar } from "@/components/admin/tests/TestBulkActionBar";
+import { AdminModeSwitcher, type AdminTestViewMode } from "@/components/admin/tests/AdminModeSwitcher";
+import { AdminExerciseTypeManager } from "@/components/admin/tests/AdminExerciseTypeManager";
 import { useAdminTests } from "@/hooks/useAdminTests";
 import { bulkAssignTestsToSet } from "@/services/admin-test-sets";
 import type { SkillType } from "@/types/exam";

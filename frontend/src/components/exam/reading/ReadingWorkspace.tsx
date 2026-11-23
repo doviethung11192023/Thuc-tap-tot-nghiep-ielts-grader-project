@@ -4,12 +4,12 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ReadingTestData } from '@/types/exam';
-import { ExitConfirmModal } from './ExitConfirmModal';
-import { SubmitConfirmModal } from './SubmitConfirmModal';
-import { GradingProgressOverlay } from './GradingProgressOverlay';
-import { ReadingWorkspaceHeader } from './reading/ReadingWorkspaceHeader';
-import { ReadingPassagePane } from './reading/ReadingPassagePane';
-import { ReadingQuestionsPane } from './reading/ReadingQuestionsPane';
+import { ExitConfirmModal } from '@/components/exam/shared/ExitConfirmModal';
+import { SubmitConfirmModal } from '@/components/exam/shared/SubmitConfirmModal';
+import { GradingProgressOverlay } from '@/components/exam/shared/GradingProgressOverlay';
+import { ReadingWorkspaceHeader } from '@/components/exam/reading/ReadingWorkspaceHeader';
+import { ReadingPassagePane } from '@/components/exam/reading/ReadingPassagePane';
+import { ReadingQuestionsPane } from '@/components/exam/reading/ReadingQuestionsPane';
 
 interface ReadingWorkspaceProps {
   testData: ReadingTestData;

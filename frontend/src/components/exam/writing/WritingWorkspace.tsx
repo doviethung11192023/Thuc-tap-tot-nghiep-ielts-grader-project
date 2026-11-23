@@ -5,8 +5,8 @@ import { ArrowLeft, Clock, Send, CheckCircle2, AlertCircle, FileText } from 'luc
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { mockWritingExamDataset } from "@/data/fallback/writing-exam";
-import { ExitConfirmModal } from './ExitConfirmModal';
-import { WritingPromptColumn, type WritingTaskItem } from './writing/WritingPromptColumn';
+import { ExitConfirmModal } from '@/components/exam/shared/ExitConfirmModal';
+import { WritingPromptColumn, type WritingTaskItem } from '@/components/exam/writing/WritingPromptColumn';
 
 export interface WritingExamDataInput {
   test_id: string;

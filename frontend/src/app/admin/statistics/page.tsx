@@ -6,7 +6,7 @@ import { Activity, AlertTriangle, Users, FileText, Clock, Loader2, RotateCcw } f
 import { getSystemStatistics } from "@/services/users";
 import toast from "react-hot-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { KpiCard } from "@/components/admin/KpiCard";
+import { KpiCard } from "@/components/admin/statistics/KpiCard";
 import { AlertsBadge } from "@/components/admin/ai-services/monitoring/AlertsBadge";
 import { ExpertGapCard } from "@/components/admin/ai-services/monitoring/ExpertGapCard";
 

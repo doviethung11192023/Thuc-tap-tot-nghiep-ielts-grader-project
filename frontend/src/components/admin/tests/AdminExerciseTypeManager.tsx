@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Plus, Filter, Loader2, BookOpen, Layers } from "lucide-react";
 import { useSkillExercises } from "@/hooks/useSkillExercises";
-import { AdminExerciseTableRow } from "./AdminExerciseTableRow";
+import { AdminExerciseTableRow } from "@/components/admin/tests/AdminExerciseTableRow";
 import type { SkillType } from "@/types/exam";
 
 const SKILLS = ["Reading", "Listening", "Writing", "Speaking"] as const;

@@ -7,9 +7,9 @@ import { getAdminUsers, updateUserStatus, resendUserInvite } from "@/services/us
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import { User } from "@/types";
-import { UserTable } from "@/components/admin/UserTable";
-import { UserPagination } from "@/components/admin/UserPagination";
-import { UserCreateModal } from "@/components/admin/UserCreateModal";
+import { UserTable } from "@/components/admin/users/UserTable";
+import { UserPagination } from "@/components/admin/users/UserPagination";
+import { UserCreateModal } from "@/components/admin/users/UserCreateModal";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();

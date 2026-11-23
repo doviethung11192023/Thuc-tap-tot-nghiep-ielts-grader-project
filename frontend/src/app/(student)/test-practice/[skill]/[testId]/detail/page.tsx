@@ -2,9 +2,9 @@
 
 import React, { useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { SpeakingResultsView } from '@/components/exam/SpeakingResultsView';
-import { CleanReadingDetailView } from '@/components/exam/clean/CleanReadingDetailView';
-import { CleanListeningDetailView } from '@/components/exam/clean/CleanListeningDetailView';
+import { SpeakingResultsView } from '@/components/exam/speaking/SpeakingResultsView';
+import { CleanReadingDetailView } from '@/components/exam/result-detail/CleanReadingDetailView';
+import { CleanListeningDetailView } from '@/components/exam/result-detail/CleanListeningDetailView';
 
 export default function SkillDetailedResultPage() {
   const params = useParams();

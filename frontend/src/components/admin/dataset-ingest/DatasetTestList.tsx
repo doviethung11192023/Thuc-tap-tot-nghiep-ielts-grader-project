@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import type { ScannedTestItem, SkillType } from "@/types/exam";
-import { DatasetTestRow } from "@/components/admin/DatasetTestRow";
-import { DatasetTestListToolbar } from "@/components/admin/DatasetTestListToolbar";
+import { DatasetTestRow } from "@/components/admin/dataset-ingest/DatasetTestRow";
+import { DatasetTestListToolbar } from "@/components/admin/dataset-ingest/DatasetTestListToolbar";
 
 interface DatasetTestListProps {
   tests: ScannedTestItem[];

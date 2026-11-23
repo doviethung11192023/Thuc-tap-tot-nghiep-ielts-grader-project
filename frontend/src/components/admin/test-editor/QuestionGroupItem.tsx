@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import { deleteQuestion, deleteQuestionGroup } from "@/services/admin-content";
-import { QuestionItemCard } from "@/components/admin/QuestionItemCard";
+import { QuestionItemCard } from "@/components/admin/test-editor/QuestionItemCard";
 import type { QuestionGroup, Question, SkillType } from "@/types/exam";
 
 interface QuestionGroupItemProps {

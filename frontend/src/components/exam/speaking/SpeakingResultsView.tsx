@@ -7,9 +7,9 @@ import { getAttemptDetail } from '@/services/student-test-practice';
 import {
   matchPartFeedbackAnswer,
   type SpeakingDetail,
-} from './speaking/speaking-detail-types';
-import { SpeakingDetailSidebar } from './speaking/speaking-detail-sidebar';
-import { SpeakingDetailQuestionCard } from './speaking/speaking-detail-question-card';
+} from '@/components/exam/speaking/speaking-detail-types';
+import { SpeakingDetailSidebar } from '@/components/exam/speaking/speaking-detail-sidebar';
+import { SpeakingDetailQuestionCard } from '@/components/exam/speaking/speaking-detail-question-card';
 
 interface SpeakingResultsViewProps {
   attemptId?: string;

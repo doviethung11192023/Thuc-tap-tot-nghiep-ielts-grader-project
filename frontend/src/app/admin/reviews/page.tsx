@@ -22,7 +22,7 @@ import {
   type AdminReviewItem,
   type AdminReviewsSummary,
 } from "@/services/admin-reviews";
-import { AdminAssignExpertModal } from "@/components/admin/AdminAssignExpertModal";
+import { AdminAssignExpertModal } from "@/components/admin/reviews/AdminAssignExpertModal";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   waiting: { label: "Chờ phân bổ", cls: "bg-amber-50 text-amber-800 border-amber-200" },

@@ -9,7 +9,7 @@ import {
   deleteAdminTestSet,
   type AdminTestSetItem,
 } from "@/services/admin-test-sets";
-import { AdminTestSetRow } from "./AdminTestSetRow";
+import { AdminTestSetRow } from "@/components/admin/tests/AdminTestSetRow";
 
 interface AdminTestSetManagerModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
 import React, { useRef, useEffect } from 'react';
 import { FileText, Play } from 'lucide-react';
 import { CleanListeningSection, CleanListeningQuestion } from "@/types/listening-result-detail";
-import { CleanListeningUtteranceCard } from './CleanListeningUtteranceCard';
+import { CleanListeningUtteranceCard } from '@/components/exam/result-detail/CleanListeningUtteranceCard';
 
 interface CleanListeningTranscriptPaneProps {
   currentSection: CleanListeningSection;

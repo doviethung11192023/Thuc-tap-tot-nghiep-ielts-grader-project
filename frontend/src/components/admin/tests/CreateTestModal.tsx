@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createTest, createSection, getTestSets } from "@/services/admin-content";
-import { CreateTestFields } from "@/components/admin/CreateTestFields";
+import { CreateTestFields } from "@/components/admin/tests/CreateTestFields";
 import type { SkillType, AllowedMode, TestDifficulty, TestSet } from "@/types/exam";
 
 interface CreateTestModalProps {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Lightbulb, ArrowLeftRight, Compass, FileText } from "lucide-react";
-import { CleanExplanationSteps } from "./CleanExplanationSteps";
+import { CleanExplanationSteps } from "@/components/exam/result-detail/CleanExplanationSteps";
 import { extractCoreReasoning } from "@/lib/explanation-parser";
 
 interface KeywordMapItem {

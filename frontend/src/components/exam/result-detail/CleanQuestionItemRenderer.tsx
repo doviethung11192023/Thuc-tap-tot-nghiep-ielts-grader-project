@@ -3,9 +3,9 @@
 import React from 'react';
 import { CleanReadingQuestion } from "@/types/reading-result-detail";
 import { CleanListeningQuestion } from "@/types/listening-result-detail";
-import { CleanQuestionDropdownExplanation } from './CleanQuestionDropdownExplanation';
-import { CleanMatchingOptionsPool } from './clean-matching-options-pool';
-import { CleanMultipleChoiceOptionsList } from './clean-multiple-choice-options-list';
+import { CleanQuestionDropdownExplanation } from '@/components/exam/result-detail/CleanQuestionDropdownExplanation';
+import { CleanMatchingOptionsPool } from '@/components/exam/result-detail/clean-matching-options-pool';
+import { CleanMultipleChoiceOptionsList } from '@/components/exam/result-detail/clean-multiple-choice-options-list';
 
 type QuestionUnion = CleanReadingQuestion | CleanListeningQuestion;
 

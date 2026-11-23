@@ -3,11 +3,11 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
 import { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
-import { CleanListeningScoreCard } from './CleanListeningScoreCard';
-import { CleanListeningTableRenderer } from './CleanListeningTableRenderer';
-import { CleanQuestionItemRenderer } from './CleanQuestionItemRenderer';
-import { CleanGroupDropdownExplanation } from './CleanGroupDropdownExplanation';
-import { CleanDetailSummaryCard } from './CleanDetailSummaryCard';
+import { CleanListeningScoreCard } from '@/components/exam/result-detail/CleanListeningScoreCard';
+import { CleanListeningTableRenderer } from '@/components/exam/result-detail/CleanListeningTableRenderer';
+import { CleanQuestionItemRenderer } from '@/components/exam/result-detail/CleanQuestionItemRenderer';
+import { CleanGroupDropdownExplanation } from '@/components/exam/result-detail/CleanGroupDropdownExplanation';
+import { CleanDetailSummaryCard } from '@/components/exam/result-detail/CleanDetailSummaryCard';
 
 interface CleanListeningExerciseGroupsPaneProps {
   userName?: string;

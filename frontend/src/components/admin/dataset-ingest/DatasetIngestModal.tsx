@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { Database, Loader2, AlertCircle, X, Sparkles } from "lucide-react";
 import { ingestCrawledDataset, scanDataset } from "@/services/admin-content";
-import { IngestResultCard } from "@/components/admin/IngestResultCard";
-import { IngestProgressBar } from "@/components/admin/IngestProgressBar";
-import { DatasetTestList } from "@/components/admin/DatasetTestList";
-import { DatasetIngestModalFooter } from "@/components/admin/DatasetIngestModalFooter";
-import { DifficultySelectorBar } from "@/components/admin/DifficultySelectorBar";
+import { IngestResultCard } from "@/components/admin/dataset-ingest/IngestResultCard";
+import { IngestProgressBar } from "@/components/admin/dataset-ingest/IngestProgressBar";
+import { DatasetTestList } from "@/components/admin/dataset-ingest/DatasetTestList";
+import { DatasetIngestModalFooter } from "@/components/admin/dataset-ingest/DatasetIngestModalFooter";
+import { DifficultySelectorBar } from "@/components/admin/dataset-ingest/DifficultySelectorBar";
 import type { IngestResponse, DatasetScanResult, TestDifficulty } from "@/types/exam";
 
 interface DatasetIngestModalProps {
