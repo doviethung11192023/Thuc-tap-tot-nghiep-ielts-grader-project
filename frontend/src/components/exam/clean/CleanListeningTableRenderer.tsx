@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningQuestion } from "@/types/listening-result-detail";
 
 interface CleanListeningTableRendererProps {
   tableData: any;

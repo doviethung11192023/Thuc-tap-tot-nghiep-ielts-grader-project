@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Compass } from 'lucide-react';
-import { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
 import { CleanListeningScoreCard } from './CleanListeningScoreCard';
 import { CleanListeningTableRenderer } from './CleanListeningTableRenderer';
 import { CleanQuestionItemRenderer } from './CleanQuestionItemRenderer';

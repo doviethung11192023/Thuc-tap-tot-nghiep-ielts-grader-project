@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { mockWritingExamDataset } from '@/mocks/exam-writing';
+import { mockWritingExamDataset } from "@/data/fallback/writing-exam";
 import { WritingResultsHeader } from './writing-results/WritingResultsHeader';
 import { WritingEssayHighlightsPane } from './writing-results/WritingEssayHighlightsPane';
 import { WritingScoreCriteriaPane } from './writing-results/WritingScoreCriteriaPane';

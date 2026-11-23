@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import type { MockSpeakingExamDataset, SpeakingPartData } from '@/mocks/exam-speaking';
+import type { MockSpeakingExamDataset, SpeakingPartData } from "@/types/exam-speaking";
 import { useSpeakingRecorder, type RecordedAnswer } from '@/hooks/useSpeakingRecorder';
 import { useSpeakingRoomMachine, type RoomQuestion } from '@/hooks/useSpeakingRoomMachine';
 import { useSpeakingUploadQueue } from '@/hooks/useSpeakingUploadQueue';

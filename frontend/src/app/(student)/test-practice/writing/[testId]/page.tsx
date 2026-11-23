@@ -9,7 +9,7 @@ import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { autosaveLabel, useServerAutosave } from '@/hooks/useServerAutosave';
 import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/services/student-test-practice';
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
-import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/utils/attempt-submission';
+import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/lib/attempt-submission';
 import { invalidatePracticeHistoryCache } from '@/services/practice-history-cache';
 import toast from 'react-hot-toast';
 

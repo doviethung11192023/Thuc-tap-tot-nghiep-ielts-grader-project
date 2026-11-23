@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
-import type { mockWritingExamDataset } from '@/mocks/exam-writing';
+import type { WritingExamDataset } from "@/data/fallback/writing-exam";
 
 interface WritingScoreCriteriaPaneProps {
-  gradingResult: typeof mockWritingExamDataset.grading_result;
+  gradingResult: WritingExamDataset["grading_result"];
 }
 
 export function WritingScoreCriteriaPane({ gradingResult }: WritingScoreCriteriaPaneProps) {

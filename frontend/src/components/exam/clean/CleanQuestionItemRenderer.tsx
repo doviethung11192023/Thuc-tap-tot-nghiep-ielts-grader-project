@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { CleanReadingQuestion } from '@/mocks/clean-dataset/reading-test-1-clean';
-import { CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanReadingQuestion } from "@/types/reading-result-detail";
+import { CleanListeningQuestion } from "@/types/listening-result-detail";
 import { CleanQuestionDropdownExplanation } from './CleanQuestionDropdownExplanation';
 import { CleanMatchingOptionsPool } from './clean-matching-options-pool';
 import { CleanMultipleChoiceOptionsList } from './clean-multiple-choice-options-list';

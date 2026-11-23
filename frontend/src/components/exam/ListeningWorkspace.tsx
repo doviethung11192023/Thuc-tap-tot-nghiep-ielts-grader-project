@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
-import { ListeningTestData } from '@/mocks/exam-listening';
+import { ListeningTestData } from "@/types/exam-listening";
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
 import { GradingProgressOverlay } from './GradingProgressOverlay';

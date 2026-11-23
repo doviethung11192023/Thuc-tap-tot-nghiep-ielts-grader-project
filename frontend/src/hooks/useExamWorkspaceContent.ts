@@ -8,10 +8,10 @@ import {
   mapToListeningTestData,
   mapToWritingExamData,
   mapToSpeakingExamData,
-} from "@/utils/exam-content-mapper";
-import type { ListeningTestData } from "@/mocks/exam-listening";
-import type { mockWritingExamDataset } from "@/mocks/exam-writing";
-import type { MockSpeakingExamDataset } from "@/mocks/exam-speaking";
+} from "@/lib/exam-content-mapper";
+import type { ListeningTestData } from "@/types/exam-listening";
+import type { WritingExamDataset } from "@/data/fallback/writing-exam";
+import type { MockSpeakingExamDataset } from "@/types/exam-speaking";
 import type { ReadingTestData } from "@/types/exam";
 
 export interface SavedWork {
@@ -45,8 +45,8 @@ export function useExamWorkspaceContent(
   // Không bao giờ rơi về đề mẫu: làm đề giả trên attempt thật thì server chấm sai và lưu điểm sai
   const [readingData, setReadingData] = useState<ReadingTestData | null>(initR);
   const [listeningData, setListeningData] = useState<ListeningTestData | null>(initL);
-  const [writingData, setWritingData] = useState<typeof mockWritingExamDataset | null>(
-    (initW as typeof mockWritingExamDataset | null) || null);
+  const [writingData, setWritingData] = useState<WritingExamDataset | null>(
+    (initW as WritingExamDataset | null) || null);
   const [closedAttempt, setClosedAttempt] = useState<ClosedAttempt | null>(null);
   // Speaking không bao giờ rơi về đề giả: bài ghi âm phải gắn với câu hỏi thật.
   const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset | null>(initS);
@@ -111,7 +111,7 @@ export function useExamWorkspaceContent(
             if (mapped) setListeningData(mapped);
           } else if (skill === "writing") {
             const mapped = mapToWritingExamData(contentData);
-            if (mapped) setWritingData(mapped as typeof mockWritingExamDataset);
+            if (mapped) setWritingData(mapped as WritingExamDataset);
           } else if (skill === "speaking") {
             const mapped = mapToSpeakingExamData(contentData);
             if (mapped) setSpeakingData(mapped);

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Lightbulb, ArrowLeftRight, Compass, FileText } from "lucide-react";
 import { CleanExplanationSteps } from "./CleanExplanationSteps";
-import { extractCoreReasoning } from "@/utils/explanation-parser";
+import { extractCoreReasoning } from "@/lib/explanation-parser";
 
 interface KeywordMapItem {
   original_text: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CleanReadingQuestion } from "@/mocks/clean-dataset/reading-test-1-clean";
+import { CleanReadingQuestion } from "@/types/reading-result-detail";
 import { Check, FileText } from "lucide-react";
 
 interface CleanDetailSummaryCardProps {

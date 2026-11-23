@@ -8,7 +8,7 @@ import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
 import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
-import { closedAttemptMessage } from '@/utils/attempt-submission';
+import { closedAttemptMessage } from '@/lib/attempt-submission';
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
 
 export default function SpeakingWorkspacePage() {

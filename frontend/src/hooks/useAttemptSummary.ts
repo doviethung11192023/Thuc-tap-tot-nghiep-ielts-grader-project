@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAttemptSummary } from "@/services/student-test-practice";
-import { cleanReadingTest1Data } from "@/mocks/clean-dataset/reading-test-1-clean";
-import { cleanListeningTest1Data } from "@/mocks/clean-dataset/listening-test-1-clean";
+import { cleanReadingTest1Data } from "@/data/fallback/reading-test-1-result";
+import { cleanListeningTest1Data } from "@/data/fallback/listening-test-1-result";
 
 export interface CleanSummaryData {
   title: string;

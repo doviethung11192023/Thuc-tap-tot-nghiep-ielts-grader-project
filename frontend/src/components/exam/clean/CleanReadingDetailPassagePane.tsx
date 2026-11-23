@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useEffect } from "react";
-import { CleanReadingQuestion } from "@/mocks/clean-dataset/reading-test-1-clean";
+import { CleanReadingQuestion } from "@/types/reading-result-detail";
 
 export interface HighlightTarget {
   text: string;

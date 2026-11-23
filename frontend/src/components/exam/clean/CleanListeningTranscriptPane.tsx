@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { FileText, Play } from 'lucide-react';
-import { CleanListeningSection, CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningSection, CleanListeningQuestion } from "@/types/listening-result-detail";
 import { CleanListeningUtteranceCard } from './CleanListeningUtteranceCard';
 
 interface CleanListeningTranscriptPaneProps {

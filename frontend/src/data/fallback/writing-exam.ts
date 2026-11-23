@@ -1,37 +1,3 @@
-export interface WritingHighlight {
-  id: string;
-  category: 'error' | 'coherence' | 'lexical' | 'strength';
-  original_text: string;
-  title: string;
-  reason: string;
-  suggested_fix: string;
-}
-
-export interface WritingCriteriaDetail {
-  score: number;
-  description: string;
-  strengths: string[];
-  improvements: string[];
-}
-
-export interface WritingGraderResult {
-  overall_band: number;
-  criteria_scores: {
-    task_response: WritingCriteriaDetail;
-    coherence_cohesion: WritingCriteriaDetail;
-    lexical_resource: WritingCriteriaDetail;
-    grammatical_accuracy: WritingCriteriaDetail;
-  };
-  highlights: WritingHighlight[];
-  top_priorities: string[];
-  lexical_upgrades: { original: string; upgraded: string; context: string }[];
-  model_essay_band_8: {
-    title: string;
-    word_count: number;
-    paragraphs: string[];
-  };
-}
-
 export const mockWritingExamDataset = {
   test_id: 'cam-18-test-1-writing',
   title: 'IELTS Academic Writing - Task 1 & Task 2 Real Test',
@@ -171,3 +137,6 @@ In conclusion, although government subsidies are crucial to ensure that no impov
     }
   }
 };
+
+/** Kiểu của dataset đề Writing (trước đây các file dùng typeof dữ liệu mock). */
+export type WritingExamDataset = typeof mockWritingExamDataset;

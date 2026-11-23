@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Send, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
-import { mockWritingExamDataset } from '@/mocks/exam-writing';
+import { mockWritingExamDataset } from "@/data/fallback/writing-exam";
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { WritingPromptColumn, type WritingTaskItem } from './writing/WritingPromptColumn';
 

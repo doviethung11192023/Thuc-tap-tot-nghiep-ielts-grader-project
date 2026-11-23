@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Play } from 'lucide-react';
-import { CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
 
 interface CleanListeningUtteranceCardProps {
   utterance: CleanListeningUtterance;

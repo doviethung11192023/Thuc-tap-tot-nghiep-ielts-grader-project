@@ -8,7 +8,7 @@ import {
 } from "@/services/admin-content";
 import type { TestItem, TestSet, SkillType, ContentStatus, AllowedMode } from "@/types/exam";
 import toast from "react-hot-toast";
-import { apiErrorDetail } from "@/utils/attempt-submission";
+import { apiErrorDetail } from "@/lib/attempt-submission";
 
 interface CacheEntry {
   items: TestItem[];

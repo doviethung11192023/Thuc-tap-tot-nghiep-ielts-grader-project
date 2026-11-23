@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { getAttemptDetail } from "@/services/student-test-practice";
-import { cleanReadingTest1Data, CleanReadingQuestion } from "@/mocks/clean-dataset/reading-test-1-clean";
-import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/utils/explanation-parser";
+import { CleanReadingQuestion } from "@/types/reading-result-detail";
+import { cleanReadingTest1Data } from "@/data/fallback/reading-test-1-result";
+import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/lib/explanation-parser";
 
 export interface DetailPassage {
   passage_number: number;

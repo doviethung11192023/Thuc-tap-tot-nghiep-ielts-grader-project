@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api-client";
-import { mockExamCollections } from "@/mocks/test-sets";
+
 import type { ExamCollection, SingleTestItem, PublishedTestItem } from "@/types/test-practice";
 
 export interface GetPublishedTestsParams {

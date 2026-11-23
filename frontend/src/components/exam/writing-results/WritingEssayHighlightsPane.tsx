@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import type { WritingHighlight } from '@/mocks/exam-writing';
+import type { WritingHighlight } from "@/types/exam-writing";
 
 interface WritingEssayHighlightsPaneProps {
   essayText: string;

@@ -11,7 +11,7 @@ import {
 import type { BandConversion, SystemSetting } from "@/types/exam";
 import { BandConversionsTable } from "@/components/admin/BandConversionsTable";
 import { SystemSettingsCards } from "@/components/admin/SystemSettingsCards";
-import { apiErrorDetail } from "@/utils/attempt-submission";
+import { apiErrorDetail } from "@/lib/attempt-submission";
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<"band" | "settings">("band");

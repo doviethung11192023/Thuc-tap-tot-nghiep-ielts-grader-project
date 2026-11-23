@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, MinusCircle, Play, RotateCcw, Volume2, FileText, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-import { ListeningTestData } from '@/mocks/exam-listening';
+import { ListeningTestData } from "@/types/exam-listening";
 import { QuestionGroupRenderer } from './renderers/QuestionGroupRenderer';
 
 interface ListeningResultsViewProps {

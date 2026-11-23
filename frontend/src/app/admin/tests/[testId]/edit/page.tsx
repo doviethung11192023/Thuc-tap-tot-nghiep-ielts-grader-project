@@ -7,7 +7,7 @@ import { ArrowLeft, Save, Plus, Loader2, Clock, ShieldAlert } from "lucide-react
 import { getTestDetail, updateTest, createSection } from "@/services/admin-content";
 import { SectionEditor } from "@/components/admin/SectionEditor";
 import type { TestItem, ContentStatus, AllowedMode, TestDifficulty } from "@/types/exam";
-import { apiErrorDetail } from "@/utils/attempt-submission";
+import { apiErrorDetail } from "@/lib/attempt-submission";
 
 export default function ExamBuilderPage() {
   const params = useParams();

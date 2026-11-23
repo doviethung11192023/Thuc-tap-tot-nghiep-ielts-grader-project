@@ -9,7 +9,7 @@ import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { useServerAutosave } from '@/hooks/useServerAutosave';
 import { AutosaveStatusBadge } from '@/components/exam/AutosaveStatusBadge';
 import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
-import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/utils/attempt-submission';
+import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/lib/attempt-submission';
 
 export default function ListeningWorkspacePage() {
   const router = useRouter();

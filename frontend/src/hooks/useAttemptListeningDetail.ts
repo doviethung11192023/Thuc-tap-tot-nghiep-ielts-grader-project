@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
 import { getAttemptDetail } from "@/services/student-test-practice";
-import {
-  cleanListeningTest1Data,
-  CleanListeningTestData,
-  CleanListeningSection,
-  CleanListeningExerciseGroup,
-  CleanListeningQuestion,
-  CleanListeningUtterance
-} from "@/mocks/clean-dataset/listening-test-1-clean";
-import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/utils/explanation-parser";
+import { CleanListeningTestData, CleanListeningSection, CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
+import { cleanListeningTest1Data } from "@/data/fallback/listening-test-1-result";
+import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/lib/explanation-parser";
 
 function parseUtterances(passageText?: string): CleanListeningUtterance[] {
   if (!passageText) return [];

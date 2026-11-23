@@ -1,7 +1,8 @@
 import type { ReadingTestData } from "@/types/exam";
-import type { ListeningTestData, ListeningSectionData } from "@/mocks/exam-listening";
-import { mockWritingExamDataset } from "@/mocks/exam-writing";
-import { mockSpeakingExamDataset, type SpeakingPartData } from "@/mocks/exam-speaking";
+import type { ListeningTestData, ListeningSectionData } from "@/types/exam-listening";
+import { mockWritingExamDataset } from "@/data/fallback/writing-exam";
+import { SpeakingPartData } from "@/types/exam-speaking";
+import { mockSpeakingExamDataset } from "@/data/fallback/speaking-exam";
 import { parseReadingParagraphs, mapQuestionGroup } from "./exam-mapper-helpers";
 
 export { parseReadingParagraphs, mapQuestionGroup };

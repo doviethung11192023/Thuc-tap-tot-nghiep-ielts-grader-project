@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Volume2, Sparkles, Mic } from 'lucide-react';
-import type { SpeakingPartQuestionItem } from '@/mocks/exam-speaking';
+import type { SpeakingPartQuestionItem } from "@/types/exam-speaking";
 import type { RoomPhase } from '@/hooks/useSpeakingRoomMachine';
 import type { AnswerState } from '@/hooks/useSpeakingUploadQueue';
 import { SpeakingAnswerControls } from './speaking-answer-controls';

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Check, Mic, ChevronUp, ChevronDown, PlayCircle } from 'lucide-react';
-import { SpeakingPartData } from '@/mocks/exam-speaking';
+import { SpeakingPartData } from "@/types/exam-speaking";
 
 interface SpeakingQuestionSidebarProps {
   parts: SpeakingPartData[];

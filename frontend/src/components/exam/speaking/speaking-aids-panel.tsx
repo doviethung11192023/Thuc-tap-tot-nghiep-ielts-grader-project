@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Lightbulb, ChevronUp, ChevronDown, StickyNote, X } from 'lucide-react';
-import { SpeakingIdeaStep } from '@/mocks/exam-speaking';
+import { SpeakingIdeaStep } from "@/types/exam-speaking";
 
 interface SpeakingAidsPanelProps {
   ideas?: SpeakingIdeaStep[];

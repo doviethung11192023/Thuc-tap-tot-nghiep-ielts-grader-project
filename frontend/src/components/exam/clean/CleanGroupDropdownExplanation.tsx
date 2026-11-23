@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
-import { CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
 import { CleanGroupEvidenceLocation } from './CleanGroupEvidenceLocation';
 import { CleanExplanationSteps } from './CleanExplanationSteps';
 

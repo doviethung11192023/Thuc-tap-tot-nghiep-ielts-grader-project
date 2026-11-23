@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { CleanListeningSection } from '@/mocks/clean-dataset/listening-test-1-clean';
+import { CleanListeningSection } from "@/types/listening-result-detail";
 
 interface CleanListeningDetailBottomBarProps {
   sections: CleanListeningSection[];

@@ -10,7 +10,7 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
-import type { SpeakingPartData } from '@/mocks/exam-speaking';
+import type { SpeakingPartData } from "@/types/exam-speaking";
 import type { AnswerState } from '@/hooks/useSpeakingUploadQueue';
 import { SpeakingDetailAudioPlayer } from './speaking-detail-audio-player';
 
