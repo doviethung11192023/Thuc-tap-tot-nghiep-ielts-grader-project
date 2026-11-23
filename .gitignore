@@ -99,6 +99,7 @@ docs/*
 !docs/source-of-truth.md
 !docs/defense-highlights.md
 !docs/project-roadmap.md
+!docs/codebase-summary.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)

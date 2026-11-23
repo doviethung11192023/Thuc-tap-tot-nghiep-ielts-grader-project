@@ -3,7 +3,7 @@ title: "Cấu trúc lại source code (chỉ dời và đổi tên, không đổ
 plan_id: "261123-1130-source-code-restructure"
 date: "2026-11-23"
 version: "1.0"
-status: "draft — chờ duyệt §9"
+status: "đã làm GĐ1–GĐ6 (2026-11-23), nhánh refactor/source-structure; GĐ7 để sau"
 branch: "Sinh_AI-Dev (commit gốc 445771f)"
 người làm: "Sinh (Claude hỗ trợ)"
 người duyệt: "Sinh + nhóm (Hungdo, Long) cho phần frontend/Core"
@@ -138,7 +138,7 @@ Bộ kiểm dùng chung (gọi là **"bộ kiểm xanh"**), chạy hết mỗi g
 find backend -name __pycache__ -type d -prune -exec rm -rf {} +
 cd backend && .venv/bin/python -m pytest tests -q            # Core: 399 passed
 cd ai-engine && .venv/bin/python -m pytest tests -q          # engine: 314 passed (trước GĐ2: backend/app/ai)
-cd frontend && npx tsc --noEmit && npx eslint src && npm run build
+cd frontend && npx tsc --noEmit && npm run build    # eslint: số lỗi không được tăng (có sẵn 207 lỗi từ trước)
 docker compose config -q                                     # compose hợp lệ, đường dẫn build/volume đúng
 ```
 
@@ -200,6 +200,25 @@ Ngày 4  ██   GĐ5 + GĐ6     mốc: README mới chạy được trên máy
 4. **Bỏ dữ liệu mock dự phòng** trong `student-test-practice.ts` (`mockExamCollections`) và `exam-content-mapper.ts` đổi hành vi khi API lỗi: màn hình sẽ báo lỗi thay vì hiện đề giả. Đồng ý đổi, hay giữ lại và chỉ dời sang `fixtures/`?
 5. **`backend/uploads/` đang track 1 file mp3** (`ae2493ee15e8.mp3`): xoá khỏi git hay giữ làm dữ liệu test?
 6. **Thời điểm làm**: trước hay sau buổi bảo vệ? Làm trước thì cần đủ 3,5 ngày không chen tính năng mới.
+
+## 10. Kết quả (2026-11-23)
+
+| GĐ | Kết quả đo | Commit |
+|---|---|---|
+| GĐ1 | Gốc repo 21 → 15 mục được track | `67274f6`, `1632eb6` |
+| GĐ2 | 127 file dời thuần; engine 314 test pass từ `ai-engine/`; chấm thật 1 bài Task 2 qua engine mới (HTTP 200, trace đã xoá); compose dùng `./ai-engine` | `9aa1631`, `16161ab` |
+| GĐ3 | `openapi.json` trước = sau (116 route); Core 399 → 400 test pass; gốc `services/` chỉ còn `__init__.py` | `e7e5fee`, `e175320`, `049e3f8` |
+| GĐ4 | 0 import `@/mocks`; tsc sạch; build thành công; lint 207 lỗi, cảnh báo 92 → 91 | `800096b`, `5da8f0a` |
+| GĐ5 | 76 file dời, 2 component chết bị xoá; 0 file `.tsx` rời ở gốc `components/exam/`, `components/admin/` | `6536485`, `9af5c1f` |
+| GĐ6 | README viết lại; thêm `docs/codebase-summary.md`; mọi đường dẫn trong 2 file tồn tại | (commit cuối) |
+
+Lỗi do chính đợt này gây ra và đã sửa: `dataset_path_resolver.py` tính thư mục dataset bằng `parents[3]`, dời sâu thêm một cấp nên modal "Nạp từ Dataset" báo 404 (bẫy §6.5). Sửa thành `parents[4]`, thêm test khoá.
+
+Phát hiện ngoài phạm vi (chưa sửa):
+- `backend/integration_tests/test_e2e_admin_content_flow.py` để lại file mp3 giả 34 byte trên R2 mỗi lần chạy; hiện có 15 file như vậy từ 19/10 đến 07/11 trong `audio/listening/`.
+- `data/fallback/` vẫn được màn hình dùng khi API thiếu dữ liệu (đổi hành vi, để làm riêng).
+
+Chưa kiểm được trên trình duyệt: trang kết quả Listening/Reading (`result-detail/`) và trang làm bài Speaking, vì cần tài khoản Learner có attempt; tsc và build đã đạt.
 
 ## Phụ lục tham chiếu
 
