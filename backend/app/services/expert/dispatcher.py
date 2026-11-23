@@ -16,6 +16,7 @@ from app.services.expert.sla_service import (
 from app.services.learning_profile.common import invalidate_user_profile_cache
 from app.services.notification_service import notify_expert_assigned, notify_expert_completed
 from app.core.domain_errors import DomainError
+from app.services.ai_monitoring.ai_expert_gap_scores import schedule_expert_gap_scores
 
 logger = logging.getLogger(__name__)
 
@@ -423,6 +424,7 @@ async def submit_expert_final_review(
         logger.warning(f"Không thể invalidate cache learning profile: {e}")
 
     notify_expert_completed(attempt_id, overall_band)
+    schedule_expert_gap_scores(attempt_id)     # gửi Expert − AI lên trace Langfuse, chạy nền, lỗi bỏ qua (FR-057)
 
     return {
         "status": "completed",

@@ -1,4 +1,4 @@
-"""Quản trị người dùng, thống kê hệ thống, giám sát chấm AI (UC-19, UC-23, UC-24)."""
+"""Quản trị người dùng và thống kê hệ thống (UC-19, UC-23). Giám sát lượt chấm AI: admin_ai_monitoring.py (UC-24)."""
 import json
 from typing import Optional
 
@@ -70,15 +70,6 @@ async def get_statistics(request: Request, current_user: User = Depends(require_
     result = {"meta": {"code": 200}, "data": system_statistics.system_statistics()}
     await redis.setex(STATISTICS_CACHE_KEY, 300, json.dumps(result))
     return result
-
-
-@router.get("/evaluations/logs")
-async def get_eval_logs(page: int = 1, limit: int = 10,
-                        skill: Optional[str] = Query(None, description="writing | speaking"),
-                        status: Optional[str] = Query(None, description="done | failed | running"),
-                        current_user: User = Depends(require_admin)):
-    """Các lượt chấm AI (grading_runs) mới nhất: trạng thái, lỗi, độ trễ, trace (FR-30)."""
-    return {"meta": {"code": 200, "message": "Success"}, "data": system_statistics.grading_run_logs(page, limit, skill, status)}
 
 
 @router.get("/reviews")

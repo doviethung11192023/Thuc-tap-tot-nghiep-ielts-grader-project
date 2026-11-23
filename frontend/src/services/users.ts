@@ -44,18 +44,6 @@ export async function updateLearnerGoals(payload: {
 // API SERVICE: ADMIN
 // ============================================================
 
-// API: Xem log AI (GET /api/v1/admin/evaluations/logs) — Admin only
-export async function getEvaluationLogs(params?: {
-  essay_id?: string;
-  skill?: string;
-  status?: string;
-  page?: number;
-  limit?: number;
-}) {
-  const res = await apiClient.get("/api/v1/admin/evaluations/logs", { params });
-  return res.data.data;
-}
-
 // API: Danh sách người dùng có phân trang, tìm kiếm và lọc theo role (GET /api/v1/admin/users) — Admin only (UC-19)
 export async function getAdminUsers(params?: {
   page?: number;

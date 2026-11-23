@@ -10,7 +10,8 @@ import logging
 from typing import Callable, TypeVar
 
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
+from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.langfuse.usage_meter import record_usage
 from services.prompt_builder import CriterionPrompts, CompiledPrompt
 from services.langfuse.prompt_manager import AgentCriterion
 from utils.band_rounding import normalize_band
@@ -73,9 +74,11 @@ async def call_llm_json(
                 messages=messages,
                 temperature=compiled_prompt.temperature,
                 max_tokens=compiled_prompt.max_tokens,
+                **trace_options(compiled_prompt),
                 extra_body=llm_extra_body() if extra_body is None else extra_body,
                 **options,
             )
+            record_usage(response, model)     # tokens count even when the output is then rejected
             choice = response.choices[0]
             if choice.finish_reason == "length":
                 # qwen-flash can loop on whitespace in JSON mode. The text is unusable, so

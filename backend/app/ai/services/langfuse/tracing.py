@@ -14,7 +14,7 @@ def get_trace_id() -> str | None:
 def score(trace_id: str, name: str, value: float, comment: str = "") -> None:
     """Gửi một điểm score lên một Langfuse trace."""
     client = get_langfuse_client()
-    client.score(
+    client.create_score(
         trace_id=trace_id,
         name=name,
         value=value,

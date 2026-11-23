@@ -5,6 +5,7 @@ Hai cấu hình worker, chạy thành hai tiến trình:
     arq app.worker.tasks.WorkerSettings          Writing + cron
     arq app.worker.tasks.SpeakingWorkerSettings  Speaking, mỗi lần một bài
 """
+import asyncio
 import os
 
 from arq import cron
@@ -14,6 +15,8 @@ from dotenv import load_dotenv
 from app.services.grading.grading_queue import GRADING_JOB_TIMEOUT_SECONDS, SPEAKING_QUEUE, WRITING_QUEUE
 from app.services.grading.grading_run_executor import execute_grading_run
 from app.services.grading.stale_grading_run_recovery import recover_stale_grading_runs
+from app.services.ai_monitoring.model_price_sync import sync_model_prices
+from app.services.ai_monitoring.tracing_retention import purge_old_ai_traces
 from app.services.practice.mock_auto_submit import auto_submit_overdue_mocks
 from app.services.speaking.speaking_audio_retention import purge_expired_speaking_audio
 
@@ -47,6 +50,18 @@ async def purge_speaking_audio_task(ctx):
     print(f"🧹 [Retention] removed {purge_expired_speaking_audio()} audio files")
 
 
+async def purge_ai_traces_task(ctx):
+    """Xoá trace Langfuse từ 90 ngày, output/lỗi lượt chấm lỗi từ 180 ngày; giữ số liệu sử dụng (spec 008, FR-030)."""
+    print(f"🧹 [Retention] AI traces {await purge_old_ai_traces()}")
+
+
+async def sync_model_prices_task(ctx):
+    """Kiểm giá model với trang giá của nhà cung cấp mỗi ngày; giá đổi thì cập nhật và ghi audit (spec 008)."""
+    status = await asyncio.to_thread(sync_model_prices)
+    changed = [m for m, r in status["models"].items() if r["status"] == "updated"]
+    print(f"💲 [PriceSync] đổi giá: {changed or 'không'}; lỗi nguồn: {status['errors'] or 'không'}")
+
+
 class WorkerSettings:
     functions = [grade_run_task]
     queue_name = WRITING_QUEUE
@@ -54,6 +69,8 @@ class WorkerSettings:
     job_timeout = GRADING_JOB_TIMEOUT_SECONDS
     keep_result = 0            # giải phóng job id ngay khi xong để cron đẩy lại được
     cron_jobs = [cron(purge_speaking_audio_task, hour=3, minute=0),
+                 cron(purge_ai_traces_task, hour=3, minute=30),
+                 cron(sync_model_prices_task, hour={4, 16}, minute=0),
                  cron(recover_stale_runs_task, minute=set(range(60))),
                  cron(auto_submit_mocks_task, minute=set(range(60)), second=15)]
     redis_settings = _redis_settings

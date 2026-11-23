@@ -11,7 +11,8 @@ import logging
 
 from schemas.task_type import UNKNOWN_TASK_TYPE, TaskTypeResult
 from services import jev_client
-from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence
+from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.langfuse.usage_meter import record_usage
 from services.prompt_builder import get_prompt_manager
 from settings.config import get_settings
 
@@ -135,9 +136,11 @@ def _classify_with_prompt(compiled) -> str | None:
         messages=compiled.messages,
         temperature=compiled.temperature,
         max_tokens=compiled.max_tokens,
+        **trace_options(compiled),
         response_format={"type": "json_object"},
         extra_body=llm_extra_body(),
     )
+    record_usage(response, compiled.model)
     data = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}"))
     task_type = data.get("task_type")
     return task_type if task_type in _TASK_TYPES else None

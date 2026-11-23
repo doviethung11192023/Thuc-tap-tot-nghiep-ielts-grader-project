@@ -44,6 +44,7 @@ services:
     env_file: ./backend/app/ai/.env
     environment:
       - PORT=8001
+      - CORE_API_URL=http://fastapi:8000
       - SPEECH_DEVICE=cpu
       - SPEECH_STT_MODEL=small.en
       - SPEECH_STT_COMPUTE_TYPE=int8

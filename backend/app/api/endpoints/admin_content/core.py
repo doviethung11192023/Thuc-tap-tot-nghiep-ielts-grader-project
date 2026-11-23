@@ -4,6 +4,7 @@ from typing import Optional
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
+from app.services.ai_services.ai_step_catalog import is_ai_managed_setting
 from app.services.admin.staff_accounts import write_audit   # UC-38: sửa bảng quy đổi và cấu hình phải ghi audit
 from app.schemas.exam_content import SkillType
 from app.schemas.system_settings import (
@@ -119,7 +120,8 @@ async def delete_band_conversion(
 async def get_system_settings(current_user: User = Depends(require_admin)):
     """Lấy danh sách các cấu hình và tham số hệ thống."""
     res = db().table("system_settings").select("*").order("key").execute()
-    return {"meta": {"code": 200}, "data": res.data or []}
+    # Khoá ai_* và trace_view_days do trang Service AI quản lý, không lộ ở trình sửa JSON chung (spec 008)
+    return {"meta": {"code": 200}, "data": [r for r in (res.data or []) if not is_ai_managed_setting(r["key"])]}
 
 @router.put("/core/settings/{key}")
 async def update_system_setting(
@@ -128,6 +130,8 @@ async def update_system_setting(
     current_user: User = Depends(require_admin)
 ):
     """Cập nhật giá trị một cấu hình hệ thống (JSON)."""
+    if is_ai_managed_setting(key):
+        raise HTTPException(status_code=400, detail="Quản lý ở trang Service AI")
     existing = db().table("system_settings").select("key, value").eq("key", key).execute().data
     if not existing:
         raise HTTPException(status_code=404, detail=f"Không có cấu hình '{key}'")

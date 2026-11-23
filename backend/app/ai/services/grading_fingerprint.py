@@ -10,6 +10,7 @@ import hashlib
 import json
 
 from services.langfuse.prompt_manager import PromptManager
+from services.runtime_config.request_runtime_config import current_runtime_config
 from services.langfuse.prompt_registry import (
     CHART_PROMPT_NAME, CLASSIFY_PROMPT_NAME, GRADE_PROMPT_NAME, KEYCHECK_PROMPT_NAME, PROMPT_NAMES,
     REWRITE_PROMPT_NAMES, TASK1_PROMPT_NAMES, VISUAL_CLASSIFY_PROMPT_NAME,
@@ -38,4 +39,10 @@ def grading_fingerprint(task: str, pm: PromptManager) -> str:
                    s.essay_classifier],
         "prompts": {name: pm._fetch(name).version for name in names},
     }
+    config = current_runtime_config()
+    overrides = {step: o.model_dump(exclude_none=True) for step, o in config.steps.items()}
+    if config.llm.enable_thinking is not None:      # thinking đổi lập luận và điểm → phải đổi dấu vân tay
+        overrides["llm.enable_thinking"] = config.llm.enable_thinking
+    if overrides:       # Admin overrides change the result, so they change the fingerprint (absent → unchanged hash)
+        setup["admin_overrides"] = overrides
     return hashlib.sha256(json.dumps(setup, sort_keys=True).encode()).hexdigest()

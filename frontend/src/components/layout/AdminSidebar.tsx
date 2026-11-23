@@ -11,6 +11,8 @@ import {
   FileText,
   Sliders,
   UserCheck,
+  Cpu,
+  ScrollText,
   X,
   ChevronLeft,
   ChevronRight
@@ -39,6 +41,8 @@ export function AdminSidebar({
     { href: "/admin/tests", label: "Đề thi 4 Kỹ năng", icon: FileText },
     { href: "/admin/reviews", label: "Điều phối Chấm bài", icon: UserCheck },
     { href: "/admin/users", label: "Quản lý Học viên", icon: Users },
+    { href: "/admin/ai-services", label: "Service AI", icon: Cpu },
+    { href: "/admin/audit-logs", label: "Audit log", icon: ScrollText },
     { href: "/admin/settings", label: "Dữ liệu Lõi & Cài đặt", icon: Sliders },
   ];
 

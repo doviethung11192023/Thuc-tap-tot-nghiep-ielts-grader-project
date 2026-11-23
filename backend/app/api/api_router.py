@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.api.endpoints import essays, users, admin, auth, expert, notifications
+from app.api.endpoints import admin_ai_monitoring, admin_ai_services, internal_ai_engine
 from app.api.endpoints.admin_content import (
     tests as admin_tests,
     sections as admin_sections,
@@ -24,6 +25,9 @@ api_router.include_router(admin_core.router, prefix="/admin", tags=["Admin Core"
 api_router.include_router(admin_ingest.router, prefix="/admin", tags=["Admin Ingestion"])
 api_router.include_router(admin_test_sets.router, prefix="/admin", tags=["Admin Test Sets"])
 api_router.include_router(admin_writing_materials.router, prefix="/admin", tags=["Admin Writing Materials"])
+api_router.include_router(admin_ai_services.router, prefix="/admin", tags=["Admin AI Services"])
+api_router.include_router(admin_ai_monitoring.router, prefix="/admin", tags=["Admin AI Monitoring"])
+api_router.include_router(internal_ai_engine.router, prefix="/internal", tags=["Internal AI Engine"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(expert.router, prefix="/expert", tags=["Expert"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])

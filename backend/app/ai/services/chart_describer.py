@@ -21,7 +21,8 @@ from dataclasses import dataclass, field
 import httpx
 
 from settings.config import get_settings
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
+from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.langfuse.usage_meter import record_usage
 from services.langfuse.prompt_manager import PromptManager
 from services.task1_type_knowledge import TASK1_TYPES, normalize_task1_type
 
@@ -165,11 +166,13 @@ async def classify_visual(data_url: str, prompt_manager: PromptManager) -> str |
                 messages=_with_image(compiled.messages, data_url, "Classify this visual."),
                 temperature=compiled.temperature,
                 max_tokens=compiled.max_tokens,
+                **trace_options(compiled),
                 response_format={"type": "json_object"},
                 extra_body=llm_extra_body(),
             ),
             _CLASSIFY_TIMEOUT_SECONDS,
         )
+        record_usage(response, compiled.model)
         visual_type = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}")).get("type")
     except Exception as e:
         logger.warning("[Task1] Visual classifier failed: %s", e)
@@ -184,9 +187,11 @@ async def _describe(title: str, data_url: str, prompt_manager: PromptManager) ->
         messages=_with_image(compiled.messages, data_url, f"Task prompt:\n{title}"),
         temperature=compiled.temperature,
         max_tokens=compiled.max_tokens,
+        **trace_options(compiled),
         response_format={"type": "json_object"},
         extra_body=llm_extra_body(),
     )
+    record_usage(response, compiled.model)
     return _parse_description(response.choices[0].message.content or "{}")
 
 

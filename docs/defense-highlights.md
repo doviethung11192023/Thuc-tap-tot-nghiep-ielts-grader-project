@@ -225,6 +225,19 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - **Biết khi nào không dùng:** không Kubernetes, Kafka, Temporal (ADR-28) vì nhóm 3 người, 1 tháng, quy mô thiết kế không cần. Pattern đã có sẵn: `grading_runs` + cron quét lại chính là **transactional outbox**.
 - Chi phí: GPU thuê theo giờ, dự kiến dưới 200.000 đ cho load test và ngày bảo vệ.
 
+## 9b. Quản lý Service AI: truy vết được, đổi được, không làm hỏng chấm bài (✅ code + kiểm với dịch vụ thật 2026-11-22; ✅ nghiệm thu giao diện Admin 2026-11-23, trừ phần cần key thật; spec 008, ADR-33)
+
+- **Mỗi lượt chấm một trace**, nhóm theo attempt; mỗi lần gọi LLM trong trace mang tên prompt (`writing/common/cc`...) và nối với phiên bản prompt. Đo trên một bài Task 2 thật: 1 span + 5 lần gọi, **tổng token trong trace khớp đúng** số engine trả về để tính chi phí (11 451 vào / 5 626 ra).
+- **Admin đổi model, tham số, API key trong app, không khởi động lại gì**; **bắt gọi thử trước khi lưu**: thử với model không tồn tại → DashScope trả `model_not_found`, key sai → `invalid_api_key`, cả hai đều không được lưu. Có hiệu lực ≤ 60 s; lượt đang chạy giữ cấu hình đã lấy.
+- **Key không bao giờ ra khỏi server dạng rõ**: mã hoá Fernet trong bảng không có policy RLS, audit chỉ ghi 4 ký tự cuối; quét log Core và log engine sau các lần gọi thử: 0 lần xuất hiện; test tự động quét response và audit của luồng thay key (SC-011).
+- **Sức khoẻ 7 service** (LLM, Jev, Langfuse, Whisper, wav2vec2, LanguageTool, đồng bộ cấu hình) trong 1,5 s, không nạp model vài GB chỉ để kiểm.
+- **Chạy lại chấm** 1 hoặc ≤ 50 bài, luôn tạo evaluation mới (không ghi đè, constitution II); test SQL 30/30 trên Supabase thật, gồm "bấm chạy lại hai lần liên tiếp thì lần sau bị bỏ qua".
+- **Tìm nguyên nhân AI lệch Expert**: chênh lệch chia theo phiên bản prompt, model, dạng đề, khoảng band; trang so sánh hai cột trên cùng bài (63/63 vị trí lỗi khớp văn bản); độ lệch gửi lên trace dạng score để lọc ngay trên Langfuse.
+- **Lỗi tìm ra khi kiểm với dịch vụ thật** (nên kể, cho thấy quy trình): API cấp thấp của Langfuse SDK không mã hoá `/` trong tên prompt (danh sách prompt rỗng, test mock không bắt được); Langfuse Cloud gỡ API đọc trace v1 ngày 2026-11-16; route Admin gọi DB đồng bộ trong `async def` chặn cả API (chạy lại 50 bài ≈ 15 s đứng) → sau sửa, route nhẹ vẫn 1–4 ms khi route Admin chậm nhất đang chạy.
+- **Nhà cung cấp tăng giá thì sao?** Alibaba không có API trả giá, nên hệ thống đọc trang giá chính thức (bản Markdown, đúng vùng Singapore mà engine gọi) 2 lần mỗi ngày, có nút kiểm ngay và nguồn dự phòng LiteLLM. Giá đổi → tự cập nhật, ghi audit kèm giá cũ/mới và nguồn. **Chi phí mỗi lượt chấm được chốt lúc chấm** (`grading_runs.cost_usd`), nên giá mới chỉ áp cho lượt sau, lịch sử không bị tính lại. Lưu giá niêm yết, không lưu giá khuyến mãi, để cảnh báo ngân sách thà dư còn hơn thiếu. Đo thật: một lượt Speaking chấm lại dùng 2 model, 19 913 / 10 514 token, $0.0101, khớp tính tay.
+- **Nghiệm thu giao diện cũng tìm ra lỗi**: ô lọc "Lệch từ" nhảy về 1 khi xoá để gõ lại; "chưa rõ chi phí" báo sai lý do (thiếu giá thay vì thiếu token của lượt cũ); lưu form ghi audit cả khi không đổi gì; mã thô `grading_failed`, `per_prompt` lộ ra giao diện. Đã sửa, có test.
+- **Giới hạn nên tự nói**: đồng bộ giá phụ thuộc cấu trúc trang giá Alibaba (đổi cấu trúc thì rơi về LiteLLM, cả hai lỗi thì giữ giá cũ và báo lỗi); 80 lượt chấm trước spec 008 không có token nên không tính được chi phí; danh sách 8 bước AI lặp ở 3 nơi (engine, Core, frontend).
+
 ## 10. Quy trình làm phần mềm (✅)
 
 - Spec-driven development (GitHub Spec Kit): spec, plan, tasks, rồi mới code; mỗi tính năng có tiêu chí thành công đo được.

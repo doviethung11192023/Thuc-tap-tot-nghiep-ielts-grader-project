@@ -4,6 +4,9 @@ from typing import Any, Optional
 
 import httpx
 
+from app.clients.ai_engine_run_usage import (
+    AIEngineError, absorb_failed_response, current_run_context, finish_success,
+)
 from app.core.config import settings
 
 MAX_RETRIES = 3
@@ -26,23 +29,26 @@ async def call_ai_grade(title: str, essay: str, task_no: Optional[int], image_ur
         payload["image_url"] = image_url
     if answer_key:
         payload["answer_key"] = answer_key
+    payload.update(current_run_context())      # run_id, attempt_id, skill, mode: engine mở trace theo lượt (spec 008)
     # Secret nội bộ: /grade của AI engine từ chối request không có (giống /grade-speaking)
     headers = {"Content-Type": "application/json", "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
 
     last_error = ""
+    usage, trace_id = [], None      # token của các lần thử lỗi vẫn tính vào lượt chấm
     for attempt in range(MAX_RETRIES):
         try:
             async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
                 response = await client.post(settings.AI_ENGINE_URL, json=payload, headers=headers)
             if response.status_code == 200:
-                return response.json()
+                return finish_success(response.json(), usage, trace_id)
             last_error = f"HTTP {response.status_code}: {response.text[:500]}"
+            usage, trace_id = absorb_failed_response(response, usage, trace_id)
         except Exception as e:  # mạng, timeout
             last_error = f"{type(e).__name__}: {e}"
         if attempt < MAX_RETRIES - 1:
             print(f"⚠️ [AI Engine] lỗi ({last_error}), thử lại lần {attempt + 1}...")
             await asyncio.sleep(2 ** attempt)
-    raise RuntimeError(f"AI engine failed after {MAX_RETRIES} attempts: {last_error}")
+    raise AIEngineError(f"AI engine failed after {MAX_RETRIES} attempts: {last_error}", usage, trace_id)
 
 
 SPEAKING_TIMEOUT_SECONDS = 600.0
@@ -55,25 +61,27 @@ async def call_ai_grade_speaking(title: str, answers: list[dict[str, Any]],
     """Một lượt chấm Speaking tốn GPU và LLM nên chỉ thử lại lỗi tạm thời, không thử lại lỗi 4xx/500.
     unanswered: câu chưa có bản ghi [{part, question}], AI engine dùng để áp trần (BR-23)."""
     headers = {"Content-Type": "application/json", "X-AI-Engine-Secret": settings.AI_ENGINE_SECRET}
-    payload = {"title": title, "answers": answers, "unanswered": unanswered or []}
+    payload = {"title": title, "answers": answers, "unanswered": unanswered or [], **current_run_context()}
     last_error = ""
+    usage, trace_id = [], None
     for attempt in range(SPEAKING_TRIES):
         try:
             async with httpx.AsyncClient(timeout=SPEAKING_TIMEOUT_SECONDS) as client:
                 response = await client.post(settings.AI_ENGINE_SPEAKING_URL, json=payload, headers=headers)
             if response.status_code == 200:
-                return response.json()
+                return finish_success(response.json(), usage, trace_id)
             last_error = f"HTTP {response.status_code}: {response.text[:500]}"
+            usage, trace_id = absorb_failed_response(response, usage, trace_id)
             if response.status_code not in _RETRYABLE_STATUS:
                 break
         except httpx.TimeoutException as e:
             # Engine có thể vẫn đang chạy lượt này; gọi lại sẽ tốn GPU hai lần cho cùng một bài.
-            raise RuntimeError(f"AI engine speaking grading timed out: {type(e).__name__}") from e
+            raise AIEngineError(f"AI engine speaking grading timed out: {type(e).__name__}", usage, trace_id) from e
         except httpx.TransportError as e:
             last_error = f"{type(e).__name__}: {e}"
         if attempt < SPEAKING_TRIES - 1:
             await asyncio.sleep(5)
-    raise RuntimeError(f"AI engine speaking grading failed: {last_error}")
+    raise AIEngineError(f"AI engine speaking grading failed: {last_error}", usage, trace_id)
 
 
 MATERIAL_TIMEOUT_SECONDS = 180.0

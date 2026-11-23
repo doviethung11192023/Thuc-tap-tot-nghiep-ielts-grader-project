@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     # unless ALLOW_NO_SECRET=true, which is for a local machine only.
     ai_engine_secret: str = ""
     allow_no_secret: bool = False
+    # Core API base URL: the engine pulls the Admin runtime config from it (spec 008).
+    core_api_url: str = "http://localhost:8000"
 
     # Server
     server_reload: bool = False

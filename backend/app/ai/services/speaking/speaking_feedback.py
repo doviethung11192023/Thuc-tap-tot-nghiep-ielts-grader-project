@@ -9,9 +9,9 @@ import json
 import logging
 from dataclasses import dataclass
 
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
+from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.langfuse.usage_meter import record_usage
 from services.prompt_builder import CompiledPrompt, get_prompt_manager
-from settings.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +32,15 @@ async def _json_completion(compiled: CompiledPrompt) -> dict:
     for _ in range(_MAX_TRIES):
         try:
             response = await client.chat.completions.create(
-                model=get_settings().default_llm_model,
+                model=compiled.model,
                 messages=compiled.messages,
                 temperature=compiled.temperature,
                 max_tokens=compiled.max_tokens,
+                **trace_options(compiled),
                 response_format={"type": "json_object"},
                 extra_body=llm_extra_body(),
             )
+            record_usage(response, compiled.model)
             data = json.loads(strip_markdown_fence(response.choices[0].message.content or "{}"))
             if isinstance(data, dict):
                 return data

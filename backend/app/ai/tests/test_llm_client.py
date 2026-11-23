@@ -18,3 +18,14 @@ def test_extra_body_only_for_dashscope(monkeypatch):
     assert llm_extra_body() == {}
     monkeypatch.delenv("DEFAULT_BASE_URL")
     get_settings.cache_clear()
+
+
+def test_trace_options_names_the_call_after_the_langfuse_prompt():
+    """Trace phải cho biết lần gọi nào là prompt nào (spec 008 US1); không có prompt thật thì không thêm kwargs."""
+    from types import SimpleNamespace
+    from services.llm_client import trace_options
+    prompt = SimpleNamespace(name="writing/common/cc", version=2)
+    assert trace_options(SimpleNamespace(langfuse_prompt=prompt)) == {"name": "writing/common/cc", "langfuse_prompt": prompt}
+    assert trace_options(SimpleNamespace(langfuse_prompt=prompt), name="cc") ["name"] == "cc"
+    assert trace_options(SimpleNamespace(langfuse_prompt=None)) == {}
+    assert trace_options(SimpleNamespace(langfuse_prompt=object())) == {}

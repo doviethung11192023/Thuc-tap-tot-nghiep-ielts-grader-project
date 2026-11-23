@@ -14,6 +14,8 @@ from app.services.speaking.speaking_evaluation_finalizer import finalize_speakin
 from app.services.speaking.speaking_test_content import speaking_part_number
 from app.services.writing.writing_bands import to_half_band
 from app.clients.ai_engine_client import call_ai_grade_speaking
+from app.clients.ai_engine_run_usage import run_context
+from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
 
 # Khoá trong JSON AI engine → mã tiêu chí trong bảng criteria
 CRITERION_CODES = {"fc": "FC", "lr": "LR", "gra": "GRA", "pr": "P"}
@@ -102,12 +104,15 @@ def _store_scores(evaluation_id: str, result: dict[str, Any]) -> None:
 async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: str) -> None:
     print(f"🔧 [Worker] speaking attempt={attempt_id} evaluation={evaluation_id}")
     started = time.monotonic()
+    result = None      # kết quả engine; lỗi về sau vẫn ghi được token đã tốn
     try:
         answers = load_answers(attempt_id)
-        title_rows = db().table("attempts").select("tests(title)").eq("id", attempt_id).execute().data
+        title_rows = db().table("attempts").select("mode, tests(title)").eq("id", attempt_id).execute().data
         title = ((title_rows[0].get("tests") or {}).get("title") if title_rows else None) or "IELTS Speaking Test"
+        mode = title_rows[0].get("mode") if title_rows else None
         unanswered = load_unanswered(attempt_id, {a["question_id"] for a in answers})
-        result = await call_ai_grade_speaking(title, _request_answers(answers), unanswered)
+        with run_context(run_id, attempt_id, "speaking", mode):
+            result = await call_ai_grade_speaking(title, _request_answers(answers), unanswered)
         _store_responses(result)
         if result.get("no_speech"):
             fail_ai_evaluation(evaluation_id, attempt_id, "no_speech")   # mọi câu đều im lặng (ST_attempt)
@@ -119,14 +124,14 @@ async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: st
         db().table("grading_runs").update({
             "status": "done", "output": result, "model": result.get("model"),
             "prompt_versions": result.get("prompt_versions"), "finished_at": _now_iso(),
-            "latency_ms": int((time.monotonic() - started) * 1000),
+            "latency_ms": int((time.monotonic() - started) * 1000), **done_columns(result),
         }).eq("id", run_id).execute()
         print(f"✅ [Worker] speaking attempt {attempt_id} done")
     except Exception as e:
         print(f"❌ [Worker] speaking attempt {attempt_id} failed: {e}")
         db().table("grading_runs").update({
             "status": "failed", "error": str(e)[:2000], "finished_at": _now_iso(),
-            "latency_ms": int((time.monotonic() - started) * 1000),
+            "latency_ms": int((time.monotonic() - started) * 1000), **failed_columns(e, result),
         }).eq("id", run_id).execute()
     finally:
         try:

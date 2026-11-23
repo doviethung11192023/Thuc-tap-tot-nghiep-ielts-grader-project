@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     AI_ENGINE_URL: str = "http://localhost:8001/grade"
     AI_ENGINE_SPEAKING_URL: str = "http://localhost:8001/grade-speaking"
     AI_ENGINE_SECRET: str = ""
+    # Khoá Fernet mã hoá API key AI lưu trong DB (spec 008, FR-043); thiếu thì chặn lưu key, phần còn lại vẫn chạy
+    AI_SECRETS_ENCRYPTION_KEY: str = ""
+    # Dựng link trace: {LANGFUSE_BASE_URL}/project/{LANGFUSE_PROJECT_ID}/traces/{trace_id} (không phải key)
+    LANGFUSE_BASE_URL: str = ""
+    LANGFUSE_PROJECT_ID: str = ""
     # AI_ENGINE_URL: str = "https://dd03-2405-4802-80bc-cca0-6c28-e1b1-6417-dd23.ngrok-free.app/grade"
 
     # Cloudflare R2 Storage (S3-compatible)

@@ -14,6 +14,8 @@ from app.services.writing.writing_evaluation_finalizer import finalize_writing_e
 from app.services.writing.writing_test_content import chart_image_url
 from app.services.writing.annotation_alignment import align_annotation_coordinates
 from app.clients.ai_engine_client import call_ai_grade, call_ai_grading_fingerprint
+from app.clients.ai_engine_run_usage import run_context
+from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
 from app.services.writing.writing_grading_cache import find_cached_output, input_hash, is_first_ai_evaluation
 from app.services.writing.writing_task_materials import approved_answer_key
 
@@ -55,6 +57,15 @@ def _load_task(essay_id: str) -> dict[str, Any]:
     task = db().table("writing_tasks").select("task_type, task_prompt, chart_image_key") \
         .eq("section_id", essay["section_id"]).execute().data[0]
     return {**essay, **task}
+
+
+def _attempt_mode(attempt_id: str) -> str | None:
+    """Mode của bài, gửi cho engine làm metadata trace. Lỗi đọc không được làm hỏng lượt chấm."""
+    try:
+        rows = db().table("attempts").select("mode").eq("id", attempt_id).execute().data
+        return rows[0]["mode"] if rows else None
+    except Exception:
+        return None
 
 
 async def _grade_or_reuse(evaluation_id: str, run_id: str, essay: dict[str, Any], task_no: int) -> dict[str, Any]:
@@ -121,23 +132,25 @@ async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str
     """Background job: chấm 1 essay; lỗi được ghi vào grading_runs.error (FR-30)."""
     print(f"🔧 [Worker] evaluation={evaluation_id} task={task_no} essay={essay_id}")
     started = time.monotonic()
+    ai = None      # kết quả engine; lỗi về sau vẫn ghi được token đã tốn
     try:
         essay = _load_task(essay_id)
-        ai = await _grade_or_reuse(evaluation_id, run_id, essay, task_no)
+        with run_context(run_id, essay["attempt_id"], "writing", _attempt_mode(essay["attempt_id"])):
+            ai = await _grade_or_reuse(evaluation_id, run_id, essay, task_no)
         hash_value = ai.pop("input_hash", None)
         _store_scores(evaluation_id, task_no, ai)
         n_ann = _store_annotations(evaluation_id, essay, task_no, ai)
         db().table("grading_runs").update({
             "status": "done", "output": ai, "model": ai.get("model"),
             "prompt_versions": ai.get("prompt_versions"), "finished_at": _now_iso(), "input_hash": hash_value,
-            "latency_ms": int((time.monotonic() - started) * 1000),
+            "latency_ms": int((time.monotonic() - started) * 1000), **done_columns(ai),
         }).eq("id", run_id).execute()
         print(f"✅ [Worker] task {task_no} done ({n_ann} annotations)")
     except Exception as e:
         print(f"❌ [Worker] task {task_no} failed: {e}")
         db().table("grading_runs").update({
             "status": "failed", "error": str(e)[:2000], "finished_at": _now_iso(),
-            "latency_ms": int((time.monotonic() - started) * 1000),
+            "latency_ms": int((time.monotonic() - started) * 1000), **failed_columns(e, ai),
         }).eq("id", run_id).execute()
     finally:
         try:

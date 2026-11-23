@@ -15,7 +15,8 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING
 
 from services.langfuse.prompt_manager import PromptManager, WritingTask
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
+from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.langfuse.usage_meter import record_usage
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
 from services.sub_indicator_levels import clamp_levels, task_sub_levels
 from utils.annotation_normalizer import apply_corrections, drop_unsupported_numbers, locate_and_dedupe
@@ -85,9 +86,11 @@ class SynthesisService:
                     messages=messages,
                     temperature=compiled.temperature,
                     max_tokens=compiled.max_tokens,
+                    **trace_options(compiled),
                     response_format={"type": "json_object"},
                     extra_body=llm_extra_body(),
                 )
+                record_usage(response, compiled.model)
                 raw_content = response.choices[0].message.content or "{}"
                 data = json.loads(strip_markdown_fence(raw_content))
                 if not isinstance(data, dict):
