@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import webbrowser
 
-# Add backend/app/ai root to sys.path so scripts can run standalone
+# Add ai-engine root to sys.path so scripts can run standalone
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from schemas.input import EssayInput

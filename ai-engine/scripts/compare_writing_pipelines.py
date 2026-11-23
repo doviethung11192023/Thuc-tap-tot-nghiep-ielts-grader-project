@@ -8,7 +8,7 @@ data/reference_corpus/, so an interrupted run resumes without repeating calls.
 Labels have no stated scorer: MAE here measures distance from those labels, not
 from an examiner.
 
-Usage (from backend/app/ai):
+Usage (from ai-engine):
   uv run python scripts/compare_writing_pipelines.py --essays 120
   uv run python scripts/compare_writing_pipelines.py --essays 20 --pipelines reference --run-name thinking-off
 """

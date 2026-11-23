@@ -12,8 +12,8 @@ under grading conditions: phonemes compared with the Whisper transcript, and con
 over the words Whisper actually heard. Only these two can justify a choice for the band.
 
 Usage:
-    .venv/bin/python scripts/evaluate_l2_arctic.py --data ../../../private/speech-eval/l2-arctic \
-        --out ../../../private/speech-eval/l2-arctic-results.json
+    .venv/bin/python scripts/evaluate_l2_arctic.py --data ../private/speech-eval/l2-arctic \
+        --out ../private/speech-eval/l2-arctic-results.json
 """
 from __future__ import annotations
 

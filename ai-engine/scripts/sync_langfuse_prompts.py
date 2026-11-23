@@ -5,7 +5,7 @@ Langfuse is the single source of truth for prompt content (edit prompts in the
 Langfuse UI). The registry (services/langfuse/prompt_registry.py) defines which
 prompt names the code reads; this script checks Langfuse against it.
 
-Usage (from backend/app/ai):
+Usage (from ai-engine):
     uv run python scripts/sync_langfuse_prompts.py --list
     uv run python scripts/sync_langfuse_prompts.py --verify
     uv run python scripts/sync_langfuse_prompts.py --delete-unregistered [--yes]

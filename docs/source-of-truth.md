@@ -492,7 +492,7 @@ Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compo
 |---|---|---|
 | Core API | `backend/app` (`main.py`, `api/`, `core/`, `db/`) | Toàn bộ nghiệp vụ: tài khoản, đề, attempt, chấm L/R, Expert, dashboard, Admin |
 | Worker | `backend/app/worker` (ARQ) | Gọi AI engine, ghi evaluation, tính band; sinh TTS; chạy cron |
-| AI engine | `backend/app/ai` | Chấm Writing Task 1/2 và Speaking; TTS; không truy cập DB |
+| AI engine | `ai-engine/` | Chấm Writing Task 1/2 và Speaking; TTS; không truy cập DB |
 | Frontend | `frontend` (Next.js 16 App Router, React 19, TS 5, Tailwind, TanStack Query, Recharts) | Dùng supabase-js **chỉ** cho auth, đọc dữ liệu được phép, Realtime. **Frontend không ghi trực tiếp** vào DB |
 
 ### Công nghệ
@@ -706,7 +706,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 | # | Mâu thuẫn | Quyết định |
 |---|---|---|
 | 1 | Sơ đồ SD-00, 02, 03, 05, 08, 09 vẽ "Job Queue (**Supabase pgmq**)"; chữ trong báo cáo (mục 3.4 và quyết định kiến trúc "ba khối Core API, worker, AI engine") và ARCH_system ghi **Redis + ARQ** | Theo **Redis + ARQ**. Sơ đồ SD cần sửa nhãn |
-| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `backend/app/ai/services/langfuse/prompt_registry.py`. Từ 2026-11-11 Admin tạo phiên bản và đổi label ngay trong app (UC-22); app gọi API Langfuse, vẫn không lưu bản sao nào khác. Báo cáo cần sửa quyết định đó |
+| 2 | Quyết định "prompt quản lý trên Langfuse" ghi "prompts must be backed up in the repository"; người dùng chỉ thị "Quản lý prompt tập trung trên Langfuse, không lưu backup gì ở local" | Theo **chỉ thị người dùng**: prompt chỉ có trên Langfuse; sửa prompt bằng cách tạo version mới trên Langfuse; danh sách tên prompt nằm trong `ai-engine/services/langfuse/prompt_registry.py`. Từ 2026-11-11 Admin tạo phiên bản và đổi label ngay trong app (UC-22); app gọi API Langfuse, vẫn không lưu bản sao nào khác. Báo cáo cần sửa quyết định đó |
 | 3 | Báo cáo ghi Qwen-VL đọc biểu đồ Task 1 | Code dùng `qwen3.7-plus` (`vision_llm_model`) vì đếm chính xác hơn `qwen3-vl-plus` trong lúc demo. Về bản chất vẫn là "model vision của Qwen" |
 | 4 | `ARCHITECTURE.md` nói LangGraph, Arize Phoenix | Lỗi thời. Pipeline thật là asyncio + OpenAI SDK + Langfuse |
 | 6 | Báo cáo ghi "P suy ra từ độ chính xác phát âm"; Langfuse có `speaking/common/pr` để LLM cho band | Code tính band P, prompt `pr` v3 chỉ giải thích. Band dựa trên độ tin cậy nhận dạng, không còn dựa trên độ chính xác âm vị, nên báo cáo cần sửa theo ADR-21 |
@@ -802,7 +802,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Task 2 chưa đạt NFR-02 (p90 74,4 s) và cổng độ phân tán (0,46 so với 0,70): giữ luồng Reference và nới cổng, hay tối ưu tiếp (ADR-22)?
 - Khi nào xoá schema `legacy` (cần nhóm xác nhận đã pull code mới)?
 - Import 91 đề Writing còn lại từ R2 vào `public`.
-- Chuyển `backend/app/ai` ra `ai-engine/` ở gốc repo để tách khỏi package Core API (`pytest` trần trong `backend/` đang lỗi vì quét vào đó). Làm sau khi spec 002 xong; cần kiểm tra thư mục gốc trong cấu hình deploy.
+- ✅ Đã chuyển `backend/app/ai` ra `ai-engine/` ở gốc repo (2026-11-23, nhánh `refactor/source-structure`); `docker-compose.yml` build từ `./ai-engine`. Cấu hình deploy trên VPS phải đổi theo đường dẫn mới.
 - Chương IV (triển khai, giao diện, kiểm thử, đánh giá AI) chưa viết. Vì Expert sửa từ bản AI nên không đo MAE như hai người chấm độc lập; dùng tỉ lệ và mức Expert sửa (§1).
 - Host AI engine ở đâu: Cloudflare Workers không chạy được torch, Cloudflare Containers chưa có GPU. Lựa chọn: máy có GPU nối qua Cloudflare Tunnel, VPS chỉ CPU (chưa đo tốc độ), hoặc thuê GPU. Core API, worker và Redis cần chỗ chạy liên tục.
 - Quyết định "prompt quản lý trên Langfuse" trong báo cáo cần sửa cho khớp quyết định "chỉ Langfuse".

@@ -10,7 +10,7 @@ dataset states no licence, so essay text must never be committed):
 Labels have no stated scorer, so every row carries label_trust="unverified".
 Type labels are cached in labels.json, so an interrupted run resumes cheaply.
 
-Usage (from backend/app/ai):  uv run python scripts/build_reference_corpus.py
+Usage (from ai-engine):  uv run python scripts/build_reference_corpus.py
 """
 from __future__ import annotations
 

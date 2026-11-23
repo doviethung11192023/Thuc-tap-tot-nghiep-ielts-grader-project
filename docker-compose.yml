@@ -40,8 +40,8 @@ services:
 
   # Internal only: no published port. CPU settings by default; see the gpu override below.
   ai-engine:
-    build: ./backend/app/ai
-    env_file: ./backend/app/ai/.env
+    build: ./ai-engine
+    env_file: ./ai-engine/.env
     environment:
       - PORT=8001
       - CORE_API_URL=http://fastapi:8000
@@ -50,7 +50,7 @@ services:
       - SPEECH_STT_COMPUTE_TYPE=int8
     volumes:
       - speech_models:/root/.cache/huggingface
-      - ./backend/app/ai/data/reference_corpus:/app/data/reference_corpus:ro
+      - ./ai-engine/data/reference_corpus:/app/data/reference_corpus:ro
     profiles: ["cpu"]
 
   ai-engine-gpu:

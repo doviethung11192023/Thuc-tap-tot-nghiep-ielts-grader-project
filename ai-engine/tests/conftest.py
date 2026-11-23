@@ -1,4 +1,4 @@
-"""Make the AI engine root (backend/app/ai) importable as top-level packages."""
+"""Make the AI engine root (ai-engine/) importable as top-level packages."""
 import sys
 from pathlib import Path
 

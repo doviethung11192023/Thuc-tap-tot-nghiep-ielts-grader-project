@@ -9,8 +9,8 @@ For each sentence group in speech_eval_manifest.json, a speaker records `<group>
     and does it beat the baseline of Whisper word confidence?
 
 Usage:
-    uv run python scripts/evaluate_speech_models.py --clips ../../../private/speech-eval/clips \
-        --speakers sinh,long --out ../../../private/speech-eval/results.json
+    uv run python scripts/evaluate_speech_models.py --clips ../private/speech-eval/clips \
+        --speakers sinh,long --out ../private/speech-eval/results.json
 Clips are named <speaker>-<group>-<clean|error>.<wav|webm|m4a|mp3>.
 """
 from __future__ import annotations

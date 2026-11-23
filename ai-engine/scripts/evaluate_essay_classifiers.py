@@ -5,7 +5,7 @@ Compare essay type classifiers on the Task 2 prompts labelled by Prep in dataset
 Advantages_Disadvantages, because the two readings are both defensible.
 Baselines: old code prompt 62/96; `writing/task2/classify` on qwen3.7-plus 86/96.
 
-Usage (from backend/app/ai):  uv run python scripts/evaluate_essay_classifiers.py
+Usage (from ai-engine):  uv run python scripts/evaluate_essay_classifiers.py
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.task_type_classifier import _classify_with_prompt  # noqa: E402
 from utils.essay_type_rules import classify_by_rules  # noqa: E402
 
-DATASET = Path(__file__).resolve().parents[4] / "dataset_clean" / "dap_an_loi_giai_clean" / "writing"
+DATASET = Path(__file__).resolve().parents[2] / "dataset_clean" / "dap_an_loi_giai_clean" / "writing"
 _LABELS = (
     (r"discuss", "Discussion"),
     (r"advantage|positive|negative", "Advantages_Disadvantages"),

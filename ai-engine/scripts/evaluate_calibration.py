@@ -5,7 +5,7 @@ with the examiner band. Run after import_calibration_samples.py.
 Transcripts are AI-made until a teacher flips reviewed=true; --reviewed-only uses just those.
 The vision model tends to fix spelling while transcribing, so unreviewed LR/GRA results lean high.
 
-Usage (from backend/app/ai):  uv run python scripts/evaluate_calibration.py [--reviewed-only]
+Usage (from ai-engine):  uv run python scripts/evaluate_calibration.py [--reviewed-only]
 """
 from __future__ import annotations
 
