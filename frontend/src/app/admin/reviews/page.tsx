@@ -11,7 +11,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { AdminSlaPipelineStrip } from "@/components/admin/AdminSlaPipelineStrip";
+import { AdminSlaPipelineStrip } from "@/components/admin/reviews/AdminSlaPipelineStrip";
 import { BlurFadeCard } from "@/components/motion";
 import { toast } from "sonner";
 import {
@@ -23,7 +23,7 @@ import {
   type AdminReviewsSummary,
 } from "@/services/admin-reviews";
 import { AdminAssignExpertModal } from "@/components/admin/reviews/AdminAssignExpertModal";
-import { AdminExpertKpiTable } from "@/components/admin/AdminExpertKpiTable";
+import { AdminExpertKpiTable } from "@/components/admin/expert-governance/AdminExpertKpiTable";
 import { extractApiErrorMessage } from "@/lib/api-error";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {

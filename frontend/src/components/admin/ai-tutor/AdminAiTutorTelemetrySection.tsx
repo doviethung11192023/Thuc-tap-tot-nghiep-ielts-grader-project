@@ -3,7 +3,7 @@
 import React from "react";
 import { Coins, Cpu, Gauge, ShieldCheck } from "lucide-react";
 import type { AdminTutorStats } from "@/services/admin-tutor";
-import { AdminAiTutorTraceTable } from "./AdminAiTutorTraceTable";
+import { AdminAiTutorTraceTable } from "@/components/admin/ai-tutor/AdminAiTutorTraceTable";
 
 interface Props {
   stats: AdminTutorStats;

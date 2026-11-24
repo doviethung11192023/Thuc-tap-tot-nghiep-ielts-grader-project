@@ -19,8 +19,8 @@ import { User } from "@/types";
 import { UserTable } from "@/components/admin/users/UserTable";
 import { UserPagination } from "@/components/admin/users/UserPagination";
 import { UserCreateModal } from "@/components/admin/users/UserCreateModal";
-import { LearnerAnalyticsMatrix } from "@/components/admin/LearnerAnalyticsMatrix";
-import { LearnerWhiteBoxAuditModal } from "@/components/admin/LearnerWhiteBoxAuditModal";
+import { LearnerAnalyticsMatrix } from "@/components/admin/users/LearnerAnalyticsMatrix";
+import { LearnerWhiteBoxAuditModal } from "@/components/admin/users/LearnerWhiteBoxAuditModal";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();

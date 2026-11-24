@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { X, Loader2, ShieldCheck, Zap, Calculator, Cpu, CalendarRange, FileSpreadsheet } from "lucide-react";
 import { getAdminLearnerWhiteBoxAudit } from "@/services/users";
-import { Br12ProofTab, MonthlyAndLedgerProofTab, UtilityAndEwmaProofTab } from "./LearnerAuditProofTabs";
+import { Br12ProofTab, MonthlyAndLedgerProofTab, UtilityAndEwmaProofTab } from "@/components/admin/users/LearnerAuditProofTabs";
 
 interface LearnerWhiteBoxAuditModalProps {
   userId: string | null;
