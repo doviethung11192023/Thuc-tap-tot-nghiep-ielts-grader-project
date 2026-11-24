@@ -78,3 +78,15 @@ def test_allow_no_secret_opens_endpoint_for_local_runs(client, monkeypatch):
     monkeypatch.setattr(settings, "ai_engine_secret", "")
     monkeypatch.setattr(settings, "allow_no_secret", True)
     assert client.post("/grade", json={"title": "t", "essay": "Text."}, headers={"X-AI-Engine-Secret": ""}).status_code == 200
+
+
+def test_lifespan_skips_speech_preload_when_disabled(monkeypatch):
+    import main
+    called = []
+    monkeypatch.setattr(main, "warm_up_nlp_tools", lambda: None)
+    monkeypatch.setattr(main, "load_stt_model", lambda: called.append("stt"))
+    monkeypatch.setattr(main, "load_phoneme_model", lambda: called.append("phoneme"))
+    monkeypatch.setattr(main.get_settings(), "speech_preload_models", False)
+    with TestClient(serve.app) as c:
+        assert c.get("/health").status_code == 200
+    assert called == []
