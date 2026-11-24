@@ -4,6 +4,23 @@ import { useEffect, useState } from "react";
 import { getLearnerNextStep } from "@/services/learning-profile";
 import type { LearnerNextStep } from "@/types/learning-profile";
 
+// Gọi sẵn khi trang Learning Profile vừa mở, song song với overview; trước đây phải chờ overview về mới có
+// refreshKey để gọi, thành hai chặng nối tiếp. Chỉ dùng kết quả gọi sẵn nếu còn mới (tránh hiện số cũ).
+const PREFETCH_MAX_AGE_MS = 15_000;
+let prefetched: { at: number; promise: Promise<LearnerNextStep> } | null = null;
+
+export function prefetchLearnerNextStep() {
+  const promise = getLearnerNextStep();
+  promise.catch(() => {}); // lỗi được xử lý khi hook dùng tới promise này
+  prefetched = { at: Date.now(), promise };
+}
+
+function takeNextStepRequest(): Promise<LearnerNextStep> {
+  const ready = prefetched && Date.now() - prefetched.at < PREFETCH_MAX_AGE_MS ? prefetched.promise : null;
+  prefetched = null;
+  return ready ?? getLearnerNextStep();
+}
+
 interface NextStepState {
   key: string | null;
   data: LearnerNextStep | null;
@@ -20,7 +37,7 @@ export function useLearnerNextStep(refreshKey: string) {
 
   useEffect(() => {
     let cancelled = false;
-    getLearnerNextStep()
+    takeNextStepRequest()
       .then((data) => {
         if (!cancelled) setState({ key: refreshKey, data, error: null });
       })
