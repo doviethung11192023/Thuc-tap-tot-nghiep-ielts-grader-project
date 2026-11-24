@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     # Bucket KHÔNG public cho audio bài làm (ADR-05, NFR-07): chỉ truy cập bằng presigned URL.
     R2_PRIVATE_BUCKET_NAME: str = ""
 
+    # Origin frontend được gọi API (CORS), cách nhau bởi dấu phẩy; production phải đặt domain thật
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # Tắt /docs, /redoc, /openapi.json khi deploy công khai
+    ENABLE_API_DOCS: bool = True
+
     # Postgres trực tiếp (Session pooler) cho migration/psql; Core API không dùng
     SUPABASE_DB_URL: str = ""
 
