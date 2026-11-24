@@ -11,7 +11,10 @@ from postgrest.exceptions import APIError
 import logging
 import sys
 
-logger = logging.getLogger("app.main")
+from app.core.logging_config import configure_logging
+
+configure_logging()   # INFO cho toàn app; phải chạy trước khi nhận request đầu tiên
+logger = logging.getLogger(__name__)
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -26,11 +29,11 @@ async def lifespan(app: FastAPI):
         redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
         redis_settings.conn_retries = 1
         app.state.redis = await create_pool(redis_settings)
-        print("[ARQ] Cau hinh thanh cong ARQ Redis Pool!")
+        logger.info("[ARQ] Cau hinh thanh cong ARQ Redis Pool!")
     except Exception as e:
         from app.core.null_redis_cache import NullRedisCache
         app.state.redis = NullRedisCache()
-        print(f"[ARQ] Khong ket noi duoc Redis ({e}) -> chay khong cache")
+        logger.warning(f"[ARQ] Khong ket noi duoc Redis ({e}) -> chay khong cache")
     yield
     # Teardown
     await app.state.redis.close()

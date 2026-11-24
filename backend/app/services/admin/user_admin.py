@@ -12,6 +12,9 @@ from app.core.supabase_access_token_verifier import forget_profile
 
 from app.db.supabase import db, supabase
 from app.services.admin.staff_accounts import write_audit
+import logging
+
+logger = logging.getLogger(__name__)
 
 _activated_cache: tuple[set[str], float] | None = None
 _ACTIVATED_TTL_SEC = 60.0
@@ -27,7 +30,7 @@ def _activated_ids() -> set[str]:
         try:
             users = supabase.auth.admin.list_users(page=page, per_page=1000)
         except Exception as e:
-            print(f"⚠️ [Admin] list auth users: {e}")
+            logger.warning(f"⚠️ [Admin] list auth users: {e}")
             return _activated_cache[0] if _activated_cache else ids
         ids |= {str(u.id) for u in users or [] if getattr(u, "last_sign_in_at", None)}
         if not users or len(users) < 1000:
@@ -77,6 +80,6 @@ def set_user_active(admin_id: str, user_id: str, is_active: bool, reason: Option
     try:
         supabase.auth.admin.update_user_by_id(user_id, {"ban_duration": "none" if is_active else "876000h"})
     except Exception as e:
-        print(f"⚠️ [Admin] sync ban {user_id}: {e}")
+        logger.warning(f"⚠️ [Admin] sync ban {user_id}: {e}")
     write_audit(admin_id, "unlock_user" if is_active else "lock_user", "profiles", user_id,
                 after={"is_active": is_active, "reason": reason})

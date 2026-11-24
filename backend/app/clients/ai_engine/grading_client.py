@@ -8,6 +8,9 @@ from app.clients.ai_engine.run_usage import (
     AIEngineError, absorb_failed_response, current_run_context, finish_success,
 )
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 3
 TIMEOUT_SECONDS = 300.0
@@ -46,7 +49,7 @@ async def call_ai_grade(title: str, essay: str, task_no: Optional[int], image_ur
         except Exception as e:  # mạng, timeout
             last_error = f"{type(e).__name__}: {e}"
         if attempt < MAX_RETRIES - 1:
-            print(f"⚠️ [AI Engine] lỗi ({last_error}), thử lại lần {attempt + 1}...")
+            logger.warning(f"⚠️ [AI Engine] lỗi ({last_error}), thử lại lần {attempt + 1}...")
             await asyncio.sleep(2 ** attempt)
     raise AIEngineError(f"AI engine failed after {MAX_RETRIES} attempts: {last_error}", usage, trace_id)
 

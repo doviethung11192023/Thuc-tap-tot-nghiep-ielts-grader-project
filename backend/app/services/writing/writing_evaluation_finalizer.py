@@ -11,6 +11,9 @@ from app.db.supabase import db
 from app.services.practice.ai_evaluation_outcome import fail_ai_evaluation, publish_ai_evaluation
 from app.services.writing.writing_bands import attempt_band, task_band
 from app.services.writing.writing_task_scope import expected_task_nos
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def finalize_writing_evaluation(evaluation_id: str) -> None:
@@ -25,7 +28,7 @@ def finalize_writing_evaluation(evaluation_id: str) -> None:
 
     if any(r["status"] == "failed" for r in runs):
         fail_ai_evaluation(evaluation_id, attempt_id)
-        print(f"❌ [Worker] attempt {attempt_id} -> grading_failed")
+        logger.error(f"❌ [Worker] attempt {attempt_id} -> grading_failed")
         return
 
     scores = conn.table("criterion_scores").select("task_no, band").eq("evaluation_id", evaluation_id).execute().data or []
@@ -35,10 +38,10 @@ def finalize_writing_evaluation(evaluation_id: str) -> None:
     graded_tasks = {r["task_no"] for r in runs}
     if any(len(by_task.get(t, [])) != 4 for t in graded_tasks):
         fail_ai_evaluation(evaluation_id, attempt_id)
-        print(f"❌ [Worker] attempt {attempt_id}: missing criterion scores")
+        logger.error(f"❌ [Worker] attempt {attempt_id}: missing criterion scores")
         return
 
     attempt = conn.table("attempts").select("id, test_id, mode").eq("id", attempt_id).execute().data[0]
     band = attempt_band({t: task_band(by_task[t]) for t in graded_tasks}, expected_task_nos(attempt))
     publish_ai_evaluation(evaluation_id, attempt_id, band)
-    print(f"✅ [Worker] attempt {attempt_id} -> scored (band {band}, tasks {sorted(graded_tasks)})")
+    logger.info(f"✅ [Worker] attempt {attempt_id} -> scored (band {band}, tasks {sorted(graded_tasks)})")

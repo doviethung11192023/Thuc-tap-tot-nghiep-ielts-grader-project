@@ -18,6 +18,9 @@ from app.clients.ai_engine.run_usage import run_context
 from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
 from app.services.writing.writing_grading_cache import find_cached_output, input_hash, is_first_ai_evaluation
 from app.services.writing.writing_task_materials import approved_answer_key
+import logging
+
+logger = logging.getLogger(__name__)
 
 ANNOTATION_TYPES = {"error", "upgrade", "logic_issue", "strength"}
 # Khoá điểm trong JSON AI engine → mã tiêu chí (TA cho Task 1, TR cho Task 2)
@@ -77,7 +80,7 @@ async def _grade_or_reuse(evaluation_id: str, run_id: str, essay: dict[str, Any]
                                 await call_ai_grading_fingerprint(task_no))
         cached = find_cached_output(hash_value, run_id)
         if cached:
-            print(f"♻️ [Worker] task {task_no}: reuse result of run {cached[0]}")
+            logger.info(f"♻️ [Worker] task {task_no}: reuse result of run {cached[0]}")
             return {**cached[1], "cached_from_run_id": cached[0], "input_hash": hash_value}
     ai = await call_ai_grade(essay["task_prompt"], essay["content"], task_no,
                              chart_image_url(essay.get("chart_image_key")), key)
@@ -130,7 +133,7 @@ def _store_annotations(evaluation_id: str, essay: dict[str, Any], task_no: int, 
 
 async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str, task_no: int):
     """Background job: chấm 1 essay; lỗi được ghi vào grading_runs.error (FR-30)."""
-    print(f"🔧 [Worker] evaluation={evaluation_id} task={task_no} essay={essay_id}")
+    logger.info(f"🔧 [Worker] evaluation={evaluation_id} task={task_no} essay={essay_id}")
     started = time.monotonic()
     ai = None      # kết quả engine; lỗi về sau vẫn ghi được token đã tốn
     try:
@@ -145,9 +148,9 @@ async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str
             "prompt_versions": ai.get("prompt_versions"), "finished_at": _now_iso(), "input_hash": hash_value,
             "latency_ms": int((time.monotonic() - started) * 1000), **done_columns(ai),
         }).eq("id", run_id).execute()
-        print(f"✅ [Worker] task {task_no} done ({n_ann} annotations)")
+        logger.info(f"✅ [Worker] task {task_no} done ({n_ann} annotations)")
     except Exception as e:
-        print(f"❌ [Worker] task {task_no} failed: {e}")
+        logger.error(f"❌ [Worker] task {task_no} failed: {e}", exc_info=True)
         db().table("grading_runs").update({
             "status": "failed", "error": str(e)[:2000], "finished_at": _now_iso(),
             "latency_ms": int((time.monotonic() - started) * 1000), **failed_columns(e, ai),
@@ -156,4 +159,4 @@ async def grade_writing_task(ctx, evaluation_id: str, run_id: str, essay_id: str
         try:
             finalize_writing_evaluation(evaluation_id)
         except Exception as e:
-            print(f"⚠️ [Worker] finalize {evaluation_id} failed: {e}")
+            logger.warning(f"⚠️ [Worker] finalize {evaluation_id} failed: {e}")

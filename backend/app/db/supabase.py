@@ -5,6 +5,9 @@ import httpx
 import jwt
 from supabase import create_client, Client
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 _thread_local = threading.local()
 
@@ -77,7 +80,7 @@ def get_supabase_client() -> Client:
             if hasattr(client, "auth") and hasattr(client.auth, "admin") and hasattr(client.auth.admin, "_headers"):
                 client.auth.admin._headers["Authorization"] = f"Bearer {service_jwt}"
         except Exception as e:
-            print(f"[Supabase] Warning configuring service_role JWT: {e}")
+            logger.warning(f"[Supabase] Warning configuring service_role JWT: {e}")
 
     if hasattr(client, "postgrest") and hasattr(client.postgrest, "session") and isinstance(client.postgrest.session, httpx.Client):
         _attach_resilient_transport(client.postgrest.session)

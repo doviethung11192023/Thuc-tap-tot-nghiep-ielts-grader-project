@@ -11,6 +11,9 @@ from typing import Any
 
 from app.services.expert.dispatcher import auto_dispatch_pending_requests
 from app.services.expert.quota_manager import confirm_mock_submission_slot
+import logging
+
+logger = logging.getLogger(__name__)
 
 _NO_WORK_STATUSES = ("no_speech", "abandoned")
 
@@ -35,5 +38,5 @@ async def request_mock_expert_review(attempt: dict[str, Any], submission: dict[s
             await auto_dispatch_pending_requests()
         return created
     except Exception as e:
-        print(f"⚠️ [MockExpertReview] attempt {attempt['id']}: {e}")
+        logger.warning(f"⚠️ [MockExpertReview] attempt {attempt['id']}: {e}")
         return False

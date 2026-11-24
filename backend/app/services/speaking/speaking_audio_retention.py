@@ -8,6 +8,9 @@ from datetime import datetime, timedelta, timezone
 
 from app.db.supabase import db
 from app.services.storage.r2_storage import r2_storage
+import logging
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_RETENTION_DAYS = 180
 BATCH_SIZE = 500
@@ -37,7 +40,7 @@ def purge_expired_speaking_audio() -> int:
             db().table("speaking_responses").update({"audio_deleted_at": now.isoformat()}).eq("id", row["id"]).execute()
             deleted += 1
         except Exception as e:
-            print(f"⚠️ [Retention] {row['id']}: {e}")
+            logger.warning(f"⚠️ [Retention] {row['id']}: {e}")
     return deleted
 
 
@@ -49,4 +52,4 @@ def delete_attempt_audio(attempt_id: str) -> None:
             if row.get("audio_key") and r2_storage.private_bucket_configured:
                 r2_storage.delete_private_object(row["audio_key"])
         except Exception as e:
-            print(f"⚠️ [Retention] attempt {attempt_id}: {e}")
+            logger.warning(f"⚠️ [Retention] attempt {attempt_id}: {e}")

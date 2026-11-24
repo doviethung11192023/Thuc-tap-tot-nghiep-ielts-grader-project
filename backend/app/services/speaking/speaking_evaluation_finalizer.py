@@ -2,6 +2,9 @@
 from app.db.supabase import db
 from app.services.practice.ai_evaluation_outcome import fail_ai_evaluation, publish_ai_evaluation
 from app.services.writing.writing_bands import task_band
+import logging
+
+logger = logging.getLogger(__name__)
 
 CRITERIA_COUNT = 4
 
@@ -18,8 +21,8 @@ def finalize_speaking_evaluation(evaluation_id: str) -> None:
     scores = conn.table("criterion_scores").select("band").eq("evaluation_id", evaluation_id).execute().data or []
     if any(r["status"] == "failed" for r in runs) or len(scores) != CRITERIA_COUNT:
         fail_ai_evaluation(evaluation_id, attempt_id)
-        print(f"❌ [Worker] speaking attempt {attempt_id} -> grading_failed")
+        logger.error(f"❌ [Worker] speaking attempt {attempt_id} -> grading_failed")
         return
     band = task_band([float(s["band"]) for s in scores])
     publish_ai_evaluation(evaluation_id, attempt_id, band)
-    print(f"✅ [Worker] speaking attempt {attempt_id} -> scored (band {band})")
+    logger.info(f"✅ [Worker] speaking attempt {attempt_id} -> scored (band {band})")

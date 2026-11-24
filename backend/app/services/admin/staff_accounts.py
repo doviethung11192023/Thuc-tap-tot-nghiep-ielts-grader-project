@@ -12,6 +12,9 @@ from app.core.config import settings
 from app.core.domain_errors import ConflictError, InvalidRequestError, NotFoundError
 from app.core.supabase_access_token_verifier import forget_profile
 from app.db.supabase import db, supabase
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def password_setup_redirect() -> str:
@@ -30,7 +33,7 @@ def write_audit(admin_id: Optional[str], action: str, entity: str, entity_id: An
             "entity_id": str(entity_id) if entity_id is not None else None, "before": before, "after": after,
         }).execute()
     except Exception as e:  # audit không được làm hỏng thao tác chính
-        print(f"⚠️ [Audit] {action} {entity}:{entity_id}: {e}")
+        logger.warning(f"⚠️ [Audit] {action} {entity}:{entity_id}: {e}")
 
 
 def set_role(user_id: str, role: str, full_name: Optional[str] = None, expert_fields: Optional[dict] = None) -> None:
@@ -62,7 +65,7 @@ def _setup_link(email: str) -> Optional[str]:
                                                  "options": {"redirect_to": password_setup_redirect()}})
         return getattr(getattr(res, "properties", None), "action_link", None)
     except Exception as e:
-        print(f"⚠️ [Staff] setup link {email}: {e}")
+        logger.warning(f"⚠️ [Staff] setup link {email}: {e}")
         return None
 
 
@@ -84,7 +87,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
             if getattr(res, "user", None):
                 user_id, email_sent = res.user.id, True
         except Exception as e:
-            print(f"Invite note ({email}): {e}, fallback create_user")
+            logger.warning(f"Invite note ({email}): {e}, fallback create_user")
         if not user_id:
             try:
                 res = supabase.auth.admin.create_user({"email": email, "user_metadata": {"full_name": full_name},
@@ -98,7 +101,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
             supabase.auth.reset_password_for_email(email, options={"redirect_to": password_setup_redirect()})
             email_sent = True
         except Exception as e:
-            print(f"⚠️ [Staff] reset email {email}: {e}")
+            logger.warning(f"⚠️ [Staff] reset email {email}: {e}")
     write_audit(admin_id, f"create_{role}", "profiles", user_id,
                 after={"email": email, "full_name": full_name, "role": role, "email_sent": email_sent})
     return {"id": user_id, "email": email, "full_name": full_name, "role": role,
@@ -115,6 +118,6 @@ def resend_invite(admin_id: str, user_id: str) -> dict[str, Any]:
         supabase.auth.reset_password_for_email(email, options={"redirect_to": password_setup_redirect()})
         email_sent = True
     except Exception as e:
-        print(f"⚠️ [Staff] resend {email}: {e}")
+        logger.warning(f"⚠️ [Staff] resend {email}: {e}")
     write_audit(admin_id, "resend_invite", "profiles", user_id, after={"email": email})
     return {"email": email, "email_sent": email_sent, "setup_link": _setup_link(email)}
