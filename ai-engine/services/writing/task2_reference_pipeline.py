@@ -14,11 +14,11 @@ import time
 from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from schemas.input import EssayInput
-from services.holistic_grader import grade_all_criteria
-from services.prompt_builder import build_grade_prompt, get_prompt_manager
-from services.reference_corpus import select_ladder
-from services.synthesis_service import SynthesisService
-from services.task_type_classifier import classify_task_type
+from services.writing.holistic_grader import grade_all_criteria
+from services.llm.prompt_builder import build_grade_prompt, get_prompt_manager
+from services.writing.reference_corpus import select_ladder
+from services.writing.synthesis_service import SynthesisService
+from services.writing.task_type_classifier import classify_task_type
 from settings.config import get_settings
 from utils.preprocessor import preprocess
 

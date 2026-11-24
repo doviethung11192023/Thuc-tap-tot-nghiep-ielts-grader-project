@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from services import jev_client, task_type_classifier as classifier
+from services.writing import jev_client, task_type_classifier as classifier
 
 OPTIONS = {"Opinion": "one claim", "Discussion": "two views"}
 

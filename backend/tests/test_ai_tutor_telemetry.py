@@ -29,14 +29,14 @@ if "openai" not in sys.modules:
     fake_openai.AsyncOpenAI = object
     sys.modules["openai"] = fake_openai
 
-from services.tutor_prompts import build_tutor_messages, extract_spoiler_guard_data  # noqa: E402
-from services.tutor_stream_telemetry import (  # noqa: E402
+from services.tutor.prompts import build_tutor_messages, extract_spoiler_guard_data  # noqa: E402
+from services.tutor.stream_telemetry import (  # noqa: E402
     estimate_context_breakdown,
     extract_usage_from_chunk,
     finalize_stream_telemetry,
 )
 
-_spec = importlib.util.spec_from_file_location("tutor_streaming_service_tel", AI_DIR / "services" / "tutor_streaming_service.py")
+_spec = importlib.util.spec_from_file_location("tutor_streaming_service_tel", AI_DIR / "services" / "tutor" / "streaming_service.py")
 _stream_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_stream_mod)
 StreamFilter = _stream_mod._AntiSpoilerStreamFilter

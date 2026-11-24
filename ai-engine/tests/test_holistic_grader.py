@@ -9,9 +9,10 @@ import pytest
 
 from handlers import grammar_checker
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
-from services import grading_pipeline as gp, holistic_grader, llm_evaluator, prompt_builder
-from services.holistic_grader import parse_all_criteria
-from services.reference_corpus import BandLadder, Reference
+from services.writing import grading_pipeline as gp, holistic_grader
+from services.llm import llm_evaluator, prompt_builder
+from services.writing.holistic_grader import parse_all_criteria
+from services.writing.reference_corpus import BandLadder, Reference
 
 
 def criterion(band=6.0):

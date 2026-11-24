@@ -10,9 +10,9 @@ import logging
 from typing import Callable, TypeVar
 
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.llm.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
 from services.langfuse.usage_meter import record_usage
-from services.prompt_builder import CriterionPrompts, CompiledPrompt
+from services.llm.prompt_builder import CriterionPrompts, CompiledPrompt
 from services.langfuse.prompt_manager import AgentCriterion
 from utils.band_rounding import normalize_band
 

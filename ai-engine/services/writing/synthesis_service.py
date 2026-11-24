@@ -15,14 +15,14 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING
 
 from services.langfuse.prompt_manager import PromptManager, WritingTask
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.llm.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
 from services.langfuse.usage_meter import record_usage
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
-from services.sub_indicator_levels import clamp_levels, task_sub_levels
+from services.writing.sub_indicator_levels import clamp_levels, task_sub_levels
 from utils.annotation_normalizer import apply_corrections, drop_unsupported_numbers, locate_and_dedupe
 
 if TYPE_CHECKING:
-    from services.key_point_checker import KeyPointCheck
+    from services.writing.key_point_checker import KeyPointCheck
 
 logger = logging.getLogger(__name__)
 

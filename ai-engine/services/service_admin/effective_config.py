@@ -9,7 +9,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 
 from services.langfuse.prompt_param_resolution import PARAM_NAMES, Param, resolve_prompt_params
-from services.prompt_builder import get_prompt_manager
+from services.llm.prompt_builder import get_prompt_manager
 from services.runtime_config.ai_step_registry import STEP_LABELS, STEP_PROMPTS
 from services.runtime_config.runtime_config_client import get_runtime_config_client
 from services.runtime_config.runtime_config_model import RuntimeConfig

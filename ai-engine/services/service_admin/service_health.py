@@ -13,9 +13,9 @@ from datetime import datetime, timezone
 from typing import Awaitable, Callable
 
 from handlers import grammar_checker
-from services import jev_client
+from services.writing import jev_client
 from services.langfuse.client import get_langfuse_client
-from services.llm_client import effective_llm_api_key
+from services.llm.llm_client import effective_llm_api_key
 from services.runtime_config.runtime_config_client import get_runtime_config_client
 from services.runtime_config.secret_redaction import redact_secrets
 from services.service_admin.service_test_call import ServiceTestRequest, run_service_test

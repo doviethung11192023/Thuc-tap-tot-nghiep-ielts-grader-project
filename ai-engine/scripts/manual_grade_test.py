@@ -12,13 +12,13 @@ from schemas.input import EssayInput
 from utils.preprocessor import preprocess
 
 # Real Handlers & Services
-from services.task_type_classifier import classify_task_type
+from services.writing.task_type_classifier import classify_task_type
 from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 
-from services.prompt_builder import build_criterion_prompts
-from services.llm_evaluator import evaluate_all_criteria
-from services.synthesis_service import SynthesisService
+from services.llm.prompt_builder import build_criterion_prompts
+from services.llm.llm_evaluator import evaluate_all_criteria
+from services.writing.synthesis_service import SynthesisService
 
 try:
     from scripts.annotation_visualizer import generate_annotation_html_full

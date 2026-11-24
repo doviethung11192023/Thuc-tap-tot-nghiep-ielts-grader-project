@@ -13,8 +13,8 @@ from dataclasses import asdict, dataclass, field
 
 from schemas.answer_key import AnswerKey
 from services.langfuse.prompt_manager import PromptManager
-from services.llm_client import strip_markdown_fence
-from services.llm_evaluator import call_llm_json
+from services.llm.llm_client import strip_markdown_fence
+from services.llm.llm_evaluator import call_llm_json
 
 logger = logging.getLogger(__name__)
 

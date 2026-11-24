@@ -55,18 +55,18 @@ from services.langfuse.run_trace import RunContext  # noqa: E402
 from services.runtime_config.request_runtime_config import snapshot_for_request  # noqa: E402
 from services.service_admin.service_health import record_load_failure  # noqa: E402
 from settings.config import get_settings  # noqa: E402
-from services.grading_pipeline import (  # noqa: E402
+from services.writing.grading_pipeline import (  # noqa: E402
     PromptFetchError,
     normalize_task,
     run_grading_pipeline,
     warm_up_nlp_tools,
 )
-from services.reference_corpus import ReferenceCorpusError  # noqa: E402
-from services.grading_fingerprint import grading_fingerprint  # noqa: E402
-from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
-from services.prompt_builder import get_prompt_manager  # noqa: E402
+from services.writing.reference_corpus import ReferenceCorpusError  # noqa: E402
+from services.writing.grading_fingerprint import grading_fingerprint  # noqa: E402
+from services.writing.material_drafter import MaterialRequestError, draft_material  # noqa: E402
+from services.llm.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
-from services.tutor_router import router as tutor_router  # noqa: E402
+from services.tutor.router import router as tutor_router  # noqa: E402
 from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
 from services.speaking.phoneme_recognizer import load_model as load_phoneme_model  # noqa: E402
 from services.speaking.speech_transcriber import load_model as load_stt_model  # noqa: E402

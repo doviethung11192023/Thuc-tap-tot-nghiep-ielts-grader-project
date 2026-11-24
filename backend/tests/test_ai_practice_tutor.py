@@ -29,7 +29,7 @@ def _load_anti_spoiler_filter():
         fake_openai = types.ModuleType("openai")
         fake_openai.AsyncOpenAI = object
         sys.modules["openai"] = fake_openai
-    spec = importlib.util.spec_from_file_location("tutor_streaming_service", ai_dir / "services" / "tutor_streaming_service.py")
+    spec = importlib.util.spec_from_file_location("tutor_streaming_service", ai_dir / "services" / "tutor" / "streaming_service.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod._AntiSpoilerStreamFilter
@@ -132,7 +132,7 @@ def test_anti_spoiler_stream_filter_redacts_across_chunks():
 
 def test_matching_option_anti_spoiler_and_vi_language_guard():
     FilterCls = _load_anti_spoiler_filter()
-    from services.tutor_prompts import build_tutor_messages, extract_spoiler_guard_data
+    from services.tutor.prompts import build_tutor_messages, extract_spoiler_guard_data
 
     questions = [{
         "number": 1,

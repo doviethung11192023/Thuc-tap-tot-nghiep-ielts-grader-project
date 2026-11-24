@@ -21,10 +21,10 @@ from dataclasses import dataclass, field
 import httpx
 
 from settings.config import get_settings
-from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.llm.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence, trace_options
 from services.langfuse.usage_meter import record_usage
 from services.langfuse.prompt_manager import PromptManager
-from services.task1_type_knowledge import TASK1_TYPES, normalize_task1_type
+from services.writing.task1_type_knowledge import TASK1_TYPES, normalize_task1_type
 
 logger = logging.getLogger(__name__)
 

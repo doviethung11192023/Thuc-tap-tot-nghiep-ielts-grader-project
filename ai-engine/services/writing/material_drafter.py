@@ -10,10 +10,10 @@ import asyncio
 import json
 
 from schemas.answer_key import AnswerKey, parse_answer_key
-from services.chart_describer import _image_to_data_url, _with_image
+from services.writing.chart_describer import _image_to_data_url, _with_image
 from services.langfuse.prompt_manager import PromptManager
-from services.llm_client import strip_markdown_fence
-from services.llm_evaluator import call_llm_json
+from services.llm.llm_client import strip_markdown_fence
+from services.llm.llm_evaluator import call_llm_json
 
 MATERIAL_KINDS = ("answer_key", "outline", "sample")
 

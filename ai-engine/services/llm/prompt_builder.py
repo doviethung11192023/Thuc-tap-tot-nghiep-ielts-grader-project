@@ -16,7 +16,7 @@ from utils.essay_formatter import format_annotated_essay, format_indexed_essay
 
 
 if TYPE_CHECKING:
-    from services.reference_corpus import BandLadder
+    from services.writing.reference_corpus import BandLadder
 
 
 @dataclass

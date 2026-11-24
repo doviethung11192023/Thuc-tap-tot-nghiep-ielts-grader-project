@@ -3,9 +3,9 @@ from types import SimpleNamespace
 
 import pytest
 
-import services.chart_describer as cd
+import services.writing.chart_describer as cd
 from services.langfuse.prompt_manager import CompiledPrompt
-from services.task1_type_knowledge import get_task1_type
+from services.writing.task1_type_knowledge import get_task1_type
 
 
 class FakePromptManager:

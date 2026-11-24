@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from services import jev_client
+from services.writing import jev_client
 from services.service_admin import service_test_call as stc
 from services.runtime_config import request_runtime_config as rrc
 from services.runtime_config.runtime_config_model import RuntimeConfig
@@ -42,7 +42,7 @@ def env(monkeypatch):
     settings = Settings(_env_file=None, qwen_api_key="env-llm-key-9999", typesafe_api_key="env-ts-key-8888")
     for module in (stc, jev_client):
         monkeypatch.setattr(module, "get_settings", lambda: settings)
-    monkeypatch.setattr("services.llm_client.get_settings", lambda: settings)
+    monkeypatch.setattr("services.llm.llm_client.get_settings", lambda: settings)
     monkeypatch.setattr(stc, "AsyncOpenAI", FakeOpenAI)
     monkeypatch.setattr(stc, "ensure_langfuse_client", lambda: None)
     return settings

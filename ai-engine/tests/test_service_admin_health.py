@@ -26,8 +26,8 @@ def settings(monkeypatch):
                       langfuse_secret_key="sk-lf", default_llm_model="qwen-flash")
     for module in (sh, ec):
         monkeypatch.setattr(module, "get_settings", lambda: values)
-    monkeypatch.setattr("services.llm_client.get_settings", lambda: values)
-    monkeypatch.setattr("services.jev_client.get_settings", lambda: values)
+    monkeypatch.setattr("services.llm.llm_client.get_settings", lambda: values)
+    monkeypatch.setattr("services.writing.jev_client.get_settings", lambda: values)
     return values
 
 
