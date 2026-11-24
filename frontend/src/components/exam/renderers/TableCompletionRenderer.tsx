@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { BaseRendererProps, ReviewEvidenceAccordion } from './shared';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 interface TableCellItem {
   is_input?: boolean;
@@ -149,7 +150,7 @@ export const TableCompletionRenderer: React.FC<BaseRendererProps> = ({
     return tokens.map((part, idx) => {
       const m = part.match(/^{{(\d+)}}$/);
       if (!m) {
-        return <span key={idx} dangerouslySetInnerHTML={{ __html: part }} />;
+        return <span key={idx} dangerouslySetInnerHTML={{ __html: sanitizeHtml(part) }} />;
       }
       const qNum = Number(m[1]);
       const qData = group.questions.find((q) => q.question_number === qNum);
