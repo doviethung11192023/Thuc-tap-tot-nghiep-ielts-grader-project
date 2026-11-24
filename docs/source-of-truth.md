@@ -490,7 +490,7 @@ Browser (Next.js 16: Learner / Expert / Admin portal)
                                                                        ├─► Qwen API (DashScope)   ├─► Langfuse (prompt, trace)   └─► R2 (đọc audio)
 ```
 
-Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compose trên VPS. Supabase là dịch vụ managed. Ngoài ra có R2, Qwen và Langfuse.
+Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compose trên VPS. Việc phải làm khi deploy (biến môi trường, cấu hình Supabase Auth, cổng không được publish, kiểm sau deploy): `docs/deployment-guide.md`. Supabase là dịch vụ managed. Ngoài ra có R2, Qwen và Langfuse.
 
 | Khối | Vị trí trong repo | Trách nhiệm |
 |---|---|---|
