@@ -78,13 +78,8 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
 
           <div className="flex items-center gap-2 shrink-0">
             {detail?.overall_band != null && (
-              <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-extrabold tabular-nums">
+              <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-[#932120] text-white text-xs font-extrabold tabular-nums">
                 Band {detail.overall_band.toFixed(1)}
-              </span>
-            )}
-            {detail?.evaluator_type === 'expert' && (
-              <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
-                Chuyên gia đã thẩm định
               </span>
             )}
           </div>
@@ -95,7 +90,7 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
         {failed && (
           <div className="max-w-lg mx-auto bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3 mt-8">
             <p className="text-sm font-bold text-slate-700">Không tải được chi tiết bài làm.</p>
-            <Link href={backUrl} className="inline-block text-xs font-bold text-blue-600 hover:underline">
+            <Link href={backUrl} className="inline-block text-xs font-bold text-[#932120] hover:underline">
               Quay lại trang kết quả
             </Link>
           </div>
@@ -126,7 +121,7 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
             <p className="text-sm font-bold text-slate-800">
               Chưa có câu trả lời Speaking nào được lưu cho lượt này.
             </p>
-            <Link href={backUrl} className="inline-block text-xs font-bold text-blue-600 hover:underline">
+            <Link href={backUrl} className="inline-block text-xs font-bold text-[#932120] hover:underline">
               Quay lại trang kết quả
             </Link>
           </div>
@@ -151,7 +146,7 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
                     onClick={() => setActivePart('all')}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                       activePart === 'all'
-                        ? 'bg-blue-600 text-white shadow-xs'
+                        ? 'bg-[#932120] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -164,7 +159,7 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
                       onClick={() => setActivePart(part)}
                       className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                         activePart === part
-                          ? 'bg-blue-600 text-white shadow-xs'
+                          ? 'bg-[#932120] text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >

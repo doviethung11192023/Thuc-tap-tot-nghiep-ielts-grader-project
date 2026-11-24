@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { BookOpen, Headphones, PenTool, Mic, Clock, ChevronRight, Trash2 } from "lucide-react";
+import { SpotlightCard } from "@/components/motion";
 import type { TimelineHistoryItem } from "@/services/practice-history-cache";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface PracticeHistoryItemCardProps {
   item: TimelineHistoryItem;
@@ -20,6 +22,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemCardProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const formatDateTime = (raw: string) => {
     try {
       const d = new Date(raw);
@@ -49,23 +52,38 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
   const isOpen = item.status === "in_progress";
   const statusLabel = STATUS_LABELS[item.status] ?? "Đang làm";
 
+  const resumeMode = item.mode === "mock" ? "exam" : "practice";
+
   // Bài đã nộp luôn mở trang kết quả, kể cả khi đang chấm: không đưa Learner về phòng thi.
   const targetUrl = !isOpen
     ? `/test-practice/${item.skill.toLowerCase()}/${item.test_id}/summary?attemptId=${item.id}&returnUrl=${encodeURIComponent('/test-practice/history')}`
-    : `/test-practice/${item.skill.toLowerCase()}/${item.test_id}`;
+    : `/test-practice/${item.skill.toLowerCase()}/${item.test_id}?mode=${resumeMode}`;
 
   return (
-    <Link
-      href={targetUrl}
-      className="group block bg-white rounded-3xl border border-zinc-200/90 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all"
-    >
-      <div className="flex items-start sm:items-center gap-4">
+    <>
+      <SpotlightCard
+        tone="crimson"
+        className="bg-[var(--ux-surface)] rounded-3xl border border-[var(--ux-line)] shadow-2xs hover:shadow-md hover:border-[#932120]/40 overflow-hidden"
+      >
+        <Link href={targetUrl} className="group block p-4 sm:p-5 relative z-10">
+          <div className="flex items-start sm:items-center gap-4">
         {/* Score Pill Left */}
         <div className={`w-14 h-12 rounded-2xl flex flex-col items-center justify-center font-black shrink-0 shadow-xs transition-colors ${
-          (item.band ?? 0) >= 5.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-          (item.band ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-          isScored || hasRawOnly ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-          'bg-amber-50 text-amber-800 border border-amber-200 text-xs'
+          isScored
+            ? (item.band ?? 0) >= 6.0
+              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+              : (item.band ?? 0) >= 4.0
+                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                : 'bg-rose-100 text-rose-800 border border-rose-300'
+            : hasRawOnly
+              ? ((item.raw_score ?? 0) / Math.max(1, item.total_questions || 1)) >= 0.65
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : ((item.raw_score ?? 0) / Math.max(1, item.total_questions || 1)) >= 0.4
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                  : 'bg-rose-50 text-rose-700 border border-rose-200'
+              : item.status === 'grading_failed'
+                ? 'bg-red-100 text-red-700 border border-red-200 text-xs'
+                : 'bg-amber-50 text-amber-800 border border-amber-200 text-xs'
         }`}>
           {isScored ? (
             <>
@@ -105,16 +123,16 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (window.confirm("Xoá bài luyện tập làm dở này? Bài làm sẽ bị xoá hẳn.")) onDelete(item.id);
+                  setConfirmOpen(true);
                 }}
-                className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-red-700 hover:bg-red-50 transition-colors"
+                className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          <h4 className="font-bold text-zinc-900 text-sm sm:text-base group-hover:text-[#2563eb] transition-colors line-clamp-1">
+          <h4 className="font-bold text-[var(--ux-ink)] text-sm sm:text-base group-hover:text-[#932120] transition-colors line-clamp-1">
             {item.title}
           </h4>
 
@@ -127,12 +145,12 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
 
         {/* Right Arrow & Date */}
         <div className="hidden sm:flex flex-col items-end justify-between shrink-0 self-stretch text-right">
-          <div className="w-8 h-8 rounded-full bg-zinc-50 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center transition-colors">
-            <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-blue-600" />
+          <div className="w-8 h-8 rounded-full bg-zinc-50 group-hover:bg-rose-50 group-hover:text-[#932120] flex items-center justify-center transition-colors">
+            <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-[#932120]" />
           </div>
           <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-400">
             <Clock className="w-3 h-3" />
-            <span>Ngày làm bài: {formatDateTime(item.submitted_at)}</span>
+            <span>{isOpen ? 'Bắt đầu lúc:' : 'Ngày làm bài:'} {formatDateTime(item.submitted_at)}</span>
           </div>
         </div>
       </div>
@@ -140,8 +158,23 @@ export function PracticeHistoryItemCard({ item, onDelete }: PracticeHistoryItemC
       {/* Mobile Date footer */}
       <div className="sm:hidden flex items-center gap-1 text-[11px] font-medium text-zinc-400 mt-2 pt-2 border-t border-zinc-100">
         <Clock className="w-3 h-3" />
-        <span>Ngày làm bài: {formatDateTime(item.submitted_at)}</span>
+        <span>{isOpen ? 'Bắt đầu lúc:' : 'Ngày làm bài:'} {formatDateTime(item.submitted_at)}</span>
       </div>
-    </Link>
+        </Link>
+      </SpotlightCard>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Xóa bài luyện tập làm dở?"
+        description="Bài làm này chưa nộp và sẽ bị xóa hoàn toàn khỏi lịch sử luyện tập của bạn."
+        confirmLabel="Xóa bài dở"
+        tone="danger"
+        onConfirm={() => {
+          setConfirmOpen(false);
+          onDelete?.(item.id);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   );
 }

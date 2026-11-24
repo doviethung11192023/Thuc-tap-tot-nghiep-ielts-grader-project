@@ -60,7 +60,7 @@ export function useLearningProfile() {
     setSavingGoal(true);
     try {
       await updateLearningProfileGoals(payload);
-      await fetchProfileData();
+      await fetchProfileData(true);
       return true;
     } catch (err: any) {
       alert("Lỗi khi lưu mục tiêu: " + (err?.response?.data?.detail || err.message));

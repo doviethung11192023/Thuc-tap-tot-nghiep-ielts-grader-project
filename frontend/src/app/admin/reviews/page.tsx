@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useReducedMotion } from "motion/react";
 import {
   ArrowRightLeft,
-  CheckCircle2,
-  Clock,
   Loader2,
   RefreshCw,
   Search,
   Sparkles,
-  UserCheck,
-  Users,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { AdminSlaPipelineStrip } from "@/components/admin/AdminSlaPipelineStrip";
+import { BlurFadeCard } from "@/components/motion";
+import { toast } from "sonner";
 import {
   adminAssignReview,
   adminAutoDispatchReviews,
@@ -23,6 +23,8 @@ import {
   type AdminReviewsSummary,
 } from "@/services/admin-reviews";
 import { AdminAssignExpertModal } from "@/components/admin/AdminAssignExpertModal";
+import { AdminExpertKpiTable } from "@/components/admin/AdminExpertKpiTable";
+import { extractApiErrorMessage } from "@/lib/api-error";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   waiting: { label: "Chờ phân bổ", cls: "bg-amber-50 text-amber-800 border-amber-200" },
@@ -47,8 +49,17 @@ function formatDateTime(iso?: string | null): string {
 }
 
 export default function AdminReviewsDispatchPage() {
+  const prefersReduced = useReducedMotion();
+  const [tbodyRef, setTbodyAnimate] = useAutoAnimate<HTMLTableSectionElement>({
+    duration: 200,
+    easing: "ease-out",
+  });
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setTbodyAnimate(!prefersReduced);
+  }, [prefersReduced, setTbodyAnimate]);
   const [statusFilter, setStatusFilter] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
   const [expertFilter, setExpertFilter] = useState("");
@@ -56,6 +67,7 @@ export default function AdminReviewsDispatchPage() {
   const [dispatching, setDispatching] = useState(false);
   const [assignTarget, setAssignTarget] = useState<AdminReviewItem | null>(null);
   const [assignSubmitting, setAssignSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"queue" | "performance">("queue");
 
   const limit = 15;
 
@@ -95,8 +107,8 @@ export default function AdminReviewsDispatchPage() {
       const res = await adminAutoDispatchReviews();
       toast.success(res?.meta?.message || "Đã chạy phân bổ tự động");
       await queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Không thể phân bổ tự động lúc này");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Không thể phân bổ tự động lúc này"));
     } finally {
       setDispatching(false);
     }
@@ -113,8 +125,8 @@ export default function AdminReviewsDispatchPage() {
       toast.success(res?.meta?.message || "Đã cập nhật chuyên gia phụ trách");
       setAssignTarget(null);
       await queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Không thể gán bài cho chuyên gia này");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Không thể gán bài cho chuyên gia này"));
     } finally {
       setAssignSubmitting(false);
     }
@@ -134,66 +146,71 @@ export default function AdminReviewsDispatchPage() {
             Theo dõi bài đang nằm ở chuyên gia nào và gán / chuyển giao trực tiếp theo yêu cầu.
           </p>
         </div>
-        <div className="flex items-center gap-2.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => void handleAutoDispatch()}
-            disabled={dispatching || summary.waiting === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#932120] hover:bg-[#7a1b1a] text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {dispatching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            Phân bổ tự động ({summary.waiting})
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadReviews()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs sm:text-sm font-bold text-zinc-700 cursor-pointer"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#932120]" : ""}`} />
-            Làm mới
-          </button>
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="inline-flex p-1 bg-zinc-100 rounded-xl border border-zinc-200">
+            <button
+              type="button"
+              onClick={() => setActiveTab("queue")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                activeTab === "queue" ? "bg-white text-zinc-900 shadow-xs" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              Hàng đợi điều phối
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("performance")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                activeTab === "performance" ? "bg-white text-[#932120] shadow-xs" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              Hiệu suất &amp; Thưởng Phạt Expert
+            </button>
+          </div>
+          {activeTab === "queue" && (
+            <>
+              <button
+                type="button"
+                onClick={() => void handleAutoDispatch()}
+                disabled={dispatching || summary.waiting === 0}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#932120] hover:bg-[#7a1b1a] text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {dispatching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Phân bổ tự động ({summary.waiting})
+              </button>
+              <button
+                type="button"
+                onClick={() => void loadReviews()}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs sm:text-sm font-bold text-zinc-700 cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#932120]" : ""}`} />
+                Làm mới
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Chờ phân bổ</span>
-            <Clock className="w-4 h-4 text-amber-600" />
-          </div>
-          <p className="text-2xl font-extrabold text-zinc-900 mt-2">{summary.waiting}</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Đang giao / Chấm</span>
-            <UserCheck className="w-4 h-4 text-sky-600" />
-          </div>
-          <p className="text-2xl font-extrabold text-zinc-900 mt-2">{summary.assigned}</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Đã hoàn thành</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <p className="text-2xl font-extrabold text-zinc-900 mt-2">{summary.completed}</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Expert Sẵn sàng</span>
-            <Users className="w-4 h-4 text-[#932120]" />
-          </div>
-          <p className="text-2xl font-extrabold text-zinc-900 mt-2">
-            {summary.available_experts}
-            <span className="text-sm font-semibold text-zinc-400">/{experts.length}</span>
-          </p>
-        </div>
-      </div>
+      {activeTab === "performance" ? (
+        <AdminExpertKpiTable interactive />
+      ) : (
+        <>
+      {/* Interactive SLA Pipeline Strip (Lucian Workflow Systems) */}
+      <AdminSlaPipelineStrip
+        summary={summary}
+        expertsTotal={experts.length}
+        activeStatus={statusFilter}
+        onSelectStatus={(nextStatus) => {
+          setStatusFilter(nextStatus);
+          setPage(1);
+        }}
+      />
 
       {/* Filter + Table */}
-      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full space-y-5">
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
-          <div className="relative flex-1 min-w-0">
+      <BlurFadeCard inView={false} index={1}>
+        <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full space-y-5">
+        <div className="flex flex-col xl:flex-row gap-3 items-stretch xl:items-center">
+          <div className="relative flex-1 min-w-[260px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input
               type="text"
@@ -207,7 +224,7 @@ export default function AdminReviewsDispatchPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <select
               aria-label="Lọc theo trạng thái"
               value={statusFilter}
@@ -245,7 +262,7 @@ export default function AdminReviewsDispatchPage() {
                 setExpertFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#932120]/20"
+              className="w-full sm:max-w-[210px] truncate px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#932120]/20"
             >
               <option value="">Tất cả chuyên gia</option>
               {experts.map((exp) => (
@@ -270,7 +287,7 @@ export default function AdminReviewsDispatchPage() {
                 <th className="py-3.5 px-4 text-right">Điều phối</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 text-sm">
+            <tbody ref={tbodyRef} className="divide-y divide-zinc-100 text-sm">
               {loading && items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-zinc-500">
@@ -402,7 +419,8 @@ export default function AdminReviewsDispatchPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </BlurFadeCard>
 
       <AdminAssignExpertModal
         review={assignTarget}
@@ -411,6 +429,8 @@ export default function AdminReviewsDispatchPage() {
         onClose={() => setAssignTarget(null)}
         onConfirm={handleConfirmAssign}
       />
+        </>
+      )}
     </div>
   );
 }

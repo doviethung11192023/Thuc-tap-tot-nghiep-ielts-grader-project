@@ -105,7 +105,7 @@ def test_seed_normalization_and_roman_sorting():
     t6 = {"id": _TEST6_WORDLIST_GROUP_ID, "question_type": "completion", "instructions": "Questions 31-36...", "group_options": []}
     _normalize_seed_group(t6)
     assert len(t6["group_options"]) == 11
-    assert t6["instructions"].startswith("Questions 30-35.")
+    assert t6["instructions"].startswith("Questions 31-36.")
     assert t6.get("max_words") is None  # Wordlist group khong bi ep max_words
 
     t8_headings = {

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { KeyRound, ShieldCheck, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');

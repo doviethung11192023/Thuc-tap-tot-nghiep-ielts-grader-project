@@ -11,7 +11,7 @@ import { discardAttempt, startTestAttempt, submitWritingAttempt } from '@/servic
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/utils/attempt-submission';
 import { invalidatePracticeHistoryCache } from '@/services/practice-history-cache';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 export default function WritingWorkspacePage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function WritingWorkspacePage() {
   const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
   const summaryPath = (id: string) => `/test-practice/writing/${testId}/summary?attemptId=${id}${returnQuery}`;
 
-  const { loading, attemptId, attemptError, deadlineMs, writingData, savedWork, closedAttempt } =
+  const { loading, attemptId, attemptError, attemptErrorStatus, deadlineMs, writingData, savedWork, closedAttempt } =
     useExamWorkspaceContent(testId, 'writing', mode);
   // Tự lưu bài viết lên server (FR-11, NFR-03)
   const [essays, setEssays] = useState<Record<1 | 2, string> | null>(null);
@@ -62,7 +62,14 @@ export default function WritingWorkspacePage() {
         router.push(summaryPath(currentAttemptId));
         return;
       }
-      setSubmitError(submitFailureMessage(err));
+      const msg = submitFailureMessage(err);
+      setSubmitError(msg);
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 403) {
+        toast.error("Tài khoản Quản trị/Chuyên gia không thể nộp bài thi Học viên. Vui lòng đăng nhập bằng tài khoản Học viên.");
+      } else {
+        toast.error(`Không thể nộp bài thi: ${msg}`);
+      }
     }
   };
 
@@ -75,12 +82,32 @@ export default function WritingWorkspacePage() {
     return <ExamWorkspaceSkeleton skill="writing" />;
   }
 
+  const switchMode = mode === 'exam' ? 'practice' : 'exam';
+  const switchHref = `/test-practice/writing/${testId}?mode=${switchMode}${parts ? `&parts=${parts}` : ''}${returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : ''}`;
+
   return (
     <div className="flex flex-col h-full w-full">
       {attemptError && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-800 flex items-center gap-2 shrink-0">
-          <span className="font-semibold">⚠️ Lưu ý phân quyền:</span>
-          <span>{attemptError}. Hãy đăng nhập bằng tài khoản Học viên để nộp bài và nhận điểm AI.</span>
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">
+              {attemptErrorStatus === 403 ? '⚠️ Lưu ý phân quyền:' : '⚠️ Không thể khởi tạo phiên làm bài:'}
+            </span>
+            <span>
+              {attemptErrorStatus === 403
+                ? 'Tài khoản hiện tại không thuộc vai trò Học viên nên không thể nộp bài. Vui lòng đăng nhập tài khoản Học viên.'
+                : attemptError}
+            </span>
+          </div>
+          {attemptErrorStatus === 400 && (
+            <button
+              type="button"
+              onClick={() => router.replace(switchHref)}
+              className="px-3 py-1 rounded-lg bg-[#932120] hover:bg-[#7a1a19] text-white font-bold text-xs transition-colors cursor-pointer"
+            >
+              Chuyển sang chế độ {switchMode === 'practice' ? 'Luyện tập' : 'Thi thử'}
+            </button>
+          )}
         </div>
       )}
       <WritingWorkspace

@@ -39,6 +39,7 @@ export interface SkillAttemptHistory {
 export interface SkillDetailInTest {
   skill: 'Listening' | 'Reading' | 'Writing' | 'Speaking';
   status: 'not_started' | 'draft' | 'completed';
+  allowedMode?: 'practice' | 'mock' | 'both';
   draftTime?: string;
   hasVirtualRoom?: boolean;
   latestBandScore?: number;
@@ -50,6 +51,7 @@ export interface SingleTestItem {
   id: string;
   orderNumber: number;
   title: string;
+  allowedMode?: 'practice' | 'mock' | 'both';
   skills: SkillDetailInTest[];
 }
 

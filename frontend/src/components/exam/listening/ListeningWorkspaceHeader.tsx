@@ -1,13 +1,18 @@
 "use client";
 
 import React from 'react';
-import { ArrowLeft, Clock, Send } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
+import { ExamTabularTimer } from '../ExamTabularTimer';
 
 interface ListeningWorkspaceHeaderProps {
   title: string;
   mode: 'exam' | 'practice';
   timerSeconds: number;
   initialExamSeconds: number;
+  examPhase?: 'audio' | 'review' | 'expired';
+  reviewSeconds?: number;
+  activeAudioSectionNumber?: number;
+  totalSections?: number;
   onExitClick: () => void;
   onSubmit: () => void;
 }
@@ -17,6 +22,10 @@ export function ListeningWorkspaceHeader({
   mode,
   timerSeconds,
   initialExamSeconds,
+  examPhase = 'audio',
+  reviewSeconds = 120,
+  activeAudioSectionNumber = 1,
+  totalSections = 4,
   onExitClick,
   onSubmit,
 }: ListeningWorkspaceHeaderProps) {
@@ -47,14 +56,20 @@ export function ListeningWorkspaceHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-red-50 text-[#932120] border border-red-100 px-3.5 py-1.5 rounded-xl text-sm font-bold shadow-xs">
-          <Clock className="w-4 h-4 text-[#932120]" />
-          {mode === 'exam' ? (
-            <span>{formatDisplayTime(timerSeconds)} / {formatDisplayTime(initialExamSeconds)}</span>
-          ) : (
-            <span>⏱️ {formatDisplayTime(timerSeconds)}</span>
-          )}
-        </div>
+        <ExamTabularTimer
+          mode={mode}
+          timerSeconds={mode === 'exam' && examPhase === 'review' ? reviewSeconds : examPhase === 'expired' ? 0 : timerSeconds}
+          capSeconds={mode === 'exam' && examPhase === 'audio' ? initialExamSeconds : undefined}
+          prefixText={mode === 'exam' && examPhase === 'audio' ? `Section ${activeAudioSectionNumber}/${totalSections} ·` : undefined}
+          isReviewPhase={mode === 'exam' && examPhase === 'review'}
+          overrideLabel={
+            mode === 'exam' && examPhase === 'review'
+              ? `Kiểm tra cuối giờ: ${formatDisplayTime(reviewSeconds)}`
+              : mode === 'exam' && examPhase === 'expired'
+                ? '00:00'
+                : undefined
+          }
+        />
 
         <button 
           onClick={onSubmit}

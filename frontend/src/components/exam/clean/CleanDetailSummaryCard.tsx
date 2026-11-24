@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CleanReadingQuestion } from "@/mocks/clean-dataset/reading-test-1-clean";
+import type { CleanReadingQuestion } from "@/types/clean-detail";
 import { Check, FileText } from "lucide-react";
 
 interface CleanDetailSummaryCardProps {
@@ -107,9 +107,9 @@ export function CleanDetailSummaryCard({
     });
 
     return (
-      <div className="rounded-xl border border-blue-200 bg-white p-4 md:p-5 shadow-2xs space-y-3">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-100 pb-2.5">
-          <FileText className="w-4 h-4 text-blue-600" />
+      <div className="rounded-xl border border-red-200/80 bg-white p-4 md:p-5 shadow-2xs space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#932120] border-b border-red-100 pb-2.5">
+          <FileText className="w-4 h-4 text-[#932120]" />
           <span>Bảng tóm tắt & Đối chiếu kết quả (Table Completion)</span>
         </div>
 
@@ -143,13 +143,13 @@ export function CleanDetailSummaryCard({
   }
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50/20 p-4 md:p-5 shadow-2xs space-y-3">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-100 pb-2.5">
-        <FileText className="w-4 h-4 text-blue-600" />
+    <div className="rounded-xl border border-red-200/80 bg-red-50/20 p-4 md:p-5 shadow-2xs space-y-3">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#932120] border-b border-red-100 pb-2.5">
+        <FileText className="w-4 h-4 text-[#932120]" />
         <span>Đoạn văn tóm tắt & Đối chiếu kết quả điền từ</span>
       </div>
 
-      <div className="text-sm md:text-base leading-loose text-zinc-800 font-serif">
+      <div className="text-sm md:text-base leading-loose text-zinc-800 font-serif whitespace-pre-line">
         {renderTokenizedText(template)}
       </div>
     </div>

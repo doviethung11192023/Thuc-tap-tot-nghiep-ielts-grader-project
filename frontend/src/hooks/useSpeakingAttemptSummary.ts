@@ -47,6 +47,9 @@ export interface SpeakingAttemptSummary {
   overall_band: number | null;
   evaluator_type?: string | null;
   expert_review_status?: string | null;
+  expert_review_due_at?: string | null;
+  ai_evaluation?: { overall_band: number; feedback?: string | null } | null;
+  expert_review?: { overall_band: number; feedback?: string | null } | null;
   test_sections?: SpeakingTestSectionPrompt[];
   speaking: {
     grading_done: boolean;

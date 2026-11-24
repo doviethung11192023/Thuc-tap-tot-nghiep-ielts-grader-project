@@ -4,7 +4,17 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
+
+const SAFE_NEXT_PREFIX_RE =
+  /^\/(reset-password|learning-profile|test-practice|profile|results|dashboard|history|admin|expert)(\/|\?|$)/;
+
+function isSafeInternalPath(path: string | null): path is string {
+  if (!path || !path.startsWith('/')) return false;
+  if (path.startsWith('//') || path.startsWith('/\\')) return false;
+  if (/[\x00-\x1f\\]/.test(path)) return false;
+  return SAFE_NEXT_PREFIX_RE.test(path);
+}
 
 function CallbackContent() {
   const router = useRouter();
@@ -29,9 +39,9 @@ function CallbackContent() {
           .eq('id', session.user.id)
           .single();
 
-        // Kiểm tra tham số next chuyển hướng (ví dụ: /reset-password)
+        // Kiểm tra tham số next chuyển hướng (ví dụ: /reset-password), chống Open Redirect
         const nextParam = searchParams.get('next');
-        if (nextParam && nextParam.startsWith('/')) {
+        if (isSafeInternalPath(nextParam)) {
           router.push(nextParam);
           return;
         }

@@ -36,7 +36,21 @@ async function fetchUserProfileOnce(userId: string, authUser?: SupabaseUser | nu
         .eq("id", userId)
         .single();
       if (data) {
-        cachedAuthUser = { ...data, avatar_url: data.avatar_key ?? null, updated_at: data.created_at } as User;
+        let voiceConsentAt: string | null = null;
+        if (data.role === "learner") {
+          const { data: lp } = await supabase
+            .from("learner_profiles")
+            .select("voice_consent_at")
+            .eq("user_id", userId)
+            .maybeSingle();
+          voiceConsentAt = lp?.voice_consent_at ?? null;
+        }
+        cachedAuthUser = {
+          ...data,
+          avatar_url: data.avatar_key ?? null,
+          voice_consent_at: voiceConsentAt,
+          updated_at: data.created_at,
+        } as User;
       } else if (authUser) {
         cachedAuthUser = {
           id: authUser.id,

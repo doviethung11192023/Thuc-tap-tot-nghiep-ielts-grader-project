@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { PlusCircle, X, Loader2, Image as ImageIcon, Upload } from "lucide-react";
 import { createQuestionGroup, uploadMedia } from "@/services/admin-content";
 import type { SkillType } from "@/types/exam";
@@ -65,8 +66,9 @@ export function QuestionGroupModal({
     try {
       const res = await uploadMedia(file, "images/question_groups");
       setImageKey(res.url || res.key);
+      toast.success("Tải ảnh lên R2 thành công");
     } catch (err: any) {
-      alert("Lỗi tải ảnh lên Cloudflare R2: " + (err.message || ""));
+      toast.error("Lỗi tải ảnh lên Cloudflare R2: " + (err.message || ""));
     } finally {
       setUploadingImage(false);
     }

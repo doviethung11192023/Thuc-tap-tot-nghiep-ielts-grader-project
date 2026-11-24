@@ -16,14 +16,19 @@ AUDIO_URL_SECONDS = 600
 _CODE_ORDER = {code: index for index, code in enumerate(CRITERION_CODES.values())}
 
 
-def _current_evaluation(attempt_id: str) -> Optional[dict[str, Any]]:
-    """Bản chính thức nếu có (Expert hoặc AI); không thì lượt chấm AI mới nhất (để hiện trạng thái lỗi)."""
+def _load_evaluations(attempt_id: str) -> tuple[Optional[dict[str, Any]], Optional[dict[str, Any]], Optional[dict[str, Any]]]:
+    """Trả về (evaluation đang áp dụng, AI evaluation mới nhất, Expert evaluation chính thức nếu có)."""
     rows = db().table("evaluations").select("id, evaluator_type, status, overall_band, is_official, feedback, created_at") \
         .eq("attempt_id", attempt_id).order("created_at", desc=True).execute().data or []
     official = next((row for row in rows if row.get("is_official") and row.get("status") == "done"), None)
-    if official:
-        return official
-    return next((row for row in rows if row.get("evaluator_type") == "ai"), rows[0] if rows else None)
+    ai_eval = next((row for row in rows if row.get("evaluator_type") == "ai" and row.get("status") == "done"), None)
+    expert_eval = next((row for row in rows if row.get("evaluator_type") == "expert" and row.get("status") == "done"), None)
+    current = official or ai_eval or next((row for row in rows if row.get("evaluator_type") == "ai"), rows[0] if rows else None)
+    return current, ai_eval, expert_eval
+
+
+def _current_evaluation(attempt_id: str) -> Optional[dict[str, Any]]:
+    return _load_evaluations(attempt_id)[0]
 
 
 def _ai_evaluation_id(attempt_id: str) -> Optional[str]:
@@ -50,9 +55,32 @@ def _run_output(attempt_id: str, evaluation: Optional[dict[str, Any]]) -> dict[s
     return (rows[0].get("output") if rows else None) or {}
 
 
+def _review_request_meta(attempt_id: str) -> tuple[Optional[str], Optional[str]]:
+    try:
+        rows = db().table("review_requests").select("status").eq("attempt_id", attempt_id).limit(1).execute().data or []
+        if not rows:
+            return None, None
+        st = rows[0].get("status")
+        due_at = None
+        if st in ("waiting", "assigned"):
+            asgns = (
+                db().table("review_assignments")
+                .select("due_at, ended_at")
+                .eq("attempt_id", attempt_id)
+                .is_("ended_at", "null")
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            due_at = asgns[0].get("due_at") if asgns else None
+        return st, due_at
+    except Exception:
+        return None, None
+
+
 def _expert_review_status(attempt_id: str) -> Optional[str]:
-    rows = db().table("review_requests").select("status").eq("attempt_id", attempt_id).limit(1).execute().data or []
-    return rows[0]["status"] if rows else None
+    return _review_request_meta(attempt_id)[0]
 
 
 def _speaking_test_prompts(test_id: str) -> list[dict[str, Any]]:
@@ -74,22 +102,45 @@ def _speaking_test_prompts(test_id: str) -> list[dict[str, Any]]:
 
 def build_speaking_summary(attempt: dict[str, Any]) -> dict[str, Any]:
     title = db().table("tests").select("title").eq("id", attempt["test_id"]).execute().data
-    evaluation = _current_evaluation(attempt["id"])
+    evaluation, ai_eval, expert_eval = _load_evaluations(attempt["id"])
     done = bool(evaluation and evaluation["status"] == "done")
     output = _run_output(attempt["id"], evaluation) if done else {}
+    cur_criteria = _criteria(evaluation["id"]) if done else []
+    rev_status, rev_due_at = _review_request_meta(attempt["id"])
+    ai_payload = (
+        {
+            "overall_band": float(ai_eval["overall_band"]),
+            "criteria": _criteria(ai_eval["id"]) if ai_eval["id"] != (evaluation or {}).get("id") else cur_criteria,
+            "feedback": ai_eval.get("feedback"),
+        }
+        if ai_eval and ai_eval.get("overall_band") is not None
+        else None
+    )
+    expert_payload = (
+        {
+            "overall_band": float(expert_eval["overall_band"]),
+            "criteria": _criteria(expert_eval["id"]) if expert_eval["id"] != (evaluation or {}).get("id") else cur_criteria,
+            "feedback": expert_eval.get("feedback"),
+        }
+        if expert_eval and expert_eval.get("overall_band") is not None
+        else None
+    )
     return {
         "attempt_id": attempt["id"], "test_id": attempt["test_id"],
         "title": (title[0]["title"] if title else None) or "IELTS Speaking Test", "skill": "speaking",
         "mode": attempt["mode"], "status": attempt["status"],
         "overall_band": float(evaluation["overall_band"]) if done and evaluation.get("overall_band") is not None else None,
         "evaluator_type": evaluation.get("evaluator_type") if done else None,
-        "expert_review_status": _expert_review_status(attempt["id"]),
+        "expert_review_status": rev_status,
+        "expert_review_due_at": rev_due_at,
+        "ai_evaluation": ai_payload,
+        "expert_review": expert_payload,
         "correct_count": 0, "total_questions": 0,
         "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"), "task_formats_result": [],
         "test_sections": _speaking_test_prompts(attempt["test_id"]),
         "speaking": {
             "grading_done": attempt["status"] not in GRADING_STATES,
-            "criteria": _criteria(evaluation["id"]) if done else [],
+            "criteria": cur_criteria,
             "feedback": evaluation.get("feedback") if done else None,
             "overall": output.get("overall"),
             "pronunciation": output.get("pronunciation"),

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import { deleteQuestion, deleteQuestionGroup } from "@/services/admin-content";
 import { QuestionItemCard } from "@/components/admin/QuestionItemCard";
@@ -30,9 +31,10 @@ export function QuestionGroupItem({
     setDeleting(true);
     try {
       await deleteQuestionGroup(group.id);
+      toast.success("Đã xóa nhóm câu hỏi");
       onRefresh();
-    } catch (err) {
-      alert("Lỗi khi xóa nhóm câu hỏi");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Lỗi khi xóa nhóm câu hỏi");
     } finally {
       setDeleting(false);
     }
@@ -42,9 +44,10 @@ export function QuestionGroupItem({
     if (!confirm(`Xóa câu hỏi #${qNum}?`)) return;
     try {
       await deleteQuestion(qId);
+      toast.success(`Đã xóa câu hỏi #${qNum}`);
       onRefresh();
-    } catch (err) {
-      alert("Lỗi khi xóa câu hỏi");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Lỗi khi xóa câu hỏi");
     }
   };
 

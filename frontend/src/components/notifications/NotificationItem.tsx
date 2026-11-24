@@ -2,132 +2,47 @@
 
 import React from 'react';
 import {
-  CheckCircle2,
   AlertCircle,
-  Clock,
   ArrowRight,
+  Award,
   Bell,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  Flame,
   GraduationCap,
   Send,
-  ClipboardCheck,
+  ShieldAlert,
+  Snowflake,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { AppNotification, sanitizeNotification } from '@/stores/notification-store';
+import { getNotificationMeta, type NotificationStyleMeta } from './notification-meta';
 
 interface NotificationItemProps {
   notification: AppNotification;
   onClick: (notification: AppNotification) => void;
 }
 
+const ICONS: Record<NotificationStyleMeta['iconKey'], React.ReactNode> = {
+  grad: <GraduationCap className="w-4 h-4" />,
+  clip: <ClipboardCheck className="w-4 h-4" />,
+  send: <Send className="w-4 h-4" />,
+  check: <CheckCircle2 className="w-4 h-4" />,
+  alert: <AlertCircle className="w-4 h-4" />,
+  spin: <Clock className="w-4 h-4 animate-spin" />,
+  flame: <Flame className="w-4 h-4" />,
+  snow: <Snowflake className="w-4 h-4" />,
+  award: <Award className="w-4 h-4" />,
+  clock: <Clock className="w-4 h-4" />,
+  shield: <ShieldAlert className="w-4 h-4" />,
+  bell: <Bell className="w-4 h-4" />,
+};
+
 export function NotificationItem({ notification, onClick }: NotificationItemProps) {
   const item = sanitizeNotification(notification);
-
-  const getStatusBadge = () => {
-    switch (item.type) {
-      case 'expert_complete':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-            {item.band_score ? `Chính thức · Band ${item.band_score.toFixed(1)}` : 'Chuyên gia đã chấm'}
-          </span>
-        );
-      case 'expert_assigned':
-      case 'expert_reassigned':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
-            {item.type === 'expert_reassigned' ? 'Điều phối mới' : 'Bài chấm mới'}
-          </span>
-        );
-      case 'expert_requested':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
-            Đã gửi Chuyên gia
-          </span>
-        );
-      case 'ai_complete':
-      case 'grading_complete':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-            {item.band_score ? `AI · Band ${item.band_score.toFixed(1)}` : 'AI đã chấm xong'}
-          </span>
-        );
-      case 'ai_failed':
-      case 'grading_failed':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-800 border border-red-200">
-            Chưa chấm được
-          </span>
-        );
-      case 'ai_grading':
-      case 'grading_pending':
-        return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-            Đang phân tích
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getIcon = () => {
-    switch (item.type) {
-      case 'expert_complete':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-teal-100 flex items-center justify-center shrink-0 text-teal-700">
-            <GraduationCap className="w-4 h-4" />
-          </div>
-        );
-      case 'expert_assigned':
-      case 'expert_reassigned':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-700">
-            <ClipboardCheck className="w-4 h-4" />
-          </div>
-        );
-      case 'expert_requested':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 text-sky-700">
-            <Send className="w-4 h-4" />
-          </div>
-        );
-      case 'ai_complete':
-      case 'grading_complete':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-700">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
-        );
-      case 'ai_failed':
-      case 'grading_failed':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-700">
-            <AlertCircle className="w-4 h-4" />
-          </div>
-        );
-      case 'ai_grading':
-      case 'grading_pending':
-        return (
-          <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-amber-700">
-            <Clock className="w-4 h-4 animate-spin" />
-          </div>
-        );
-      default:
-        return (
-          <div className="w-8 h-8 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0 text-zinc-600">
-            <Bell className="w-4 h-4" />
-          </div>
-        );
-    }
-  };
-
-  const getCtaLabel = () => {
-    if (item.type === 'ai_failed' || item.type === 'grading_failed') return 'Kiểm tra & chấm lại';
-    if (item.type === 'expert_assigned' || item.type === 'expert_reassigned') return 'Mở trang chấm bài';
-    if (item.type === 'expert_complete') return 'Xem điểm chính thức';
-    if (item.type === 'expert_requested') return 'Theo dõi trạng thái';
-    return 'Xem kết quả chi tiết';
-  };
+  const meta = getNotificationMeta(item);
 
   let formattedDate = 'Vừa xong';
   try {
@@ -144,27 +59,27 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
         !item.read ? 'bg-red-50/20' : 'bg-white'
       }`}
     >
-      {getIcon()}
+      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.iconBgClass}`}>
+        {ICONS[meta.iconKey]}
+      </div>
 
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 truncate">
-            {getStatusBadge()}
-            <span className="text-xs font-bold text-zinc-900 truncate">
-              {item.title}
-            </span>
+            {meta.badgeLabel && (
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${meta.badgeClass}`}>
+                {meta.badgeLabel}
+              </span>
+            )}
+            <span className="text-xs font-bold text-zinc-900 truncate">{item.title}</span>
           </div>
-          <span className="text-[10px] text-zinc-400 shrink-0 font-medium">
-            {formattedDate}
-          </span>
+          <span className="text-[10px] text-zinc-400 shrink-0 font-medium">{formattedDate}</span>
         </div>
 
-        <p className="text-xs text-zinc-600 leading-relaxed line-clamp-2">
-          {item.message}
-        </p>
+        <p className="text-xs text-zinc-600 leading-relaxed line-clamp-2">{item.message}</p>
 
         <div className="flex items-center gap-1 text-[11px] font-bold text-[#932120] hover:text-[#7a1a19] pt-0.5">
-          <span>{getCtaLabel()}</span>
+          <span>{meta.ctaLabel}</span>
           <ArrowRight className="w-3 h-3" />
         </div>
       </div>

@@ -1,14 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { WeeklySkillCards } from "./WeeklySkillCards";
-import { TestPracticeScoreLineChart } from "./TestPracticeScoreLineChart";
+import { CriterionMasteryCards } from "./CriterionMasteryCards";
 import { AIDiagnosticCard } from "./AIDiagnosticCard";
 import { QuestionTypeHighlights } from "./QuestionTypeHighlights";
 import { QuestionTypeReportTable } from "./QuestionTypeReportTable";
 import { PracticeHistoryTimeline } from "./PracticeHistoryTimeline";
+import { ChartSkeleton } from "@/components/ui/skeleton";
 import type { LearningProfileTestPracticeData } from "@/types/learning-profile";
+
+const TestPracticeScoreLineChart = dynamic(
+  () => import("./TestPracticeScoreLineChart").then((m) => m.TestPracticeScoreLineChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-72" label="Đang tải biểu đồ điểm số..." /> }
+);
 
 interface TestPracticeTabProps {
   data: LearningProfileTestPracticeData | null;
@@ -34,12 +41,16 @@ export function TestPracticeTab({ data, loading }: TestPracticeTabProps) {
     highlights,
     question_type_report,
     recent_history,
+    criterion_mastery,
   } = data;
 
   return (
     <div className="space-y-7 w-full">
       {/* 1. Điểm trung bình hàng tuần & Delta so với tuần trước */}
       <WeeklySkillCards skillAverages={skill_averages} />
+
+      {/* 1b. Phân tích chi tiết 8 tiêu chí Writing & Speaking */}
+      <CriterionMasteryCards mastery={criterion_mastery} />
 
       {/* 2. Theo dõi điểm số (Line Chart 30 bài gần nhất) */}
       <TestPracticeScoreLineChart scoreTracking={score_tracking} />

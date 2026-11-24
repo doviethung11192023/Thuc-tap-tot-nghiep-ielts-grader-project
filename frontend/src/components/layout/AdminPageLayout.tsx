@@ -108,7 +108,7 @@ export function AdminPageLayout({ children }: { children: React.ReactNode }) {
 
   // 4. Authorized Admin Portal Layout (Full-Width Responsive)
   return (
-    <div className="min-h-screen bg-zinc-100 font-sans flex w-full">
+    <div className="min-h-screen bg-[var(--ux-page)] font-sans flex w-full">
       {/* Red Sidebar */}
       <AdminSidebar
         isCollapsed={isCollapsed}

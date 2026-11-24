@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { CriterionScoreDetail } from "@/types";
 import { loadExpertSnippets, SnippetItem } from "@/lib/expert-snippets";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 interface Props {
   skill: "writing" | "speaking";
@@ -106,8 +107,8 @@ export default function CriterionScoringPanel({
               ĐIỂM CHÍNH THỨC CỦA CHUYÊN GIA
             </span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-3xl font-extrabold text-[#932120] font-mono">
-                {overallBand.toFixed(1)}
+              <span className="text-3xl font-extrabold text-[#932120] font-mono tabular-nums">
+                <AnimatedNumber value={overallBand} decimals={1} />
               </span>
               <span className="text-xs font-bold text-zinc-500">OVERALL BAND</span>
             </div>

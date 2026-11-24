@@ -51,6 +51,25 @@ async def get_question_types_summary(request: Request, skill: str = Query("readi
     return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": summary_list}
 
 
+def _estimate_minutes(skill_lower: str, q_type: str, q_count: int, item: Dict[str, Any]) -> int:
+    """Ước lượng thời lượng chuẩn IELTS cho từng kỹ năng (SYS-09)."""
+    if q_type == "writing_task1":
+        return 20
+    if q_type == "writing_task2":
+        return 40
+    if skill_lower == "writing":
+        return 30
+    if skill_lower == "speaking":
+        ans_sec = item.get("answer_seconds")
+        prep_sec = item.get("prep_seconds") or 0
+        if ans_sec and q_count > 0:
+            return max(2, round((q_count * (int(ans_sec) + int(prep_sec))) / 60))
+        if q_type == "speaking_part2":
+            return 3
+        return 5
+    return max(5, q_count * 2) if q_count > 0 else 10
+
+
 def _build_exercises(skill_lower: str, type_filter: Optional[str], diff_filter: Optional[str],
                      page: int, limit: int) -> Dict[str, Any]:
     if skill_lower in ("writing", "speaking"):
@@ -84,7 +103,7 @@ def _build_exercises(skill_lower: str, type_filter: Optional[str], diff_filter: 
             "skill": skill_lower.capitalize(),
             "difficulty": diff_vi,
             "question_count": q_count if q_count > 0 else 5,
-            "estimated_minutes": max(5, q_count * 2) if q_count > 0 else 10,
+            "estimated_minutes": _estimate_minutes(skill_lower, q_type, q_count, it),
             "test_id": test_info.get("id"),
             "section_id": sec.get("id"),
             "part_number": part_num,
@@ -117,6 +136,6 @@ async def list_practice_exercises(
 
     cache_key = f"{skill_lower}_{type_filter or ''}_{diff_filter or ''}_{page}_{limit}"
     result_data, cached = await get_or_load(
-        request.app.state.redis, "exercises", cache_key, _CACHE_TTL_SECONDS,
+        request.app.state.redis, "exercises_v2", cache_key, _CACHE_TTL_SECONDS,
         lambda: _build_exercises(skill_lower, type_filter, diff_filter, page, limit))
     return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}

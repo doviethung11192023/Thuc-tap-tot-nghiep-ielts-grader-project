@@ -11,7 +11,11 @@ import { getVoiceConsentAt } from '@/services/speaking-room';
 import { SpeakingIntroModal } from './speaking/speaking-intro-modal';
 import { SpeakingConsentGate } from './speaking/speaking-consent-gate';
 import { SpeakingMicCheck } from './speaking/speaking-mic-check';
-import { SpeakingPartGuideline } from './speaking/speaking-part-guideline';
+import {
+  PART_GUIDE_DISMISSED_KEY,
+  SpeakingPartGuideline,
+  isPartGuideDismissed,
+} from './speaking/speaking-part-guideline';
 import { SpeakingQuestionSidebar } from './speaking/speaking-question-sidebar';
 import { SpeakingVirtualRoomStage } from './speaking/speaking-virtual-room-stage';
 import { SpeakingAidsPanel } from './speaking/speaking-aids-panel';
@@ -59,6 +63,7 @@ export function SpeakingWorkspace({
   const [micLost, setMicLost] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const submittedRef = useRef(false);
+  const seenPartsRef = useRef<Set<PartNumber>>(new Set());
 
   const recorder = useSpeakingRecorder(() => setMicLost(true));
   const uploads = useSpeakingUploadQueue(attemptId);
@@ -73,14 +78,23 @@ export function SpeakingWorkspace({
     [parts],
   );
 
+  const enterPart = useCallback((partNum: PartNumber, qIndex: number) => {
+    setCurrentPart(partNum);
+    setCurrentQuestionIndex(qIndex);
+    if (isPartGuideDismissed() || seenPartsRef.current.has(partNum)) {
+      setViewPhase('testing');
+    } else {
+      seenPartsRef.current.add(partNum);
+      setViewPhase('guideline');
+    }
+  }, []);
+
   /** Câu đầu tiên chưa có câu trả lời, để làm tiếp sau khi tải lại trang. */
   const goToFirstUnanswered = useCallback(() => {
     const next = allQuestions.find(({ question }) => !answers[question.id]);
     if (!next) return setViewPhase('review');
-    setCurrentPart(next.part);
-    setCurrentQuestionIndex(next.index);
-    setViewPhase('guideline');
-  }, [allQuestions, answers]);
+    enterPart(next.part, next.index);
+  }, [allQuestions, answers, enterPart]);
 
   const handleNextQuestion = useCallback(() => {
     if (currentQuestionIndex + 1 < questions.length) {
@@ -89,13 +103,11 @@ export function SpeakingWorkspace({
     }
     const nextPart = parts.find((part) => part.part_number > currentPart);
     if (nextPart) {
-      setCurrentPart(nextPart.part_number);
-      setCurrentQuestionIndex(0);
-      setViewPhase('guideline');
+      enterPart(nextPart.part_number, 0);
     } else {
       setViewPhase('review');
     }
-  }, [currentPart, currentQuestionIndex, parts, questions.length]);
+  }, [currentPart, currentQuestionIndex, enterPart, parts, questions.length]);
 
   const roomQuestion = useMemo<RoomQuestion | undefined>(() => {
     if (!currentQuestion) return undefined;
@@ -174,11 +186,10 @@ export function SpeakingWorkspace({
 
   const handleSelectQuestion = (partNumber: PartNumber, index: number) => {
     if (isMock) return;
-    setCurrentQuestionIndex(index);
     if (partNumber !== currentPart) {
-      setCurrentPart(partNumber);
-      setViewPhase('guideline');
+      enterPart(partNumber, index);
     } else {
+      setCurrentQuestionIndex(index);
       setViewPhase('testing');
     }
   };
@@ -198,7 +209,7 @@ export function SpeakingWorkspace({
   }, [allQuestions, answers]);
 
   const clock = remainingMs === null ? null : (
-    <span className="flex items-center gap-1.5 text-xs font-bold font-mono text-blue-700">
+    <span className="flex items-center gap-1.5 text-xs font-bold font-mono text-rose-300">
       <Clock className="w-3.5 h-3.5" />
       {Math.floor(remainingMs / 60000).toString().padStart(2, '0')}:{Math.floor((remainingMs % 60000) / 1000).toString().padStart(2, '0')}
     </span>
@@ -216,7 +227,7 @@ export function SpeakingWorkspace({
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50 flex flex-col justify-between">
+    <div className="h-dvh w-full overflow-y-auto bg-slate-950 text-slate-100 flex flex-col justify-between">
       <SpeakingIntroModal
         isOpen={viewPhase === 'intro' && !introDismissed()}
         onClose={handleExit}
@@ -234,6 +245,8 @@ export function SpeakingWorkspace({
           getLevel={recorder.getLevel}
           startRecording={recorder.start}
           stopRecording={recorder.stop}
+          allowSkip={!isMock}
+          onSkip={handleMicPassed}
           onPassed={handleMicPassed}
         />
       )}
@@ -244,7 +257,14 @@ export function SpeakingWorkspace({
           instructions={activePartData.instructions}
           guidelines={activePartData.guidelines}
           onBack={handleExit}
-          onStart={() => setViewPhase('testing')}
+          onStart={(dismiss) => {
+            if (dismiss) {
+              try {
+                localStorage.setItem(PART_GUIDE_DISMISSED_KEY, 'true');
+              } catch {}
+            }
+            setViewPhase('testing');
+          }}
         />
       )}
 
@@ -265,12 +285,12 @@ export function SpeakingWorkspace({
 
       {viewPhase === 'testing' && activePartData && (
         <div className="flex-1 flex flex-col justify-between">
-          <header className="w-full bg-white/95 backdrop-blur-xs border-b border-slate-200/80 px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shadow-xs">
+          <header className="w-full bg-slate-900/95 backdrop-blur-xs border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shadow-xs">
             <div className="flex items-center gap-2.5 min-w-0">
               <button
                 type="button"
                 onClick={handleExit}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0"
                 title="Rời khỏi phòng thi"
                 aria-label="Rời khỏi phòng thi"
               >
@@ -279,18 +299,18 @@ export function SpeakingWorkspace({
               <span
                 className={`hidden sm:inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${
                   isMock
-                    ? 'bg-red-50 text-[#932120] border-red-200'
-                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                    ? 'bg-[#932120]/30 text-rose-200 border-[#932120]/50'
+                    : 'bg-slate-800 text-slate-200 border-slate-700'
                 }`}
               >
                 {isMock ? 'Thi thử IELTS' : 'Luyện tập'}
               </span>
             </div>
-            <h1 className="text-xs sm:text-sm font-bold text-slate-800 text-center max-w-2xl truncate px-2">
+            <h1 className="text-xs sm:text-sm font-bold text-white text-center max-w-2xl truncate px-2">
               {exam.title}
             </h1>
             <div className="flex items-center gap-2.5 shrink-0">
-              <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold tabular-nums">
+              <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 text-[11px] font-bold tabular-nums border border-slate-700">
                 Đã trả lời {answeredCount}/{allQuestions.length}
               </span>
               {clock}
@@ -339,13 +359,13 @@ export function SpeakingWorkspace({
       )}
 
       {micLost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-3 text-center">
-            <h2 className="text-lg font-bold text-slate-800">Mất kết nối micro</h2>
-            <p className="text-sm text-slate-600">Các câu đã ghi vẫn được giữ. Bạn có thể nộp phần đã làm, hoặc kết nối lại micro rồi tải lại trang để làm tiếp.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-slate-900 text-slate-100 border border-slate-700 rounded-3xl shadow-2xl p-6 space-y-3 text-center">
+            <h2 className="text-lg font-bold text-white">Mất kết nối micro</h2>
+            <p className="text-sm text-slate-300">Các câu đã ghi vẫn được giữ. Bạn có thể nộp phần đã làm, hoặc kết nối lại micro rồi tải lại trang để làm tiếp.</p>
             <button
               onClick={() => { setMicLost(false); setViewPhase('review'); }}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl text-sm"
+              className="w-full py-3 px-4 bg-[#932120] hover:bg-[#7a1a19] text-white font-semibold rounded-2xl text-sm cursor-pointer"
             >
               Xem lại bài đã làm
             </button>

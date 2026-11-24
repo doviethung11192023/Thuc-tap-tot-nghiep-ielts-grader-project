@@ -11,6 +11,14 @@ from typing import Any, Optional
 
 from app.db.supabase import db
 from app.services.listening_reading.lr_answer_matching import is_correct
+from app.services.r2_storage import r2_storage
+
+
+def _media_url(key: Optional[str]) -> Optional[str]:
+    if not key or key.startswith(("http://", "https://", "data:")):
+        return key
+    url = r2_storage.get_file_url(key)
+    return url if url.startswith(("http://", "https://")) else key
 
 _TEST6_WORDLIST_GROUP_ID = "6d107a55-3309-46b1-a574-be2fa8a53390"
 _LISTENING_T3_S1_Q2_ID = "552ea3fb-ecb7-42f2-93d0-a59970274965"
@@ -107,10 +115,6 @@ def _normalize_seed_group(g: dict[str, Any]) -> None:
     if g.get("id") == _TEST6_WORDLIST_GROUP_ID:
         if not g.get("group_options"):
             g["group_options"] = [dict(o) for o in _TEST6_WORDLIST_OPTIONS]
-        if "Questions 31-36" in (g.get("instructions") or ""):
-            g["instructions"] = (
-                "Questions 30-35. Complete the summary below. Choose a letter from A-K for each answer."
-            )
 
     qs = g.get("questions") or []
     for q in qs:
@@ -179,10 +183,10 @@ def load_lr_test(test_id: str) -> Optional[dict[str, Any]]:
     return test
 
 
-def _option_sort_key(row: dict[str, Any]) -> tuple[int, int, str]:
+def _option_sort_key(row: dict[str, Any], use_roman: bool = True) -> tuple[int, int, str]:
     label = str(row.get("label") or "").strip()
     low = label.lower()
-    if low in _ROMAN_ORDER:
+    if use_roman and low in _ROMAN_ORDER:
         return (0, _ROMAN_ORDER[low], "")
     if label.isdigit():
         return (0, int(label), "")
@@ -190,7 +194,10 @@ def _option_sort_key(row: dict[str, Any]) -> tuple[int, int, str]:
 
 
 def _options(rows: list[dict]) -> Optional[list[dict]]:
-    return [{"key": o["label"], "text": o["text"]} for o in sorted(rows, key=_option_sort_key)] or None
+    if not rows:
+        return None
+    use_roman = all(str(o.get("label") or "").strip().lower() in _ROMAN_ORDER for o in rows)
+    return [{"key": o["label"], "text": o["text"]} for o in sorted(rows, key=lambda r: _option_sort_key(r, use_roman))] or None
 
 
 def _format_correct_answer(
@@ -280,12 +287,13 @@ def _group(g: dict[str, Any], keys: Optional[dict[str, dict]], answers: Optional
                 "explanation_4_steps": k.get("explanation") or "", "evidence_text": k.get("evidence") or "",
             })
         questions.append(item)
+    image_url = _media_url(g.get("image_key"))
     return {
         "id": g["id"], "order_no": g["order_no"], "question_type": g["question_type"],
-        "instructions": g.get("instructions"), "image_key": g.get("image_key"),
+        "instructions": g.get("instructions"), "image_key": image_url,
         "content": {"ui_question_type": g.get("subtype"), "template": g.get("template"),
                     "options_pool": _options(g.get("group_options") or []),
-                    "diagram_image_url": g.get("image_key"), "select_count": g.get("select_count"),
+                    "diagram_image_url": image_url, "select_count": g.get("select_count"),
                     "allow_reuse": g.get("allow_reuse"), "max_words": g.get("max_words")},
         "questions": questions,
     }
@@ -307,7 +315,7 @@ def build_lr_sections(test: dict[str, Any], with_keys: bool = False, answers: Op
         groups = sorted(lr.get("question_groups") or [], key=lambda g: g["order_no"])
         sec = {"id": s["id"], "order_no": s["order_no"], "title": s.get("title"),
                "passage_text": None if (is_listening and not with_keys) else lr.get("passage"),
-               "audio_key": lr.get("audio_key"),
+               "audio_key": _media_url(lr.get("audio_key")),
                "question_groups": [_group(g, keys, answers) for g in groups]}
         if with_keys:
             sec["transcript"] = lr.get("transcript") or (lr.get("passage") if is_listening else None)

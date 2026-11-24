@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { ArrowLeft, Clock, Send, ZoomIn, ZoomOut } from 'lucide-react';
+import { ArrowLeft, Send, ZoomIn, ZoomOut } from 'lucide-react';
+import { ExamTabularTimer } from '../ExamTabularTimer';
 
 interface ReadingWorkspaceHeaderProps {
   title: string;
@@ -24,12 +25,6 @@ export function ReadingWorkspaceHeader({
   onExitClick,
   onSubmit,
 }: ReadingWorkspaceHeaderProps) {
-  const formatDisplayTime = (totalSecs: number) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="bg-white border-b border-zinc-200 px-5 py-2.5 h-14 flex items-center justify-between shadow-xs shrink-0 z-20">
       <div className="flex items-center gap-3">
@@ -73,15 +68,12 @@ export function ReadingWorkspaceHeader({
           </button>
         </div>
 
-        {/* Active Timer Display */}
-        <div className="flex items-center gap-2 bg-red-50 text-[#932120] border border-red-100 px-3.5 py-1.5 rounded-xl text-sm font-bold shadow-xs">
-          <Clock className="w-4 h-4 text-[#932120]" />
-          {mode === 'exam' ? (
-            <span>{formatDisplayTime(timerSeconds)} / {formatDisplayTime(initialExamSeconds)}</span>
-          ) : (
-            <span>⏱️ {formatDisplayTime(timerSeconds)}</span>
-          )}
-        </div>
+        {/* Active Timer Display (Lucian #100 Tabular) */}
+        <ExamTabularTimer
+          mode={mode}
+          timerSeconds={timerSeconds}
+          capSeconds={initialExamSeconds}
+        />
 
         {/* Submit Button */}
         <button

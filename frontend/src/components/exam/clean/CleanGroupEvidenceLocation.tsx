@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowLeftRight, Compass, Play } from 'lucide-react';
-import { CleanListeningQuestion, CleanListeningUtterance } from '@/mocks/clean-dataset/listening-test-1-clean';
+import type { CleanListeningQuestion, CleanListeningUtterance } from '@/types/clean-detail';
 
 interface CleanGroupEvidenceLocationProps {
   currentQ: CleanListeningQuestion;
@@ -112,9 +112,9 @@ export function CleanGroupEvidenceLocation({
   return (
     <div className="space-y-4">
       {/* Mục: Từ khóa chính trong câu hỏi */}
-      <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
-          <div className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800">
+          <div className="w-4 h-4 rounded-full bg-[#932120] text-white flex items-center justify-center text-[10px]">
             ?
           </div>
           <span>Từ khóa chính trong câu hỏi (Question {currentQ.question_number})</span>
@@ -125,10 +125,10 @@ export function CleanGroupEvidenceLocation({
       </div>
 
       {/* Mục: So sánh với bản ghi âm */}
-      <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-3">
+      <div className="rounded-xl border border-red-200/70 bg-red-50/20 p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
-            <ArrowLeftRight className="w-4 h-4 text-blue-600" />
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#932120]">
+            <ArrowLeftRight className="w-4 h-4 text-[#932120]" />
             <span>So sánh với bản ghi âm</span>
           </div>
 
@@ -146,7 +146,7 @@ export function CleanGroupEvidenceLocation({
             <button
               type="button"
               onClick={handlePlayEvidence}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#932120] hover:bg-[#7a1a19] text-white font-bold text-xs shadow-xs transition-colors cursor-pointer active:scale-95"
             >
               <Play className="w-3.5 h-3.5 ml-0.5" />
               <span>Phát âm thanh</span>
@@ -154,7 +154,7 @@ export function CleanGroupEvidenceLocation({
           </div>
         </div>
 
-        <div className="p-3 bg-white rounded-xl border border-blue-200/80 text-sm text-zinc-800 leading-relaxed shadow-2xs">
+        <div className="p-3 bg-white rounded-xl border border-red-200/70 text-sm text-zinc-800 leading-relaxed shadow-2xs">
           {renderHighlightedEvidence(currentQ.evidence_text, currentQ.keywords_mapping)}
         </div>
 

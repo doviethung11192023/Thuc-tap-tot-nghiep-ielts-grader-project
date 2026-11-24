@@ -25,55 +25,60 @@ export function ReadingPassagePane({
   if (!currentPassage) return null;
 
   return (
-    <div className="w-1/2 border-r border-zinc-200 bg-white flex flex-col h-full relative">
+    <div className="w-1/2 border-r border-[var(--ux-line)] bg-[var(--ux-surface)] flex flex-col h-full relative">
       <div
         ref={passageScrollRef}
         className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar space-y-6 pb-20"
       >
-        <div className="border-b border-zinc-100 pb-4 text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#932120] bg-red-50 px-3 py-1 rounded-full border border-red-100">
-            Reading Passage {currentPassage.passageNumber || activePassage + 1}
-          </span>
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-900 mt-3 font-serif">
-            {currentPassage.passage.title}
-          </h2>
-        </div>
+        <div className="max-w-[70ch] mx-auto space-y-6">
+          <div className="border-b border-[var(--ux-line)] pb-4 text-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#932120] bg-rose-50 px-3 py-1 rounded-full border border-rose-100">
+              Reading Passage {currentPassage.passageNumber || activePassage + 1}
+            </span>
+            <h2 className="text-xl md:text-2xl font-bold text-[var(--ux-ink)] mt-3 font-serif leading-snug">
+              {currentPassage.passage.title}
+            </h2>
+          </div>
 
-        <div
-          className="space-y-6 text-zinc-800 leading-relaxed font-serif"
-          style={{ fontSize: `${fontSize}px` }}
-        >
-          {currentPassage.passage.paragraphs?.map((p: any) => {
-            const isSelected = highlightedEvidence?.paragraph === p.id;
-            return (
-              <div
-                key={p.id}
-                id={`para-${p.id}`}
-                className={`p-4 rounded-xl transition-all duration-300 flex gap-4 ${
-                  isSelected
-                    ? 'bg-amber-100 ring-2 ring-amber-400 shadow-sm'
-                    : 'hover:bg-zinc-50'
-                }`}
-              >
-                <span className="font-sans font-bold text-zinc-400 shrink-0 text-base select-none">
-                  [{p.id}]
-                </span>
-                <p className="leading-relaxed">
-                  {isSelected && highlightedEvidence?.quote && p.text.includes(highlightedEvidence.quote) ? (
-                    <span>
-                      {p.text.split(highlightedEvidence.quote)[0]}
-                      <mark className="bg-amber-300 font-semibold px-1 rounded text-zinc-900 animate-pulse">
-                        {highlightedEvidence.quote}
-                      </mark>
-                      {p.text.split(highlightedEvidence.quote)[1]}
+          <div
+            className="space-y-5 text-[var(--ux-ink)] leading-[1.8] font-serif"
+            style={{ fontSize: `${fontSize}px` }}
+          >
+            {currentPassage.passage.paragraphs?.map((p: any) => {
+              const paraKey = p.label || p.id;
+              const isSelected = highlightedEvidence?.paragraph === paraKey;
+              return (
+                <div
+                  key={p.id}
+                  id={`para-${paraKey}`}
+                  className={`p-4 rounded-xl transition-colors duration-200 flex gap-4 ${
+                    isSelected
+                      ? 'bg-amber-100 ring-2 ring-amber-400 shadow-sm'
+                      : 'hover:bg-[var(--ux-surface-2)]/60'
+                  }`}
+                >
+                  {p.label && (
+                    <span className="font-sans font-bold text-[var(--ux-ink-3)] shrink-0 text-sm pt-1 select-none">
+                      [{p.label}]
                     </span>
-                  ) : (
-                    p.text
                   )}
-                </p>
-              </div>
-            );
-          })}
+                  <p className="leading-[1.8]">
+                    {isSelected && highlightedEvidence?.quote && p.text.includes(highlightedEvidence.quote) ? (
+                      <span>
+                        {p.text.split(highlightedEvidence.quote)[0]}
+                        <mark className="bg-amber-300 font-semibold px-1 rounded text-zinc-900">
+                          {highlightedEvidence.quote}
+                        </mark>
+                        {p.text.split(highlightedEvidence.quote)[1]}
+                      </span>
+                    ) : (
+                      p.text
+                    )}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

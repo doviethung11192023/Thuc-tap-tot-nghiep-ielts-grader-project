@@ -38,7 +38,12 @@ function prefetchOtherSkills(current: string) {
   }
 }
 
-export function useSkillExercises(skill: string, selectedQuestionType: string | null) {
+export function useSkillExercises(
+  skill: string,
+  selectedQuestionType: string | null,
+  page?: number,
+  limit?: number
+) {
   const skillKey = skill.toLowerCase();
   const [itemsBySkill, setItemsBySkill] = useState<Record<string, PracticeExerciseItem[]>>(() => {
     const cached = readCatalogCache<PracticeExerciseItem[]>(cacheKey(skillKey));
@@ -75,11 +80,16 @@ export function useSkillExercises(skill: string, selectedQuestionType: string | 
 
   const { typesSummary, exercises } = useMemo(() => {
     const items = allItems || [];
+    const filtered = selectedQuestionType ? items.filter((it) => it.raw_type === selectedQuestionType) : items;
+    const paged =
+      typeof page === "number" && typeof limit === "number" && limit > 0
+        ? filtered.slice((page - 1) * limit, page * limit)
+        : filtered;
     return {
       typesSummary: summarizeTypes(items),
-      exercises: selectedQuestionType ? items.filter((it) => it.raw_type === selectedQuestionType) : items,
+      exercises: paged,
     };
-  }, [allItems, selectedQuestionType]);
+  }, [allItems, selectedQuestionType, page, limit]);
 
   return {
     typesSummary,

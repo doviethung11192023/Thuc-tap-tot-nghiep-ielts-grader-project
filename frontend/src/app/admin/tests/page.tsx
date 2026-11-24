@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { FileText, Plus, Database, Loader2, RotateCcw, FolderKanban } from "lucide-react";
 import { DatasetIngestModal } from "@/components/admin/DatasetIngestModal";
 import { CreateTestModal } from "@/components/admin/CreateTestModal";
@@ -12,7 +13,9 @@ import { TestBulkActionBar } from "@/components/admin/TestBulkActionBar";
 import { AdminModeSwitcher, type AdminTestViewMode } from "@/components/admin/AdminModeSwitcher";
 import { AdminExerciseTypeManager } from "@/components/admin/AdminExerciseTypeManager";
 import { useAdminTests } from "@/hooks/useAdminTests";
+import { BlurFadeCard } from "@/components/motion";
 import { bulkAssignTestsToSet } from "@/services/admin-test-sets";
+import { extractApiErrorMessage } from "@/lib/api-error";
 import type { SkillType } from "@/types/exam";
 
 const SKILL_LABELS: Record<string, string> = {
@@ -49,8 +52,9 @@ export default function AdminTestsPage() {
       await bulkAssignTestsToSet(selectedIds, targetSetId);
       toggleSelectAll(false);
       clearCacheAndRefresh(false);
-    } catch (err: any) {
-      alert(err?.response?.data?.detail || "Lỗi khi gán bộ đề");
+      toast.success("Đã gán bộ đề cho các bài thi đã chọn");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Lỗi khi gán bộ đề"));
     }
   };
 
@@ -73,7 +77,7 @@ export default function AdminTestsPage() {
             <FolderKanban className="w-4 h-4 text-[#932120]" /> Quản Lý Bộ Đề
           </button>
           <button onClick={() => setIsIngestOpen(true)} className="px-4 py-2.5 bg-zinc-100 text-zinc-800 rounded-xl text-xs sm:text-sm font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 border border-zinc-300 shadow-xs cursor-pointer">
-            <Database className="w-4 h-4 text-[#932120]" /> Nạp từ Dataset Crawled
+            <Database className="w-4 h-4 text-[#932120]" /> Nạp từ Kho Dữ Liệu Chuẩn
           </button>
           <button
             onClick={() => {
@@ -100,19 +104,21 @@ export default function AdminTestsPage() {
         />
       ) : (
         <>
-          <TestFilterBar
-            skill={skill} status={status} testSetId={testSetId} difficulty={difficulty}
-            allowedMode={allowedMode} sortBy={sortBy} search={search} testSets={testSets}
-            isRefreshing={isRefreshing} loading={loading} onTabClick={handleTabClick}
-            onStatusChange={(st) => { setStatus(st); setPage(1); }}
-            onTestSetChange={(ts) => { setTestSetId(ts); setPage(1); }}
-            onDifficultyChange={(d) => { setDifficulty(d); setPage(1); }}
-            onModeChange={(m) => { setAllowedMode(m); setPage(1); }}
-            onSortChange={(s) => { setSortBy(s); setPage(1); }}
-            onSearchChange={(val) => { setSearch(val); setPage(1); }}
-            onResetAll={resetAllFilters}
-            onRefresh={() => clearCacheAndRefresh(false)}
-          />
+          <BlurFadeCard inView={false}>
+            <TestFilterBar
+              skill={skill} status={status} testSetId={testSetId} difficulty={difficulty}
+              allowedMode={allowedMode} sortBy={sortBy} search={search} testSets={testSets}
+              isRefreshing={isRefreshing} loading={loading} onTabClick={handleTabClick}
+              onStatusChange={(st) => { setStatus(st); setPage(1); }}
+              onTestSetChange={(ts) => { setTestSetId(ts); setPage(1); }}
+              onDifficultyChange={(d) => { setDifficulty(d); setPage(1); }}
+              onModeChange={(m) => { setAllowedMode(m); setPage(1); }}
+              onSortChange={(s) => { setSortBy(s); setPage(1); }}
+              onSearchChange={(val) => { setSearch(val); setPage(1); }}
+              onResetAll={resetAllFilters}
+              onRefresh={() => clearCacheAndRefresh(false)}
+            />
+          </BlurFadeCard>
 
           <TestBulkActionBar
             selectedCount={selectedIds.length}
@@ -122,7 +128,8 @@ export default function AdminTestsPage() {
             onBulkAssignSet={handleBulkAssignSet}
           />
 
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden relative w-full">
+          <BlurFadeCard inView={false} delay={0.05}>
+            <div className="bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden relative w-full">
             {(isRefreshing || isPendingTransition) && <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#932120] animate-pulse z-10" />}
 
             <div className="overflow-x-auto w-full">
@@ -169,7 +176,8 @@ export default function AdminTestsPage() {
             </div>
 
             <TestPagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
-          </div>
+            </div>
+          </BlurFadeCard>
         </>
       )}
 

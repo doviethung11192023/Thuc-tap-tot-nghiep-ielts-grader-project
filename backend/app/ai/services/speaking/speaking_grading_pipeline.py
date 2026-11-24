@@ -122,6 +122,16 @@ def _criterion_payload(output: AgentCriterionOutput) -> dict:
             "issues": output.issues, "improvements": output.improvements}
 
 
+def _ielts_round(value: float) -> float:
+    whole = int(value)
+    rem = value - whole
+    if rem < 0.25:
+        return float(whole)
+    if rem < 0.75:
+        return float(whole) + 0.5
+    return float(whole) + 1.0
+
+
 async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
                                 unanswered: list[UnansweredQuestion] | None = None) -> dict:
     """`unanswered`: questions of the test with no recording, for the coverage ceiling (BR-23)."""
@@ -175,7 +185,8 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
 
         criteria = {name: _criterion_payload(output)
                     for name, output in (("fc", fc), ("lr", lr), ("gra", gra), ("pr", pr))}
-        overall = await generate_overall(title, criteria)
+        overall_band = _ielts_round(sum(float(v["band"]) for v in criteria.values()) / 4.0)
+        overall = await generate_overall(title, criteria, overall_band=overall_band)
         parts = await parts_task
     finally:
         parts_task.cancel()     # no-op once awaited; on any failure the run is lost, so stop the Part reports too

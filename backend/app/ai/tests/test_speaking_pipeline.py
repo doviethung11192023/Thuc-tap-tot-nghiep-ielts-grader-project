@@ -59,9 +59,10 @@ def stubs(monkeypatch):
     async def fake_parts(title, answers):
         return {"part1": {"part_summary": "ok"}}
 
-    async def fake_overall(title, criteria):
+    async def fake_overall(title, criteria, overall_band=None):
         calls["overall"] += 1
         calls["overall_criteria"] = criteria
+        calls["overall_band"] = overall_band
         return {"overall_summary": "ok"}
 
     monkeypatch.setattr(pipeline, "download_audio", fake_download)
@@ -99,6 +100,7 @@ def test_llm_cannot_change_the_pronunciation_band(stubs, monkeypatch):
 def test_overall_report_receives_the_code_band(stubs, monkeypatch):
     result = _run(monkeypatch, [_spoken("r1", 1), _spoken("r2", 2)])
     assert stubs["overall_criteria"]["pr"]["band"] == result["pronunciation"]["band"]
+    assert stubs["overall_band"] is not None
 
 
 def test_one_silent_answer_is_kept_in_rows_but_not_graded(stubs, monkeypatch):

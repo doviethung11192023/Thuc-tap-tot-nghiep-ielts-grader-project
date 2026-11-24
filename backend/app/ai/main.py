@@ -53,6 +53,7 @@ from services.grading_fingerprint import grading_fingerprint  # noqa: E402
 from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
 from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
+from services.tutor_router import router as tutor_router  # noqa: E402
 from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
 from services.speaking.phoneme_recognizer import load_model as load_phoneme_model  # noqa: E402
 from services.speaking.speech_transcriber import load_model as load_stt_model  # noqa: E402
@@ -74,15 +75,18 @@ async def lifespan(app: FastAPI):
         logger.info("NLP tools ready")
     except Exception as e:  # first request will retry the lazy initialisation
         logger.warning("NLP warm-up failed: %s", e, exc_info=True)
-    # about 10 s otherwise paid by the first Speaking test after each restart; the two models load side by
-    # side, and one failing does not stop the other (the first Speaking test loads a missing one lazily)
-    logger.info("Loading speech models (Whisper, wav2vec2)...")
-    outcomes = await asyncio.gather(asyncio.to_thread(load_stt_model), asyncio.to_thread(load_phoneme_model),
-                                    return_exceptions=True)
-    for name, outcome in zip(("Whisper", "wav2vec2"), outcomes):
-        if isinstance(outcome, Exception):
-            logger.warning("%s warm-up failed: %s", name, outcome, exc_info=outcome)
-    logger.info("Speech models warm-up finished")
+    if settings.speech_preload_models:
+        # Load sequentially to avoid concurrent OpenMP/PyTorch memory spikes on CPU hosts;
+        # one failing does not stop the other (the first Speaking test loads a missing one lazily).
+        logger.info("Loading speech models (Whisper, wav2vec2)...")
+        for name, loader in (("Whisper", load_stt_model), ("wav2vec2", load_phoneme_model)):
+            try:
+                await asyncio.to_thread(loader)
+            except Exception as e:
+                logger.warning("%s warm-up failed: %s", name, e, exc_info=True)
+        logger.info("Speech models warm-up finished")
+    else:
+        logger.info("Skipping speech models warm-up (SPEECH_PRELOAD_MODELS=false; lazy-loads on first Speaking test)")
     yield
 
 
@@ -100,6 +104,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(tutor_router)
 
 
 # ── Request schema ────────────────────────────────────────────────────────────

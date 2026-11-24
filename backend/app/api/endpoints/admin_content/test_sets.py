@@ -1,12 +1,14 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
+from app.services.admin.staff_accounts import write_audit
 from app.services.cms.cms_tests import db_error
 
+REQUIRED_MOCK_SKILLS = ("listening", "reading", "writing", "speaking")
 router = APIRouter(route_class=StudentContentMutationRoute)
 
 class TestSetCreatePayload(BaseModel):
@@ -14,6 +16,9 @@ class TestSetCreatePayload(BaseModel):
 
 class TestSetUpdatePayload(BaseModel):
     name: str = Field(..., min_length=2, max_length=150)
+
+class TestSetStatusPayload(BaseModel):
+    status: Literal["draft", "published", "archived"]
 
 class BulkAssignSetPayload(BaseModel):
     test_ids: List[str]
@@ -42,14 +47,19 @@ async def list_admin_test_sets(current_user: User = Depends(require_admin)):
         sid = s["id"]
         assigned = tests_by_set.get(sid, [])
         skills = sorted(list({str(t.get("skill", "")).capitalize() for t in assigned if t.get("skill")}))
+        published_skills = {str(t.get("skill", "")).lower() for t in assigned if t.get("status") == "published" and t.get("skill")}
+        missing_skills = [sk.capitalize() for sk in REQUIRED_MOCK_SKILLS if sk not in published_skills]
         published_count = sum(1 for t in assigned if t.get("status") == "published")
         result.append({
             "id": sid,
             "name": s["name"],
+            "status": s.get("status", "published"),
             "created_at": s.get("created_at"),
             "total_tests": len(assigned),
             "published_tests": published_count,
             "skills": skills,
+            "missing_skills": missing_skills,
+            "is_complete_mock": len(missing_skills) == 0,
         })
 
     return {
@@ -103,6 +113,37 @@ async def update_admin_test_set(
         "meta": {"code": 200, "message": "Cập nhật bộ đề thi thành công"},
         "data": res.data[0]
     }
+
+
+@router.patch("/test-sets/{set_id}/status")
+async def update_admin_test_set_status(
+    set_id: str,
+    payload: TestSetStatusPayload,
+    current_user: User = Depends(require_admin),
+):
+    """Đổi trạng thái bộ đề; khi xuất bản bắt buộc phải có đủ 4 kỹ năng đã xuất bản."""
+    try:
+        uuid.UUID(set_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Mã bộ đề thi không hợp lệ (UUID)")
+
+    if payload.status == "published":
+        assigned = (
+            db().table("tests").select("skill, status").eq("test_set_id", set_id).execute().data or []
+        )
+        pub_skills = {str(t.get("skill", "")).lower() for t in assigned if t.get("status") == "published"}
+        missing = [sk.capitalize() for sk in REQUIRED_MOCK_SKILLS if sk not in pub_skills]
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Bộ đề Mock cần đủ 4 kỹ năng đã xuất bản trước khi publish (thiếu: {', '.join(missing)})",
+            )
+
+    res = db().table("test_sets").update({"status": payload.status}).eq("id", set_id).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bộ đề thi")
+    write_audit(current_user.id, f"{payload.status}_test_set", "test_sets", set_id, after={"status": payload.status})
+    return {"meta": {"code": 200, "message": "Cập nhật trạng thái bộ đề thành công"}, "data": res.data[0]}
 
 @router.delete("/test-sets/{set_id}")
 async def delete_admin_test_set(
