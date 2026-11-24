@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Search, BookOpen, Headphones, PenTool, Mic, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { StaggerGrid } from "@/components/motion";
 import type { PublishedTestItem } from "@/types/test-practice";
 import { DirectTestCard } from "./DirectTestCard";
 
@@ -79,15 +80,45 @@ export function StudentDirectTestsSection({
         </div>
       </div>
 
-      {/* Filters Bar & Search */}
-      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-zinc-200 shadow-2xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
+      {/* Filters Bar & Search — flex-wrap 2 hàng trên viewport nhỏ để không cắt mất Writing/Speaking/Khó */}
+      <div className="flex flex-col gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-zinc-200 shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 shrink-0">Độ khó:</span>
+            {DIFFICULTY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setDifficulty(opt.value)}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                  difficulty.toLowerCase() === opt.value.toLowerCase()
+                    ? "bg-zinc-800 text-white shadow-xs"
+                    : "bg-zinc-50 text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full md:w-72 shrink-0">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm theo tên bài thi..."
+              className="w-full pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#932120]/30 font-medium transition-all"
+            />
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-zinc-100">
           <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 shrink-0">Kỹ năng:</span>
           {SKILL_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setSkill(opt.value)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 skill.toLowerCase() === opt.value.toLowerCase()
                   ? "bg-[#932120] text-white shadow-xs"
                   : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
@@ -97,38 +128,12 @@ export function StudentDirectTestsSection({
               <span>{opt.label}</span>
             </button>
           ))}
-
-          <span className="text-zinc-300 mx-1">|</span>
-          {DIFFICULTY_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setDifficulty(opt.value)}
-              className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-                difficulty.toLowerCase() === opt.value.toLowerCase()
-                  ? "bg-zinc-800 text-white shadow-xs"
-                  : "bg-zinc-50 text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative w-full lg:w-72 shrink-0">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên bài thi..."
-            className="w-full pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#932120]/30 font-medium transition-all"
-          />
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
         </div>
       </div>
 
       {/* Grid bài thi với Smart Prefetch & Skeleton */}
       {loading && tests.length === 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6].map((idx) => (
             <div key={idx} className="bg-white rounded-2xl border border-zinc-200 p-4 space-y-3 animate-pulse">
               <div className="flex items-center justify-between">
@@ -145,11 +150,11 @@ export function StudentDirectTestsSection({
           ))}
         </div>
       ) : tests.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
-          {tests.map((test) => (
-            <DirectTestCard key={test.id} test={test} onOpenTestPrep={onOpenTestPrep} />
+        <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+          {tests.map((test, idx) => (
+            <DirectTestCard key={test.id} test={test} index={idx} onOpenTestPrep={onOpenTestPrep} />
           ))}
-        </div>
+        </StaggerGrid>
       ) : (
         <div className="bg-white p-12 rounded-2xl border border-zinc-200 text-center space-y-2">
           <BookOpen className="w-10 h-10 text-zinc-300 mx-auto" />

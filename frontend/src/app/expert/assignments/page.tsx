@@ -4,24 +4,27 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { 
-  Clock, 
-  FileText, 
-  Mic, 
-  CheckCircle2, 
-  ChevronRight, 
+import {
+  Clock,
+  FileText,
+  Mic,
+  CheckCircle2,
+  ChevronRight,
   ArrowRight,
-  Loader2, 
+  Loader2,
   AlertTriangle
 } from "lucide-react";
+import { m } from "motion/react";
+import { BlurFadeCard, SpotlightCard, StaggerGrid } from "@/components/motion";
 import {
   getExpertAssignments,
   getAssignmentWorkspace,
   declineAssignment,
   startAssignmentGrading,
 } from "@/services/expert";
+import { extractApiErrorMessage } from "@/lib/api-error";
 import type { ExpertAssignment } from "@/types";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export default function ExpertAssignmentsPage() {
   const router = useRouter();
@@ -54,8 +57,8 @@ export default function ExpertAssignmentsPage() {
         void queryClient.invalidateQueries({ queryKey: ["expert-assignments"] });
       }
       router.push(`/expert/assignments/${item.id}`);
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Lỗi khi bắt đầu chấm bài");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Lỗi khi bắt đầu chấm bài"));
     }
   };
 
@@ -70,8 +73,8 @@ export default function ExpertAssignmentsPage() {
       setDeclineModalItem(null);
       setDeclineReason("");
       void queryClient.invalidateQueries({ queryKey: ["expert-assignments"] });
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Lỗi khi từ chối nhận bài");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Lỗi khi từ chối nhận bài"));
     } finally {
       setIsSubmittingDecline(false);
     }
@@ -90,26 +93,33 @@ export default function ExpertAssignmentsPage() {
 
         {/* Tab Filters */}
         <div className="inline-flex p-1 bg-zinc-100 rounded-xl border border-zinc-200">
-          <button
-            onClick={() => setTab("active")}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              tab === "active"
-                ? "bg-white text-zinc-900 shadow-xs"
-                : "text-zinc-600 hover:text-zinc-900"
-            }`}
-          >
-            Đang chấm / Cần chấm
-          </button>
-          <button
-            onClick={() => setTab("completed")}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              tab === "completed"
-                ? "bg-white text-zinc-900 shadow-xs"
-                : "text-zinc-600 hover:text-zinc-900"
-            }`}
-          >
-            Lịch sử hoàn tất
-          </button>
+          {(
+            [
+              { id: "active", label: "Đang chấm / Cần chấm" },
+              { id: "completed", label: "Lịch sử hoàn tất" },
+            ] as const
+          ).map((itemTab) => {
+            const isActive = tab === itemTab.id;
+            return (
+              <button
+                key={itemTab.id}
+                type="button"
+                onClick={() => setTab(itemTab.id)}
+                className={`relative px-4 py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  isActive ? "text-zinc-900" : "text-zinc-600 hover:text-zinc-900"
+                }`}
+              >
+                {isActive && (
+                  <m.span
+                    layoutId="expert-assignments-tab-pill"
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                    className="absolute inset-0 rounded-lg bg-white shadow-xs border border-zinc-200/80"
+                  />
+                )}
+                <span className="relative z-10">{itemTab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -120,32 +130,43 @@ export default function ExpertAssignmentsPage() {
           <span className="text-sm font-medium text-zinc-500">Đang tải danh sách bài tập...</span>
         </div>
       ) : assignments.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center space-y-3 shadow-xs">
-          <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto text-zinc-400">
-            <CheckCircle2 className="w-6 h-6" />
+        <BlurFadeCard inView={false}>
+          <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center space-y-3 shadow-xs">
+            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto text-zinc-400">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900">Không có bài chấm nào trong danh sách</h3>
+            <p className="text-sm text-zinc-500 max-w-sm mx-auto">
+              {tab === "active" 
+                ? "Hiện tại bạn đã chấm xong tất cả các bài được phân công. Hãy bật trạng thái Nhận bài ở trang Profile để tiếp tục nhận bài mới."
+                : "Bạn chưa có lịch sử bài thi đã chấm nào."}
+            </p>
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Không có bài chấm nào trong danh sách</h3>
-          <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-            {tab === "active" 
-              ? "Hiện tại bạn đã chấm xong tất cả các bài được phân công. Hãy bật trạng thái Nhận bài ở trang Profile để tiếp tục nhận bài mới."
-              : "Bạn chưa có lịch sử bài thi đã chấm nào."}
-          </p>
-        </div>
+        </BlurFadeCard>
       ) : (
-        <div className="space-y-4">
-          {assignments.map((item) => {
+        <StaggerGrid className="space-y-4">
+          {assignments.map((item, idx) => {
             const isSpeaking = item.skill === "speaking";
-            const isUrgent = item.remaining_hours <= 6 && !item.ended_at;
+            const isOverdue = !item.ended_at && item.remaining_hours < 0;
+            const isCritical = !item.ended_at && item.remaining_hours >= 0 && item.remaining_hours <= 6;
+            const isWarning12h = !item.ended_at && item.remaining_hours > 6 && item.remaining_hours <= 12;
 
             return (
-              <div
-                key={item.id}
-                onMouseEnter={() => prefetchWorkspace(item.id)}
-                className={`bg-white rounded-2xl border transition-all p-5 shadow-xs hover:shadow-md ${
-                  isUrgent ? "border-amber-400 bg-amber-50/20" : "border-zinc-200"
-                }`}
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <BlurFadeCard key={item.id} index={idx} inView={idx >= 4}>
+                <SpotlightCard
+                  tone={isCritical || isOverdue ? "crimson" : isWarning12h ? "amber" : "crimson"}
+                  onMouseEnter={() => prefetchWorkspace(item.id)}
+                  className={`bg-white rounded-2xl border p-5 shadow-xs hover:shadow-md overflow-hidden ${
+                    isOverdue
+                      ? "border-rose-400 bg-rose-50/30"
+                      : isCritical
+                        ? "border-[#fecaca] bg-[#fef2f2]/60"
+                        : isWarning12h
+                          ? "border-amber-300 bg-amber-50/25"
+                          : "border-zinc-200"
+                  }`}
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                   {/* Info Column */}
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -168,18 +189,47 @@ export default function ExpertAssignmentsPage() {
                         #{item.attempt_id.slice(0, 8)}
                       </span>
 
-                      {/* Status / SLA Badge */}
+                      {/* Status / SLA Badge (3 levels: <= 12h amber, <= 6h crimson, < 0h overdue) */}
                       {!item.ended_at ? (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold ${
-                          isUrgent ? "bg-red-100 text-red-700 animate-pulse" : "bg-zinc-100 text-zinc-600"
-                        }`}>
-                          <Clock className="w-3.5 h-3.5" />
-                          Hạn chót: Còn {item.remaining_hours} giờ
-                        </span>
+                        isOverdue ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-red-100 text-red-800 border border-red-300 tabular-nums">
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                            Quá hạn {Math.abs(item.remaining_hours).toFixed(1)} giờ làm việc
+                          </span>
+                        ) : isCritical ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#fef2f2] text-[#932120] border border-[#fecaca] tabular-nums">
+                            <Clock className="w-3.5 h-3.5" />
+                            Khẩn cấp: Còn {item.remaining_hours} giờ làm việc
+                          </span>
+                        ) : isWarning12h ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 tabular-nums">
+                            <Clock className="w-3.5 h-3.5" />
+                            Sắp đến hạn: Còn {item.remaining_hours} giờ làm việc
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-zinc-100 text-zinc-700 tabular-nums">
+                            <Clock className="w-3.5 h-3.5" />
+                            Hạn chót: Còn {item.remaining_hours} giờ làm việc
+                          </span>
+                        )
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold ${
+                          item.end_reason === "completed"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : item.end_reason === "declined"
+                              ? "bg-amber-100 text-amber-800"
+                              : item.end_reason === "expired"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-zinc-100 text-zinc-700"
+                        }`}>
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Đã hoàn thành
+                          {item.end_reason === "completed"
+                            ? "Đã hoàn thành"
+                            : item.end_reason === "declined"
+                              ? "Đã từ chối"
+                              : item.end_reason === "expired"
+                                ? "Quá hạn SLA"
+                                : "Đã chuyển giao"}
                         </span>
                       )}
                     </div>
@@ -227,7 +277,7 @@ export default function ExpertAssignmentsPage() {
                         {item.started_at ? "Tiếp tục chấm" : "Bắt đầu chấm bài"}
                         <ArrowRight className="w-4 h-4" />
                       </button>
-                    ) : (
+                    ) : item.end_reason === "completed" ? (
                       <Link
                         href={`/expert/assignments/${item.id}`}
                         className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-xl text-xs font-bold transition-colors inline-flex items-center gap-1.5"
@@ -235,13 +285,18 @@ export default function ExpertAssignmentsPage() {
                         Xem kết quả đã chấm
                         <ChevronRight className="w-4 h-4" />
                       </Link>
+                    ) : (
+                      <span className="text-xs font-medium text-zinc-500 italic px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl">
+                        {item.note || "Phiên chấm đã đóng"}
+                      </span>
                     )}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </SpotlightCard>
+              </BlurFadeCard>
             );
           })}
-        </div>
+        </StaggerGrid>
       )}
 
       {/* Modal từ chối nhận bài (FR-39) */}

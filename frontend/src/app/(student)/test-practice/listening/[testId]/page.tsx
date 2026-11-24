@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ListeningWorkspace } from '@/components/exam/ListeningWorkspace';
+import { AttemptErrorBanner } from '@/components/exam/AttemptErrorBanner';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
@@ -17,7 +18,7 @@ export default function ListeningWorkspacePage() {
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3', '4'];
   const returnUrl = searchParams.get('returnUrl') || '';
 
-  const { loading, attemptId, deadlineMs, listeningData } = useExamWorkspaceContent(testId, 'listening', mode);
+  const { loading, attemptId, attemptError, attemptErrorStatus, deadlineMs, listeningData } = useExamWorkspaceContent(testId, 'listening', mode);
   const startedAtRef = useRef<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -64,6 +65,14 @@ export default function ListeningWorkspacePage() {
 
   return (
     <div className="space-y-3">
+      <AttemptErrorBanner
+        skill="listening"
+        testId={testId}
+        mode={mode}
+        attemptError={attemptError}
+        attemptErrorStatus={attemptErrorStatus}
+        returnUrl={returnUrl}
+      />
       {submitError && (
         <div
           role="alert"
@@ -82,6 +91,8 @@ export default function ListeningWorkspacePage() {
       <ListeningWorkspace
         testData={listeningData}
         mode={mode}
+        attemptId={attemptId}
+        attemptError={attemptError}
         onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
         deadlineMs={mode === 'exam' ? deadlineMs : null}
         selectedParts={parts}

@@ -2,10 +2,12 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.security import User, get_current_user
 from app.services.learning_profile.common import invalidate_user_profile_cache
+from app.services.learning_profile.gamification_state_store import update_study_plan
+from app.services.learning_profile.streak_summary_service import claim_streak_repair, get_streak_summary
 from app.services.learning_profile_aggregator import (
     compute_learning_profile_overview,
     compute_learning_profile_test_practice,
@@ -17,13 +19,13 @@ router = APIRouter()
 
 
 class GoalUpdateRequest(BaseModel):
-    input_band: Optional[float] = None
-    target_overall: Optional[float] = None
-    target_listening: Optional[float] = None
-    target_reading: Optional[float] = None
-    target_writing: Optional[float] = None
-    target_speaking: Optional[float] = None
-    test_date: Optional[str] = None
+    input_band: Optional[float] = Field(default=None, ge=1.0, le=9.0)
+    target_overall: Optional[float] = Field(default=None, ge=4.0, le=9.0)
+    target_listening: Optional[float] = Field(default=None, ge=4.0, le=9.0)
+    target_reading: Optional[float] = Field(default=None, ge=4.0, le=9.0)
+    target_writing: Optional[float] = Field(default=None, ge=4.0, le=9.0)
+    target_speaking: Optional[float] = Field(default=None, ge=4.0, le=9.0)
+    test_date: Optional[str] = Field(default=None, max_length=20)
 
 
 def _drop_profile_cache(user_id: str) -> None:
@@ -68,3 +70,28 @@ def update_student_goals(req: GoalUpdateRequest, current_user: User = Depends(ge
     saved = save_goals(current_user.id, payload)
     _drop_profile_cache(current_user.id)
     return {"meta": {"code": 200, "message": "Cập nhật mục tiêu thành công"}, "data": saved}
+
+
+class StudyPlanUpdateRequest(BaseModel):
+    weekly_goal_days: Optional[int] = Field(default=None, ge=3, le=7)
+    reminder_enabled: Optional[bool] = None
+
+
+@router.get("/learning-profile/streak-summary")
+def get_student_streak_summary(current_user: User = Depends(get_current_user)):
+    """Endpoint siêu nhẹ cho Header Streak Pill trên mọi trang Học viên (cache 60s)."""
+    return {"meta": {"code": 200}, "data": get_streak_summary(current_user.id)}
+
+
+@router.put("/learning-profile/study-plan")
+def update_student_study_plan(req: StudyPlanUpdateRequest, current_user: User = Depends(get_current_user)):
+    """Cập nhật mục tiêu tuần (3/5/7 buổi) và công tắc nhắc giữ chuỗi 20:00 GMT+7 (FR-57)."""
+    saved = update_study_plan(current_user.id, req.weekly_goal_days, req.reminder_enabled)
+    return {"meta": {"code": 200, "message": "Đã lưu kế hoạch học tập tuần"}, "data": saved}
+
+
+@router.post("/learning-profile/streak/repair")
+def repair_student_streak(current_user: User = Depends(get_current_user)):
+    """Khôi phục chuỗi >= 5 ngày bị đứt trong cửa sổ 48h sau khi hoàn thành nhiệm vụ 2x (UC-47, BR-29)."""
+    res = claim_streak_repair(current_user.id)
+    return {"meta": {"code": 200, "message": "Khôi phục chuỗi học thành công!"}, "data": res}

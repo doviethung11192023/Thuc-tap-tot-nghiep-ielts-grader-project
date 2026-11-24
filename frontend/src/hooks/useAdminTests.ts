@@ -7,7 +7,7 @@ import {
   deleteTest,
 } from "@/services/admin-content";
 import type { TestItem, TestSet, SkillType, ContentStatus, AllowedMode } from "@/types/exam";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface CacheEntry {
   items: TestItem[];

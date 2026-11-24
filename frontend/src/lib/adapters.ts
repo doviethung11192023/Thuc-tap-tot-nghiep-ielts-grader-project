@@ -25,6 +25,8 @@ export function mapApiResultToGradingResult(resData: EssayResultsResponse["data"
     is_score_overridden: Boolean(resData.result.is_score_overridden),
     evaluator_type: resData.result.evaluator_type || (resData.result.is_score_overridden ? "expert" : "ai"),
     expert_feedback: resData.result.expert_feedback ?? null,
+    ai_evaluation: resData.result.ai_evaluation ?? null,
+    expert_review: resData.result.expert_review ?? null,
     sibling_essays: resData.sibling_essays || [],
     scores: {
       overall_band: resData.result.overall_band,

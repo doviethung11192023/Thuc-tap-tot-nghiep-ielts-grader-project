@@ -4,8 +4,8 @@ import type { BandConversion } from "@/types/exam";
 
 interface BandConversionsTableProps {
   conversions: BandConversion[];
-  bandSkill: string;
-  onSkillChange: (skill: string) => void;
+  bandSkill: "reading" | "listening";
+  onSkillChange: (skill: "reading" | "listening") => void;
   onUpdate: (id: string, raw_min: number, raw_max: number, band: number) => void;
 }
 

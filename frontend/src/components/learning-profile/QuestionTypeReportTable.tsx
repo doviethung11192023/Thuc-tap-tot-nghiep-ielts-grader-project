@@ -15,6 +15,7 @@ export function QuestionTypeReportTable({ reportRows }: QuestionTypeReportTableP
   const filtered = reportRows.filter(
     (r) => r.skill.toLowerCase() === selectedSkill.toLowerCase()
   );
+  const isCriteriaSkill = selectedSkill === "Writing" || selectedSkill === "Speaking";
 
   return (
     <div className="bg-white rounded-3xl border border-zinc-200/90 shadow-2xs overflow-hidden">
@@ -46,11 +47,11 @@ export function QuestionTypeReportTable({ reportRows }: QuestionTypeReportTableP
         <table className="w-full text-left text-xs">
           <thead className="bg-zinc-50 text-zinc-500 font-bold border-b border-zinc-200/80">
             <tr>
-              <th className="py-3 px-5">Loại câu hỏi</th>
-              <th className="py-3 px-4 text-center">Tổng số câu</th>
-              <th className="py-3 px-4 text-center text-emerald-700">Câu đúng</th>
-              <th className="py-3 px-4 text-center text-rose-700">Câu sai</th>
-              <th className="py-3 px-5 text-center">Tỷ lệ chính xác</th>
+              <th className="py-3 px-5">{isCriteriaSkill ? "Hình thức chấm" : "Loại câu hỏi"}</th>
+              <th className="py-3 px-4 text-center">{isCriteriaSkill ? "Số bài" : "Tổng số câu"}</th>
+              <th className="py-3 px-4 text-center text-emerald-700">{isCriteriaSkill ? "Đạt ≥ 5.0" : "Câu đúng"}</th>
+              <th className="py-3 px-4 text-center text-rose-700">{isCriteriaSkill ? "Dưới 5.0" : "Câu sai"}</th>
+              <th className="py-3 px-5 text-center">{isCriteriaSkill ? "Band trung bình" : "Tỷ lệ chính xác"}</th>
               <th className="py-3 px-4 text-center">Luyện gần nhất</th>
               <th className="py-3 px-5 text-right">Hành động</th>
             </tr>
@@ -69,17 +70,31 @@ export function QuestionTypeReportTable({ reportRows }: QuestionTypeReportTableP
                 <td className="py-3.5 px-4 text-center text-emerald-600 font-bold">{row.correct}</td>
                 <td className="py-3.5 px-4 text-center text-rose-600 font-bold">{row.incorrect}</td>
                 <td className="py-3.5 px-5 text-center">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
-                      row.accuracy >= 60
-                        ? "bg-emerald-100 text-emerald-800"
-                        : row.accuracy >= 40
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-rose-100 text-rose-800"
-                    }`}
-                  >
-                    {row.accuracy}%
-                  </span>
+                  {row.metric_type === "band" && typeof row.avg_band === "number" ? (
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+                        row.avg_band >= 6.0
+                          ? "bg-emerald-100 text-emerald-800"
+                          : row.avg_band >= 4.0
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
+                      Band {row.avg_band.toFixed(1)}
+                    </span>
+                  ) : (
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+                        row.accuracy >= 60
+                          ? "bg-emerald-100 text-emerald-800"
+                          : row.accuracy >= 40
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
+                      {row.accuracy}%
+                    </span>
+                  )}
                 </td>
                 <td className="py-3.5 px-4 text-center text-zinc-500">{row.last_practiced}</td>
                 <td className="py-3.5 px-5 text-right">

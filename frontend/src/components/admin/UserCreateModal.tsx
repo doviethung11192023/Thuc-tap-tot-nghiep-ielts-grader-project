@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { adminCreateAdmin, adminCreateExpert } from "@/services/users";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { UserCreateSuccess } from "@/components/admin/UserCreateSuccess";
 import { UserCreateForm } from "@/components/admin/UserCreateForm";
 

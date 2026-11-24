@@ -100,6 +100,16 @@ def _criterion_payload(output: AgentCriterionOutput) -> dict:
             "issues": output.issues, "improvements": output.improvements}
 
 
+def _ielts_round(value: float) -> float:
+    whole = int(value)
+    rem = value - whole
+    if rem < 0.25:
+        return float(whole)
+    if rem < 0.75:
+        return float(whole) + 0.5
+    return float(whole) + 1.0
+
+
 async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -> dict:
     started = time.perf_counter()
     answers = await _analyze_all(inputs)
@@ -138,7 +148,8 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput]) -
     parts = await generate_part_feedback(title, [
         PartAnswer(a.part, a.question, a.transcript.text, a.quality.speech_seconds) for a in spoken])
     criteria = {name: _criterion_payload(output) for name, output in (("fc", fc), ("lr", lr), ("gra", gra), ("pr", pr))}
-    overall = await generate_overall(title, criteria)
+    overall_band = _ielts_round(sum(float(v["band"]) for v in criteria.values()) / 4.0)
+    overall = await generate_overall(title, criteria, overall_band=overall_band)
 
     return {
         "no_speech": False,

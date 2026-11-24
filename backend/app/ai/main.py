@@ -46,6 +46,7 @@ from services.grading_pipeline import (  # noqa: E402
 )
 from services.reference_corpus import ReferenceCorpusError  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
+from services.tutor_router import router as tutor_router  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
 
@@ -75,6 +76,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(tutor_router)
 
 
 # ── Request schema ────────────────────────────────────────────────────────────

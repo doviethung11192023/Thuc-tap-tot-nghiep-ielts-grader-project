@@ -5,7 +5,8 @@ LearnerGoalResponse, UserProgressResponse.
 profiles(full_name, avatar_key, role learner|expert|admin) + learner_profiles(target_*,
 test_date, voice_consent_at). Không còn is_activated: kích hoạt tài khoản do Supabase Auth lo.
 """
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+import math
 from typing import Any, Optional
 
 from app.core.domain_errors import ForbiddenError, InvalidRequestError
@@ -13,6 +14,43 @@ from app.core.domain_errors import ForbiddenError, InvalidRequestError
 from app.db.supabase import db
 
 GOAL_FIELDS = ("input_band", "target_overall", "target_listening", "target_reading", "target_writing", "target_speaking", "test_date")
+BAND_GOAL_FIELDS = ("input_band", "target_overall", "target_listening", "target_reading", "target_writing", "target_speaking")
+VN_TZ = timezone(timedelta(hours=7))
+
+
+def _validate_goal_payload(goals: dict[str, Any]) -> dict[str, Any]:
+    """Kiểm duyệt chặt band (bội 0.5, chống hack huy hiệu) và ngày thi hợp lệ (GMT+7)."""
+    payload: dict[str, Any] = {}
+    for k in BAND_GOAL_FIELDS:
+        if k not in goals or goals[k] is None:
+            continue
+        raw = float(goals[k])
+        if not math.isfinite(raw):
+            raise InvalidRequestError(f"Giá trị {k} không hợp lệ")
+        lo = 1.0 if k == "input_band" else 4.0
+        if raw < lo or raw > 9.0:
+            raise InvalidRequestError(f"{k} phải nằm trong khoảng {lo:.1f} đến 9.0")
+        payload[k] = round(raw * 2.0) / 2.0
+    if "input_band" in payload and "target_overall" in payload and payload["target_overall"] < payload["input_band"]:
+        raise InvalidRequestError("Mục tiêu tổng (target_overall) không thể thấp hơn trình độ đầu vào (input_band)")
+    if "test_date" in goals and goals["test_date"] is not None:
+        raw_d = str(goals["test_date"]).strip()
+        if raw_d == "":
+            payload["test_date"] = None
+        else:
+            try:
+                parsed = date.fromisoformat(raw_d[:10])
+            except ValueError:
+                raise InvalidRequestError("Ngày thi phải đúng định dạng YYYY-MM-DD")
+            today_vn = datetime.now(VN_TZ).date()
+            if parsed < today_vn:
+                raise InvalidRequestError("Ngày thi dự kiến không được nằm trong quá khứ")
+            if parsed > today_vn + timedelta(days=365 * 5):
+                raise InvalidRequestError("Ngày thi dự kiến tối đa trong vòng 5 năm tới")
+            payload["test_date"] = parsed.isoformat()
+    if not payload:
+        raise InvalidRequestError("Không có trường mục tiêu hợp lệ để cập nhật")
+    return payload
 
 
 def get_profile(user_id: str) -> Optional[dict[str, Any]]:
@@ -53,7 +91,7 @@ def get_goals(user_id: str) -> Optional[dict[str, Any]]:
 
 
 def save_goals(user_id: str, goals: dict[str, Any]) -> dict[str, Any]:
-    payload = {k: v for k, v in goals.items() if k in GOAL_FIELDS}
+    payload = _validate_goal_payload(goals)
     res = db().table("learner_profiles").update(payload).eq("user_id", user_id).execute()
     if not res.data:
         raise ForbiddenError("Chỉ Learner mới đặt mục tiêu IELTS")

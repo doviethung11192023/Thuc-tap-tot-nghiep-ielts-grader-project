@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { CleanListeningQuestion } from '@/mocks/clean-dataset/listening-test-1-clean';
+import type { CleanListeningQuestion } from '@/types/clean-detail';
 
 interface CleanListeningTableRendererProps {
   tableData: any;
@@ -32,7 +32,7 @@ export function CleanListeningTableRenderer({
   }
 
   // Map câu hỏi theo id hoặc question_number
-  const questionMap = new Map<number, CleanListeningQuestion>();
+  const questionMap = new Map<number | string, CleanListeningQuestion>();
   questions.forEach(q => {
     questionMap.set(q.id, q);
     questionMap.set(q.question_number, q);

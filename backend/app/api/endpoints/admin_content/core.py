@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from datetime import datetime, timezone
 from typing import Optional
+from app.core.domain_errors import InvalidRequestError
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.security import require_admin, User
 from app.db.supabase import db
@@ -8,6 +9,41 @@ from app.schemas.exam_content import SkillType
 from app.schemas.system_settings import (
     BandConversionCreate, SystemSettingUpdate
 )
+from app.services.admin.staff_accounts import write_audit
+from app.services.expert.expert_policy_config import (
+    DEFAULT_EXPERT_COMPLETENESS_RULES,
+    DEFAULT_EXPERT_PENALTY_CONFIG,
+    DEFAULT_EXPERT_RPS_CONFIG,
+    validate_expert_setting,
+)
+from app.services.learning_profile.common import clear_all_profile_cache
+from app.services.learning_profile.gamification_config import DEFAULT_LEARNER_GAMIFICATION_CONFIG
+from app.services.practice.learning_profile_readers import DEFAULT_ROADMAP_CONFIG
+from app.services.tutor.tutor_config_store import (
+    DEFAULT_AI_TUTOR_CONFIG,
+    invalidate_tutor_config_cache,
+    validate_tutor_config,
+)
+
+ALLOWED_UPSERT_SETTINGS = {
+    "roadmap_config",
+    "ai_tutor_config",
+    "expert_completeness_rules",
+    "expert_rps_config",
+    "expert_penalty_config",
+    "expert_cooldown_min_active_pool",
+    "learner_gamification_config",
+}
+_DEFAULT_SETTINGS_INJECT: tuple[tuple[str, dict, str], ...] = (
+    ("roadmap_config", DEFAULT_ROADMAP_CONFIG, "Tham số cá nhân hóa lộ trình học tập"),
+    ("ai_tutor_config", DEFAULT_AI_TUTOR_CONFIG, "Cấu hình Trợ lý AI luyện tập Reading/Listening"),
+    ("expert_completeness_rules", DEFAULT_EXPERT_COMPLETENESS_RULES, "Ngưỡng kiểm tra độ đầy đủ bài chấm Chuyên gia (Pillar 1)"),
+    ("expert_rps_config", DEFAULT_EXPERT_RPS_CONFIG, "Trọng số & ngưỡng hạng Review Performance Score 30 ngày (Pillar 2)"),
+    ("expert_penalty_config", DEFAULT_EXPERT_PENALTY_CONFIG, "Cấu hình phạt lũy tiến quá hạn SLA 48h (Pillar 3)"),
+    ("expert_cooldown_min_active_pool", {"value": 3}, "Ngưỡng tối thiểu số Chuyên gia active trước khi tự động Cooldown (BR-26)"),
+    ("learner_gamification_config", DEFAULT_LEARNER_GAMIFICATION_CONFIG, "Cấu hình Adaptive Streak, Streak Freeze & Huy hiệu 3 tầng Học viên"),
+)
+HIDDEN_SECRET_SETTINGS = {"ai_tutor_secrets"}
 
 router = APIRouter(route_class=StudentContentMutationRoute)
 
@@ -109,21 +145,39 @@ async def delete_band_conversion(
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
 @router.get("/core/settings")
 async def get_system_settings(current_user: User = Depends(require_admin)):
-    """Lấy danh sách các cấu hình và tham số hệ thống."""
+    """Lấy danh sách các cấu hình hệ thống (ẩn tuyệt đối ai_tutor_secrets, kèm mặc định roadmap/tutor/Wave 5)."""
     res = db().table("system_settings").select("*").order("key").execute()
-    return {"meta": {"code": 200}, "data": res.data or []}
+    rows = [r for r in (res.data or []) if r.get("key") not in HIDDEN_SECRET_SETTINGS]
+    existing_keys = {r.get("key") for r in rows}
+    for s_key, s_val, s_desc in _DEFAULT_SETTINGS_INJECT:
+        if s_key not in existing_keys:
+            rows.append({"key": s_key, "value": s_val, "description": s_desc, "updated_at": None})
+    return {"meta": {"code": 200}, "data": rows}
 
 @router.put("/core/settings/{key}")
 async def update_system_setting(
     key: str,
     data: SystemSettingUpdate,
-    current_user: User = Depends(require_admin)
+    request: Request,
+    current_user: User = Depends(require_admin),
 ):
     """Cập nhật giá trị một cấu hình hệ thống (JSON)."""
-    if not db().table("system_settings").select("key").eq("key", key).execute().data:
+    if key in HIDDEN_SECRET_SETTINGS:
+        raise HTTPException(status_code=403, detail="Không thể chỉnh sửa kho khóa bí mật qua endpoint cấu hình chung")
+    exists = bool(db().table("system_settings").select("key").eq("key", key).execute().data)
+    if not exists and key not in ALLOWED_UPSERT_SETTINGS:
         raise HTTPException(status_code=404, detail=f"Không có cấu hình '{key}'")
+    try:
+        if key == "ai_tutor_config":
+            value = validate_tutor_config(data.value)
+        elif key in ("expert_completeness_rules", "expert_cooldown_min_active_pool"):
+            value = validate_expert_setting(key, data.value)
+        else:
+            value = data.value
+    except InvalidRequestError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
     payload = {
-        "value": data.value,
+        "value": value,
         "updated_by": str(current_user.id),
         "admin_role": "admin",
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -131,4 +185,18 @@ async def update_system_setting(
     res = db().table("system_settings").upsert({"key": key, **payload}).execute()
     if not res.data:
         raise HTTPException(status_code=500, detail="Không thể lưu cấu hình")
+    if key in ("roadmap_config", "learner_gamification_config"):
+        clear_all_profile_cache()
+    if key in ("expert_completeness_rules", "expert_rps_config", "expert_penalty_config", "expert_cooldown_min_active_pool"):
+        try:
+            redis = getattr(request.app.state, "redis", None)
+            if redis is not None:
+                await redis.delete("admin:statistics:v2", "admin:statistics:v3")
+        except Exception:
+            pass
+    if key == "ai_tutor_config":
+        invalidate_tutor_config_cache()
+        write_audit(str(current_user.id), "update_ai_tutor_config", "system_settings", key, after={"model": value.get("primary_model"), "enabled": value.get("enabled"), "hourly_quota": value.get("hourly_quota")})
+    elif key in ("expert_completeness_rules", "expert_rps_config", "expert_penalty_config", "expert_cooldown_min_active_pool", "learner_gamification_config"):
+        write_audit(str(current_user.id), f"update_{key}", "system_settings", key, after=value)
     return {"meta": {"code": 200, "message": f"Cập nhật cấu hình '{key}' thành công"}, "data": res.data[0]}

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { WritingSummaryResult } from '@/components/exam/summary/WritingSummaryResult';
 import { SpeakingSummaryResult } from '@/components/exam/summary/SpeakingSummaryResult';
 import { SkillSummarySkeleton } from '@/components/exam/summary/SkillSummarySkeleton';
+import { CleanDetailErrorState } from '@/components/exam/clean/CleanDetailErrorState';
 import { useAttemptSummary } from '@/hooks/useAttemptSummary';
 import { 
   CheckCircle2, 
@@ -29,7 +30,7 @@ export default function SkillSummaryResultPage() {
 
   const isReading = skill === 'reading';
   // Speaking và Writing có hook kết quả riêng; không gọi API lần hai rồi bỏ kết quả
-  const { data: cleanData, loading } = useAttemptSummary(
+  const { data: cleanData, loading, error } = useAttemptSummary(
     skill === 'speaking' || skill === 'writing' ? undefined : attemptId,
     skill
   );
@@ -57,9 +58,16 @@ export default function SkillSummaryResultPage() {
 
   const skillTitle = isReading ? 'Reading' : 'Listening';
 
-  // Hiển thị Skeleton layout nếu đang tải kết quả thực tế, ngăn chặn giật 4.0 mock
-  if (loading || !cleanData) {
+  if (loading) {
     return <SkillSummarySkeleton skillTitle={skillTitle} />;
+  }
+
+  if (error || !cleanData) {
+    return (
+      <CleanDetailErrorState
+        message={error || "Không tìm thấy kết quả bài làm."}
+      />
+    );
   }
 
   const bandScore = cleanData.overall_band;

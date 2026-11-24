@@ -3,6 +3,8 @@ import type {
   LearningProfileOverviewData,
   LearningProfileTestPracticeData,
   GoalUpdatePayload,
+  StreakSummaryData,
+  StudyPlanUpdatePayload,
 } from "@/types/learning-profile";
 
 export async function getLearningProfileOverview(): Promise<LearningProfileOverviewData> {
@@ -19,10 +21,37 @@ export async function getLearningProfileTestPractice(): Promise<LearningProfileT
   return res.data.data;
 }
 
-export async function updateLearningProfileGoals(payload: GoalUpdatePayload): Promise<any> {
-  const res = await apiClient.put<{ meta: { code: number }; data: any }>(
+export async function updateLearningProfileGoals(payload: GoalUpdatePayload): Promise<unknown> {
+  const res = await apiClient.put<{ meta: { code: number }; data: unknown }>(
     "/api/v1/test-practice/learning-profile/goals",
     payload
   );
+  return res.data.data;
+}
+
+export async function getStreakSummary(): Promise<StreakSummaryData> {
+  const res = await apiClient.get<{ meta: { code: number }; data: StreakSummaryData }>(
+    "/api/v1/test-practice/learning-profile/streak-summary"
+  );
+  return res.data.data;
+}
+
+export async function updateStudyPlan(payload: StudyPlanUpdatePayload): Promise<unknown> {
+  const res = await apiClient.put<{ meta: { code: number }; data: unknown }>(
+    "/api/v1/test-practice/learning-profile/study-plan",
+    payload
+  );
+  return res.data.data;
+}
+
+export async function claimStreakRepair(): Promise<{
+  restored: boolean;
+  current_streak: number;
+  longest_streak: number;
+}> {
+  const res = await apiClient.post<{
+    meta: { code: number };
+    data: { restored: boolean; current_streak: number; longest_streak: number };
+  }>("/api/v1/test-practice/learning-profile/streak/repair", {});
   return res.data.data;
 }

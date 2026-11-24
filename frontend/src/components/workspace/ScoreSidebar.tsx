@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { InlineAnnotation, CriteriaDetail, GradingResult } from "@/types";
 import { AlertCircle, Sparkles, TrendingUp, ChevronRight, CheckCircle2, BookOpen, Quote } from "lucide-react";
+import { DualEvaluationComparisonCard } from "@/components/exam/summary/DualEvaluationComparisonCard";
 
 export type CriterionTab = "OVERALL" | "TR" | "CC" | "LR" | "GRA";
 
@@ -119,6 +120,13 @@ function OverallTab({ result }: { result: GradingResult }) {
           </p>
         </div>
       )}
+
+      <DualEvaluationComparisonCard
+        compact
+        aiBand={result.ai_evaluation?.overall_band}
+        expertBand={result.expert_review?.overall_band}
+        expertFeedback={result.expert_review?.feedback ?? result.expert_feedback}
+      />
 
       <div>
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-4 flex items-center gap-2">

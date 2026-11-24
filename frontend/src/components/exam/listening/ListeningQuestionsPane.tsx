@@ -7,11 +7,14 @@ import { QuestionGroupRenderer } from '../renderers/QuestionGroupRenderer';
 interface ListeningQuestionsPaneProps {
   availableSections: any[];
   activeSection: number;
+  playingAudioSection?: number;
+  isExamAudioPlaying?: boolean;
   currentSection: any;
   allQuestions: any[];
   answeredCount: number;
   userAnswers: Record<number, string | string[]>;
   flaggedQuestions?: Record<number, boolean>;
+  isLocked?: boolean;
   onSectionChange: (idx: number) => void;
   onAnswerChange: (questionNumber: number, value: any) => void;
   onQuestionClick: (questionNumber: number) => void;
@@ -26,11 +29,14 @@ function hasAnswerValue(val: string | string[] | undefined): boolean {
 export function ListeningQuestionsPane({
   availableSections,
   activeSection,
+  playingAudioSection,
+  isExamAudioPlaying = false,
   currentSection,
   allQuestions,
   answeredCount,
   userAnswers,
   flaggedQuestions = {},
+  isLocked = false,
   onSectionChange,
   onAnswerChange,
   onQuestionClick,
@@ -43,27 +49,38 @@ export function ListeningQuestionsPane({
       {/* Section Tabs */}
       <div className="border-b border-zinc-200 px-6 py-2.5 bg-zinc-50 flex flex-wrap items-center justify-between gap-2 shrink-0">
         <div className="flex gap-2 overflow-x-auto">
-          {availableSections.map((s, idx) => (
-            <button
-              key={s.section_number || s.sectionNumber || idx}
-              type="button"
-              onClick={() => onSectionChange(idx)}
-              className={`px-4 py-2 text-xs md:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
-                activeSection === idx
-                  ? 'bg-[#932120] text-white shadow-md'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
-              }`}
-            >
-              <span>Section {s.sectionNumber || s.section_number || idx + 1}</span>
-              <span
-                className={`text-[10px] px-2 py-0.5 rounded-full ${
-                  activeSection === idx ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-600'
+          {availableSections.map((s, idx) => {
+            const isPlayingThisSection = playingAudioSection === idx && isExamAudioPlaying;
+            return (
+              <button
+                key={s.section_number || s.sectionNumber || idx}
+                type="button"
+                onClick={() => onSectionChange(idx)}
+                className={`px-4 py-2 text-xs md:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
+                  activeSection === idx
+                    ? 'bg-[#932120] text-white shadow-md'
+                    : 'bg-white text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
                 }`}
               >
-                {s.question_groups.reduce((acc: number, g: any) => acc + g.questions.length, 0)} câu
-              </span>
-            </button>
-          ))}
+                {isPlayingThisSection && (
+                  <span
+                    className={`w-2 h-2 rounded-full animate-pulse ${
+                      activeSection === idx ? 'bg-emerald-300' : 'bg-emerald-500'
+                    }`}
+                    title="Đang phát audio Section này"
+                  />
+                )}
+                <span>Section {s.sectionNumber || s.section_number || idx + 1}</span>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full ${
+                    activeSection === idx ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-600'
+                  }`}
+                >
+                  {s.question_groups.reduce((acc: number, g: any) => acc + g.questions.length, 0)} câu
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="hidden sm:flex items-center gap-3 text-xs text-zinc-500 font-medium">
@@ -77,7 +94,11 @@ export function ListeningQuestionsPane({
       </div>
 
       {/* Section Header & Questions */}
-      <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-6 pb-28">
+      <div
+        className={`flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-6 pb-28 ${
+          isLocked ? 'pointer-events-none opacity-60 select-none' : ''
+        }`}
+      >
         <div className="border-b border-zinc-100 pb-4">
           <h2 className="text-xl font-bold text-zinc-900">{currentSection.title}</h2>
           <p className="text-xs text-zinc-500 mt-1">

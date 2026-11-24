@@ -15,6 +15,7 @@ from app.core.domain_errors import AuthenticationRequiredError, ConflictError, F
 from app.db.supabase import db
 
 LATE_GRACE_SECONDS = 30
+LISTENING_REVIEW_BUFFER_MINUTES = 5
 DEFAULT_MINUTES = {"listening": 30, "reading": 60, "writing": 60, "speaking": 14}
 
 
@@ -32,6 +33,13 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
         raise InvalidRequestError(f"Bài thi không cho phép chế độ {mode}")
 
     duration = test.get("duration_minutes") or DEFAULT_MINUTES.get(test["skill"], 60)
+    # Listening Exam Mode streams Section 1->4 audio followed by a 2-minute final review period.
+    # Add buffer on server deadline so forced auto-submit at 00:00 never hits 409 Conflict.
+    effective_deadline_minutes = (
+        duration + LISTENING_REVIEW_BUFFER_MINUTES
+        if mode == "mock" and test.get("skill") == "listening"
+        else duration
+    )
     open_res = db().table("attempts").select("*").eq("learner_id", user_id).eq("test_id", test["id"]) \
         .eq("status", "in_progress").execute()
     attempt = None
@@ -47,11 +55,16 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
             attempt = row
     if not attempt:
         start = now_utc()
-        res = db().table("attempts").insert({
-            "learner_id": user_id, "test_id": test["id"], "skill": test["skill"], "mode": mode,
-            "status": "in_progress", "started_at": start.isoformat(),
-            "deadline_at": (start + timedelta(minutes=duration)).isoformat() if mode == "mock" else None,
-        }).execute()
+        try:
+            res = db().table("attempts").insert({
+                "learner_id": user_id, "test_id": test["id"], "skill": test["skill"], "mode": mode,
+                "status": "in_progress", "started_at": start.isoformat(),
+                "deadline_at": (start + timedelta(minutes=effective_deadline_minutes)).isoformat() if mode == "mock" else None,
+            }).execute()
+        except Exception as exc:
+            if "mock_test_already_taken" in str(exc):
+                raise ConflictError("Bạn đã hoàn thành đề thi thử (Mock Test) này rồi. Mỗi đề thi thử chỉ được làm 1 lần theo chuẩn BR-12.")
+            raise
         if not res.data:
             raise InternalFailureError("Không thể tạo phiên làm bài thi")
         attempt = res.data[0]

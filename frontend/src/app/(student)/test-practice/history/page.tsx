@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowLeft, History, RefreshCw, BarChart2 } from "lucide-react";
 import {
   fetchPracticeHistoryData,
@@ -10,9 +11,14 @@ import {
   PracticeHistorySummaryData,
 } from "@/services/practice-history-cache";
 import { discardAttempt } from "@/services/student-test-practice";
-import { PracticeHistoryRadarCard } from "@/components/exam/history/PracticeHistoryRadarCard";
 import { PracticeQuestionTypeAccuracyCard } from "@/components/exam/history/PracticeQuestionTypeAccuracyCard";
 import { PracticeTimelineSection } from "@/components/exam/history/PracticeTimelineSection";
+import { ChartSkeleton } from "@/components/ui/skeleton";
+
+const PracticeHistoryRadarCard = dynamic(
+  () => import("@/components/exam/history/PracticeHistoryRadarCard").then((m) => m.PracticeHistoryRadarCard),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-72" label="Đang tải biểu đồ radar điểm..." /> }
+);
 
 export default function TestPracticeHistoryPage() {
   const [data, setData] = useState<PracticeHistorySummaryData | null>(() => getCachedPracticeHistory());

@@ -17,7 +17,7 @@ import {
   deleteExpertSnippet, 
   SnippetItem 
 } from "@/lib/expert-snippets";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface Props {
   isOpen: boolean;

@@ -103,36 +103,87 @@ export function extractCoreReasoning(explanation?: string): string {
   return '';
 }
 
+const stripHtmlCell = (html: string): string =>
+  html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(?:p|div|li)>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+
+function extractBlankFromHtmlTable(template: string, qNum: number): string {
+  const token = `{{${qNum}}}`;
+  const rowMatches = template.match(/<tr[\s\S]*?<\/tr>/gi) || [];
+  const rows = rowMatches.map((r) =>
+    (r.match(/<(?:th|td)[^>]*>[\s\S]*?<\/(?:th|td)>/gi) || []).map((c) =>
+      stripHtmlCell(c.replace(/^<(?:th|td)[^>]*>/i, '').replace(/<\/(?:th|td)>$/i, ''))
+    )
+  );
+  if (rows.length === 0) return '';
+
+  const headers = rows[0] || [];
+  for (let rIdx = 0; rIdx < rows.length; rIdx++) {
+    const row = rows[rIdx];
+    for (let cIdx = 0; cIdx < row.length; cIdx++) {
+      if (!row[cIdx].includes(token)) continue;
+      const lines = row[cIdx]
+        .replace(/\s+-\s+/g, '\n')
+        .split(/[\n•\uFFFD]+/)
+        .map((s) => s.replace(/^[-*\s]+/, '').trim())
+        .filter(Boolean);
+      const cellLine = lines.find((l) => l.includes(token)) || row[cIdx].trim();
+      const rowLabel = cIdx > 0 ? row[0]?.replace(/\s+/g, ' ').trim() : '';
+      const colLabel = rIdx > 0 ? headers[cIdx]?.replace(/\s+/g, ' ').trim() : '';
+      const ctx = [rowLabel, colLabel].filter(Boolean).join(' • ');
+      if (!ctx) return cellLine;
+      if (cellLine === token) return `${ctx}: ${cellLine}`;
+      return `${ctx} — ${cellLine}`;
+    }
+  }
+  return '';
+}
+
 /**
- * Trích xuất câu/mục ngữ cảnh bao quanh ô trống {{qNum}} từ đoạn tóm tắt hoặc ghi chú template
- * (RD-04: Đã loại bỏ mã HTML trước khi trích xuất để tránh rò rỉ </td>, <tr>)
+ * Trích xuất câu/mục ngữ cảnh bao quanh ô trống {{qNum}} từ bảng HTML hoặc template ghi chú (SYS-10).
  */
 export function extractSentenceForBlank(template?: string, qNum?: number): string {
   if (!template || !qNum) return '';
 
-  // 1. Chuẩn hóa HTML: thay thế các thẻ đóng khối thành ngắt dòng, sau đó loại bỏ toàn bộ tag HTML
+  if (/<table[\s\S]*?>/i.test(template)) {
+    const fromTable = extractBlankFromHtmlTable(template, qNum);
+    if (fromTable) return fromTable;
+  }
+
   let cleaned = template
+    .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(?:td|th|tr|p|div|li)>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
-    .replace(/\r\n/g, '\n');
+    .replace(/\r\n/g, '\n')
+    .replace(/\s+-\s+/g, '\n');
 
-  // 2. Phân tách theo dấu chấm câu (. ! ?), xuống dòng (\n), hoặc ký tự gạch đầu dòng (•, \u2022, \uFFFD, ;, |)
   const regex = new RegExp(`([^.!?\\n•\\uFFFD;|]*\\{\\{${qNum}\\}\\}[^.!?\\n•\\uFFFD;|]*)`, 'i');
   const match = cleaned.match(regex);
   if (!match) return '';
 
-  let clause = match[1].trim();
-
-  // 3. Tẩy sạch bất kỳ ký tự rác HTML còn sót lại ở hai đầu câu (như '> hoặc '<)
-  clause = clause.replace(/^[>'"\s]+|[<'"\s]+$/g, '').trim();
-
-  // 4. Tinh chỉnh nếu clause bị dính phần trước do thiếu dấu chấm
+  let clause = match[1].trim().replace(/^[>'"\-\s]+|[<'"\s]+$/g, '').trim();
   const startPattern = new RegExp(`(?:^|[\\s])((?:A|An|The|[A-Z][a-z]+)\\s*\\{\\{${qNum}\\}\\}[^.!?•;]*)`);
   const prefixMatch = clause.match(startPattern);
-  if (prefixMatch && prefixMatch[1]) {
+  if (prefixMatch?.[1]) {
     clause = prefixMatch[1].trim();
   }
-
   return clause;
+}
+
+/**
+ * Fallback trích câu/mục ngữ cảnh từ Step 1 của lời giải nếu template rỗng hoặc chỉ có {{n}}.
+ */
+export function extractQuestionContextFromExplanation(explanation?: string): string {
+  if (!explanation) return '';
+  const step1 = explanation.split(/###\s*Step\s*2/i)[0] || explanation;
+  const labeled = step1.match(/(?:Statement|Question|Prompt|Note|Text|Câu|Ghi chú)\s*:\s*["“]?([^\n"”]{5,})["”]?/i);
+  if (labeled?.[1]) return labeled[1].trim();
+  const quoted = step1.match(/>?\s*["“]([^"\n”]{6,})["”]/);
+  return quoted?.[1]?.trim() || '';
 }

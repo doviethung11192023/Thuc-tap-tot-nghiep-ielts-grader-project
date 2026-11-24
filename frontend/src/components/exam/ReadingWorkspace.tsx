@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { ReadingTestData } from '@/types/exam';
 import { ExitConfirmModal } from './ExitConfirmModal';
@@ -10,9 +11,16 @@ import { ReadingWorkspaceHeader } from './reading/ReadingWorkspaceHeader';
 import { ReadingPassagePane } from './reading/ReadingPassagePane';
 import { ReadingQuestionsPane } from './reading/ReadingQuestionsPane';
 
+const PracticeAiTutorDrawer = dynamic(
+  () => import('./tutor/PracticeAiTutorDrawer').then((m) => m.PracticeAiTutorDrawer),
+  { ssr: false, loading: () => null }
+);
+
 interface ReadingWorkspaceProps {
   testData: ReadingTestData;
   mode: 'exam' | 'practice';
+  attemptId?: string | null;
+  attemptError?: string | null;
   selectedParts?: string[];
   returnUrl?: string;
   /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
@@ -22,12 +30,13 @@ interface ReadingWorkspaceProps {
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
 }
 
-export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
+export function ReadingWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
   const router = useRouter();
   const draftKey = `ielts_reading_draft_${testData.test_id}`;
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>(() => {
+    if (mode !== 'practice') return {};
     try {
       if (typeof window === 'undefined') return {};
       const saved = localStorage.getItem(draftKey);
@@ -45,6 +54,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isGrading, setIsGrading] = useState<boolean>(false);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
   const passageScrollRef = useRef<HTMLDivElement>(null);
 
   const availablePassages = useMemo(() => {
@@ -94,6 +104,8 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
         if (nextVal <= 0) {
           if (!autoSubmittedRef.current) {
             autoSubmittedRef.current = true;
+            setIsExpired(true);
+            setIsSubmitModalOpen(false);
             setTimeout(() => {
               setIsGrading(true);
               Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current))
@@ -175,7 +187,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+    <div className="flex flex-col h-dvh w-full bg-zinc-50 overflow-hidden">
       <ReadingWorkspaceHeader
         title={testData.title}
         mode={mode}
@@ -187,7 +199,7 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
         onSubmit={() => setIsSubmitModalOpen(true)}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 flex overflow-hidden ${isExpired ? 'pointer-events-none opacity-60 select-none' : ''}`}>
         <ReadingPassagePane
           availablePassages={availablePassages}
           activePassage={activePassage}
@@ -212,6 +224,18 @@ export function ReadingWorkspace({ testData, mode, selectedParts, returnUrl, onA
           onQuestionClick={handleQuestionPaletteClick}
           onToggleFlag={handleToggleFlag}
         />
+
+        {mode === 'practice' && (
+          <PracticeAiTutorDrawer
+            attemptId={attemptId}
+            attemptError={attemptError}
+            skill="reading"
+            mode={mode}
+            activeSectionNo={currentPassage?.passageNumber || activePassage + 1}
+            userAnswers={userAnswers}
+            onHighlightParagraph={(para) => handleSelectEvidence(para, '')}
+          />
+        )}
       </div>
 
       <ExitConfirmModal

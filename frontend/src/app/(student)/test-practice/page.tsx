@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { Library, Target } from "lucide-react";
+import { m } from "motion/react";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { useExamCollections } from "@/hooks/useExamCollection";
 import { useStudentPublishedTests } from "@/hooks/useStudentPublishedTests";
 import { StudentPracticeBanner } from "@/components/exam/student-practice/StudentPracticeBanner";
@@ -52,6 +54,8 @@ export default function TestPracticePage() {
     id: string;
     title: string;
     skill: "Reading" | "Listening" | "Writing" | "Speaking";
+    allowedMode?: "practice" | "mock" | "both";
+    durationMin?: number;
   } | null>(null);
 
   const handleOpenTestPrep = (test: PublishedTestItem) => {
@@ -69,48 +73,66 @@ export default function TestPracticePage() {
       id: test.id,
       title: test.title,
       skill: normalizedSkill,
+      allowedMode: test.allowed_mode || "both",
+      durationMin: test.duration_min,
     });
   };
 
   return (
     <div className="w-full max-w-[1536px] mx-auto px-1 sm:px-2">
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex flex-col 2xl:flex-row gap-6 items-start">
         {/* Main Content Area (Trái) */}
         <div className="flex-1 min-w-0 space-y-5 w-full">
           <StudentPracticeBanner />
 
           {/* Tabs Switcher: Khám phá bộ đề vs Luyện theo kỹ năng */}
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex space-x-1.5 bg-zinc-100 p-1 rounded-xl w-fit border border-zinc-200">
+            <div className="flex space-x-1.5 bg-[var(--ux-surface-2)] p-1 rounded-xl w-fit border border-[var(--ux-line)]">
               <button
                 id="btn-tab-explore"
+                type="button"
                 onClick={() => handleTabChange("explore")}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 cursor-pointer ${
                   activeTab === "explore"
-                    ? "bg-white text-[#932120] shadow-xs"
-                    : "text-zinc-600 hover:text-zinc-900"
+                    ? "text-[#932120]"
+                    : "text-[var(--ux-ink-2)] hover:text-[var(--ux-ink)]"
                 }`}
               >
-                <Library className="w-4 h-4" />
-                Khám phá đề thi thực tế
+                {activeTab === "explore" && (
+                  <m.span
+                    layoutId="test-practice-tab-pill"
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                    className="absolute inset-0 rounded-lg bg-[var(--ux-surface)] shadow-xs border border-[var(--ux-line)]"
+                  />
+                )}
+                <Library className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Khám phá đề thi thực tế</span>
               </button>
               <button
                 id="btn-tab-skills"
+                type="button"
                 onClick={() => handleTabChange("by-type")}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 cursor-pointer ${
                   activeTab === "by-type"
-                    ? "bg-white text-[#932120] shadow-xs"
-                    : "text-zinc-600 hover:text-zinc-900"
+                    ? "text-[#932120]"
+                    : "text-[var(--ux-ink-2)] hover:text-[var(--ux-ink)]"
                 }`}
               >
-                <Target className="w-4 h-4" />
-                Luyện theo dạng bài
+                {activeTab === "by-type" && (
+                  <m.span
+                    layoutId="test-practice-tab-pill"
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                    className="absolute inset-0 rounded-lg bg-[var(--ux-surface)] shadow-xs border border-[var(--ux-line)]"
+                  />
+                )}
+                <Target className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Luyện theo dạng bài</span>
               </button>
             </div>
 
             {activeTab === "explore" && (
-              <div className="text-xs font-semibold text-zinc-500 hidden sm:block">
-                Đang phục vụ <strong className="text-zinc-800">{total}</strong> đề thi chuẩn hóa
+              <div className="text-xs font-semibold text-[var(--ux-ink-2)] hidden sm:block">
+                Đang phục vụ <strong className="text-[var(--ux-ink)] tabular-nums"><AnimatedNumber value={total} /></strong> đề thi chuẩn hóa
               </div>
             )}
           </div>
@@ -145,9 +167,12 @@ export default function TestPracticePage() {
 
       {activeTestPrep && (
         <TestPrepModal
+          key={`${activeTestPrep.id}-${activeTestPrep.allowedMode ?? "both"}`}
           testId={activeTestPrep.id}
           testTitle={activeTestPrep.title}
           skill={activeTestPrep.skill}
+          allowedMode={activeTestPrep.allowedMode}
+          durationMin={activeTestPrep.durationMin}
           onClose={() => setActiveTestPrep(null)}
         />
       )}

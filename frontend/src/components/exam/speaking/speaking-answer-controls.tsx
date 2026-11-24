@@ -39,26 +39,26 @@ function StatusLine({
 }: Pick<SpeakingAnswerControlsProps, 'phase' | 'secondsLeft' | 'isMock' | 'isPart2' | 'answer'>) {
   if (phase === 'asking') {
     return (
-      <span className="inline-flex items-center gap-1.5">
-        <Headphones className="w-3.5 h-3.5 text-blue-600" />
+      <span className="inline-flex items-center gap-1.5 text-slate-200">
+        <Headphones className="w-3.5 h-3.5 text-rose-400" />
         Giám khảo đang đọc câu hỏi...
       </span>
     );
   }
   if (phase === 'preparing') {
     return (
-      <span className="inline-flex items-center gap-1.5">
-        <Timer className="w-3.5 h-3.5 text-amber-600" />
+      <span className="inline-flex items-center gap-1.5 text-slate-200">
+        <Timer className="w-3.5 h-3.5 text-amber-400" />
         <span>
           {isPart2 ? 'Chuẩn bị' : 'Suy nghĩ'}:{' '}
-          <strong className="text-blue-600 font-bold font-mono tabular-nums">{secondsLeft}s</strong>, sau đó tự bắt đầu ghi âm
+          <strong className="text-rose-300 font-bold font-mono tabular-nums">{secondsLeft}s</strong>, sau đó tự bắt đầu ghi âm
         </span>
       </span>
     );
   }
   if (phase === 'recording') {
     return (
-      <span className="text-red-600 font-semibold flex items-center gap-1.5">
+      <span className="text-rose-400 font-semibold flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
         Đang ghi âm, còn <span className="font-mono tabular-nums">{formatSeconds(secondsLeft)}</span>
       </span>
@@ -66,24 +66,24 @@ function StatusLine({
   }
   if (answer?.status === 'uploading') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-blue-700">
+      <span className="inline-flex items-center gap-1.5 text-rose-300">
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         Đang lưu câu trả lời...
       </span>
     );
   }
   if (answer?.status === 'failed') {
-    return <span className="text-red-600 font-medium">{answer.error}</span>;
+    return <span className="text-rose-400 font-medium">{answer.error}</span>;
   }
   if (answer?.status === 'saved') {
     return (
-      <span className="text-emerald-700 font-medium flex items-center gap-1">
+      <span className="text-emerald-400 font-medium flex items-center gap-1">
         <Check className="w-3.5 h-3.5" />
         {isMock ? 'Đã lưu — Đang chuyển câu tiếp theo...' : 'Đã lưu câu trả lời'}
       </span>
     );
   }
-  return <span>Câu này chưa có câu trả lời</span>;
+  return <span className="text-slate-300">Câu này chưa có câu trả lời</span>;
 }
 
 export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
@@ -99,7 +99,7 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
   onNext,
 }) => (
   <div className="w-full flex flex-col items-center space-y-3 pt-2">
-    <div className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-white border border-slate-200/80 px-4 py-1.5 rounded-full shadow-2xs">
+    <div className="flex items-center gap-2 text-xs font-medium text-slate-200 bg-slate-900 border border-slate-700 px-4 py-1.5 rounded-full shadow-2xs">
       <StatusLine
         phase={phase}
         secondsLeft={secondsLeft}
@@ -120,7 +120,7 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
         <button
           type="button"
           onClick={onSkipPreparation}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs shrink-0 shadow-xs transition-colors cursor-pointer"
+          className="px-5 py-2.5 bg-[#932120] hover:bg-[#7a1a19] text-white rounded-full font-bold text-xs shrink-0 shadow-xs transition-colors cursor-pointer"
         >
           Bắt đầu nói ngay
         </button>
@@ -130,7 +130,7 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
         <button
           type="button"
           onClick={onStop}
-          className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md shadow-red-500/20 flex items-center gap-2 transition-colors cursor-pointer"
+          className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md shadow-red-950/40 flex items-center gap-2 transition-colors cursor-pointer"
         >
           <Square className="w-3 h-3 fill-white" />
           <span>Đã nói xong</span>
@@ -151,7 +151,7 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
         <button
           type="button"
           onClick={onRerecord}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-xs flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+          className="px-5 py-2.5 bg-[#932120] hover:bg-[#7a1a19] text-white rounded-full font-bold text-xs flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>{answer ? 'Ghi âm lại' : 'Ghi âm'}</span>
@@ -162,7 +162,7 @@ export const SpeakingAnswerControls: React.FC<SpeakingAnswerControlsProps> = ({
         <button
           type="button"
           onClick={onNext}
-          className="w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+          className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
           title="Câu tiếp theo"
           aria-label="Câu tiếp theo"
         >

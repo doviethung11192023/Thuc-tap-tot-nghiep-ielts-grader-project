@@ -8,6 +8,8 @@ import { CleanReadingDetailScoreCard } from './CleanReadingDetailScoreCard';
 import { CleanReadingDetailHeader } from './CleanReadingDetailHeader';
 import { CleanDetailSummaryCard } from './CleanDetailSummaryCard';
 import { CleanReadingDetailSkeleton } from './CleanReadingDetailSkeleton';
+import { CleanDetailErrorState } from './CleanDetailErrorState';
+import { CleanMatchingOptionsPool } from './clean-matching-options-pool';
 import { useAttemptDetail } from '@/hooks/useAttemptDetail';
 
 interface CleanReadingDetailViewProps {
@@ -23,14 +25,14 @@ export function CleanReadingDetailView({
   attemptId,
   selectedParts,
 }: CleanReadingDetailViewProps) {
-  const { data, loading } = useAttemptDetail(attemptId);
+  const { data, loading, error } = useAttemptDetail(attemptId);
   const [activePassageIndex, setActivePassageIndex] = useState(0);
   const [highlightedEvidence, setHighlightedEvidence] = useState<HighlightTarget | null>(null);
   const passageScrollRef = useRef<HTMLDivElement>(null);
 
-  const rawPassages = data.passages || [];
-  const rawQuestions = data.questions || [];
-  const rawGroups = data.exercise_groups || [];
+  const rawPassages = data?.passages || [];
+  const rawQuestions = data?.questions || [];
+  const rawGroups = data?.exercise_groups || [];
 
   const filteredPassages = useMemo(() => {
     if (!selectedParts?.length) return rawPassages;
@@ -55,6 +57,15 @@ export function CleanReadingDetailView({
 
   if (loading) {
     return <CleanReadingDetailSkeleton />;
+  }
+
+  if (error || !data) {
+    return (
+      <CleanDetailErrorState
+        message={error || "Không có dữ liệu chi tiết cho bài làm này."}
+        onBack={onBack}
+      />
+    );
   }
 
   const currentPassage =
@@ -84,7 +95,7 @@ export function CleanReadingDetailView({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-dvh w-full bg-zinc-100 overflow-hidden font-sans">
       {/* 1. TOP HEADER */}
       <CleanReadingDetailHeader onBack={onBack} onRetake={onRetake} />
 
@@ -133,6 +144,10 @@ export function CleanReadingDetailView({
                   </div>
                 )}
 
+                {group.optionsPool && group.optionsPool.length > 0 && (
+                  <CleanMatchingOptionsPool optionsPool={group.optionsPool} />
+                )}
+
                 {/* Đoạn văn tóm tắt điền từ nếu có template */}
                 {group.template && (
                   <CleanDetailSummaryCard
@@ -147,7 +162,6 @@ export function CleanReadingDetailView({
                     <CleanQuestionItemRenderer
                       key={question.question_number}
                       question={question}
-                      optionsPool={group.optionsPool}
                       onSelectEvidence={handleSelectEvidence}
                     />
                   ))}

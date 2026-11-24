@@ -18,6 +18,7 @@ export default function TestSkillsListPage() {
     skill: "Reading" | "Listening" | "Writing" | "Speaking";
     testId: string;
     title: string;
+    allowedMode?: "practice" | "mock" | "both";
   } | null>(null);
 
   if (loading) {
@@ -107,6 +108,7 @@ export default function TestSkillsListPage() {
                 skill,
                 testId: test.id,
                 title: `${test.title} - ${skill}`,
+                allowedMode: skillItem.allowedMode || test.allowedMode || "both",
               })
             }
           />
@@ -115,9 +117,11 @@ export default function TestSkillsListPage() {
 
       {activePrepModal && (
         <TestPrepModal
+          key={`${activePrepModal.testId}-${activePrepModal.skill}-${activePrepModal.allowedMode ?? "both"}`}
           testId={activePrepModal.testId}
           testTitle={activePrepModal.title}
           skill={activePrepModal.skill}
+          allowedMode={activePrepModal.allowedMode}
           returnUrl={`/test-practice/set/${setId}/test/${testId}`}
           onClose={() => setActivePrepModal(null)}
         />

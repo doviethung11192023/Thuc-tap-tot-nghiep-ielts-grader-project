@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAttemptDetail } from "@/services/student-test-practice";
-import { cleanReadingTest1Data, CleanReadingQuestion } from "@/mocks/clean-dataset/reading-test-1-clean";
+import type { CleanReadingQuestion } from "@/types/clean-detail";
 import { extractKeywordsFromExplanation, extractSentenceForBlank } from "@/utils/explanation-parser";
 
 export interface DetailPassage {
@@ -31,20 +31,32 @@ export interface AttemptDetailData {
 }
 
 export function useAttemptDetail(attemptId?: string) {
-  const [data, setData] = useState<AttemptDetailData>(cleanReadingTest1Data);
+  const [data, setData] = useState<AttemptDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(attemptId));
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!attemptId) return;
+    if (!attemptId) {
+      setData(null);
+      setError("Không tìm thấy mã bài làm (attemptId). Vui lòng mở lại từ Lịch sử làm bài.");
+      setLoading(false);
+      return;
+    }
 
     let mounted = true;
     setLoading(true);
+    setError(null);
 
     getAttemptDetail(attemptId)
       .then((res) => {
-        if (!mounted || !res || !res.sections) return;
+        if (!mounted) return;
+        if (!res || !Array.isArray(res.sections) || res.sections.length === 0) {
+          setData(null);
+          setError("Không tìm thấy dữ liệu bài làm Reading.");
+          return;
+        }
 
-        const sections = res.sections || [];
+        const sections = res.sections;
         const passages: DetailPassage[] = sections.map((s: any, idx: number) => ({
           passage_number: s.order_no || idx + 1,
           title: s.title || `Passage ${idx + 1}`,
@@ -100,22 +112,22 @@ export function useAttemptDetail(attemptId?: string) {
           })
         );
 
-        // Đảm bảo thứ tự nhóm câu hỏi tăng dần theo question_start
         exercise_groups.sort((a, b) => (a.question_start ?? 0) - (b.question_start ?? 0));
-
         const questions: CleanReadingQuestion[] = exercise_groups.flatMap((eg) => eg.questions || []);
 
         setData({
-          title: res.title || "IELTS Practice Test",
+          title: res.title || "IELTS Reading Test",
           overall_band: res.overall_band == null ? null : Number(res.overall_band),
           correct_count: Number(res.correct_count || 0),
-          passages: passages.length > 0 ? passages : cleanReadingTest1Data.passages,
-          questions: questions.length > 0 ? questions : cleanReadingTest1Data.questions,
-          exercise_groups: exercise_groups.length > 0 ? exercise_groups : cleanReadingTest1Data.exercise_groups,
+          passages,
+          questions,
+          exercise_groups,
         });
       })
       .catch((err) => {
-        console.warn("Could not load backend attempt detail, using fallback:", err);
+        if (!mounted) return;
+        setData(null);
+        setError(err?.response?.data?.detail || "Không thể tải chi tiết bài làm Reading. Vui lòng thử lại sau.");
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -126,5 +138,5 @@ export function useAttemptDetail(attemptId?: string) {
     };
   }, [attemptId]);
 
-  return { data, loading };
+  return { data, loading, error };
 }

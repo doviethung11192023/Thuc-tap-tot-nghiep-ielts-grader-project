@@ -60,6 +60,7 @@ export default function LearningProfilePage() {
           data={overview}
           loading={loading}
           onOpenGoalModal={() => setIsGoalModalOpen(true)}
+          onRefresh={refresh}
         />
       )}
 

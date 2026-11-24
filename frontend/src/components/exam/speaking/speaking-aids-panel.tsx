@@ -21,14 +21,14 @@ export const SpeakingAidsPanel: React.FC<SpeakingAidsPanelProps> = ({
   return (
     <div className="w-full lg:w-80 space-y-4 shrink-0 flex flex-col justify-start">
       {/* 💡 Ý tưởng Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-4 shadow-sm overflow-hidden">
+      <div className="bg-slate-900 rounded-3xl border border-slate-800 p-4 shadow-sm overflow-hidden text-slate-100">
         <button
           type="button"
           onClick={() => setIsIdeasCollapsed(!isIdeasCollapsed)}
-          className="w-full flex items-center justify-between text-xs font-bold text-slate-800 pb-2 border-b border-slate-100 cursor-pointer"
+          className="w-full flex items-center justify-between text-xs font-bold text-white pb-2 border-b border-slate-800 cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+            <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
             <span>Ý tưởng gợi ý</span>
           </div>
           {isIdeasCollapsed ? (
@@ -43,10 +43,10 @@ export const SpeakingAidsPanel: React.FC<SpeakingAidsPanelProps> = ({
             {ideas.length > 0 ? (
               ideas.map((item) => (
                 <div key={item.step} className="text-xs space-y-1">
-                  <div className="font-bold text-slate-800">
+                  <div className="font-bold text-slate-100">
                     Step {item.step}. {item.title}
                   </div>
-                  <div className="text-slate-600 leading-relaxed text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100">
+                  <div className="text-slate-300 leading-relaxed text-[11px] bg-slate-800/80 p-2 rounded-xl border border-slate-700">
                     {item.example}
                   </div>
                 </div>

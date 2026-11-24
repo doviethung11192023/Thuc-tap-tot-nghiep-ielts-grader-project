@@ -1,6 +1,7 @@
+// Lucian UX/UI Prompt #055 inspired · Studio Dark Listening Player (MIT adapted)
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Play, Pause, RotateCcw, RotateCw, Volume2, Volume1, VolumeX, Loader2, AlertCircle } from 'lucide-react';
 
 interface ListeningAudioBarProps {
@@ -19,6 +20,9 @@ interface ListeningAudioBarProps {
   isMuted: boolean;
   onToggleMute: () => void;
   mode: 'exam' | 'practice';
+  activeAudioSectionNumber?: number;
+  totalSections?: number;
+  examPhase?: 'audio' | 'review' | 'expired';
   volume?: number;
   onVolumeChange?: (vol: number) => void;
   onSeek?: (time: number) => void;
@@ -48,6 +52,9 @@ export function ListeningAudioBar({
   isMuted,
   onToggleMute,
   mode,
+  activeAudioSectionNumber = 1,
+  totalSections = 4,
+  examPhase = 'audio',
   volume = 1,
   onVolumeChange,
   onSeek,
@@ -61,14 +68,37 @@ export function ListeningAudioBar({
 
   const effectiveVol = isMuted ? 0 : volume;
   const progressRatio = durationSeconds > 0 ? Math.min(1, Math.max(0, currentTime / durationSeconds)) : 0;
+  const isExamPlayLocked = mode === 'exam' && (isPlaying || examPhase === 'review' || examPhase === 'expired');
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const target = parseFloat(e.target.value);
     if (onSeek) onSeek(target);
   };
 
+  // Practice-only keyboard shortcuts: Space = Play/Pause, ArrowLeft/Right = -/+5s
+  useEffect(() => {
+    if (mode !== 'practice') return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || target?.isContentEditable) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        onTogglePlay();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        onRewind5s();
+      } else if (e.key === 'ArrowRight' && onForward5s) {
+        e.preventDefault();
+        onForward5s();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mode, onTogglePlay, onRewind5s, onForward5s]);
+
   return (
-    <div className="bg-zinc-900 text-white px-6 py-3 shrink-0 shadow-md border-b border-zinc-800 flex flex-wrap items-center justify-between gap-4 z-20">
+    <div className="studio-dark bg-[#0F172A] text-white px-6 py-3 shrink-0 shadow-md border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 z-20">
       {/* Thẻ audio HTML5 thực tế */}
       <audio
         ref={audioRef}
@@ -86,9 +116,24 @@ export function ListeningAudioBar({
         <button
           type="button"
           onClick={onTogglePlay}
+          disabled={isExamPlayLocked}
           aria-label={isPlaying ? 'Tạm dừng audio' : 'Phát audio'}
-          className="w-10 h-10 rounded-full bg-[#932120] hover:bg-red-700 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer"
-          title={isPlaying ? 'Tạm dừng' : 'Phát âm thanh thực tế'}
+          className={`w-10 h-10 rounded-full text-white flex items-center justify-center shadow-lg transition-transform ${
+            isExamPlayLocked
+              ? 'bg-[#932120]/70 cursor-not-allowed opacity-85'
+              : 'bg-[#932120] hover:bg-red-700 active:scale-95 cursor-pointer'
+          }`}
+          title={
+            mode === 'exam'
+              ? examPhase === 'review'
+                ? 'Audio thi đã kết thúc'
+                : isPlaying
+                  ? 'Phòng thi: Không thể tạm dừng audio'
+                  : 'Bắt đầu phát Audio phòng thi'
+              : isPlaying
+                ? 'Tạm dừng'
+                : 'Phát âm thanh thực tế'
+          }
         >
           {isBuffering ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -104,9 +149,9 @@ export function ListeningAudioBar({
             <button
               type="button"
               onClick={onRewind5s}
-              aria-label="Tua lùi 5 giây"
-              className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold"
-              title="Tua lùi 5 giây"
+              aria-label="Tua lùi 5 giây (Phím ←)"
+              className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold tabular-nums"
+              title="Tua lùi 5 giây (Phím mũi tên trái ←)"
             >
               <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline">-5s</span>
@@ -116,9 +161,9 @@ export function ListeningAudioBar({
               <button
                 type="button"
                 onClick={onForward5s}
-                aria-label="Tua tới 5 giây"
-                className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold"
-                title="Tua tới 5 giây"
+                aria-label="Tua tới 5 giây (Phím →)"
+                className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-0.5 text-xs font-semibold tabular-nums"
+                title="Tua tới 5 giây (Phím mũi tên phải →)"
               >
                 <RotateCw className="w-4 h-4" />
                 <span className="hidden sm:inline">+5s</span>
@@ -127,8 +172,8 @@ export function ListeningAudioBar({
           </>
         )}
 
-        <span className="text-xs font-mono font-bold text-zinc-300">
-          {formatAudioTime(currentTime)} / {formatAudioTime(durationSeconds)}
+        <span className="text-xs font-mono tabular-nums font-bold text-zinc-200">
+          {formatAudioTime(currentTime)} <span className="text-zinc-500">/</span> {formatAudioTime(durationSeconds)}
         </span>
 
         {audioError && (
@@ -162,23 +207,30 @@ export function ListeningAudioBar({
           })}
         </div>
 
-        {/* Thanh trượt seeker cho phép click tua khi luyện tập */}
-        <div className="relative w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+        {/* Thanh trượt seeker với hiệu ứng knob Lucian #055 */}
+        <div className="group/rail relative w-full h-1.5 hover:h-2 bg-slate-800 rounded-full transition-all">
           <div
-            className="h-full bg-[#932120] rounded-full transition-all duration-75"
+            className="h-full bg-gradient-to-r from-[#932120] to-amber-500 rounded-full transition-all duration-75"
             style={{ width: `${progressRatio * 100}%` }}
           />
           {mode === 'practice' && (
-            <input
-              type="range"
-              aria-label="Tiến độ âm thanh"
-              min={0}
-              max={durationSeconds || 450}
-              step={1}
-              value={currentTime}
-              onChange={handleSeek}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
+            <>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 -translate-y-1/2 -ml-1.5 w-3 h-3 rounded-full bg-white shadow-md opacity-0 group-hover/rail:opacity-100 transition-opacity"
+                style={{ left: `${progressRatio * 100}%` }}
+              />
+              <input
+                type="range"
+                aria-label="Tiến độ âm thanh"
+                min={0}
+                max={durationSeconds || 450}
+                step={1}
+                value={currentTime}
+                onChange={handleSeek}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </>
           )}
         </div>
       </div>
@@ -202,8 +254,16 @@ export function ListeningAudioBar({
             ))}
           </div>
         ) : (
-          <span className="hidden lg:inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-800 text-[11px] font-semibold text-zinc-300 border border-zinc-700">
-            Phòng thi • Tự động giữ vị trí từng Section
+          <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800 text-[11px] font-semibold text-zinc-300 border border-zinc-700">
+            {examPhase === 'review' ? (
+              <span className="text-amber-300">Audio đã kết thúc • 2 phút kiểm tra bài</span>
+            ) : examPhase === 'expired' ? (
+              <span className="text-red-300">Hết giờ • Đang tự động nộp bài</span>
+            ) : (
+              <span>
+                Đang phát Section {activeAudioSectionNumber}/{totalSections} • Khóa tua & tạm dừng
+              </span>
+            )}
           </span>
         )}
 

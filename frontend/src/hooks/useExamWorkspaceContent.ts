@@ -32,15 +32,17 @@ export function useExamWorkspaceContent(
   const [deadlineMs, setDeadlineMs] = useState<number | null>(null); // hạn nộp của thi thử, theo đồng hồ client
   const [readingData, setReadingData] = useState<ReadingTestData>(initR || mockReadingFullTest);
   const [listeningData, setListeningData] = useState<ListeningTestData>(initL || mockListeningFullTest);
-  const [writingData, setWritingData] = useState<typeof mockWritingExamDataset>((initW as any) || mockWritingExamDataset);
+  const [writingData, setWritingData] = useState<typeof mockWritingExamDataset>((initW as typeof mockWritingExamDataset | null) || mockWritingExamDataset);
   // Speaking không bao giờ rơi về đề giả: bài ghi âm phải gắn với câu hỏi thật.
   const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset | null>(initS);
   const [attemptMode, setAttemptMode] = useState<"practice" | "mock" | null>(null);
   const [attemptError, setAttemptError] = useState<string | null>(null);
-  const hasStartedRef = useRef(false);
+  const [attemptErrorStatus, setAttemptErrorStatus] = useState<number | null>(null);
+  const startedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
+    const startKey = `${testId}:${skill}:${mode}`;
 
     async function loadContent() {
       if (!testId) {
@@ -48,13 +50,17 @@ export function useExamWorkspaceContent(
         return;
       }
 
-      // Khởi tạo phiên thi trong nền 1 lần duy nhất, tránh duplicate do React StrictMode
-      if (!hasStartedRef.current) {
-        hasStartedRef.current = true;
+      // Khởi tạo phiên thi 1 lần cho mỗi cặp (testId, skill, mode); tự reset khi chuyển chế độ
+      if (startedKeyRef.current !== startKey) {
+        startedKeyRef.current = startKey;
+        setAttemptId(null);
+        setAttemptMode(null);
+        setAttemptError(null);
+        setAttemptErrorStatus(null);
+        setDeadlineMs(null);
         startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
           .then((attemptRes) => {
-            // Không chặn theo `mounted`: StrictMode (dev) chạy cleanup trước khi request xong
-            // nhưng hasStartedRef khiến effect lần hai không gọi lại, nên attemptId sẽ mãi null.
+            if (startedKeyRef.current !== startKey) return;
             if (attemptRes?.attempt_id) {
               setAttemptId(attemptRes.attempt_id);
               setAttemptMode(attemptRes.mode ?? null);   // attempt dở có thể khác mode trên URL
@@ -66,15 +72,18 @@ export function useExamWorkspaceContent(
             }
           })
           .catch((e) => {
+            if (startedKeyRef.current !== startKey) return;
             console.warn("Could not start attempt session in background:", e);
+            setAttemptErrorStatus(e?.response?.status ?? null);
             setAttemptError(e?.response?.data?.detail || "Không bắt đầu được bài thi");
           });
       }
 
       // Tải và hiển thị nội dung đề thi ngay lập tức
       try {
-        const contentData = cached ? cached : await prefetchExamContent(testId);
-        if (mounted && contentData && !cached) {
+        const currentCached = getExamContentCache(testId);
+        const contentData = currentCached ? currentCached : await prefetchExamContent(testId);
+        if (mounted && contentData && !currentCached) {
           if (skill === "reading") {
             const mapped = mapToReadingTestData(contentData);
             if (mapped) setReadingData(mapped);
@@ -107,6 +116,7 @@ export function useExamWorkspaceContent(
     attemptId,
     attemptMode,
     attemptError,
+    attemptErrorStatus,
     deadlineMs,
     readingData,
     listeningData,

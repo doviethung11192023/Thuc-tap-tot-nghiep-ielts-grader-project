@@ -80,7 +80,7 @@ export interface BandConversion {
 
 export interface SystemSetting {
   key: string;
-  value: Record<string, any>;
+  value: Record<string, unknown>;
   description?: string | null;
   updated_at: string;
   updated_by?: string | null;
@@ -168,7 +168,7 @@ export interface PassageData {
   id: string;
   title: string;
   content: string;
-  paragraphs?: { id: string; text: string }[];
+  paragraphs?: { id: string; label?: string; text: string }[];
 }
 
 export interface ReadingTestData {

@@ -73,26 +73,27 @@ export function CleanMultipleChoiceOptionsList({
             <div
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 ${radioStyle}`}
             >
-              {isCorrectOption ? (
-                <Check className="w-3.5 h-3.5 stroke-[3]" />
-              ) : isUserSelected ? (
-                <X className="w-3.5 h-3.5 stroke-[3]" />
-              ) : (
-                opt.key
-              )}
+              {opt.key}
             </div>
 
-            <div className="flex-1">
-              <span>{opt.text}</span>
-              {isCorrectOption && isUserSelected && (
-                <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng • Bạn đã chọn)</span>
-              )}
-              {isCorrectOption && !isUserSelected && (
-                <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng)</span>
-              )}
-              {isUserSelected && !isCorrectOption && (
-                <span className="ml-2 text-xs text-red-600 font-semibold">(Bạn đã chọn)</span>
-              )}
+            <div className="flex-1 flex items-center justify-between gap-2">
+              <div>
+                <span>{opt.text}</span>
+                {isCorrectOption && isUserSelected && (
+                  <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng • Bạn đã chọn)</span>
+                )}
+                {isCorrectOption && !isUserSelected && (
+                  <span className="ml-2 text-xs text-emerald-700 font-bold">(Đáp án đúng)</span>
+                )}
+                {isUserSelected && !isCorrectOption && (
+                  <span className="ml-2 text-xs text-red-600 font-semibold">(Bạn đã chọn)</span>
+                )}
+              </div>
+              {isCorrectOption ? (
+                <Check className="w-4 h-4 text-emerald-600 stroke-[2.75] shrink-0" />
+              ) : isUserSelected ? (
+                <X className="w-4 h-4 text-red-600 stroke-[2.75] shrink-0" />
+              ) : null}
             </div>
           </div>
         );

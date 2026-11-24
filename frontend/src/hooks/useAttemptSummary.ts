@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { getAttemptSummary } from "@/services/student-test-practice";
-import { cleanReadingTest1Data } from "@/mocks/clean-dataset/reading-test-1-clean";
-import { cleanListeningTest1Data } from "@/mocks/clean-dataset/listening-test-1-clean";
 
 export interface CleanSummaryData {
   title: string;
@@ -14,7 +12,7 @@ export interface CleanSummaryData {
 }
 
 function formatSubmittedDate(dateStr?: string): string {
-  if (!dateStr) return "Hôm nay";
+  if (!dateStr) return "—";
   try {
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) {
@@ -32,38 +30,44 @@ function formatSubmittedDate(dateStr?: string): string {
 }
 
 export function useAttemptSummary(attemptId: string | undefined, skill: string) {
-  const isReading = skill === "reading";
-  const defaultData = isReading ? cleanReadingTest1Data : cleanListeningTest1Data;
-
-  const [data, setData] = useState<CleanSummaryData | null>(attemptId ? null : defaultData);
+  const [data, setData] = useState<CleanSummaryData | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(attemptId));
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!attemptId) {
-      setData(defaultData);
+      setData(null);
+      setError("Không tìm thấy mã bài làm (attemptId). Vui lòng mở lại từ Lịch sử làm bài.");
       setLoading(false);
       return;
     }
 
     let mounted = true;
     setLoading(true);
+    setError(null);
 
     getAttemptSummary(attemptId)
       .then((res) => {
-        if (!mounted || !res) return;
+        if (!mounted) return;
+        if (!res) {
+          setData(null);
+          setError("Không tìm thấy bảng điểm cho bài làm này.");
+          return;
+        }
         setData({
-          title: res.title || defaultData.title,
+          title: res.title || `IELTS ${skill === 'reading' ? 'Reading' : 'Listening'} Test`,
           overall_band: res.overall_band == null ? null : Number(res.overall_band),
-          correct_count: Number(res.correct_count ?? defaultData.correct_count),
-          total_questions: Number(res.total_questions || defaultData.total_questions),
-          time_spent: res.time_spent_sec ? `${Math.round(res.time_spent_sec / 60)} phút` : defaultData.time_spent,
-          submitted_at: formatSubmittedDate(res.submitted_at || defaultData.submitted_at),
-          task_formats_result: res.task_formats_result?.length ? res.task_formats_result : defaultData.task_formats_result,
+          correct_count: Number(res.correct_count ?? 0),
+          total_questions: Number(res.total_questions || 0),
+          time_spent: res.time_spent_sec ? `${Math.round(res.time_spent_sec / 60)} phút` : "—",
+          submitted_at: formatSubmittedDate(res.submitted_at),
+          task_formats_result: Array.isArray(res.task_formats_result) ? res.task_formats_result : [],
         });
       })
       .catch((err) => {
-        console.warn("Could not load backend attempt summary, using fallback:", err);
-        if (mounted) setData(defaultData);
+        if (!mounted) return;
+        setData(null);
+        setError(err?.response?.data?.detail || "Không thể tải bảng điểm bài làm. Vui lòng thử lại sau.");
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -74,5 +78,5 @@ export function useAttemptSummary(attemptId: string | undefined, skill: string) 
     };
   }, [attemptId, skill]);
 
-  return { data, loading };
+  return { data, loading, error };
 }

@@ -11,9 +11,14 @@ import {
 const summaryCache = new Map<string, QuestionTypeSummaryItem[]>();
 const exercisesCache = new Map<string, { items: PracticeExerciseItem[]; total: number }>();
 
-export function useSkillExercises(skill: string, selectedQuestionType: string | null) {
+export function useSkillExercises(
+  skill: string,
+  selectedQuestionType: string | null,
+  page: number = 1,
+  limit: number = 12
+) {
   const sLower = skill.toLowerCase();
-  const cacheKey = `${sLower}_${selectedQuestionType || "all"}`;
+  const cacheKey = `${sLower}_${selectedQuestionType || "all"}_${page}_${limit}`;
   const initialEntry = exercisesCache.get(cacheKey);
 
   const [typesSummary, setTypesSummary] = useState<QuestionTypeSummaryItem[]>(
@@ -24,8 +29,8 @@ export function useSkillExercises(skill: string, selectedQuestionType: string | 
   const [loading, setLoading] = useState<boolean>(() => !initialEntry);
   const [loadingTypes, setLoadingTypes] = useState<boolean>(() => !summaryCache.has(sLower));
 
-  const currentSkillRef = useRef(skill);
-  currentSkillRef.current = skill;
+  const currentReqRef = useRef(cacheKey);
+  currentReqRef.current = cacheKey;
 
   // 1. Tải danh sách tóm tắt loại câu hỏi
   useEffect(() => {
@@ -56,14 +61,13 @@ export function useSkillExercises(skill: string, selectedQuestionType: string | 
     };
   }, [skill]);
 
-  // 2. Tải danh sách bài tập theo kỹ năng và dạng câu hỏi
+  // 2. Tải danh sách bài tập theo kỹ năng, dạng câu hỏi và phân trang
   useEffect(() => {
     let mounted = true;
-    const sLower = skill.toLowerCase();
-    const cacheKey = `${sLower}_${selectedQuestionType || "all"}`;
+    const reqKey = `${skill.toLowerCase()}_${selectedQuestionType || "all"}_${page}_${limit}`;
 
-    if (exercisesCache.has(cacheKey)) {
-      const cached = exercisesCache.get(cacheKey)!;
+    if (exercisesCache.has(reqKey)) {
+      const cached = exercisesCache.get(reqKey)!;
       setExercises(cached.items);
       setTotal(cached.total);
       setLoading(false);
@@ -72,13 +76,14 @@ export function useSkillExercises(skill: string, selectedQuestionType: string | 
 
     setLoading(true);
     getSkillExercises({
-      skill: sLower,
+      skill: skill.toLowerCase(),
       question_type: selectedQuestionType || undefined,
-      limit: 20,
+      page,
+      limit,
     })
       .then((data) => {
-        if (!mounted || currentSkillRef.current !== skill) return;
-        exercisesCache.set(cacheKey, { items: data.items, total: data.total });
+        if (!mounted || currentReqRef.current !== reqKey) return;
+        exercisesCache.set(reqKey, { items: data.items, total: data.total });
         setExercises(data.items);
         setTotal(data.total);
       })
@@ -92,7 +97,7 @@ export function useSkillExercises(skill: string, selectedQuestionType: string | 
     return () => {
       mounted = false;
     };
-  }, [skill, selectedQuestionType]);
+  }, [skill, selectedQuestionType, page, limit]);
 
   return {
     typesSummary,

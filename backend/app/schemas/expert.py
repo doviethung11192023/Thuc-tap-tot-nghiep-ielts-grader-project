@@ -1,9 +1,12 @@
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 import re
+from typing import Any, Dict, List, Optional
 
-EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+from pydantic import BaseModel, Field, validator
+
+EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+ALLOWED_HELPFULNESS_TAGS = {"clear_actionable", "detailed_errors", "too_brief", "unclear"}
+
 
 class ExpertProfileResponse(BaseModel):
     user_id: str
@@ -15,11 +18,20 @@ class ExpertProfileResponse(BaseModel):
     bio: Optional[str] = None
     active_reviews_count: int = 0
     created_at: Optional[datetime] = None
+    tier: str = "standard"
+    tier_max_reviews: int = 5
+    cooldown_until: Optional[datetime] = None
+    consecutive_clean_reviews: int = 0
+    is_suspended_by_penalty: bool = False
+    rps_summary: Optional[Dict[str, Any]] = None
+    performance_summary: Optional[Dict[str, Any]] = None
+
 
 class ExpertAvailabilityUpdate(BaseModel):
     is_available: Optional[bool] = None
     max_active_reviews: Optional[int] = Field(None, ge=1, le=20)
     bio: Optional[str] = None
+
 
 class AdminCreateExpertRequest(BaseModel):
     email: str = Field(..., min_length=5, max_length=255)
@@ -34,7 +46,6 @@ class AdminCreateExpertRequest(BaseModel):
             raise ValueError("Định dạng email không hợp lệ")
         return v
 
-# Schemas cho Phân hệ Quota & Điều phối Chuyên gia (BR-11, BR-15, BR-16, BR-20)
 
 class LearnerQuotaResponse(BaseModel):
     week_start: str
@@ -50,8 +61,10 @@ class LearnerQuotaResponse(BaseModel):
     can_reserve_mock: bool
     can_request_practice: bool
 
+
 class PracticeReviewRequestCreate(BaseModel):
     attempt_id: str
+
 
 class ExpertAssignmentItem(BaseModel):
     id: str
@@ -59,7 +72,7 @@ class ExpertAssignmentItem(BaseModel):
     attempt_id: str
     expert_id: str
     skill: str
-    source: str # 'mock' hoặc 'practice'
+    source: str
     test_title: Optional[str] = None
     learner_name: Optional[str] = None
     learner_email: Optional[str] = None
@@ -73,8 +86,10 @@ class ExpertAssignmentItem(BaseModel):
     can_decline: bool = False
     remaining_hours: float = 0.0
 
+
 class ExpertDeclineRequest(BaseModel):
     note: str = Field(..., min_length=5, max_length=500, description="Lý do từ chối nhận bài")
+
 
 class CriterionScoreInput(BaseModel):
     criterion_id: str
@@ -82,6 +97,7 @@ class CriterionScoreInput(BaseModel):
     skill: str = "writing"
     band: float
     comment: Optional[str] = ""
+
 
 class AnnotationInput(BaseModel):
     type: str = "error"
@@ -97,9 +113,28 @@ class AnnotationInput(BaseModel):
     start_ms: Optional[int] = None
     end_ms: Optional[int] = None
 
+
 class ExpertSubmitReviewRequest(BaseModel):
     overall_band: float
     criterion_scores: List[CriterionScoreInput]
     annotations: Optional[List[AnnotationInput]] = []
     feedback: Optional[str] = ""
     change_reason: Optional[str] = ""
+    ai_agreement_confirmed: bool = False
+    study_tip_note: Optional[str] = None
+
+
+class AdminWaivePenaltyRequest(BaseModel):
+    waive_reason: str = Field(..., min_length=10, max_length=500, description="Lý do miễn phạt rõ ràng")
+
+
+class ExpertHelpfulnessRatingRequest(BaseModel):
+    is_helpful: bool
+    tags: List[str] = Field(default_factory=list)
+
+    @validator("tags", each_item=True)
+    def validate_tag(cls, v):
+        clean = str(v).strip()
+        if clean not in ALLOWED_HELPFULNESS_TAGS:
+            raise ValueError(f"Tag không hợp lệ: {clean}")
+        return clean

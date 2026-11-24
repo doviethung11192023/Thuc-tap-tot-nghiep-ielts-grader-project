@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -90,29 +90,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="relative min-h-screen overflow-hidden bg-[var(--ux-page)] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-[var(--ux-ink)]">
+      {/* Subtle Academic Crimson & Warm Amber ambient glow (zero purple) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[720px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(147,33,32,0.12)_0%,rgba(217,119,6,0.06)_50%,transparent_75%)] blur-2xl"
+      />
+      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="flex justify-center">
-          <div className="bg-[#932120] p-3 rounded-xl shadow-lg">
-            <BookOpen className="w-10 h-10 text-white" />
+          <div className="bg-[#932120] p-3 rounded-2xl shadow-lg ring-4 ring-rose-100/80">
+            <BookOpen className="w-9 h-9 text-white" />
           </div>
         </div>
-        <div className="mt-6 flex justify-center border-b border-zinc-200">
+        <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-[var(--ux-ink)]">
+          MoonLab IELTS
+        </h1>
+        <p className="mt-1 text-xs font-medium text-[var(--ux-ink-2)]">
+          Luyện thi &amp; chấm điểm IELTS 4 kỹ năng chuẩn AI + Chuyên gia
+        </p>
+        <div className="mt-6 flex justify-center border-b border-[var(--ux-line)]">
           <Link href="/login" className="px-8 py-3 text-sm font-bold text-[#932120] border-b-2 border-[#932120]">
             Đăng nhập
           </Link>
-          <Link href="/register" className="px-8 py-3 text-sm font-bold text-zinc-500 hover:text-zinc-700 transition-colors">
+          <Link href="/register" className="px-8 py-3 text-sm font-bold text-[var(--ux-ink-2)] hover:text-[var(--ux-ink)] transition-colors">
             Đăng ký
           </Link>
         </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-zinc-100">
+      <div className="relative z-10 mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-[var(--ux-surface)] py-8 px-5 sm:px-10 rounded-2xl shadow-lg border border-[var(--ux-line)]">
           <form className="space-y-6" action="#" method="POST" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-                Email address
+                Địa chỉ email
               </label>
               <div className="mt-1">
                 <input
@@ -130,7 +141,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-                Password
+                Mật khẩu
               </label>
               <div className="mt-1">
                 <input
@@ -157,13 +168,13 @@ export default function LoginPage() {
                   className="h-4 w-4 text-[#932120] focus:ring-[#932120] border-zinc-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-900">
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </label>
               </div>
 
               <div className="text-sm">
                 <Link href="/forgot-password" className="font-medium text-[#932120] hover:text-[#7a1a19]">
-                  Forgot your password?
+                  Quên mật khẩu?
                 </Link>
               </div>
             </div>
@@ -174,7 +185,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#932120] transition-all disabled:opacity-50"
               >
-                {loading ? 'Đang đăng nhập...' : 'Sign in'}
+                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
             </div>
           </form>

@@ -25,15 +25,18 @@ def _invalidate_profile(user_id: str) -> None:
 def list_history(user_id: str, page: int, limit: int, skill: Optional[str], status: Optional[str]) -> dict[str, Any]:
     q = db().table("attempts").select(
         "id, test_id, skill, mode, status, raw_score, question_count, started_at, submitted_at, "
-        "tests(title, duration_minutes)", count="exact"
+        "tests(title, duration_minutes)"
     ).eq("learner_id", user_id).neq("status", "abandoned")
     if status and status.lower() in ("scored", "in_progress"):
         q = q.eq("status", status.lower())
     if skill and skill.lower() != "all":
         q = q.eq("skill", skill.lower())
+    res = q.order("started_at", desc=True).execute()
+    all_rows = res.data or []
+    all_rows.sort(key=lambda a: str(a.get("submitted_at") or a.get("started_at") or ""), reverse=True)
+    total = len(all_rows)
     offset = (page - 1) * limit
-    res = q.order("started_at", desc=True).range(offset, offset + limit - 1).execute()
-    attempts = res.data or []
+    attempts = all_rows[offset : offset + limit]
 
     bands = {}
     if attempts:
@@ -55,7 +58,6 @@ def list_history(user_id: str, page: int, limit: int, skill: Optional[str], stat
             "submitted_at": a.get("submitted_at") or a.get("started_at"),
             "duration_min": test.get("duration_minutes") or 60,
         })
-    total = res.count if getattr(res, "count", None) is not None else len(items)
     return {"items": items, "total": total, "page": page, "limit": limit}
 
 

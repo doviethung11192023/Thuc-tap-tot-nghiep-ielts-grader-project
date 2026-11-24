@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ReadingWorkspace } from '@/components/exam/ReadingWorkspace';
+import { AttemptErrorBanner } from '@/components/exam/AttemptErrorBanner';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
@@ -17,7 +18,7 @@ export default function ReadingWorkspacePage() {
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3'];
   const returnUrl = searchParams.get('returnUrl') || '';
 
-  const { loading, attemptId, deadlineMs, readingData } = useExamWorkspaceContent(testId, 'reading', mode);
+  const { loading, attemptId, attemptError, attemptErrorStatus, deadlineMs, readingData } = useExamWorkspaceContent(testId, 'reading', mode);
   const startedAtRef = useRef<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -64,6 +65,14 @@ export default function ReadingWorkspacePage() {
 
   return (
     <div className="space-y-3">
+      <AttemptErrorBanner
+        skill="reading"
+        testId={testId}
+        mode={mode}
+        attemptError={attemptError}
+        attemptErrorStatus={attemptErrorStatus}
+        returnUrl={returnUrl}
+      />
       {submitError && (
         <div
           role="alert"
@@ -82,6 +91,8 @@ export default function ReadingWorkspacePage() {
       <ReadingWorkspace
         testData={readingData}
         mode={mode}
+        attemptId={attemptId}
+        attemptError={attemptError}
         onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
         deadlineMs={mode === 'exam' ? deadlineMs : null}
         selectedParts={parts}

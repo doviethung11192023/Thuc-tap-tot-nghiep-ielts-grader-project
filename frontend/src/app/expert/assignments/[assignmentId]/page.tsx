@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -25,8 +26,18 @@ import type {
 import WritingAnnotationWorkspace from "@/components/expert/WritingAnnotationWorkspace";
 import SpeakingAudioWorkspace from "@/components/expert/SpeakingAudioWorkspace";
 import CriterionScoringPanel from "@/components/expert/CriterionScoringPanel";
-import SnippetDrawer from "@/components/expert/SnippetDrawer";
-import toast from "react-hot-toast";
+import {
+  ExpertCompletenessChecklist,
+  isWorkspaceReviewComplete,
+} from "@/components/expert/ExpertCompletenessChecklist";
+import { AiAgreementConfirmModal } from "@/components/expert/AiAgreementConfirmModal";
+import { extractApiErrorMessage } from "@/lib/api-error";
+import { toast } from "sonner";
+
+const SnippetDrawer = dynamic(() => import("@/components/expert/SnippetDrawer"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function ExpertWorkspacePage() {
   const params = useParams();
@@ -62,8 +73,9 @@ export default function ExpertWorkspacePage() {
   const [drawerCategory, setDrawerCategory] = useState("ALL");
   const [drawerOnSelect, setDrawerOnSelect] = useState<(text: string) => void>(() => () => {});
 
-  // Confirm Submit Modal
+  // Confirm Submit Modals
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showAiAgreementModal, setShowAiAgreementModal] = useState(false);
 
   useEffect(() => {
     hydratedRef.current = false;
@@ -89,14 +101,24 @@ export default function ExpertWorkspacePage() {
     if (initCriteria.length > 0) {
       setCriteriaScores(initCriteria);
     } else {
-      const fallbacks: CriterionScoreDetail[] = (data.criteria_definitions || []).map((def) => ({
-        criterion_id: def.id,
-        code: def.code,
-        name: def.name,
-        task_no: 1,
-        band: 6.0,
-        comment: "",
-      }));
+      const fallbacks: CriterionScoreDetail[] = (data.criteria_definitions || []).map((def) => {
+        const isSpeaking = data.attempt.skill === "speaking";
+        const firstTask = data.content?.tasks?.[0];
+        const firstTaskNo = firstTask?.task_no ?? (firstTask?.task_type === "task1" ? 1 : 2);
+        const defaultTaskNo = isSpeaking
+          ? 0
+          : def.code === "TA"
+            ? 1
+            : firstTaskNo;
+        return {
+          criterion_id: def.id,
+          code: def.code,
+          name: def.name,
+          task_no: defaultTaskNo,
+          band: 6.0,
+          comment: "",
+        };
+      });
       setCriteriaScores(fallbacks);
     }
 
@@ -161,8 +183,8 @@ export default function ExpertWorkspacePage() {
       await queryClient.invalidateQueries({ queryKey: ["expert-assignments"] });
       toast.success("Đã lưu bản nháp bài chấm!");
       router.push("/expert/assignments");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Không thể lưu bản nháp");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Không thể lưu bản nháp"));
     } finally {
       setIsSavingDraft(false);
     }
@@ -181,14 +203,15 @@ export default function ExpertWorkspacePage() {
     setIsDrawerOpen(true);
   };
 
-  const handleSubmitFinal = async () => {
+  const handleSubmitFinal = async (aiAgreement?: { confirmed: boolean; studyTipNote: string }) => {
     if (!data) return;
 
     const aiBand = data.ai_evaluation.evaluation?.overall_band;
+    const minReason = data.completeness_rules?.min_change_reason_chars ?? 15;
     if (aiBand !== undefined && aiBand !== null) {
       const dev = Math.abs(overallBand - Number(aiBand));
-      if (dev >= 1.0 && changeReason.trim().length < 5) {
-        toast.error("Điểm số lệch từ 1.0 band trở lên so với AI. Bắt buộc phải chọn hoặc nhập lý do giải trình.");
+      if (dev >= 1.0 && changeReason.trim().length < minReason) {
+        toast.error(`Điểm số lệch từ 1.0 band trở lên so với AI. Vui lòng nhập lý do giải trình tối thiểu ${minReason} ký tự.`);
         setShowConfirmModal(false);
         return;
       }
@@ -196,14 +219,23 @@ export default function ExpertWorkspacePage() {
 
     try {
       setIsSubmitting(true);
-      await submitExpertReview(assignmentId, buildPayload());
+      await submitExpertReview(assignmentId, {
+        ...buildPayload(),
+        ...(aiAgreement
+          ? {
+              ai_agreement_confirmed: aiAgreement.confirmed,
+              study_tip_note: aiAgreement.studyTipNote,
+            }
+          : {}),
+      });
       await queryClient.invalidateQueries({ queryKey: ["expert-assignments"] });
       await queryClient.invalidateQueries({ queryKey: ["expert-workspace", assignmentId] });
       toast.success("Ký duyệt và trả kết quả chính thức thành công!");
       setShowConfirmModal(false);
+      setShowAiAgreementModal(false);
       router.push("/expert/assignments");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Lỗi khi nộp kết quả chấm bài");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Lỗi khi nộp kết quả chấm bài"));
     } finally {
       setIsSubmitting(false);
     }
@@ -222,7 +254,7 @@ export default function ExpertWorkspacePage() {
     return (
       <div className="max-w-lg mx-auto my-12 p-6 bg-white rounded-2xl border border-zinc-200 text-center space-y-3">
         <p className="text-sm font-bold text-red-700">
-          {(error as any)?.response?.data?.detail || "Không thể tải dữ liệu bài thi"}
+          {extractApiErrorMessage(error, "Không thể tải dữ liệu bài thi")}
         </p>
         <Link
           href="/expert/assignments"
@@ -239,6 +271,36 @@ export default function ExpertWorkspacePage() {
   const isSpeaking = data.attempt.skill === "speaking";
   const tasks = data.content.tasks || [];
   const questions = data.content.questions || [];
+  const aiEval = data.ai_evaluation.evaluation;
+  const hasValidAi = Boolean(aiEval && aiEval.status !== "failed" && aiEval.overall_band !== null && aiEval.overall_band !== undefined);
+  const aiCrit = data.ai_evaluation.criteria || [];
+  const aiAnn = data.ai_evaluation.annotations || [];
+  const annSig = (a: WorkspaceAnnotation) =>
+    `${a.category || ""}|${(a.original_text || "").trim()}|${(a.corrected_text || "").trim()}|${(a.explanation || "").trim()}|${a.essay_id || a.response_id || ""}`;
+  const isUnchangedFromAi = Boolean(
+    hasValidAi &&
+      aiEval &&
+      aiCrit.length > 0 &&
+      Math.abs(overallBand - Number(aiEval.overall_band)) < 0.01 &&
+      generalFeedback.trim() === (aiEval.feedback || "").trim() &&
+      criteriaScores.length === aiCrit.length &&
+      criteriaScores.every((cs) => {
+        const match = aiCrit.find((ac) => ac.criterion_id === cs.criterion_id && (ac.task_no || 1) === (cs.task_no || 1));
+        return Boolean(match && Math.abs(cs.band - match.band) < 0.01 && (cs.comment || "").trim() === (match.comment || "").trim());
+      }) &&
+      annotations.length === aiAnn.length &&
+      annotations.every((a) => aiAnn.some((b) => annSig(a) === annSig(b))),
+  );
+  const reviewComplete = isWorkspaceReviewComplete(
+    data.attempt.skill,
+    criteriaScores,
+    annotations,
+    generalFeedback,
+    data.completeness_rules,
+    overallBand,
+    aiEval?.overall_band,
+    changeReason,
+  );
 
   return (
     <div className="space-y-5 pb-6">
@@ -343,6 +405,20 @@ export default function ExpertWorkspacePage() {
             }}
             onOpenSnippetDrawer={handleOpenDrawer}
           />
+          <ExpertCompletenessChecklist
+            skill={data.attempt.skill}
+            overallBand={overallBand}
+            aiOverallBand={aiEval?.overall_band}
+            changeReason={changeReason}
+            criteriaScores={criteriaScores}
+            annotations={annotations}
+            generalFeedback={generalFeedback}
+            onChangeFeedback={(val) => {
+              setGeneralFeedback(val);
+              setIsDirty(true);
+            }}
+            rules={data.completeness_rules}
+          />
         </div>
       </div>
 
@@ -383,8 +459,10 @@ export default function ExpertWorkspacePage() {
 
           <button
             type="button"
-            onClick={() => setShowConfirmModal(true)}
-            className="px-6 py-2.5 bg-[#932120] hover:bg-[#7a1a19] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+            disabled={!reviewComplete}
+            onClick={() => (isUnchangedFromAi ? setShowAiAgreementModal(true) : setShowConfirmModal(true))}
+            title={reviewComplete ? "Ký duyệt & Công bố kết quả" : "Hoàn tất đầy đủ các mục kiểm tra trước khi nộp"}
+            className="px-6 py-2.5 bg-[#932120] hover:bg-[#7a1a19] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
           >
             <Sparkles className="w-4 h-4" /> Ký Duyệt &amp; Trả Kết Quả Chính Thức
           </button>
@@ -400,16 +478,30 @@ export default function ExpertWorkspacePage() {
         onSelectSnippet={drawerOnSelect}
       />
 
+      <AiAgreementConfirmModal
+        open={showAiAgreementModal}
+        overallBand={overallBand}
+        minStudyTipChars={data.completeness_rules?.min_study_tip_chars ?? 30}
+        submitting={isSubmitting}
+        onClose={() => setShowAiAgreementModal(false)}
+        onConfirm={(studyTipNote) => void handleSubmitFinal({ confirmed: true, studyTipNote })}
+      />
+
       {/* Confirm Submission Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-submit-title"
+        >
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-[#932120]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-zinc-900">Xác nhận công bố kết quả</h3>
+                <h3 id="confirm-submit-title" className="text-base font-bold text-zinc-900">Xác nhận công bố kết quả</h3>
                 <p className="text-xs text-zinc-500">Kết quả này sẽ trở thành điểm số chính thức (Official Band)</p>
               </div>
             </div>

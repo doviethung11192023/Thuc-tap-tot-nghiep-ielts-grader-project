@@ -17,13 +17,7 @@ interface PracticeQuestionTypeAccuracyCardProps {
 }
 
 export function PracticeQuestionTypeAccuracyCard({ questionTypes }: PracticeQuestionTypeAccuracyCardProps) {
-  const displayItems = questionTypes.length > 0 ? questionTypes.slice(0, 5) : [
-    { type_name: "Sentence Completion", skill: "Reading", total_questions: 40, correct: 30, accuracy: 75, last_practiced: "12/10/2026" },
-    { type_name: "Multiple Choice (MCQ)", skill: "Listening", total_questions: 25, correct: 18, accuracy: 72, last_practiced: "10/10/2026" },
-    { type_name: "Matching Headings", skill: "Reading", total_questions: 35, correct: 22, accuracy: 63, last_practiced: "08/10/2026" },
-    { type_name: "True / False / Not Given", skill: "Reading", total_questions: 30, correct: 16, accuracy: 53, last_practiced: "05/10/2026" },
-    { type_name: "Note & Summary Completion", skill: "Listening", total_questions: 20, correct: 13, accuracy: 65, last_practiced: "02/10/2026" },
-  ];
+  const displayItems = questionTypes.slice(0, 5);
 
   return (
     <div className="bg-white rounded-3xl border border-zinc-200/90 p-5 shadow-2xs space-y-4">
@@ -37,6 +31,11 @@ export function PracticeQuestionTypeAccuracyCard({ questionTypes }: PracticeQues
         </div>
       </div>
 
+      {displayItems.length === 0 ? (
+        <div className="py-8 text-center text-xs text-zinc-500 border border-dashed border-zinc-200 rounded-2xl">
+          Chưa có dữ liệu dạng bài. Hãy hoàn thành 1–2 đề luyện tập để hệ thống thống kê độ chính xác thực tế.
+        </div>
+      ) : (
       <div className="space-y-3">
         {displayItems.map((item, idx) => (
           <div key={idx} className="p-3 rounded-2xl bg-zinc-50 border border-zinc-150 space-y-1.5 hover:bg-white hover:border-zinc-300 transition-all">
@@ -69,6 +68,7 @@ export function PracticeQuestionTypeAccuracyCard({ questionTypes }: PracticeQues
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

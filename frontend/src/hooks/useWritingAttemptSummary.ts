@@ -37,6 +37,10 @@ export interface WritingAttemptSummary {
   evaluatorType?: "ai" | "expert" | string | null;
   evaluationStatus?: string | null;
   expertFeedback?: string | null;
+  expertReviewStatus?: string | null;
+  expertReviewDueAt?: string | null;
+  aiEvaluation?: { overall_band: number } | null;
+  expertReview?: { overall_band: number; feedback?: string | null } | null;
   tasks: WritingTaskSummary[];
 }
 
@@ -75,6 +79,10 @@ export function useWritingAttemptSummary(attemptId?: string) {
           evaluatorType: writing.evaluator_type ?? res?.evaluator_type ?? null,
           evaluationStatus: res?.evaluation_status ?? null,
           expertFeedback: writing.expert_feedback ?? res?.expert_feedback ?? null,
+          expertReviewStatus: res?.expert_review_status ?? null,
+          expertReviewDueAt: res?.expert_review_due_at ?? null,
+          aiEvaluation: res?.ai_evaluation ?? null,
+          expertReview: res?.expert_review ?? null,
           tasks: writing.tasks ?? [],
         };
         setData(next);

@@ -25,7 +25,7 @@ export function CleanReadingDetailSkeleton() {
   }, []);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-dvh w-full bg-zinc-100 overflow-hidden font-sans">
       {/* 1. TOP PROGRESS BAR */}
       <div className="bg-white border-b border-zinc-200 px-6 py-3 flex items-center justify-between shrink-0 shadow-2xs">
         <div className="flex items-center gap-3">

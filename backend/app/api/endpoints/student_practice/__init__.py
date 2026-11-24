@@ -8,6 +8,7 @@ from app.api.endpoints.student_practice.speaking_uploads import router as speaki
 from app.api.endpoints.student_practice.analytics import router as analytics_router
 from app.api.endpoints.student_practice.exercises import router as exercises_router
 from app.api.endpoints.student_practice.expert_requests import router as expert_requests_router
+from app.api.endpoints.student_practice.tutor import router as tutor_router
 
 student_practice_router = APIRouter()
 
@@ -22,4 +23,5 @@ student_practice_router.include_router(analytics_router, prefix="/student", tags
 student_practice_router.include_router(analytics_router, prefix="/test-practice", tags=["Student Practice Analytics"])
 student_practice_router.include_router(expert_requests_router, prefix="/student", tags=["Student Expert Quota"])
 student_practice_router.include_router(expert_requests_router, prefix="/test-practice", tags=["Student Expert Requests"])
+student_practice_router.include_router(tutor_router, prefix="/test-practice", tags=["Student AI Practice Tutor"])
 

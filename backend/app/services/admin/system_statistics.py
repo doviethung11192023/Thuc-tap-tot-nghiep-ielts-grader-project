@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from app.db.supabase import db
+from app.services.admin.expert_kpi_service import get_expert_kpis
 
 RUN_STATUS_LABEL = {"done": "COMPLETED", "failed": "FAILED", "running": "RUNNING"}
 
@@ -56,7 +57,54 @@ def system_statistics() -> dict[str, Any]:
         "ai_error_rate": round(failed / len(finished) * 100, 2) if finished else 0.0,
         "avg_processing_time": round(sum(latencies) / len(latencies) / 1000, 1) if latencies else 0.0,
         "submissions_trend": trend,
+        "monthly_cohort_progression": _monthly_cohort_progression(),
+        "expert_kpis": get_expert_kpis(),
     }
+
+
+def _monthly_cohort_progression(months: int = 6) -> list[dict[str, Any]]:
+    vn_tz = timezone(timedelta(hours=7))
+    now_vn = datetime.now(vn_tz)
+    cutoff = (now_vn.replace(day=1) - timedelta(days=months * 31)).isoformat()
+    rows = (
+        db()
+        .table("attempt_results")
+        .select("learner_id, band, submitted_at, status")
+        .eq("status", "scored")
+        .gte("submitted_at", cutoff)
+        .execute()
+        .data
+        or []
+    )
+    buckets: dict[str, dict[str, Any]] = {}
+    for i in range(months - 1, -1, -1):
+        m_dt = (now_vn.replace(day=15) - timedelta(days=i * 30))
+        ym = m_dt.strftime("%Y-%m")
+        buckets[ym] = {"label": f"T{m_dt.month}/{str(m_dt.year)[2:]}", "bands": [], "learners": set()}
+    for r in rows:
+        sub_at = r.get("submitted_at")
+        if not sub_at:
+            continue
+        try:
+            dt = datetime.fromisoformat(str(sub_at).replace("Z", "+00:00"))
+            ym = (dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt).astimezone(vn_tz).strftime("%Y-%m")
+        except Exception:
+            continue
+        if ym in buckets:
+            if r.get("band") is not None and float(r["band"]) > 0:
+                buckets[ym]["bands"].append(float(r["band"]))
+            if r.get("learner_id"):
+                buckets[ym]["learners"].add(r["learner_id"])
+    return [
+        {
+            "month": ym,
+            "label": b["label"],
+            "avg_band": round(sum(b["bands"]) / len(b["bands"]), 2) if b["bands"] else 0.0,
+            "active_learners": len(b["learners"]),
+            "total_attempts": len(b["bands"]),
+        }
+        for ym, b in sorted(buckets.items())
+    ]
 
 
 def grading_run_logs(page: int, limit: int, skill: str | None = None, run_status: str | None = None) -> dict[str, Any]:

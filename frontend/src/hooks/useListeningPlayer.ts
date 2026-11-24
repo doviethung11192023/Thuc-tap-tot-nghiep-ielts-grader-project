@@ -6,12 +6,16 @@ interface UseListeningPlayerProps {
   audioUrl?: string;
   sectionKey?: string;
   defaultDuration?: number;
+  autoPlayOnSectionChange?: boolean;
+  onEnded?: () => void;
 }
 
 export function useListeningPlayer({
   audioUrl,
   sectionKey,
   defaultDuration = 450,
+  autoPlayOnSectionChange = false,
+  onEnded,
 }: UseListeningPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const savedTimeBySectionRef = useRef<Record<string, number>>({});
@@ -19,6 +23,18 @@ export function useListeningPlayer({
   const activeKeyRef = useRef<string>(currentKey);
   const pendingSeekRef = useRef<number | null>(null);
   const playbackSpeedRef = useRef<number>(1.0);
+  const shouldAutoPlayRef = useRef<boolean>(false);
+  const autoPlayOnSectionChangeRef = useRef<boolean>(autoPlayOnSectionChange);
+  const onEndedRef = useRef(onEnded);
+  const mountedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    autoPlayOnSectionChangeRef.current = autoPlayOnSectionChange;
+  }, [autoPlayOnSectionChange]);
+
+  useEffect(() => {
+    onEndedRef.current = onEnded;
+  }, [onEnded]);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
@@ -39,6 +55,9 @@ export function useListeningPlayer({
   useEffect(() => {
     const audio = audioRef.current;
     const prevKey = activeKeyRef.current;
+    const isSectionSwitch = mountedRef.current && prevKey !== currentKey;
+    mountedRef.current = true;
+
     if (audio && prevKey !== currentKey) {
       savedTimeBySectionRef.current[prevKey] = audio.currentTime || 0;
     }
@@ -54,6 +73,7 @@ export function useListeningPlayer({
     setAudioError(null);
     setIsBuffering(Boolean(audioUrl));
     setCurrentTime(savedTime);
+    shouldAutoPlayRef.current = Boolean(autoPlayOnSectionChangeRef.current && audioUrl && isSectionSwitch);
 
     if (audioUrl) {
       audio.src = audioUrl;
@@ -183,6 +203,19 @@ export function useListeningPlayer({
   const handleCanPlay = useCallback(() => {
     setIsBuffering(false);
     setAudioError(null);
+    const audio = audioRef.current;
+    if (shouldAutoPlayRef.current && audio) {
+      shouldAutoPlayRef.current = false;
+      audio.playbackRate = playbackSpeedRef.current;
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          setIsPlaying(false);
+        });
+    }
   }, []);
 
   const handleWaiting = useCallback(() => {
@@ -199,6 +232,7 @@ export function useListeningPlayer({
     setIsPlaying(false);
     savedTimeBySectionRef.current[activeKeyRef.current] = 0;
     setCurrentTime(0);
+    onEndedRef.current?.();
   }, []);
 
   return {

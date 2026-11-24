@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Lightbulb, ArrowLeftRight, Compass, FileText } from "lucide-react";
 import { CleanExplanationSteps } from "./CleanExplanationSteps";
 import { extractCoreReasoning } from "@/utils/explanation-parser";
+import { renderSafeInlineMarkdown } from "@/utils/safe-markdown-inline";
 
 interface KeywordMapItem {
   original_text: string;
@@ -19,6 +20,7 @@ interface CleanQuestionDropdownExplanationProps {
   explanation4Steps?: string;
   evidenceText?: string;
   keywordsMapping?: KeywordMapItem[];
+  skill?: "reading" | "listening";
   onSelectEvidence?: (originalText: string, questionNumber?: number) => void;
   defaultExpanded?: boolean;
 }
@@ -29,9 +31,11 @@ export function CleanQuestionDropdownExplanation({
   explanation4Steps,
   evidenceText,
   keywordsMapping = [],
+  skill = "reading",
   onSelectEvidence,
   defaultExpanded = false,
 }: CleanQuestionDropdownExplanationProps) {
+  const isListening = skill === "listening";
   const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded);
   const [showFullSteps, setShowFullSteps] = useState<boolean>(false);
 
@@ -74,21 +78,21 @@ export function CleanQuestionDropdownExplanation({
   };
 
   return (
-    <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50/30 overflow-hidden shadow-2xs transition-all">
+    <div className="mt-3 rounded-xl border border-red-200/80 bg-red-50/20 overflow-hidden shadow-2xs transition-all">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-2 flex items-center justify-between text-left bg-blue-50/80 hover:bg-blue-100/80 transition-colors border-b border-blue-100 cursor-pointer"
+        className="w-full px-4 py-2 flex items-center justify-between text-left bg-red-50/70 hover:bg-red-100/70 transition-colors border-b border-red-100 cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+          <div className="w-5 h-5 rounded-full bg-[#932120] flex items-center justify-center text-white shrink-0">
             <Lightbulb className="w-3 h-3" />
           </div>
-          <span className="font-semibold text-xs sm:text-sm text-blue-900">
+          <span className="font-semibold text-xs sm:text-sm text-[#932120]">
             Giải thích & Dẫn chứng câu {questionNumber}
           </span>
         </div>
-        <div className="text-blue-700">
+        <div className="text-[#932120]">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </button>
@@ -101,7 +105,7 @@ export function CleanQuestionDropdownExplanation({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
                   <Compass className="w-3.5 h-3.5 text-amber-600" />
-                  Vị trí chứng cứ trên bài đọc
+                  {isListening ? "Vị trí chứng cứ trong transcript" : "Vị trí chứng cứ trên bài đọc"}
                 </span>
                 {onSelectEvidence && (
                   <button
@@ -109,7 +113,7 @@ export function CleanQuestionDropdownExplanation({
                     onClick={() => onSelectEvidence(evidenceText, questionNumber)}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
                   >
-                    <span>Highlight trên bài 📍</span>
+                    <span>{isListening ? "Highlight trên transcript 📍" : "Highlight trên bài 📍"}</span>
                   </button>
                 )}
               </div>
@@ -120,8 +124,8 @@ export function CleanQuestionDropdownExplanation({
           )}
 
           {/* 2. Từ khóa chính trong câu hỏi */}
-          <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-3 space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-blue-900">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-700">
               Từ khóa chính trong câu hỏi
             </div>
             <div className="text-zinc-800 text-xs sm:text-sm">{renderHighlightedPrompt()}</div>
@@ -140,7 +144,7 @@ export function CleanQuestionDropdownExplanation({
                     key={kIdx}
                     onClick={() => onSelectEvidence && onSelectEvidence(km.original_text, questionNumber)}
                     className="flex items-center gap-2 flex-wrap text-xs cursor-pointer group"
-                    title="Bấm để xem và highlight từ khóa trên bài đọc"
+                    title={isListening ? "Bấm để xem và highlight từ khóa trên transcript" : "Bấm để xem và highlight từ khóa trên bài đọc"}
                   >
                     <span className="border border-dashed border-emerald-500 bg-white text-emerald-950 rounded px-2 py-0.5 font-bold shadow-2xs">
                       {km.paraphrased_text}
@@ -162,7 +166,7 @@ export function CleanQuestionDropdownExplanation({
                 <Lightbulb className="w-3.5 h-3.5 text-[#932120]" />
                 <span>Lý do chọn đáp án</span>
               </div>
-              <p className="text-xs sm:text-sm text-zinc-800 leading-relaxed font-sans">{coreReasoning}</p>
+              <p className="text-xs sm:text-sm text-zinc-800 leading-relaxed font-sans">{renderSafeInlineMarkdown(coreReasoning)}</p>
             </div>
           )}
 

@@ -43,20 +43,20 @@ export function CriteriaGrid({ criteria }: { criteria: SpeakingCriterionScore[] 
           >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#932120]">
                   {item.code}
                 </span>
                 <h3 className="text-sm font-bold text-slate-800">
                   {CRITERION_LABELS[item.code] ?? item.name}
                 </h3>
               </div>
-              <span className="px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-lg font-black text-blue-700 tabular-nums shrink-0">
+              <span className="px-3 py-1 rounded-xl bg-red-50 border border-red-200 text-lg font-black text-[#932120] tabular-nums shrink-0">
                 {item.band.toFixed(1)}
               </span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-all duration-300"
+                className="h-full rounded-full bg-gradient-to-r from-[#932120] to-[#b83230] transition-all duration-300"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -100,8 +100,21 @@ export function PronunciationEvidence({ evidence }: { evidence: SpeakingPronunci
         <div className="space-y-1.5">
           <h3 className="text-xs font-bold text-slate-700">Từ có thể phát âm chưa rõ</h3>
           <div className="flex flex-wrap gap-1.5">
-            {evidence.words_possibly_mispronounced.map((item) => (
-              <span key={item.word} className="px-2.5 py-1 rounded-full bg-slate-100 text-xs text-slate-700">{item.word}</span>
+            {Object.values(
+              evidence.words_possibly_mispronounced.reduce<Record<string, { word: string; count: number }>>((acc, item) => {
+                const key = item.word.trim().toLowerCase();
+                if (!key) return acc;
+                if (acc[key]) {
+                  acc[key].count += 1;
+                } else {
+                  acc[key] = { word: item.word, count: 1 };
+                }
+                return acc;
+              }, {})
+            ).map((entry, idx) => (
+              <span key={`${entry.word}-${idx}`} className="px-2.5 py-1 rounded-full bg-slate-100 text-xs text-slate-700">
+                {entry.word}{entry.count > 1 ? ` ×${entry.count}` : ''}
+              </span>
             ))}
           </div>
         </div>
@@ -126,15 +139,20 @@ export function SpeechMetricsPanel({ metrics }: { metrics: Record<string, number
     <section className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
       <h2 className="text-sm font-bold text-slate-800">Số đo độ trôi chảy</h2>
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        {rows.map((metric) => (
-          <Stat
-            key={metric.key}
-            label={metric.label}
-            value={metric.key === 'pause_ratio'
-              ? `${Math.round(metrics[metric.key] * 100)}%`
-              : `${metrics[metric.key]}${metric.unit ? ` ${metric.unit}` : ''}`}
-          />
-        ))}
+        {rows.map((metric) => {
+          const raw = metrics[metric.key];
+          const formatted =
+            metric.key === 'pause_ratio'
+              ? `${Math.round(raw * 100)}%`
+              : `${Number.isInteger(raw) ? raw : raw.toFixed(1)}${metric.unit ? ` ${metric.unit}` : ''}`;
+          return (
+            <Stat
+              key={metric.key}
+              label={metric.label}
+              value={formatted}
+            />
+          );
+        })}
       </dl>
     </section>
   );

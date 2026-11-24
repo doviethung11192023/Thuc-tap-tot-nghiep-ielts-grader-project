@@ -110,7 +110,7 @@ export function SpeakingDetailAudioPlayer({
           type="button"
           onClick={togglePlay}
           aria-label={playing ? 'Tạm dừng' : 'Phát bản ghi âm'}
-          className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-xs transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full bg-[#932120] hover:bg-[#7a1a19] text-white flex items-center justify-center shrink-0 shadow-xs transition-colors cursor-pointer"
         >
           {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
         </button>
@@ -128,13 +128,13 @@ export function SpeakingDetailAudioPlayer({
         <div className="relative flex-1 flex items-center h-6 group">
           <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-[width] duration-75"
+              className="h-full bg-gradient-to-r from-[#932120] to-[#b83230] rounded-full transition-[width] duration-75"
               style={{ width: `${progressPct}%` }}
             />
           </div>
 
           <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white shadow-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-[#932120] border-2 border-white shadow-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ left: `${progressPct}%` }}
           />
 

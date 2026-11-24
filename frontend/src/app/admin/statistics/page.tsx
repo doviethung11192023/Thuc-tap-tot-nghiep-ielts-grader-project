@@ -1,16 +1,72 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Activity, AlertTriangle, Users, FileText, Clock, Bot, Loader2, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { Activity, AlertTriangle, Users, FileText, Clock, Bot, Loader2, RotateCcw, SearchCheck } from "lucide-react";
 import { getSystemStatistics, getEvaluationLogs } from "@/services/users";
 import { retryAiGrading } from "@/services/student-test-practice";
-import toast from "react-hot-toast";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "sonner";
 import { KpiCard } from "@/components/admin/KpiCard";
+import { AdminExpertKpiTable, type ExpertKpiRow } from "@/components/admin/AdminExpertKpiTable";
+import { ChartSkeleton } from "@/components/ui/skeleton";
+import { BlurFadeCard, StaggerGrid } from "@/components/motion";
+import { extractApiErrorMessage } from "@/lib/api-error";
+
+interface SystemStatisticsData {
+  total_users?: number;
+  total_essays?: number;
+  essays_today?: number;
+  ai_error_rate?: number;
+  avg_processing_time?: number;
+  submissions_trend?: Array<{ date: string; count: number }>;
+  monthly_cohort_progression?: Array<{
+    month: string;
+    label: string;
+    avg_band: number;
+    active_learners: number;
+    total_attempts: number;
+  }>;
+  expert_kpis?: ExpertKpiRow[];
+}
+
+interface EvaluationLogItem {
+  id: string;
+  attempt_id?: string | null;
+  task_no?: number | null;
+  status?: string | null;
+  processing_time?: number | null;
+  latency_ms?: number | null;
+  error_message?: string | null;
+  created_at?: string | null;
+  essay?: {
+    user?: { email?: string | null } | null;
+    topic?: { title?: string | null } | null;
+  } | null;
+}
+
+function normalizeLogs(raw: unknown): EvaluationLogItem[] {
+  if (Array.isArray(raw)) return raw as EvaluationLogItem[];
+  if (raw && typeof raw === "object" && "items" in raw) {
+    const items = (raw as { items?: unknown }).items;
+    if (Array.isArray(items)) return items as EvaluationLogItem[];
+  }
+  return [];
+}
+
+const AdminSubmissionsTrendChart = dynamic(
+  () => import("@/components/admin/AdminSubmissionsTrendChart").then((m) => m.AdminSubmissionsTrendChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-96" label="Đang tải biểu đồ xu hướng nộp bài..." /> }
+);
+
+const AdminMonthlyCohortChart = dynamic(
+  () => import("@/components/admin/AdminMonthlyCohortChart").then((m) => m.AdminMonthlyCohortChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-80" label="Đang tải biểu đồ cohort theo tháng..." /> }
+);
 
 export default function AdminStatisticsPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [stats, setStats] = useState<SystemStatisticsData | null>(null);
+  const [logs, setLogs] = useState<EvaluationLogItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [retryingAttemptId, setRetryingAttemptId] = useState<string | null>(null);
 
@@ -21,8 +77,8 @@ export default function AdminStatisticsPage() {
         getSystemStatistics(),
         getEvaluationLogs({ limit: 15 }),
       ]);
-      setStats(statsData);
-      setLogs(logsData.items || logsData || []);
+      setStats(statsData as SystemStatisticsData);
+      setLogs(normalizeLogs(logsData));
     } catch {
       toast.error("Không thể tải số liệu hệ thống và lịch sử AI");
     } finally {
@@ -31,8 +87,25 @@ export default function AdminStatisticsPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let cancelled = false;
+    Promise.all([getSystemStatistics(), getEvaluationLogs({ limit: 15 })])
+      .then(([statsData, logsData]) => {
+        if (cancelled) return;
+        setStats(statsData as SystemStatisticsData);
+        setLogs(normalizeLogs(logsData));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          toast.error("Không thể tải số liệu hệ thống và lịch sử AI");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleRetryAi = async (attemptId: string) => {
     try {
@@ -40,8 +113,8 @@ export default function AdminStatisticsPage() {
       await retryAiGrading(attemptId);
       toast.success("Đã đưa bài viết vào hàng đợi AI chấm lại!");
       await fetchData();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.detail || "Không thể kích hoạt chấm lại bằng AI");
+    } catch (e: unknown) {
+      toast.error(extractApiErrorMessage(e, "Không thể kích hoạt chấm lại bằng AI"));
     } finally {
       setRetryingAttemptId(null);
     }
@@ -62,7 +135,13 @@ export default function AdminStatisticsPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">AI System Health & Metrics</h1>
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Giám sát hiệu suất, độ ổn định và chi phí vận hành mô hình AI IELTS Grader</p>
         </div>
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <Link
+            href="/admin/users"
+            className="min-h-[44px] bg-[#932120] hover:bg-[#7a1a19] text-white rounded-xl px-4 py-2 text-xs sm:text-sm font-bold shadow-xs inline-flex items-center gap-2"
+          >
+            <SearchCheck className="w-4 h-4" /> Minh chứng Học viên
+          </Link>
           <button
             type="button"
             onClick={fetchData}
@@ -73,32 +152,28 @@ export default function AdminStatisticsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
-        <KpiCard title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-blue-600" />} subtext="Total registered users" />
-        <KpiCard title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Bài Writing trong đề + bài chấm tự do" />
-        <KpiCard title="Essays Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Essays submitted today" />
-        <KpiCard title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext="Evaluation error rate" />
-        <KpiCard title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Average evaluation time" />
-      </div>
+      <StaggerGrid autoAnimate={false} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
+        <KpiCard index={0} tone="crimson" title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-[#932120]" />} subtext="Total registered users" />
+        <KpiCard index={1} tone="emerald" title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng bài Writing trong hệ thống" />
+        <KpiCard index={2} tone="crimson" title="Essays Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Essays submitted today" />
+        <KpiCard index={3} tone="amber" title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext="Evaluation error rate" />
+        <KpiCard index={4} tone="sky" title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Average evaluation time" />
+      </StaggerGrid>
 
-      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full">
-        <h3 className="text-base sm:text-lg font-bold text-zinc-900 mb-5 flex items-center gap-2.5">
-          <Activity className="w-5 h-5 text-[#932120]" /> Biểu đồ xu hướng nộp bài
-        </h3>
-        <div className="h-72 sm:h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={stats?.submissions_trend || []}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
-              <XAxis dataKey="date" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #e4e4e7", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} itemStyle={{ color: "#932120", fontWeight: "bold" }} />
-              <Line type="monotone" dataKey="count" name="Số bài" stroke="#932120" strokeWidth={3} dot={{ r: 4, fill: "#932120", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <BlurFadeCard>
+        <AdminSubmissionsTrendChart data={stats?.submissions_trend || []} />
+      </BlurFadeCard>
 
-      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full">
+      <BlurFadeCard>
+        <AdminMonthlyCohortChart data={stats?.monthly_cohort_progression || []} />
+      </BlurFadeCard>
+
+      <BlurFadeCard>
+        <AdminExpertKpiTable items={stats?.expert_kpis || []} interactive onPenaltyWaived={() => void fetchData()} />
+      </BlurFadeCard>
+
+      <BlurFadeCard>
+        <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full">
         <h3 className="text-base sm:text-lg font-bold text-zinc-900 mb-5 flex items-center gap-2.5">
           <Bot className="w-5 h-5 text-zinc-700" /> AI Evaluation Logs (Lịch sử chấm thi AI gần đây)
         </h3>
@@ -118,9 +193,10 @@ export default function AdminStatisticsPage() {
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {logs.length > 0 ? (
-                logs.map((log: any, index: number) => {
+                logs.map((log, index: number) => {
                   const procSeconds = log.processing_time ?? (log.latency_ms ? Math.round((log.latency_ms / 1000) * 10) / 10 : null);
-                  const canRetry = log.status === "FAILED" && Boolean(log.attempt_id);
+                  const attemptId = log.attempt_id ?? "";
+                  const canRetry = log.status === "FAILED" && Boolean(attemptId);
                   return (
                     <tr key={log.id} className="bg-white hover:bg-zinc-50/70 transition-colors">
                       <td className="px-4 py-4 font-bold text-zinc-900 whitespace-nowrap">{index + 1}</td>
@@ -145,11 +221,11 @@ export default function AdminStatisticsPage() {
                         {canRetry ? (
                           <button
                             type="button"
-                            onClick={() => handleRetryAi(log.attempt_id)}
-                            disabled={retryingAttemptId === log.attempt_id}
+                            onClick={() => handleRetryAi(attemptId)}
+                            disabled={retryingAttemptId === attemptId}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#932120] hover:bg-[#7a1a19] text-white text-xs font-bold transition-colors disabled:opacity-60"
                           >
-                            {retryingAttemptId === log.attempt_id ? (
+                            {retryingAttemptId === attemptId ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
                               <RotateCcw className="w-3.5 h-3.5" />
@@ -171,7 +247,8 @@ export default function AdminStatisticsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+        </div>
+      </BlurFadeCard>
     </div>
   );
 }

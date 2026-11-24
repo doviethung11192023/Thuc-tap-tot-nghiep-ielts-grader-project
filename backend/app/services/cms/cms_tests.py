@@ -103,10 +103,31 @@ def update_test(admin_id: str, test_id: str, data: dict[str, Any]) -> dict[str, 
     return to_api(row)
 
 
+def _ensure_publish_question_count(test_id: str) -> None:
+    """Kiểm tra đề Reading/Listening đầy đủ phải có đúng 40 câu trước khi publish (UC-21)."""
+    rows = db().table("tests").select("id, skill, source_name").eq("id", test_id).execute().data
+    if not rows:
+        raise NotFoundError("Bài thi không tồn tại")
+    test = rows[0]
+    if test.get("skill") not in ("reading", "listening") or test.get("source_name") == "micro_exercise":
+        return
+    sec_rows = db().table("sections").select("id").eq("test_id", test_id).execute().data or []
+    sec_ids = [s["id"] for s in sec_rows if s.get("id")]
+    q_cnt = 0
+    if sec_ids:
+        q_res = db().table("questions").select("id", count="exact").in_("lr_section_id", sec_ids).execute()
+        q_cnt = q_res.count if getattr(q_res, "count", None) is not None else len(q_res.data or [])
+    if q_cnt != 40:
+        raise InvalidRequestError(
+            f"Đề {test['skill'].capitalize()} đầy đủ phải có đúng 40 câu hỏi trước khi xuất bản (hiện có {q_cnt} câu)"
+        )
+
+
 def set_status(admin_id: str, test_id: str, status: str) -> dict[str, Any]:
     status = "draft" if status == "pending_review" else status
     payload: dict[str, Any] = {"status": status}
     if status == "published":
+        _ensure_publish_question_count(test_id)
         payload.update(reviewer_id=admin_id, reviewer_role="admin", reviewed_at=datetime.now(timezone.utc).isoformat())
     try:
         res = db().table("tests").update(payload).eq("id", test_id).execute()

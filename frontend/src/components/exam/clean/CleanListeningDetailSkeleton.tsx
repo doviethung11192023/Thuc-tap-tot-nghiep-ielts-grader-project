@@ -14,13 +14,13 @@ export function CleanListeningDetailSkeleton() {
   }, []);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-100 overflow-hidden font-sans animate-in fade-in duration-200">
+    <div className="flex flex-col h-dvh w-full bg-zinc-100 overflow-hidden font-sans animate-in fade-in duration-200">
       {/* 1. TOP HEADER SKELETON */}
       <header className="bg-white border-b border-zinc-200 px-5 py-2.5 h-14 flex items-center justify-between shadow-2xs shrink-0 z-20">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse border border-zinc-200" />
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-base shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#932120] flex items-center justify-center text-white font-black text-base shadow-xs">
               M
             </div>
             <div className="flex flex-col gap-1">

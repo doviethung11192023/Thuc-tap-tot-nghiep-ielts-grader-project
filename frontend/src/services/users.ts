@@ -5,6 +5,12 @@ import type { UserProgress, LearnerGoal, User } from "@/types";
 // API SERVICE: USERS & LEARNER
 // ============================================================
 
+// API: Lấy hồ sơ cá nhân hiện tại từ backend (gồm voice_consent_at từ learner_profiles)
+export async function getMyProfile(): Promise<User> {
+  const res = await apiClient.get<User>("/api/v1/users/me");
+  return res.data;
+}
+
 // API: Xem tiến trình học tập (GET /api/v1/users/me/progress)
 export async function getUserProgress(): Promise<UserProgress> {
   const res = await apiClient.get("/api/v1/users/me/progress");
@@ -109,5 +115,21 @@ export async function activateAccount(): Promise<void> {
 // API: Thống kê hệ thống (GET /api/v1/admin/statistics) — Admin only
 export async function getSystemStatistics() {
   const res = await apiClient.get("/api/v1/admin/statistics");
+  return res.data.data;
+}
+
+// API: Bảng hội tụ thống kê học viên (3-Query Bulk Vectorized) — Admin only
+export async function getAdminLearnersAnalytics(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
+  const res = await apiClient.get("/api/v1/admin/learners/analytics", { params });
+  return res.data.data;
+}
+
+// API: Hồ sơ Minh chứng Trắng số liệu học viên (White-Box Audit) — Admin only
+export async function getAdminLearnerWhiteBoxAudit(userId: string) {
+  const res = await apiClient.get(`/api/v1/admin/learners/${userId}/audit`);
   return res.data.data;
 }

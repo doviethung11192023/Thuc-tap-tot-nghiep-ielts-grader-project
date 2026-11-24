@@ -63,6 +63,13 @@ export async function bulkUpdateTestStatus(testIds: string[], status: ContentSta
   return res.data;
 }
 
+export async function cloneTestToDraft(testId: string): Promise<TestItem> {
+  const res = await apiClient.post<{ meta: { code: number }; data: TestItem }>(
+    `/api/v1/admin/tests/${testId}/clone-draft`
+  );
+  return res.data.data;
+}
+
 export async function deleteTest(testId: string) {
   await apiClient.delete(`/api/v1/admin/tests/${testId}`);
 }
@@ -149,7 +156,7 @@ export async function getSystemSettings(): Promise<SystemSetting[]> {
   return res.data.data;
 }
 
-export async function updateSystemSetting(key: string, value: Record<string, any>, description?: string) {
+export async function updateSystemSetting(key: string, value: Record<string, unknown>, description?: string) {
   const res = await apiClient.put(`/api/v1/admin/core/settings/${key}`, { value, description });
   return res.data.data;
 }
