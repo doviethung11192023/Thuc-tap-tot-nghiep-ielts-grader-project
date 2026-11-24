@@ -10,6 +10,7 @@ import { useServerAutosave } from '@/hooks/useServerAutosave';
 import { AutosaveStatusBadge } from '@/components/exam/shared/AutosaveStatusBadge';
 import { discardAttempt, startTestAttempt, submitReadingListeningAnswers } from '@/services/student-test-practice';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/lib/attempt-submission';
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 export default function ListeningWorkspacePage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function ListeningWorkspacePage() {
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
   const parts = searchParams.get('parts')?.split(',') || ['1', '2', '3', '4'];
-  const returnUrl = searchParams.get('returnUrl') || '';
+  const returnUrl = safeInternalPath(searchParams.get('returnUrl'), '');
   const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
   const summaryPath = (id: string) =>
     `/test-practice/listening/${testId}/summary?attemptId=${id}&parts=${parts.join(',')}${returnQuery}`;

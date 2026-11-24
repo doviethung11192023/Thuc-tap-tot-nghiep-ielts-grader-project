@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 function CallbackContent() {
   const router = useRouter();
@@ -30,8 +31,8 @@ function CallbackContent() {
           .single();
 
         // Kiểm tra tham số next chuyển hướng (ví dụ: /reset-password)
-        const nextParam = searchParams.get('next');
-        if (nextParam && nextParam.startsWith('/')) {
+        const nextParam = safeInternalPath(searchParams.get('next'), '');
+        if (nextParam) {
           router.push(nextParam);
           return;
         }

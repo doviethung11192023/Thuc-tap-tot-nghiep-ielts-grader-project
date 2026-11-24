@@ -16,6 +16,7 @@ import {
   ArrowRight,
   BarChart3
 } from 'lucide-react';
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 export default function SkillSummaryResultPage() {
   const params = useParams();
@@ -25,7 +26,7 @@ export default function SkillSummaryResultPage() {
   const testId = params?.testId as string;
   const attemptId = searchParams.get('attemptId') || undefined;
   const partsParam = searchParams.get('parts') || '';
-  const returnUrl = searchParams.get('returnUrl') || '';
+  const returnUrl = safeInternalPath(searchParams.get('returnUrl'), '');
 
   const isReading = skill === 'reading';
   // Speaking và Writing có hook kết quả riêng; không gọi API lần hai rồi bỏ kết quả

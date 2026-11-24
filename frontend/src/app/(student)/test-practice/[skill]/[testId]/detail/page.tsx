@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { SpeakingResultsView } from '@/components/exam/speaking/SpeakingResultsView';
 import { CleanReadingDetailView } from '@/components/exam/result-detail/CleanReadingDetailView';
 import { CleanListeningDetailView } from '@/components/exam/result-detail/CleanListeningDetailView';
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 export default function SkillDetailedResultPage() {
   const params = useParams();
@@ -15,7 +16,7 @@ export default function SkillDetailedResultPage() {
   const testId = params?.testId as string;
   const attemptId = searchParams.get('attemptId') || undefined;
   const parts = searchParams.get('parts')?.split(',') || undefined;
-  const returnUrl = searchParams.get('returnUrl') || undefined;
+  const returnUrl = safeInternalPath(searchParams.get('returnUrl'), '') || undefined;
 
   // Nút thoát / mũi tên quay lại góc trên bên trái: Trở về trang Bảng kết quả tổng quan
   const handleBack = () => {
