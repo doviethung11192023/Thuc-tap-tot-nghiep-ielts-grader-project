@@ -3,6 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import main as serve
+from api import grading_routes
 from services.langfuse.prompt_manager import PromptFetchError
 
 SECRET = "test-engine-secret"
@@ -19,7 +20,7 @@ def client(monkeypatch):
         calls.append(kwargs)
         return {"task_type": kwargs["task_type"] or "task2", "scores": {"overall_band": 6.5}}
 
-    monkeypatch.setattr(serve, "run_grading_pipeline", fake_pipeline)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", fake_pipeline)
     settings = main.get_settings()
     monkeypatch.setattr(settings, "ai_engine_secret", SECRET)
     monkeypatch.setattr(settings, "allow_no_secret", False)
@@ -53,7 +54,7 @@ def test_empty_title_allowed_but_blank_essay_rejected(client):
 def test_prompt_fetch_error_maps_to_502(client, monkeypatch):
     async def failing(**kwargs):
         raise PromptFetchError("TA_TASK1 missing")
-    monkeypatch.setattr(serve, "run_grading_pipeline", failing)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", failing)
     res = client.post("/grade", json={"title": "x", "essay": "Text."})
     assert res.status_code == 502
     assert "TA_TASK1" in res.json()["detail"]

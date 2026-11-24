@@ -6,7 +6,7 @@ from urllib.parse import quote
 import pytest
 from fastapi.testclient import TestClient
 
-import admin_routes
+from api import admin_routes
 import main
 from services.langfuse import prompt_admin as pa
 from services.langfuse.prompt_registry import ALL_PROMPT_NAMES

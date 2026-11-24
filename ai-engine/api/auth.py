@@ -1,4 +1,4 @@
-"""Engine-secret dependency, shared by main.py and admin_routes.py (kept apart to avoid a circular import)."""
+"""Engine-secret dependency, shared by grading_routes.py and admin_routes.py (kept in its own module to avoid a circular import)."""
 import secrets
 
 from fastapi import Header, HTTPException
