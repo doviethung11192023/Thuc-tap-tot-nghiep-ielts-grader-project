@@ -23,6 +23,10 @@ frontend ──HTTP──▶ backend (Core API, :8000) ──hàng đợi──�
                      Supabase                                          DashScope, Langfuse
 ```
 
+![Kiến trúc hệ thống](docs/diagrams/system-architecture.drawio.png)
+
+Sáu sơ đồ lõi (kiến trúc, luồng chấm Writing và Speaking, luồng Expert, trạng thái bài làm, ERD) và bản chữ cho agent: [`docs/diagrams/README.md`](docs/diagrams/README.md).
+
 ## 2. Chạy local
 
 Cần: Python 3.11+, Node.js, [uv](https://docs.astral.sh/uv/) (cho AI engine), Redis, một project Supabase.

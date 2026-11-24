@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.concurrency import run_in_threadpool
 from datetime import datetime, timezone
 from typing import Optional
 from app.core.domain_errors import InvalidRequestError
@@ -73,7 +74,7 @@ def _parse_id(item_id: str) -> tuple:
 
 # --- Band Conversions (Bảng Quy Đổi Điểm Thô Sang Band Score) ---
 @router.get("/core/band-conversions")
-async def get_band_conversions(
+def get_band_conversions(
     skill: Optional[SkillType] = Query(None, description="Lọc theo skill: listening, reading"),
     current_user: User = Depends(require_admin)
 ):
@@ -85,7 +86,7 @@ async def get_band_conversions(
     return {"meta": {"code": 200}, "data": [_with_id(r) for r in res.data or []]}
 
 @router.post("/core/band-conversions", status_code=status.HTTP_201_CREATED)
-async def create_band_conversion(
+def create_band_conversion(
     data: BandConversionCreate,
     current_user: User = Depends(require_admin)
 ):
@@ -110,7 +111,7 @@ async def create_band_conversion(
     return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": _with_id(res.data[0])}
 
 @router.put("/core/band-conversions/{item_id}")
-async def update_band_conversion(
+def update_band_conversion(
     item_id: str,
     data: BandConversionCreate,
     current_user: User = Depends(require_admin)
@@ -138,7 +139,7 @@ async def update_band_conversion(
     return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": _with_id(res.data[0])}
 
 @router.delete("/core/band-conversions/{item_id}")
-async def delete_band_conversion(
+def delete_band_conversion(
     item_id: str,
     current_user: User = Depends(require_admin)
 ):
@@ -152,7 +153,7 @@ async def delete_band_conversion(
 
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
 @router.get("/core/settings")
-async def get_system_settings(current_user: User = Depends(require_admin)):
+def get_system_settings(current_user: User = Depends(require_admin)):
     """Lấy danh sách các cấu hình hệ thống (ẩn tuyệt đối ai_tutor_secrets, kèm mặc định roadmap/tutor/Wave 5)."""
     res = db().table("system_settings").select("*").order("key").execute()
     # Khoá ai_* và trace_view_days do trang Service AI quản lý (spec 008), kho khoá bí mật cũng không lộ ở trình sửa JSON chung
@@ -164,6 +165,11 @@ async def get_system_settings(current_user: User = Depends(require_admin)):
             rows.append({"key": s_key, "value": s_val, "description": s_desc, "updated_at": None})
     return {"meta": {"code": 200}, "data": rows}
 
+# Cấu hình ảnh hưởng số liệu Expert: đổi thì xoá cache trang thống kê Admin
+_STATS_CACHE_SETTINGS = ("expert_completeness_rules", "expert_rps_config", "expert_penalty_config",
+                         "expert_cooldown_min_active_pool")
+
+
 @router.put("/core/settings/{key}")
 async def update_system_setting(
     key: str,
@@ -171,7 +177,20 @@ async def update_system_setting(
     request: Request,
     current_user: User = Depends(require_admin),
 ):
-    """Cập nhật giá trị một cấu hình hệ thống (JSON)."""
+    """Cập nhật giá trị một cấu hình hệ thống (JSON). Đọc/ghi Supabase (đồng bộ) chạy trong threadpool để không
+    chặn event loop; chỉ phần xoá cache Redis (async) chạy ở đây."""
+    result = await run_in_threadpool(_save_system_setting, key, data, current_user)
+    if key in _STATS_CACHE_SETTINGS:
+        try:
+            redis = getattr(request.app.state, "redis", None)
+            if redis is not None:
+                await redis.delete("admin:statistics:v2", "admin:statistics:v3")
+        except Exception:
+            pass
+    return result
+
+
+def _save_system_setting(key: str, data: SystemSettingUpdate, current_user: User) -> dict:
     if key in HIDDEN_SECRET_SETTINGS:
         raise HTTPException(status_code=403, detail="Không thể chỉnh sửa kho khóa bí mật qua endpoint cấu hình chung")
     if is_ai_managed_setting(key):
@@ -199,13 +218,6 @@ async def update_system_setting(
         raise HTTPException(status_code=500, detail="Không thể lưu cấu hình")
     if key in ("roadmap_config", "learner_gamification_config"):
         clear_all_profile_cache()
-    if key in ("expert_completeness_rules", "expert_rps_config", "expert_penalty_config", "expert_cooldown_min_active_pool"):
-        try:
-            redis = getattr(request.app.state, "redis", None)
-            if redis is not None:
-                await redis.delete("admin:statistics:v2", "admin:statistics:v3")
-        except Exception:
-            pass
     before_val = {"value": existing[0]["value"]} if existing else None
     if key == "ai_tutor_config":
         invalidate_tutor_config_cache()

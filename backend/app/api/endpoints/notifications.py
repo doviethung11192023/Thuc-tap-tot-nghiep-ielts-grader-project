@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("")
-async def get_my_notifications(
+def get_my_notifications(
     limit: int = Query(30, ge=1, le=50),
     unread_only: bool = Query(False),
     current_user: User = Depends(get_current_active_user),
@@ -21,7 +21,7 @@ async def get_my_notifications(
 
 
 @router.patch("/{notification_id}/read")
-async def read_notification(
+def read_notification(
     notification_id: str,
     current_user: User = Depends(get_current_active_user),
 ):
@@ -32,6 +32,6 @@ async def read_notification(
 
 
 @router.post("/read-all")
-async def read_all_notifications(current_user: User = Depends(get_current_active_user)):
+def read_all_notifications(current_user: User = Depends(get_current_active_user)):
     updated_count = mark_all_notifications_read(current_user.id)
     return {"updated_count": updated_count}

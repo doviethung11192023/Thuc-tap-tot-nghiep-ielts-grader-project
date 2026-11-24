@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { BaseRendererProps, ReviewEvidenceAccordion } from './shared';
 import { Check } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
   group,
@@ -182,7 +183,7 @@ export const InlineFillBlankRenderer: React.FC<BaseRendererProps> = ({
             </span>
           );
         }
-        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />;
+        return <span key={index} dangerouslySetInnerHTML={{ __html: sanitizeHtml(part) }} />;
       })}
 
       {/* Review Panels for incorrect answers */}

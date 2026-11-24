@@ -8,11 +8,16 @@ không đổi được vai trò (attempts tham chiếu learner_profiles).
 """
 from typing import Any, Optional
 
+from app.core.config import settings
 from app.core.domain_errors import ConflictError, InvalidRequestError, NotFoundError
 from app.core.supabase_access_token_verifier import forget_profile
 from app.db.supabase import db, supabase
 
-REDIRECT_TARGET = "http://localhost:3000/auth/callback?next=/reset-password"
+
+def password_setup_redirect() -> str:
+    """Link trong email mời / đặt lại mật khẩu: về trang callback của frontend rồi sang đặt mật khẩu.
+    Lấy từ FRONTEND_URL (trước đây gắn cứng localhost nên email gửi lúc deploy trỏ về máy người nhận)."""
+    return f"{settings.FRONTEND_URL.rstrip('/')}/auth/callback?next=/reset-password"
 
 
 def write_audit(admin_id: Optional[str], action: str, entity: str, entity_id: Any = None,
@@ -54,7 +59,7 @@ def set_role(user_id: str, role: str, full_name: Optional[str] = None, expert_fi
 def _setup_link(email: str) -> Optional[str]:
     try:
         res = supabase.auth.admin.generate_link({"type": "recovery", "email": email,
-                                                 "options": {"redirect_to": REDIRECT_TARGET}})
+                                                 "options": {"redirect_to": password_setup_redirect()}})
         return getattr(getattr(res, "properties", None), "action_link", None)
     except Exception as e:
         print(f"⚠️ [Staff] setup link {email}: {e}")
@@ -75,7 +80,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
         user_id = None
         try:
             res = supabase.auth.admin.invite_user_by_email(
-                email, options={"data": {"full_name": full_name}, "redirect_to": REDIRECT_TARGET})
+                email, options={"data": {"full_name": full_name}, "redirect_to": password_setup_redirect()})
             if getattr(res, "user", None):
                 user_id, email_sent = res.user.id, True
         except Exception as e:
@@ -90,7 +95,7 @@ def provision_staff(admin_id: str, email: str, full_name: str, role: str,
     set_role(user_id, role, full_name, expert_fields)
     if existing:
         try:
-            supabase.auth.reset_password_for_email(email, options={"redirect_to": REDIRECT_TARGET})
+            supabase.auth.reset_password_for_email(email, options={"redirect_to": password_setup_redirect()})
             email_sent = True
         except Exception as e:
             print(f"⚠️ [Staff] reset email {email}: {e}")
@@ -107,7 +112,7 @@ def resend_invite(admin_id: str, user_id: str) -> dict[str, Any]:
         raise NotFoundError("User not found")
     email, email_sent = rows[0]["email"].strip().lower(), False
     try:
-        supabase.auth.reset_password_for_email(email, options={"redirect_to": REDIRECT_TARGET})
+        supabase.auth.reset_password_for_email(email, options={"redirect_to": password_setup_redirect()})
         email_sent = True
     except Exception as e:
         print(f"⚠️ [Staff] resend {email}: {e}")

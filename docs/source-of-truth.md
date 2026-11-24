@@ -272,6 +272,8 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 **Nguyên tắc:** chấm AI là **bất đồng bộ**. Core API nhận bài và trả về ngay; worker chấm; trình duyệt nhận kết quả qua Supabase Realtime, có polling dự phòng (ADR-02).
 
+📌 Sơ đồ tương ứng: [`attempt-state-machine`](diagrams/attempt-state-machine.drawio.png), [`expert-review-flow`](diagrams/expert-review-flow.drawio.png), [`speaking-flow`](diagrams/speaking-flow.drawio.png).
+
 | Sơ đồ | Nội dung chính |
 |---|---|
 | SD-00 | Luồng tổng: bắt đầu bài, nộp, L/R chấm ngay, W/S đẩy job vào hàng đợi, worker chạy AI và lưu evaluation, Expert chấm (Mock) và lưu bản chính thức, Realtime báo kết quả |
@@ -311,7 +313,7 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 ## 7. Thiết kế cơ sở dữ liệu (đích: 34 bảng, 2 view, 47 FK; bỏ `mock_sessions` ngày 2026-11-09, thêm `writing_task_materials` ngày 2026-11-11, thêm `ai_provider_secrets` ngày 2026-11-22)
 
-ERD vẽ theo ký hiệu Chen. Có 4 phép chuyên biệt hoá (specialisation):
+ERD vẽ theo ký hiệu Chen. Bản tổng quan các bảng chính trong repo: [`erd-overview`](diagrams/erd-overview.drawio.png). Có 4 phép chuyên biệt hoá (specialisation):
 
 | Thực thể cha | Kiểu con | Cách ánh xạ |
 |---|---|---|
@@ -473,6 +475,8 @@ Quy tắc cần nhiều dòng dữ liệu hoặc cần đọc cấu hình (chu�
 
 ## 8. Kiến trúc
 
+📌 Sơ đồ: [`system-architecture`](diagrams/system-architecture.drawio.png), [`writing-grading-flow`](diagrams/writing-grading-flow.drawio.png), [`speaking-flow`](diagrams/speaking-flow.drawio.png). Bản chữ ở [`diagrams/README.md`](diagrams/README.md).
+
 ```
 Browser (Next.js 16: Learner / Expert / Admin portal)
   ├─ sign up / log in ──────────────► Supabase Auth (JWT)
@@ -486,7 +490,7 @@ Browser (Next.js 16: Learner / Expert / Admin portal)
                                                                        ├─► Qwen API (DashScope)   ├─► Langfuse (prompt, trace)   └─► R2 (đọc audio)
 ```
 
-Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compose trên VPS. Supabase là dịch vụ managed. Ngoài ra có R2, Qwen và Langfuse.
+Phần tự host (Core API, worker, AI engine, Redis) chạy bằng Docker Compose trên VPS. Việc phải làm khi deploy (biến môi trường, cấu hình Supabase Auth, cổng không được publish, kiểm sau deploy): `docs/deployment-guide.md`. Supabase là dịch vụ managed. Ngoài ra có R2, Qwen và Langfuse.
 
 | Khối | Vị trí trong repo | Trách nhiệm |
 |---|---|---|
@@ -676,6 +680,11 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 - Tự đổi role thành admin bằng anon key: không có policy ghi; trigger chỉ đọc `app_metadata`; FK `(id, role)`.
 - Đọc attempt của người khác: RLS chỉ cho đọc dòng của mình; endpoint của người không sở hữu trả **404** (không trả 403).
 - Đọc đáp án qua DevTools hoặc REST: bảng `question_keys` riêng; DTO trả trước khi nộp không chứa đáp án.
+- XSS qua nội dung đề (2026-11-24): hai lớp. (1) HTML template đề (Admin soạn hoặc nạp từ dataset) đi qua DOMPurify với danh sách cho phép (`frontend/src/lib/sanitize-html.ts`: thẻ định dạng và bảng, thuộc tính `style/colspan/rowspan/class/align`, `style` có `url()`/`expression()` bị bỏ) trước `dangerouslySetInnerHTML`; nơi khác React tự escape. (2) CSP có nonce sinh mỗi request (`frontend/src/proxy.ts`): `script-src 'nonce-…' 'strict-dynamic'` chặn script chèn vào, handler nội tuyến, URL `javascript:`; `connect-src` chỉ Core API, Supabase (https, wss), R2, nên mã lọt vào cũng không `fetch` token ra ngoài được. Nonce buộc mọi trang render động (`await connection()` trong root layout). Chấp nhận: `style-src 'unsafe-inline'` (React, recharts, toast cần), `img-src/media-src https:` (ảnh, audio đề đến từ nhiều host). Access token vẫn ở localStorage; hạn 15 phút đặt trong Supabase Dashboard.
+- Trang khác gọi API bằng phiên người dùng (CSRF, CORS): API xác thực bằng Bearer token trong header, không dùng cookie; CORS chỉ nhận origin trong `CORS_ORIGINS` của Core.
+- Clickjacking, open redirect: frontend gửi `X-Frame-Options: DENY` và CSP `frame-ancestors 'none'` (cùng CSP ở `proxy.ts`); tham số `next`/`returnUrl` và `action_url` của thông báo chỉ nhận đường dẫn nội bộ (`safeInternalPath`, trả bản đã chuẩn hoá, từ chối pathname bắt đầu `//`). Kiểm 2026-11-24: iframe từ origin khác bị Chrome chặn ở mọi trang, kể cả 404 và request prefetch; 21 payload open redirect đều đúng.
+- Lộ chi tiết lỗi: lỗi chưa xử lý trả 500 gọn (traceback chỉ ghi log), id sai định dạng trả 400; `/docs` tắt bằng `ENABLE_API_DOCS=false` khi deploy.
+- ⚠️ Chưa chặn: Learner đọc được nội dung đề **Mock** (không kèm đáp án) qua REST vì policy `published_read` không loại `allowed_mode = 'mock'`; Core chưa rate limit `/auth/login`. Chi tiết: `docs/quality-security-evaluation.md`.
 - Gọi thẳng AI engine `/grade` để đốt quota Qwen: chỉ mạng Docker nội bộ, có secret header, không mở CORS. Secret là bắt buộc (2026-11-13): `/grade`, `/grade-speaking`, `/draft-material` trả 503 khi chưa đặt `AI_ENGINE_SECRET`, chỉ mở khi bật rõ `ALLOW_NO_SECRET=true` trên máy local. Bỏ ngrok, engine không mở cổng ra ngoài.
 - Lộ service role key, key Qwen hay Langfuse: chỉ dùng ở server; **không commit `.env`**; bật secret scanning.
 - Spam nộp bài để tốn chi phí AI: rate limit theo user trong Redis; bắt buộc xác minh email; mỗi đề chỉ 1 attempt đang mở.
@@ -686,7 +695,18 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 
 ## 10. Danh mục sơ đồ
 
-Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để sửa) và `.png` (để xem).
+**Trong repo (`docs/diagrams/`, cập nhật 2026-11-23):** 6 sơ đồ lõi vẽ theo code hiện tại, mỗi sơ đồ có `.drawio` (sửa bằng extension Draw.io Integration), `.drawio.png` (xem) và bản chữ cho agent trong [`diagrams/README.md`](diagrams/README.md). Sửa sơ đồ thì sửa cả bản chữ.
+
+| File | Nội dung | Mục SoT |
+|---|---|---|
+| `system-architecture` | Các khối, hướng gọi, dịch vụ ngoài | §8 |
+| `writing-grading-flow` | Pipeline chấm Writing Task 1 và Task 2 | §8 |
+| `speaking-flow` | Từ ghi âm đến điểm Speaking | §8 |
+| `expert-review-flow` | Tạo, giao, kết thúc yêu cầu Expert | §6 |
+| `attempt-state-machine` | Trạng thái `attempts.status` | §6 |
+| `erd-overview` | Quan hệ giữa các bảng chính | §7 |
+
+**Bộ 37 sơ đồ cho báo cáo (ngoài repo, có thể lệch code):** gốc `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để sửa) và `.png` (để xem).
 
 | Thư mục | File | Hình trong báo cáo |
 |---|---|---|
@@ -760,7 +780,7 @@ Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để 
 - Chấm Writing và Speaking chạy qua ARQ (`app/services/grading/`), nên cần Redis và worker. Không có Redis thì API vẫn chạy bằng `NullRedisCache`, bài được lưu nhưng chờ chấm tới khi Redis và worker hoạt động.
 - Mock Writing/Speaking tự tạo yêu cầu Expert khi nộp, cả khi Learner tự nộp lẫn khi cron tự nộp lúc hết giờ (`mock_expert_review_request`); bài không có nội dung (Writing không lưu chữ nào, Speaking không có câu trả lời) không tạo (xem dòng Expert workflow bên dưới).
 - Tự lưu và tự nộp (spec 004, làm 2026-11-09): L/R và Writing tự lưu lên server (`PUT /test-practice/attempts/{id}/work`, hook `useServerAutosave`, nhãn trạng thái lưu); `POST /attempts/start` trả `saved_work` để làm tiếp trên máy khác. Cron `auto_submit_mocks_task` (worker, mỗi phút) nộp Mock quá hạn + 30 s bằng bài đã lưu; nộp tay sau hạn cũng chấm bài đã lưu thay vì 409. Writing Mock không có chữ nào thì thành `abandoned`, `auto_submitted = true`. **Chưa làm:** thông báo "bài Mock đang dở, còn X phút" khi quay lại (US2), Speaking hỏi lại câu dở (US4), lựa chọn gửi Expert cho bài tự nộp (FR-013, chờ luồng Expert), hiện nhãn "nộp tự động" ở trang kết quả (FR-014), load test 5.000 người.
-- Core API chạy 1 tiến trình uvicorn; endpoint `async` gọi client Supabase đồng bộ nên mỗi lượt gọi DB chặn event loop. Phải sửa trước khi chịu tải lớn (mục tiêu load test 5.000 người ở spec 004; phương án ở `docs/defense-highlights.md` §8).
+- Core API chạy 1 tiến trình uvicorn. Đã sửa 2026-11-24: 61 endpoint `async def` không có `await` (gọi client Supabase đồng bộ, chặn event loop) đổi thành `def` để chạy trong threadpool; test `backend/tests/test_api_hardening.py` chặn tái phát. Đo: 6 request song song từ xếp hàng 0,4 → 2,0 s còn 0,4 → 0,6 s; reload 4 trang Learner trung bình 1 728 → 665 ms. Còn lại: handler `async` có `await` nhưng vẫn gọi hàm đồng bộ xen giữa (nộp Writing/Speaking, xin chấm Expert, workspace Expert, thống kê Admin), và giới hạn 1 tiến trình (ADR-24; mục tiêu load test 5.000 người ở spec 004; phương án ở `docs/defense-highlights.md` §8).
 - AI engine chưa trả model/prompt version/trace id → các cột truy vết mỗi lần chấm (model, phiên bản prompt, mã trace) trong `grading_runs` còn trống.
 - Transcript Listening dữ liệu cũ nằm trong `passage_text`, hiện trước khi nộp (trái yêu cầu "transcript Listening chỉ hiện sau khi nộp"). Cột `lr_sections.transcript` đã bị thu quyền đọc với `authenticated` (2026-11-09); dữ liệu cần chuyển sang cột đó.
 - Frontend polling 5 s cho Writing (`useWritingAttemptSummary.ts`), chưa dùng Realtime.

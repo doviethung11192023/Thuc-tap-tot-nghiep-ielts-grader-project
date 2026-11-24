@@ -9,6 +9,7 @@ import {
   useNotificationsQuery,
 } from '@/services/notifications';
 import { useRouter } from 'next/navigation';
+import { safeInternalPath } from '@/lib/safe-redirect';
 import { NotificationItem } from './NotificationItem';
 
 export function NotificationBell() {
@@ -74,8 +75,10 @@ export function NotificationBell() {
       }
     }
     setIsOpen(false);
-    if (notification.action_url) {
-      router.push(notification.action_url);
+    // action_url lấy từ DB: chỉ đi tới trang trong app (chặn //evil.com, javascript:...)
+    const actionPath = safeInternalPath(notification.action_url, '');
+    if (actionPath) {
+      router.push(actionPath);
     } else if (notification.essay_id) {
       router.push(`/results/${notification.essay_id}`);
     } else {

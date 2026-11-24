@@ -96,7 +96,7 @@ async def get_admin_tutor_overview(request: Request, current_user: User = Depend
 
 
 @router.put("/tutor/secrets")
-async def update_admin_tutor_secrets(body: TutorSecretsUpdateBody, current_user: User = Depends(require_admin)):
+def update_admin_tutor_secrets(body: TutorSecretsUpdateBody, current_user: User = Depends(require_admin)):
     masked = save_tutor_secret_overrides(str(current_user.id), body.secrets)
     return {"meta": {"code": 200, "message": "Đã cập nhật khóa API mã hóa thành công"}, "data": {"masked_overrides": masked}}
 

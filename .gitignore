@@ -100,6 +100,7 @@ docs/*
 !docs/defense-highlights.md
 !docs/project-roadmap.md
 !docs/codebase-summary.md
+!docs/deployment-guide.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)
@@ -113,3 +114,4 @@ dataset_clean/
 private/
 tools/browser-automation/node_modules/
 dataset_clean/
+plans/

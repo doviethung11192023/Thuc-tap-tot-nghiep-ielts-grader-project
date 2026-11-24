@@ -25,7 +25,7 @@ class BulkAssignSetPayload(BaseModel):
     test_set_id: Optional[str] = None
 
 @router.get("/test-sets")
-async def list_admin_test_sets(current_user: User = Depends(require_admin)):
+def list_admin_test_sets(current_user: User = Depends(require_admin)):
     """Danh sách tất cả bộ đề thi trong hệ thống kèm thống kê bài thi và kỹ năng."""
     sets_res = db().table("test_sets").select("*").order("created_at", desc=True).execute()
     test_sets = sets_res.data or []
@@ -72,7 +72,7 @@ async def list_admin_test_sets(current_user: User = Depends(require_admin)):
     }
 
 @router.post("/test-sets", status_code=status.HTTP_201_CREATED)
-async def create_admin_test_set(
+def create_admin_test_set(
     payload: TestSetCreatePayload,
     current_user: User = Depends(require_admin)
 ):
@@ -93,7 +93,7 @@ async def create_admin_test_set(
     }
 
 @router.put("/test-sets/{set_id}")
-async def update_admin_test_set(
+def update_admin_test_set(
     set_id: str,
     payload: TestSetUpdatePayload,
     current_user: User = Depends(require_admin)
@@ -116,7 +116,7 @@ async def update_admin_test_set(
 
 
 @router.patch("/test-sets/{set_id}/status")
-async def update_admin_test_set_status(
+def update_admin_test_set_status(
     set_id: str,
     payload: TestSetStatusPayload,
     current_user: User = Depends(require_admin),
@@ -146,7 +146,7 @@ async def update_admin_test_set_status(
     return {"meta": {"code": 200, "message": "Cập nhật trạng thái bộ đề thành công"}, "data": res.data[0]}
 
 @router.delete("/test-sets/{set_id}")
-async def delete_admin_test_set(
+def delete_admin_test_set(
     set_id: str,
     current_user: User = Depends(require_admin)
 ):
@@ -175,7 +175,7 @@ async def delete_admin_test_set(
     }
 
 @router.post("/tests/bulk-assign-set")
-async def bulk_assign_tests_to_set(
+def bulk_assign_tests_to_set(
     payload: BulkAssignSetPayload,
     current_user: User = Depends(require_admin)
 ):

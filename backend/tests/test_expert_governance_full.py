@@ -300,14 +300,15 @@ def test_b3_b6_new_expert_tier_probation_recovery_snapshots_and_rating(monkeypat
 
     # Learner rating API saves once and rejects duplicate with 409
     learner = User(id="u1", email="u1@test.com", role="learner")
-    saved = asyncio.run(expert_requests.submit_expert_helpfulness_rating(
+    # Handler là hàm thường (chạy trong threadpool), gọi trực tiếp
+    saved = expert_requests.submit_expert_helpfulness_rating(
         "att1", ExpertHelpfulnessRatingRequest(is_helpful=True, tags=["clear_actionable"]), current_user=learner
-    ))
+    )
     assert saved["status"] == "saved"
     with pytest.raises(HTTPException) as exc_dup:
-        asyncio.run(expert_requests.submit_expert_helpfulness_rating(
+        expert_requests.submit_expert_helpfulness_rating(
             "att1", ExpertHelpfulnessRatingRequest(is_helpful=False, tags=["too_brief"]), current_user=learner
-        ))
+        )
     assert exc_dup.value.status_code == 409
 
 

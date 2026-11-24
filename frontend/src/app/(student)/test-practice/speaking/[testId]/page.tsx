@@ -10,6 +10,7 @@ import { discardAttempt, submitSpeakingAttempt } from '@/services/student-test-p
 import { ExamPageNotice } from '@/components/exam/shared/ExamPageNotice';
 import { closedAttemptMessage } from '@/lib/attempt-submission';
 import { notifyAttemptSubmitted } from '@/stores/notification-store';
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 export default function SpeakingWorkspacePage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function SpeakingWorkspacePage() {
 
   const searchParams = useSearchParams();
   const requestedMode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
-  const returnUrl = searchParams.get('returnUrl') || '';
+  const returnUrl = safeInternalPath(searchParams.get('returnUrl'), '');
 
   const { loading, attemptId, attemptMode, attemptError, deadlineMs, speakingData, closedAttempt } =
     useExamWorkspaceContent(testId, 'speaking', requestedMode);

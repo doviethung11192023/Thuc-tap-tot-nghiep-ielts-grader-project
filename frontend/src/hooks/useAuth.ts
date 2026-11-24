@@ -17,12 +17,39 @@ const profileFetchMap = new Map<string, Promise<User | null>>();
 let authListenerBound = false;
 const subscribers = new Set<() => void>();
 
+// Object hồ sơ đã phát cho component lần gần nhất (để giữ nguyên tham chiếu khi làm mới ra cùng nội dung)
+let publishedUser: User | null = null;
+
 function notifySubscribers() {
+  publishedUser = cachedAuthUser;
   subscribers.forEach((cb) => cb());
 }
 
-async function fetchUserProfileOnce(userId: string, authUser?: SupabaseUser | null): Promise<User | null> {
-  if (cachedAuthUser && cachedAuthUser.id === userId) {
+// Hồ sơ lần trước lưu ở localStorage: reload trang hiển thị ngay, không chờ truy vấn profiles (~200–400 ms tới
+// Supabase) rồi làm mới ngầm. Chỉ dùng cho giao diện; quyền thật do Core API và RLS kiểm.
+const PROFILE_CACHE_KEY = "moonlab_profile_cache";
+
+function readCachedProfile(userId: string): User | null {
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as User) : null;
+    return parsed && parsed.id === userId ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(user: User | null) {
+  try {
+    if (user) localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(user));
+    else localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch {
+    // localStorage đầy hoặc bị chặn: bỏ qua, lần sau lại chờ truy vấn như cũ
+  }
+}
+
+async function fetchUserProfileOnce(userId: string, authUser?: SupabaseUser | null, force = false): Promise<User | null> {
+  if (!force && cachedAuthUser && cachedAuthUser.id === userId) {
     return cachedAuthUser;
   }
   const existing = profileFetchMap.get(userId);
@@ -80,6 +107,13 @@ async function fetchUserProfileOnce(userId: string, authUser?: SupabaseUser | nu
         cachedAuthUser = null;
       }
     } finally {
+      // Làm mới ngầm ra đúng hồ sơ cũ thì giữ nguyên object: trang dùng `user` làm dependency không tải lại lần hai
+      // (bỏ updated_at vì nhánh dự phòng đặt nó theo giờ hiện tại)
+      const sameAsBefore = (u: User | null) => JSON.stringify({ ...u, updated_at: undefined });
+      if (publishedUser && cachedAuthUser && sameAsBefore(publishedUser) === sameAsBefore(cachedAuthUser)) {
+        cachedAuthUser = publishedUser;
+      }
+      writeCachedProfile(cachedAuthUser);
       authResolved = true;
       profileFetchMap.delete(userId);
       notifySubscribers();
@@ -102,6 +136,7 @@ function ensureAuthInitialized() {
         cachedAuthUser = null;
         authResolved = true;
         localStorage.removeItem("supabase_access_token");
+        writeCachedProfile(null);
         notifySubscribers();
       }
     });
@@ -113,8 +148,17 @@ function ensureAuthInitialized() {
       .then(async ({ data: { session } }) => {
         if (session?.user) {
           localStorage.setItem("supabase_access_token", session.access_token);
+          const remembered = readCachedProfile(session.user.id);
+          if (remembered) {
+            // Mở trang ngay bằng hồ sơ đã nhớ, rồi đọc lại profiles để cập nhật tên, vai trò, trạng thái
+            cachedAuthUser = remembered;
+            authResolved = true;
+            notifySubscribers();
+            return fetchUserProfileOnce(session.user.id, session.user, true);
+          }
           return fetchUserProfileOnce(session.user.id, session.user);
         }
+        writeCachedProfile(null);
         cachedAuthUser = null;
         authResolved = true;
         notifySubscribers();
@@ -149,6 +193,7 @@ export function useAuth() {
     cachedAuthUser = null;
     authResolved = true;
     localStorage.removeItem("supabase_access_token");
+    writeCachedProfile(null);
     notifySubscribers();
   }
 

@@ -12,6 +12,7 @@ import { notifyAttemptSubmitted } from '@/stores/notification-store';
 import { closedAttemptMessage, isAlreadySubmitted, submitFailureMessage } from '@/lib/attempt-submission';
 import { invalidatePracticeHistoryCache } from '@/services/practice-history-cache';
 import { toast } from "sonner";
+import { safeInternalPath } from '@/lib/safe-redirect';
 
 export default function WritingWorkspacePage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function WritingWorkspacePage() {
 
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
-  const returnUrl = searchParams.get('returnUrl') || '';
+  const returnUrl = safeInternalPath(searchParams.get('returnUrl'), '');
   const parts = searchParams.get('parts') || undefined;
   const returnQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
   const summaryPath = (id: string) => `/test-practice/writing/${testId}/summary?attemptId=${id}${returnQuery}`;

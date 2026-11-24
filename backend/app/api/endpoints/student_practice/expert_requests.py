@@ -162,7 +162,7 @@ async def request_practice_expert_review(
 
 
 @router.get("/attempts/{attempt_id}/expert-rating")
-async def get_expert_helpfulness_rating(
+def get_expert_helpfulness_rating(
     attempt_id: str,
     current_user: User = Depends(require_learner),
 ):
@@ -175,7 +175,7 @@ async def get_expert_helpfulness_rating(
 
 
 @router.post("/attempts/{attempt_id}/expert-rating")
-async def submit_expert_helpfulness_rating(
+def submit_expert_helpfulness_rating(
     attempt_id: str,
     payload: ExpertHelpfulnessRatingRequest,
     current_user: User = Depends(require_learner),

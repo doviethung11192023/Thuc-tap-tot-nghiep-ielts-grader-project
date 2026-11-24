@@ -19,7 +19,7 @@ class SubmitAnswersRequest(BaseModel):
 
 
 @router.post("/attempts/{attempt_id}/submit")
-async def submit_reading_listening_answers(attempt_id: str, req: SubmitAnswersRequest,
+def submit_reading_listening_answers(attempt_id: str, req: SubmitAnswersRequest,
                                            current_user: Optional[User] = Depends(get_optional_user)):
     """Nộp bài Reading/Listening; chấm ngay, band chỉ khi đủ 40 câu."""
     if not current_user:

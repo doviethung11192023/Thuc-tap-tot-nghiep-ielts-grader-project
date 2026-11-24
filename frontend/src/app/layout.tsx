@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Be_Vietnam_Pro, Newsreader, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
@@ -30,11 +31,14 @@ export const metadata: Metadata = {
   description: "Hệ thống luyện thi và chấm điểm IELTS 4 kỹ năng bằng AI & Chuyên gia",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // CSP có nonce (src/proxy.ts): nonce sinh theo từng request nên mọi trang phải render động,
+  // trang dựng sẵn lúc build không có nonce và script của nó sẽ bị trình duyệt chặn.
+  await connection();
   return (
     <html
       lang="vi"

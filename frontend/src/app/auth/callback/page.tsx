@@ -5,16 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner";
+import { safeInternalPath } from '@/lib/safe-redirect';
 
+// Hai lớp chống open redirect: safeInternalPath chuẩn hoá và loại //, /\, URL tuyệt đối; sau đó chỉ cho các trang trong danh sách
 const SAFE_NEXT_PREFIX_RE =
   /^\/(reset-password|learning-profile|test-practice|profile|results|dashboard|history|admin|expert)(\/|\?|$)/;
-
-function isSafeInternalPath(path: string | null): path is string {
-  if (!path || !path.startsWith('/')) return false;
-  if (path.startsWith('//') || path.startsWith('/\\')) return false;
-  if (/[\x00-\x1f\\]/.test(path)) return false;
-  return SAFE_NEXT_PREFIX_RE.test(path);
-}
 
 function CallbackContent() {
   const router = useRouter();
@@ -40,8 +35,8 @@ function CallbackContent() {
           .single();
 
         // Kiểm tra tham số next chuyển hướng (ví dụ: /reset-password), chống Open Redirect
-        const nextParam = searchParams.get('next');
-        if (isSafeInternalPath(nextParam)) {
+        const nextParam = safeInternalPath(searchParams.get('next'), '');
+        if (nextParam && SAFE_NEXT_PREFIX_RE.test(nextParam)) {
           router.push(nextParam);
           return;
         }

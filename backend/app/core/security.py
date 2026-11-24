@@ -75,7 +75,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         print(f"[SECURITY DEBUG] Auth exception: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid authentication credentials: {str(e)}",
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

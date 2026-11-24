@@ -6,6 +6,7 @@ import {
   getLearningProfileTestPractice,
   updateLearningProfileGoals,
 } from "@/services/learning-profile";
+import { prefetchLearnerNextStep } from "@/hooks/useLearnerNextStep";
 import type {
   LearningProfileOverviewData,
   LearningProfileTestPracticeData,
@@ -53,6 +54,7 @@ export function useLearningProfile() {
   }, []);
 
   useEffect(() => {
+    prefetchLearnerNextStep();
     fetchProfileData();
   }, [fetchProfileData]);
 
