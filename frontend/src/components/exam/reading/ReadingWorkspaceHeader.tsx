@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowLeft, Send, ZoomIn, ZoomOut } from 'lucide-react';
-import { ExamTabularTimer } from '../ExamTabularTimer';
+import { ExamTabularTimer } from '@/components/exam/shared/ExamTabularTimer';
 
 interface ReadingWorkspaceHeaderProps {
   title: string;

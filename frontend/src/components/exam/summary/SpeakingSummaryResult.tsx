@@ -21,8 +21,8 @@ import {
   OverallReport,
   PronunciationEvidence,
   SpeechMetricsPanel,
-} from '../speaking/speaking-result-sections';
-import { SpeakingTestPromptsPanel } from '../speaking/speaking-prompt-card';
+} from '@/components/exam/speaking/speaking-result-sections';
+import { SpeakingTestPromptsPanel } from '@/components/exam/speaking/speaking-prompt-card';
 import { DualEvaluationComparisonCard } from './DualEvaluationComparisonCard';
 
 interface SpeakingSummaryResultProps {
