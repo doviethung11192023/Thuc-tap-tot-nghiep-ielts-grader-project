@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Compass, Flag } from 'lucide-react';
-import { QuestionGroupRenderer } from '../renderers/QuestionGroupRenderer';
+import { QuestionGroupRenderer } from '@/components/exam/renderers/QuestionGroupRenderer';
 
 interface ListeningQuestionsPaneProps {
   availableSections: any[];

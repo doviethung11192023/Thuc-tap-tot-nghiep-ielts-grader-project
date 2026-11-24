@@ -8,7 +8,7 @@ import { Activity, AlertTriangle, Users, FileText, Clock, Loader2, RotateCcw, Se
 import { getSystemStatistics } from "@/services/users";
 import { toast } from "sonner";
 import { KpiCard } from "@/components/admin/statistics/KpiCard";
-import { AdminExpertKpiTable, type ExpertKpiRow } from "@/components/admin/AdminExpertKpiTable";
+import { AdminExpertKpiTable, type ExpertKpiRow } from "@/components/admin/expert-governance/AdminExpertKpiTable";
 import { AlertsBadge } from "@/components/admin/ai-services/monitoring/AlertsBadge";
 import { ExpertGapCard } from "@/components/admin/ai-services/monitoring/ExpertGapCard";
 import { ChartSkeleton } from "@/components/ui/skeleton";
@@ -35,12 +35,12 @@ interface SystemStatisticsData {
 }
 
 const AdminSubmissionsTrendChart = dynamic(
-  () => import("@/components/admin/AdminSubmissionsTrendChart").then((m) => m.AdminSubmissionsTrendChart),
+  () => import("@/components/admin/statistics/AdminSubmissionsTrendChart").then((m) => m.AdminSubmissionsTrendChart),
   { ssr: false, loading: () => <ChartSkeleton heightClass="h-96" label="Đang tải biểu đồ xu hướng nộp bài..." /> }
 );
 
 const AdminMonthlyCohortChart = dynamic(
-  () => import("@/components/admin/AdminMonthlyCohortChart").then((m) => m.AdminMonthlyCohortChart),
+  () => import("@/components/admin/statistics/AdminMonthlyCohortChart").then((m) => m.AdminMonthlyCohortChart),
   { ssr: false, loading: () => <ChartSkeleton heightClass="h-80" label="Đang tải biểu đồ cohort theo tháng..." /> }
 );
 

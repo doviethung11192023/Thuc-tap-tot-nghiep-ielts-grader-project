@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ReadingWorkspace } from '@/components/exam/reading/ReadingWorkspace';
-import { AttemptErrorBanner } from '@/components/exam/AttemptErrorBanner';
+import { AttemptErrorBanner } from '@/components/exam/shared/AttemptErrorBanner';
 import { ExamWorkspaceSkeleton } from '@/components/exam/shared/ExamWorkspaceSkeleton';
 import { ExamPageNotice } from '@/components/exam/shared/ExamPageNotice';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';

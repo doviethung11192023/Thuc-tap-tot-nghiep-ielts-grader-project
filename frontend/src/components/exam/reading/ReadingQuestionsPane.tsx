@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Flag } from 'lucide-react';
-import { QuestionGroupRenderer } from '../renderers/QuestionGroupRenderer';
+import { QuestionGroupRenderer } from '@/components/exam/renderers/QuestionGroupRenderer';
 
 interface ReadingQuestionsPaneProps {
   currentPassage: any;

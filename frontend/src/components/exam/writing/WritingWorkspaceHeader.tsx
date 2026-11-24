@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowLeft, Send, CheckCircle2, AlertCircle } from 'lucide-react';
-import { ExamTabularTimer } from '../ExamTabularTimer';
+import { ExamTabularTimer } from '@/components/exam/shared/ExamTabularTimer';
 
 interface WritingWorkspaceHeaderProps {
   mode: 'exam' | 'practice';

@@ -11,8 +11,8 @@ import {
 } from "@/services/admin-reviews";
 import type { ExpertPenaltyItem } from "@/types";
 import { extractApiErrorMessage } from "@/lib/api-error";
-import { AdminWaivePenaltyModal } from "./AdminWaivePenaltyModal";
-import { exportExpertPerformanceCsv, TIER_BADGE_META } from "./admin-expert-kpi-utils";
+import { AdminWaivePenaltyModal } from "@/components/admin/expert-governance/AdminWaivePenaltyModal";
+import { exportExpertPerformanceCsv, TIER_BADGE_META } from "@/components/admin/expert-governance/admin-expert-kpi-utils";
 
 export type ExpertKpiRow = AdminExpertPerformanceRow;
 

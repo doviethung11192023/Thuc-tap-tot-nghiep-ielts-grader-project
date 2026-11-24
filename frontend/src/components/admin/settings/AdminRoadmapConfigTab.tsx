@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Compass, RotateCcw, Save, Loader2 } from "lucide-react";
 import type { SystemSetting } from "@/types/exam";
-import { AdminGamificationConfigCard } from "./AdminGamificationConfigCard";
+import { AdminGamificationConfigCard } from "@/components/admin/settings/AdminGamificationConfigCard";
 
 interface AdminRoadmapConfigTabProps {
   settings: SystemSetting[];

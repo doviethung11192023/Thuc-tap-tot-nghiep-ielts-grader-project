@@ -9,9 +9,9 @@ import {
   type AdminTutorConfig,
   type AdminTutorOverview,
 } from "@/services/admin-tutor";
-import { AdminAiTutorProviderSection } from "./AdminAiTutorProviderSection";
-import { AdminAiTutorPedagogySection } from "./AdminAiTutorPedagogySection";
-import { AdminAiTutorTelemetrySection } from "./AdminAiTutorTelemetrySection";
+import { AdminAiTutorProviderSection } from "@/components/admin/ai-tutor/AdminAiTutorProviderSection";
+import { AdminAiTutorPedagogySection } from "@/components/admin/ai-tutor/AdminAiTutorPedagogySection";
+import { AdminAiTutorTelemetrySection } from "@/components/admin/ai-tutor/AdminAiTutorTelemetrySection";
 
 export function AdminAiTutorConfigTab() {
   const [overview, setOverview] = useState<AdminTutorOverview | null>(null);

@@ -15,9 +15,9 @@ import {
 import type { BandConversion, SystemSetting } from "@/types/exam";
 import { BandConversionsTable } from "@/components/admin/settings/BandConversionsTable";
 import { SystemSettingsCards } from "@/components/admin/settings/SystemSettingsCards";
-import { AdminExpertGovernanceConfigCard } from "@/components/admin/AdminExpertGovernanceConfigCard";
-import { AdminRoadmapConfigTab } from "@/components/admin/AdminRoadmapConfigTab";
-import { AdminAiTutorConfigTab } from "@/components/admin/AdminAiTutorConfigTab";
+import { AdminExpertGovernanceConfigCard } from "@/components/admin/settings/AdminExpertGovernanceConfigCard";
+import { AdminRoadmapConfigTab } from "@/components/admin/settings/AdminRoadmapConfigTab";
+import { AdminAiTutorConfigTab } from "@/components/admin/ai-tutor/AdminAiTutorConfigTab";
 import { apiErrorDetail } from "@/lib/attempt-submission";
 
 export default function AdminSettingsPage() {
