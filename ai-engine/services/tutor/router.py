@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from services.tutor_streaming_service import (
+from services.tutor.streaming_service import (
     get_env_provider_status,
     ping_tutor_model,
     stream_tutor_sse,

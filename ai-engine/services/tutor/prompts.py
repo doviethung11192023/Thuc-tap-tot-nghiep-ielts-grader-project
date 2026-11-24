@@ -151,7 +151,7 @@ def build_tutor_messages(req: Dict[str, Any]) -> List[Dict[str, str]]:
     return messages
 
 
-from services.tutor_spoiler_guard import (
+from services.tutor.spoiler_guard import (
     ROMAN_NUMERALS,
     STOPWORDS_3,
     extract_spoiler_guard_data,

@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 
 from services.langfuse.prompt_manager import CompiledPrompt
-from services.prompt_builder import CriterionPrompts
+from services.llm.prompt_builder import CriterionPrompts
 
 
 def _compiled(model: str, version: int) -> CompiledPrompt:

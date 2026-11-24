@@ -15,7 +15,7 @@ Endpoints:
     GET  /grading-fingerprint?task_type=  → hash of pipeline, models, production prompt versions
     Run context (spec 008): /grade, /grade-speaking and /draft-material also accept optional run_id, attempt_id,
                   skill, mode. They answer with trace_id, usage (tokens per model) and model; error bodies carry
-                  detail, trace_id and usage. Admin routes live in admin_routes.py (/admin/*).
+                  detail, trace_id and usage. Routes live in api/ (grading_routes.py, admin_routes.py); this file only wires startup.
     POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}],
                                   "unanswered": [{part, question}] (optional) }
                   → transcripts, speech metrics, 4 criteria, feedback. Requires X-AI-Engine-Secret.
@@ -32,7 +32,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -42,32 +42,23 @@ from settings.logging import setup_logging, get_logger   # noqa: E402
 setup_logging()
 logger = get_logger(__name__)
 
-from admin_routes import router as admin_router  # noqa: E402
-from engine_auth import require_engine_secret  # noqa: E402
+from api.admin_routes import router as admin_router  # noqa: E402
+from api.grading_routes import (  # noqa: E402,F401  (re-exported for serve.py and tests)
+    grade,
+    health,
+    root,
+    router as grading_router,
+)
 from schemas.engine_requests import (  # noqa: E402,F401  (re-exported for serve.py and tests)
     MAX_ESSAY_CHARS,
     DraftMaterialRequest,
     GradeRequest,
     GradeSpeakingRequest,
 )
-from services.langfuse.grading_scope import grading_scope  # noqa: E402
-from services.langfuse.run_trace import RunContext  # noqa: E402
-from services.runtime_config.request_runtime_config import snapshot_for_request  # noqa: E402
 from services.service_admin.service_health import record_load_failure  # noqa: E402
 from settings.config import get_settings  # noqa: E402
-from services.grading_pipeline import (  # noqa: E402
-    PromptFetchError,
-    normalize_task,
-    run_grading_pipeline,
-    warm_up_nlp_tools,
-)
-from services.reference_corpus import ReferenceCorpusError  # noqa: E402
-from services.grading_fingerprint import grading_fingerprint  # noqa: E402
-from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
-from services.prompt_builder import get_prompt_manager  # noqa: E402
-from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
-from services.tutor_router import router as tutor_router  # noqa: E402
-from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
+from services.writing.grading_pipeline import run_grading_pipeline, warm_up_nlp_tools  # noqa: E402,F401
+from services.tutor.router import router as tutor_router  # noqa: E402
 from services.speaking.phoneme_recognizer import load_model as load_phoneme_model  # noqa: E402
 from services.speaking.speech_transcriber import load_model as load_stt_model  # noqa: E402
 
@@ -111,6 +102,7 @@ app = FastAPI(
 )
 
 app.include_router(admin_router)
+app.include_router(grading_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -119,92 +111,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(tutor_router)
-
-
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "IELTS Grader API is running."}
-
-
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
-
-
-def _run_context(req, task_no: int | None = None) -> RunContext:
-    return RunContext(req.run_id, req.attempt_id, req.skill, req.mode, task_no)
-
-
-@app.post("/grade", dependencies=[Depends(require_engine_secret)])
-async def grade(req: GradeRequest):
-    """Run the full grading pipeline on the submitted essay."""
-    if not req.essay.strip():
-        raise HTTPException(status_code=422, detail="Essay is empty")
-    task_no = 1 if normalize_task(req.task_type) == "task1" else 2
-    async with grading_scope(_run_context(req, task_no), "writing-grade") as scope:
-        try:
-            result = await run_grading_pipeline(
-                title=req.title,
-                essay=req.essay,
-                task_type=req.task_type,
-                image_url=req.image_url,
-                answer_key=req.answer_key,
-            )
-            return scope.success(result)
-        except PromptFetchError as e:
-            logger.error("Langfuse prompt missing: %s", e)
-            return scope.failure(502, f"Prompt configuration error: {e}")
-        except ReferenceCorpusError as e:
-            logger.error("Reference corpus unavailable: %s", e)
-            return scope.failure(503, str(e))
-        except Exception as e:
-            logger.error("Grading failed: %s", e, exc_info=True)
-            return scope.failure(500, str(e))
-
-
-@app.post("/draft-material", dependencies=[Depends(require_engine_secret)])
-async def draft_material_endpoint(req: DraftMaterialRequest):
-    """AI draft of per-task material; the Core API stores it as a draft for Admin approval (ADR-30)."""
-    async with grading_scope(_run_context(req), "writing-draft-material") as scope:
-        try:
-            content = await draft_material(req.kind, normalize_task(req.task_type), req.title, req.image_url,
-                                           req.answer_key, get_prompt_manager())
-            return scope.success({"kind": req.kind, "content": content})
-        except MaterialRequestError as e:
-            return scope.failure(422, str(e))
-        except PromptFetchError as e:
-            return scope.failure(502, f"Prompt configuration error: {e}")
-        except Exception as e:
-            logger.error("Material draft failed: %s", e, exc_info=True)
-            return scope.failure(500, str(e))
-
-
-@app.get("/grading-fingerprint", dependencies=[Depends(require_engine_secret)])
-async def grading_fingerprint_endpoint(task_type: str = "task2"):
-    """Hash of pipeline, models and production prompt versions; the Core API keys its cache on it."""
-    try:
-        await snapshot_for_request()     # Admin step overrides are part of the fingerprint
-        return {"fingerprint": await asyncio.to_thread(
-            grading_fingerprint, normalize_task(task_type), get_prompt_manager())}
-    except PromptFetchError as e:
-        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
-
-
-@app.post("/grade-speaking", dependencies=[Depends(require_engine_secret)])
-async def grade_speaking(req: GradeSpeakingRequest):
-    """Speech layers, then LLM. Slow, so the Core API calls this from a background task."""
-    async with grading_scope(_run_context(req), "speaking-grade") as scope:
-        try:
-            result = await run_speaking_pipeline(
-                req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers],
-                [UnansweredQuestion(q.part, q.question) for q in req.unanswered])
-            return scope.success(result)
-        except PromptFetchError as e:
-            logger.error("Langfuse prompt missing: %s", e)
-            return scope.failure(502, f"Prompt configuration error: {e}")
-        except Exception as e:
-            logger.error("Speaking grading failed: %s", e, exc_info=True)
-            return scope.failure(500, str(e))
 
 
 def run_server():

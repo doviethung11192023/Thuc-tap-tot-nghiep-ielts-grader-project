@@ -22,16 +22,16 @@ from schemas.answer_key import parse_key_or_none
 from schemas.input import EssayInput
 from settings.config import get_settings
 from schemas.task_type import TaskTypeResult
-from services.chart_describer import describe_chart
-from services.key_point_checker import run_key_point_check
+from services.writing.chart_describer import describe_chart
+from services.writing.key_point_checker import run_key_point_check
 from services.langfuse.prompt_manager import PromptFetchError, WritingTask
-from services.llm_evaluator import evaluate_all_criteria
-from services.prompt_builder import build_criterion_prompts, get_prompt_manager
-from services.synthesis_service import SynthesisService
-from services.task2_reference_pipeline import run_task2_reference_pipeline
-from services.reference_corpus import ReferenceCorpusError
-from services.task1_type_knowledge import get_task1_type
-from services.task_type_classifier import classify_task_type
+from services.llm.llm_evaluator import evaluate_all_criteria
+from services.llm.prompt_builder import build_criterion_prompts, get_prompt_manager
+from services.writing.synthesis_service import SynthesisService
+from services.writing.task2_reference_pipeline import run_task2_reference_pipeline
+from services.writing.reference_corpus import ReferenceCorpusError
+from services.writing.task1_type_knowledge import get_task1_type
+from services.writing.task_type_classifier import classify_task_type
 from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from utils.preprocessor import preprocess

@@ -10,10 +10,10 @@ import json
 import logging
 
 from schemas.task_type import UNKNOWN_TASK_TYPE, TaskTypeResult
-from services import jev_client
-from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence, trace_options
+from services.writing import jev_client
+from services.llm.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence, trace_options
 from services.langfuse.usage_meter import record_usage
-from services.prompt_builder import get_prompt_manager
+from services.llm.prompt_builder import get_prompt_manager
 from settings.config import get_settings
 
 logger = logging.getLogger(__name__)

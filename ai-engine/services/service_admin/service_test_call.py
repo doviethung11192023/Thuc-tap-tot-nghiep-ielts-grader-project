@@ -15,8 +15,8 @@ from typing import Literal
 from langfuse.openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
-from services import jev_client
-from services.llm_client import (
+from services.writing import jev_client
+from services.llm.llm_client import (
     effective_enable_thinking, effective_llm_api_key, effective_llm_timeout, ensure_langfuse_client,
 )
 from services.runtime_config.secret_redaction import redact_secrets

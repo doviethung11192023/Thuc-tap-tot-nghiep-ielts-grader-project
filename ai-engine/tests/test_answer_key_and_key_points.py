@@ -2,8 +2,8 @@
 import pytest
 
 from schemas.answer_key import parse_answer_key, parse_key_or_none
-from services.key_point_checker import is_close, judge
-from services.sub_indicator_levels import band_level, clamp_levels, task_sub_levels
+from services.writing.key_point_checker import is_close, judge
+from services.writing.sub_indicator_levels import band_level, clamp_levels, task_sub_levels
 
 # "Consumption of Spreads" (Prep "Graphs with a trend 1"), figures read from the chart
 SPREADS = {
@@ -102,5 +102,5 @@ def test_data_accuracy_follows_key_check():
     (7, 7, "excellent"), (6, 7, "very_good"), (5, 7, "good"), (4, 7, "fair"), (3, 7, "needs_work"), (0, 0, "needs_work"),
 ])
 def test_accuracy_level_thresholds(accurate, covered, level):
-    from services.sub_indicator_levels import accuracy_level
+    from services.writing.sub_indicator_levels import accuracy_level
     assert accuracy_level({"accurate": accurate, "covered": covered}) == level

@@ -27,8 +27,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from services.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence  # noqa: E402
-from services.prompt_builder import get_prompt_manager  # noqa: E402
+from services.llm.llm_client import get_sync_llm_client, llm_extra_body, strip_markdown_fence  # noqa: E402
+from services.llm.prompt_builder import get_prompt_manager  # noqa: E402
 from utils.essay_type_rules import ESSAY_TYPES, classify_by_rules  # noqa: E402
 from utils import reference_corpus_cleaning as cleaning  # noqa: E402
 

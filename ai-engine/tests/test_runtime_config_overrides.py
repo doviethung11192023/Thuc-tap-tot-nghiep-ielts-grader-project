@@ -3,7 +3,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from services import jev_client, llm_client
+from services.writing import jev_client
+
+from services.llm import llm_client
 from services.langfuse import prompt_manager as pm_module
 from services.langfuse.prompt_param_resolution import resolve_prompt_params
 from services.runtime_config import request_runtime_config as rrc

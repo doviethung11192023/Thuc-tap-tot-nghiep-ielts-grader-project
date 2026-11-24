@@ -11,9 +11,9 @@ import json
 from dataclasses import dataclass, field
 
 from schemas.llm_output import AgentCriterionOutput
-from services.llm_client import strip_markdown_fence
-from services.llm_evaluator import call_llm_json, validate_criterion
-from services.prompt_builder import CompiledPrompt
+from services.llm.llm_client import strip_markdown_fence
+from services.llm.llm_evaluator import call_llm_json, validate_criterion
+from services.llm.prompt_builder import CompiledPrompt
 
 
 @dataclass

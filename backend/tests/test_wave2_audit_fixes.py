@@ -144,7 +144,7 @@ def test_sys06_br08_dual_eval_and_speaking_summary_sanitize(monkeypatch):
     # Speaking AI prose sanitizer (stubbing optional openai/ai deps inside backend test runner)
     from types import ModuleType
     ai_root = Path(__file__).resolve().parents[2] / "ai-engine"  # AI engine dời khỏi backend/app/ai (2026-11-23)
-    for mod_name in ("openai", "services", "services.llm_client", "services.prompt_builder", "settings", "settings.config",
+    for mod_name in ("openai", "services", "services.llm.llm_client", "services.llm.prompt_builder", "settings", "settings.config",
                      "services.langfuse", "services.langfuse.usage_meter"):
         stub = ModuleType(mod_name)
         if mod_name == "services":

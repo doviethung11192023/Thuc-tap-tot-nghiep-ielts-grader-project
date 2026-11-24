@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-from services import reference_corpus as corpus
-from services.reference_corpus import Reference, ReferenceCorpusError, select_ladder
+from services.writing import reference_corpus as corpus
+from services.writing.reference_corpus import Reference, ReferenceCorpusError, select_ladder
 from utils.reference_corpus_cleaning import reference_id
 
 

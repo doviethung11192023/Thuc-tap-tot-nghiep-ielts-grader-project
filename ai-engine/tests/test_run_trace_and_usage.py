@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import main
+from api import grading_routes
 from services.langfuse import run_trace as rt_module
 from services.langfuse import usage_meter
 from services.langfuse.prompt_manager import PromptFetchError
@@ -140,7 +141,7 @@ def test_grade_returns_trace_usage_and_model(client, monkeypatch):
         usage_meter.record_usage(response(10, 90), "qwen3.7-plus")
         return {"scores": {"overall_band": 6.0}, "model": "ta=a; cc=b"}
 
-    monkeypatch.setattr(main, "run_grading_pipeline", pipeline)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", pipeline)
     body = client.post("/grade", json={**BODY, "task_type": "task1"}).json()
     assert body["trace_id"] == f"trace-for-{RUN_ID}"
     assert body["scores"] == {"overall_band": 6.0}
@@ -157,7 +158,7 @@ def test_model_is_the_main_step_model_after_overrides(client, monkeypatch):
         runtime.record_model("writing/task2/grade", "overridden-model")
         return {}
 
-    monkeypatch.setattr(main, "run_grading_pipeline", pipeline)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", pipeline)
     assert client.post("/grade", json=BODY).json()["model"] == "overridden-model"
 
 
@@ -165,7 +166,7 @@ def test_request_without_run_context_runs_as_before(client, monkeypatch, fake_la
     async def pipeline(**kwargs):
         return {"scores": {}}
 
-    monkeypatch.setattr(main, "run_grading_pipeline", pipeline)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", pipeline)
     body = client.post("/grade", json={"title": "T", "essay": "An essay."}).json()
     assert body["scores"] == {} and body["trace_id"] is None and body["usage"] == []
     assert fake_langfuse.opened == []
@@ -176,7 +177,7 @@ def test_errors_carry_usage_and_trace_id(client, monkeypatch):
         usage_meter.record_usage(response(5, 1), "qwen-flash")
         raise RuntimeError("provider said sk-abcdef123456 is wrong")
 
-    monkeypatch.setattr(main, "run_grading_pipeline", failing)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", failing)
     res = client.post("/grade", json=BODY)
     assert res.status_code == 500
     body = res.json()
@@ -187,7 +188,7 @@ def test_errors_carry_usage_and_trace_id(client, monkeypatch):
     async def missing(**kwargs):
         raise PromptFetchError("prompt gone")
 
-    monkeypatch.setattr(main, "run_grading_pipeline", missing)
+    monkeypatch.setattr(grading_routes, "run_grading_pipeline", missing)
     res = client.post("/grade", json=BODY)
     assert res.status_code == 502 and "prompt gone" in res.json()["detail"] and "usage" in res.json()
 
@@ -200,9 +201,9 @@ def test_speaking_and_material_endpoints_return_run_info(client, monkeypatch):
     async def material(kind, task, title, image_url, key, manager):
         return "draft"
 
-    monkeypatch.setattr(main, "run_speaking_pipeline", speaking)
-    monkeypatch.setattr(main, "draft_material", material)
-    monkeypatch.setattr(main, "get_prompt_manager", lambda: None)
+    monkeypatch.setattr(grading_routes, "run_speaking_pipeline", speaking)
+    monkeypatch.setattr(grading_routes, "draft_material", material)
+    monkeypatch.setattr(grading_routes, "get_prompt_manager", lambda: None)
     res = client.post("/grade-speaking", json={
         "run_id": RUN_ID, "answers": [{"response_id": "r", "part": 1, "question": "q", "audio_url": "u"}]}).json()
     assert res["trace_id"] and res["usage"] == [{"model": "m", "input_tokens": 3, "output_tokens": 4}]

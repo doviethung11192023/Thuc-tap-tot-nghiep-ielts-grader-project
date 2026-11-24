@@ -20,8 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from services import jev_client  # noqa: E402
-from services.prompt_builder import get_prompt_manager  # noqa: E402
-from services.task_type_classifier import _classify_with_prompt  # noqa: E402
+from services.llm.prompt_builder import get_prompt_manager  # noqa: E402
+from services.writing.task_type_classifier import _classify_with_prompt  # noqa: E402
 from utils.essay_type_rules import classify_by_rules  # noqa: E402
 
 DATASET = Path(__file__).resolve().parents[2] / "dataset_clean" / "dap_an_loi_giai_clean" / "writing"

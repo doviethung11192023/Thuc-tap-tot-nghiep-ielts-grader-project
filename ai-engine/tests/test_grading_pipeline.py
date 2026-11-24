@@ -3,12 +3,12 @@ from types import SimpleNamespace
 
 import pytest
 
-import services.grading_pipeline as gp
+import services.writing.grading_pipeline as gp
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
 from schemas.task_type import TaskTypeResult
-from services.chart_describer import ChartDescription
+from services.writing.chart_describer import ChartDescription
 from services.langfuse.prompt_manager import CompiledPrompt, resolve_agent_prompt_name
-from services.prompt_builder import CriterionPrompts
+from services.llm.prompt_builder import CriterionPrompts
 
 ESSAY = "The bar chart compares aid from six countries between 2008 and 2010. Overall, the USA gave the most."
 
@@ -99,7 +99,7 @@ async def test_task2_legacy_routing(stubbed):
 @pytest.mark.asyncio
 async def test_task1_with_approved_key_skips_image_and_adds_checklist(stubbed, monkeypatch):
     """Spec 006: an approved key replaces the vision pass; the checklist feeds the rewrite."""
-    from services.key_point_checker import judge
+    from services.writing.key_point_checker import judge
     from tests.test_answer_key_and_key_points import SPREADS
     from schemas.answer_key import parse_answer_key
 

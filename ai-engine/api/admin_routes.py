@@ -9,7 +9,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from engine_auth import require_engine_secret_strict
+from api.auth import require_engine_secret_strict
 from services.langfuse import prompt_admin, trace_admin
 from services.runtime_config.runtime_config_client import get_runtime_config_client
 from services.service_admin.effective_config import build_effective_config

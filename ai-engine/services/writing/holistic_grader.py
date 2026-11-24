@@ -5,8 +5,8 @@ import json
 
 from schemas.llm_output import AllAgentOutputs
 from services.langfuse.prompt_manager import CompiledPrompt
-from services.llm_client import llm_extra_body, strip_markdown_fence
-from services.llm_evaluator import call_llm_json, validate_criterion
+from services.llm.llm_client import llm_extra_body, strip_markdown_fence
+from services.llm.llm_evaluator import call_llm_json, validate_criterion
 
 
 def parse_all_criteria(raw_text: str) -> AllAgentOutputs:

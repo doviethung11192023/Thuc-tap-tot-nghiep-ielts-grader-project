@@ -6,9 +6,9 @@ from typing import Any, AsyncIterator, Dict, Optional
 from openai import AsyncOpenAI
 
 from settings.config import get_settings
-from services.tutor_prompts import build_tutor_messages, extract_spoiler_guard_data
-from services.tutor_spoiler_guard import _AntiSpoilerStreamFilter
-from services.tutor_stream_telemetry import (
+from services.tutor.prompts import build_tutor_messages, extract_spoiler_guard_data
+from services.tutor.spoiler_guard import _AntiSpoilerStreamFilter
+from services.tutor.stream_telemetry import (
     estimate_context_breakdown,
     extract_usage_from_chunk,
     finalize_stream_telemetry,

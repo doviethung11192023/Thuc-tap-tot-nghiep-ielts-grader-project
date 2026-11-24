@@ -17,8 +17,8 @@ from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from schemas.llm_output import AgentCriterionOutput
 from schemas.input import EssayInput
-from services.llm_evaluator import evaluate_criterion
-from services.prompt_builder import get_prompt_manager
+from services.llm.llm_evaluator import evaluate_criterion
+from services.llm.prompt_builder import get_prompt_manager
 from services.speaking.answer_analysis import (
     AnswerAnalysis, analyze_answer, combine_comparison, combine_metrics, combine_quality, mean_word_confidence,
 )
