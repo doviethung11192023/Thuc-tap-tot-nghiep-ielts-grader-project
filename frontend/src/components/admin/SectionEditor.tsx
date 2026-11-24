@@ -22,6 +22,7 @@ export function SectionEditor({ section, skill, readOnly = false, onRefresh }: S
   const [title, setTitle] = useState(section.title || "");
   const [passage, setPassage] = useState(section.passage_text || "");
   const [audioKey, setAudioKey] = useState(section.audio_key || "");
+  const [previewUrl, setPreviewUrl] = useState(section.question_groups?.[0]?.image_key || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -59,6 +60,7 @@ export function SectionEditor({ section, skill, readOnly = false, onRefresh }: S
       const folder = skill === "listening" ? "audio/listening" : skill === "speaking" ? "audio/speaking" : "images/general";
       const uploaded = await uploadMedia(file, folder);
       setAudioKey(uploaded.key || uploaded.url);
+      setPreviewUrl(uploaded.url || "");
       toast.success("Tải tệp lên Cloudflare R2 thành công!");
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || "Lỗi khi upload lên Cloudflare R2");
@@ -136,7 +138,11 @@ export function SectionEditor({ section, skill, readOnly = false, onRefresh }: S
         <SectionMediaPassageEditor
           skill={skill}
           audioKey={audioKey}
-          onAudioKeyChange={setAudioKey}
+          previewUrl={previewUrl}
+          onAudioKeyChange={(val) => {
+            setAudioKey(val);
+            if (val !== (section.audio_key || "")) setPreviewUrl("");
+          }}
           passage={passage}
           onPassageChange={setPassage}
           uploading={uploading}
