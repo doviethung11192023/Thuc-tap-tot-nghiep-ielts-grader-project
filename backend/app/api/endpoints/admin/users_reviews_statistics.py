@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request, status
 
+from app.api.responses import ok, created
 from app.core.security import User, require_admin
 from app.schemas.admin import AdminAssignReviewRequest, AdminCreateAdminRequest, UserStatusUpdate
 from app.schemas.expert import AdminCreateExpertRequest, AdminWaivePenaltyRequest
@@ -25,7 +26,7 @@ def list_users(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100),
                      search: Optional[str] = Query(None, description="Tìm theo email hoặc họ tên"),
                      current_user: User = Depends(require_admin)):
     """Danh sách người dùng, phân trang, tìm kiếm, lọc vai trò."""
-    return {"meta": {"code": 200}, "data": user_admin.list_users(page, limit, role, search)}
+    return ok(user_admin.list_users(page, limit, role, search))
 
 
 @router.put("/users/{user_id}/status")
@@ -33,15 +34,14 @@ def update_user_status(user_id: str, status_update: UserStatusUpdate, current_us
     """Khoá / mở khoá tài khoản, đồng bộ Supabase Auth, ghi audit log (FR-04)."""
     user_admin.set_user_active(current_user.id, user_id, status_update.is_active, status_update.reason)
     action_text = "mở khóa" if status_update.is_active else "khóa"
-    return {"meta": {"code": 200, "message": f"User status updated successfully ({action_text})"}}
+    return ok(message=f"User status updated successfully ({action_text})")
 
 
 @router.post("/users/{user_id}/resend-invite")
 def resend_user_invite(user_id: str, current_user: User = Depends(require_admin)):
     """Gửi lại email kích hoạt / đặt mật khẩu."""
     data = staff_accounts.resend_invite(current_user.id, user_id)
-    return {"meta": {"code": 200, "message": f"Đã gửi lại thư kích hoạt tới {data['email']}"},
-            "data": {"email_sent": data["email_sent"], "setup_link": data["setup_link"]}}
+    return ok({"email_sent": data["email_sent"], "setup_link": data["setup_link"]}, message=f"Đã gửi lại thư kích hoạt tới {data['email']}")
 
 
 @router.post("/experts", status_code=status.HTTP_201_CREATED)
@@ -50,15 +50,14 @@ def create_expert(expert_req: AdminCreateExpertRequest, current_user: User = Dep
     data = staff_accounts.provision_staff(
         current_user.id, expert_req.email, expert_req.full_name, "expert",
         expert_fields={"max_active_reviews": expert_req.max_active_reviews, "bio": expert_req.bio})
-    return {"meta": {"code": 201, "message": "Tạo tài khoản Expert thành công"}, "data": data}
+    return created(data, message="Tạo tài khoản Expert thành công")
 
 
 @router.post("/admins", status_code=status.HTTP_201_CREATED)
 def create_admin(admin_req: AdminCreateAdminRequest, current_user: User = Depends(require_admin)):
     """Tạo (hoặc cấp quyền) tài khoản Admin và gửi lời mời."""
     data = staff_accounts.provision_staff(current_user.id, admin_req.email, admin_req.full_name, "admin")
-    return {"meta": {"code": 201, "message": "Khởi tạo/phân quyền tài khoản Quản trị viên (Admin) thành công"},
-            "data": data}
+    return created(data, message="Khởi tạo/phân quyền tài khoản Quản trị viên (Admin) thành công")
 
 
 @router.get("/statistics")
@@ -68,7 +67,7 @@ async def get_statistics(request: Request, current_user: User = Depends(require_
     cached = await redis.get(STATISTICS_CACHE_KEY)
     if cached:
         return json.loads(cached)
-    result = {"meta": {"code": 200}, "data": system_statistics.system_statistics()}
+    result = ok(system_statistics.system_statistics())
     await redis.setex(STATISTICS_CACHE_KEY, 300, json.dumps(result))
     return result
 
@@ -85,17 +84,14 @@ def get_admin_reviews(
 ):
     """Danh sách yêu cầu chấm Chuyên gia kèm tải hiện tại của từng Expert."""
     data = list_admin_reviews(page=page, limit=limit, status_filter=status_filter, skill=skill, expert_id=expert_id, search=search)
-    return {"meta": {"code": 200, "message": "Success"}, "data": data}
+    return ok(data, message="Success")
 
 
 @router.post("/reviews/auto-dispatch")
 async def trigger_admin_auto_dispatch(current_user: User = Depends(require_admin)):
     """Admin kích hoạt phân bổ tự động (Least-Loaded) cho các yêu cầu đang waiting."""
     assigned_count = await auto_dispatch_pending_requests()
-    return {
-        "meta": {"code": 200, "message": f"Đã phân bổ tự động {assigned_count} bài chấm"},
-        "data": {"assigned_count": assigned_count},
-    }
+    return ok({"assigned_count": assigned_count}, message=f"Đã phân bổ tự động {assigned_count} bài chấm")
 
 
 @router.post("/reviews/{request_id}/assign")
@@ -112,10 +108,7 @@ def assign_review_to_expert(
         note=payload.note,
     )
     action_label = "chuyển giao" if data.get("reassigned") else "gán"
-    return {
-        "meta": {"code": 200, "message": f"Đã {action_label} bài chấm cho {data.get('expert_email')}"},
-        "data": data,
-    }
+    return ok(data, message=f"Đã {action_label} bài chấm cho {data.get('expert_email')}")
 
 
 @router.get("/learners/analytics")
@@ -126,13 +119,13 @@ def get_admin_learners_analytics(
     current_user: User = Depends(require_admin),
 ):
     """Bảng hội tụ thống kê học viên (3-Query Bulk Vectorized)."""
-    return {"meta": {"code": 200}, "data": learner_audit_service.list_learners_analytics(page, limit, search)}
+    return ok(learner_audit_service.list_learners_analytics(page, limit, search))
 
 
 @router.get("/learners/{user_id}/audit")
 def get_admin_learner_audit(user_id: str, current_user: User = Depends(require_admin)):
     """Hồ sơ Minh chứng Trắng 360° cho mọi số liệu hiển thị của một học viên."""
-    return {"meta": {"code": 200}, "data": learner_audit_trace.get_learner_whitebox_audit(user_id)}
+    return ok(learner_audit_trace.get_learner_whitebox_audit(user_id))
 
 
 @router.get("/experts/performance")
@@ -144,7 +137,7 @@ def get_admin_experts_performance(
 ):
     """Báo cáo hiệu suất 4-Tier, chỉ số vận hành & vi phạm của Chuyên gia (FR-50, FR-51)."""
     data = expert_kpi_service.get_expert_performance_report(period=period, tier=tier, flagged_only=flagged_only)
-    return {"meta": {"code": 200, "message": "Success"}, "data": data}
+    return ok(data, message="Success")
 
 
 @router.post("/penalties/{penalty_id}/waive")
@@ -160,4 +153,4 @@ async def waive_expert_penalty(
         await request.app.state.redis.delete(STATISTICS_CACHE_KEY)
     except Exception:
         pass
-    return {"meta": {"code": 200, "message": "Đã miễn phạt và cập nhật lại hạng Chuyên gia"}, "data": data}
+    return ok(data, message="Đã miễn phạt và cập nhật lại hạng Chuyên gia")

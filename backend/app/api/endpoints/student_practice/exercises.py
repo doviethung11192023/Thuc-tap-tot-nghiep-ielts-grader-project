@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, Request
 from typing import Optional, List, Dict, Any
+from app.api.responses import ok
 from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
 
@@ -48,7 +49,7 @@ async def get_question_types_summary(request: Request, skill: str = Query("readi
     summary_list, cached = await get_or_load(
         request.app.state.redis, "question-types", skill_lower, _CACHE_TTL_SECONDS,
         lambda: _build_question_types_summary(skill_lower))
-    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": summary_list}
+    return ok(summary_list, cached=cached)
 
 
 def _estimate_minutes(skill_lower: str, q_type: str, q_count: int, item: Dict[str, Any]) -> int:
@@ -138,4 +139,4 @@ async def list_practice_exercises(
     result_data, cached = await get_or_load(
         request.app.state.redis, "exercises_v2", cache_key, _CACHE_TTL_SECONDS,
         lambda: _build_exercises(skill_lower, type_filter, diff_filter, page, limit))
-    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}
+    return ok(result_data, cached=cached)

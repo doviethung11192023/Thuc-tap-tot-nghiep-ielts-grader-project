@@ -10,11 +10,13 @@ from typing import Any
 _MISSING: Any = object()
 
 
-def ok(data: Any = _MISSING, *, message: str | None = None, code: int = 200, **meta: Any) -> dict[str, Any]:
-    """Envelope thành công. `message` và các meta khác (vd. cached=True) chỉ xuất hiện khi được truyền."""
+def ok(data: Any = _MISSING, *, message: str | None = None, code: int = 200, cached: bool = False, **meta: Any) -> dict[str, Any]:
+    """Envelope thành công. `message`, `cached` và các meta khác chỉ xuất hiện khi được truyền."""
     meta_body: dict[str, Any] = {"code": code}
     if message is not None:
         meta_body["message"] = message
+    if cached:
+        meta_body["cached"] = True   # chỉ có khoá này khi dữ liệu lấy từ cache; không cache thì không có khoá
     meta_body.update(meta)
     body: dict[str, Any] = {"meta": meta_body}
     if data is not _MISSING:

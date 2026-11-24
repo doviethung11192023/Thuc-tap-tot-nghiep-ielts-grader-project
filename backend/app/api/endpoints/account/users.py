@@ -1,6 +1,7 @@
 """Hồ sơ, mục tiêu và tiến độ của người dùng hiện tại (UC-04, UC-05, FR-06/07)."""
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.api.responses import ok
 from app.core.security import User, get_current_active_user
 from app.schemas.user import (
     LearnerGoalResponse,
@@ -28,20 +29,20 @@ def get_my_profile(current_user: User = Depends(get_current_active_user)):
 def update_my_profile(profile: UserUpdate, current_user: User = Depends(get_current_active_user)):
     """Cập nhật họ tên, ảnh đại diện, đồng ý ghi âm (FR-38, NFR-07 — Nghị định 13/2023/NĐ-CP)."""
     data = profiles.update_profile(current_user.id, profile.full_name, profile.avatar_url, profile.voice_consent)
-    return {"meta": {"code": 200, "message": "Profile updated successfully"}, "data": data}
+    return ok(data, message="Profile updated successfully")
 
 
 @router.post("/me/voice-consent")
 def give_voice_consent(current_user: User = Depends(get_current_active_user)):
     """Learner đồng ý ghi âm trước lần ghi đầu tiên (UC-35); thời điểm đồng ý là bằng chứng."""
     data = profiles.update_profile(current_user.id, None, None, True)
-    return {"meta": {"code": 200, "message": "Đã ghi nhận đồng ý ghi âm"}, "data": data}
+    return ok(data, message="Đã ghi nhận đồng ý ghi âm")
 
 
 @router.post("/me/activate")
 def activate_my_account(current_user: User = Depends(get_current_active_user)):
     """Giữ cho frontend cũ: tài khoản được kích hoạt bởi Supabase Auth (xác minh email / link mời)."""
-    return {"meta": {"code": 200, "message": "Tài khoản đã được kích hoạt thành công"}}
+    return ok(message="Tài khoản đã được kích hoạt thành công")
 
 
 @router.get("/me/goals")
@@ -49,8 +50,8 @@ def get_my_goals(current_user: User = Depends(get_current_active_user)):
     """Mục tiêu IELTS và ngày thi dự kiến của học viên (UC-05, FR-06)."""
     goals = profiles.get_goals(current_user.id)
     if goals is None:
-        return {"meta": {"code": 200, "message": "No goals set yet"}, "data": None}
-    return {"meta": {"code": 200, "message": "Success"}, "data": LearnerGoalResponse(**goals).dict()}
+        return ok(None, message="No goals set yet")
+    return ok(LearnerGoalResponse(**goals).dict(), message="Success")
 
 
 @router.put("/me/goals")
@@ -61,11 +62,11 @@ def update_my_goals(goals: LearnerGoalUpdate, current_user: User = Depends(get_c
         goal_dict["test_date"] = goal_dict["test_date"].isoformat()
     data = profiles.save_goals(current_user.id, goal_dict)
     invalidate_user_profile_cache(current_user.id)
-    return {"meta": {"code": 200, "message": "Goals updated successfully"}, "data": data}
+    return ok(data, message="Goals updated successfully")
 
 
 @router.get("/me/progress")
 def get_my_progress(current_user: User = Depends(get_current_active_user)):
     """Thống kê Writing: số bài đã nộp, band trung bình / cao nhất theo kết quả chính thức."""
     data = UserProgressResponse(**profiles.writing_progress(current_user.id)).dict()
-    return {"meta": {"code": 200, "message": "Success"}, "data": data}
+    return ok(data, message="Success")

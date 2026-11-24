@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
+from app.api.responses import ok, created
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.domain_errors import DomainError
 from app.core.security import User, require_admin
@@ -28,13 +29,13 @@ def list_tests(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100),
     """Lọc theo kỹ năng, trạng thái, mode, bộ đề, độ khó, định dạng (full/exercise)."""
     filters = _plain({"skill": skill, "status": status_filter, "allowed_mode": allowed_mode,
                       "test_set_id": test_set_id, "difficulty": difficulty})
-    return {"meta": {"code": 200}, "data": cms_tests.list_tests(page, limit, filters, sort_by, search, test_format)}
+    return ok(cms_tests.list_tests(page, limit, filters, sort_by, search, test_format))
 
 
 @router.post("/tests", status_code=status.HTTP_201_CREATED)
 def create_test(test_data: TestCreate, current_user: User = Depends(require_admin)):
     data = cms_tests.create_test(current_user.id, _plain(test_data.model_dump()))
-    return {"meta": {"code": 201, "message": "Tạo bài thi thành công"}, "data": data}
+    return created(data, message="Tạo bài thi thành công")
 
 
 @router.get("/tests/{test_id}")
@@ -43,34 +44,34 @@ def get_test_detail(test_id: str, current_user: User = Depends(require_admin)):
     data = cms_tests.test_tree(test_id)
     if not data:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
-    return {"meta": {"code": 200}, "data": data}
+    return ok(data)
 
 
 @router.put("/tests/{test_id}")
 def update_test(test_id: str, update_data: TestUpdate, current_user: User = Depends(require_admin)):
     data = cms_tests.update_test(current_user.id, test_id, _plain(update_data.model_dump(exclude_unset=True)))
-    return {"meta": {"code": 200, "message": "Cập nhật bài thi thành công"}, "data": data}
+    return ok(data, message="Cập nhật bài thi thành công")
 
 
 @router.patch("/tests/{test_id}/status")
 def update_test_status(test_id: str, status_data: TestStatusUpdate, current_user: User = Depends(require_admin)):
     """draft → published (kiểm tra nội dung trước) → archived."""
     data = cms_tests.set_status(current_user.id, test_id, status_data.status.value)
-    return {"meta": {"code": 200, "message": f"Đã cập nhật trạng thái sang {data['status']}"}, "data": data}
+    return ok(data, message=f"Đã cập nhật trạng thái sang {data['status']}")
 
 
 @router.delete("/tests/{test_id}")
 def delete_test(test_id: str, current_user: User = Depends(require_admin)):
     """Chỉ xoá được đề nháp chưa có bài làm; đề đã dùng thì lưu trữ (archive)."""
     cms_tests.delete_test(current_user.id, test_id)
-    return {"meta": {"code": 200, "message": "Xóa bài thi thành công"}}
+    return ok(message="Xóa bài thi thành công")
 
 
 @router.post("/tests/{test_id}/clone-draft", status_code=status.HTTP_201_CREATED)
 def clone_test_draft(test_id: str, current_user: User = Depends(require_admin)):
     """Nhân bản đề published/archived sang bản nháp mới để chỉnh sửa an toàn (BR-10)."""
     data = cms_clone.clone_test_to_draft(current_user.id, test_id)
-    return {"meta": {"code": 201, "message": "Đã tạo bản nháp mới từ đề thi"}, "data": data}
+    return created(data, message="Đã tạo bản nháp mới từ đề thi")
 
 
 class BulkStatusRequest(BaseModel):
@@ -88,5 +89,4 @@ def bulk_update_status(data: BulkStatusRequest, current_user: User = Depends(req
             results.append(cms_tests.set_status(current_user.id, tid, data.status.value))
         except DomainError as e:
             errors.append({"test_id": tid, "detail": e.detail})
-    return {"meta": {"code": 200, "message": f"Đã cập nhật {len(results)}/{len(data.test_ids)} bài thi"},
-            "data": results, "errors": errors}
+    return {**ok(results, message=f"Đã cập nhật {len(results)}/{len(data.test_ids)} bài thi"), "errors": errors}

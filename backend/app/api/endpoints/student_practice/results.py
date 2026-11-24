@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.responses import ok
 from app.core.security import User, get_optional_user
 from app.services.listening_reading.lr_result_views import build_lr_detail, build_lr_summary
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt
@@ -30,7 +31,7 @@ def get_attempt_summary(attempt_id: str, current_user: Optional[User] = Depends(
         data = build_lr_summary(attempt)
     else:
         data = build_speaking_summary(attempt)
-    return {"meta": {"code": 200}, "data": data}
+    return ok(data)
 
 
 @router.get("/attempts/{attempt_id}/detail")
@@ -38,7 +39,7 @@ def get_attempt_detail_with_explanations(attempt_id: str, current_user: Optional
     """Đáp án và lời giải (L/R), hoặc transcript và phân tích từng câu (Speaking)."""
     attempt = _attempt_or_404(attempt_id, current_user)
     if attempt["skill"] == "speaking":
-        return {"meta": {"code": 200}, "data": build_speaking_detail(attempt)}
+        return ok(build_speaking_detail(attempt))
     if attempt["skill"] not in ("reading", "listening"):
         raise HTTPException(status_code=400, detail="Chi tiết đáp án chỉ áp dụng cho Listening, Reading, Speaking")
-    return {"meta": {"code": 200}, "data": build_lr_detail(attempt)}
+    return ok(build_lr_detail(attempt))

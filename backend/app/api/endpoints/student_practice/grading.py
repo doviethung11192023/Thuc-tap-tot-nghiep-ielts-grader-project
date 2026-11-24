@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.api.responses import ok
 from app.core.security import User, get_optional_user
 from app.services.learning_profile.common import _cache
 from app.services.listening_reading.lr_grading_service import submit_lr
@@ -33,4 +34,4 @@ def submit_reading_listening_answers(attempt_id: str, req: SubmitAnswersRequest,
     # Dashboard xem ngay sau khi nộp phải thấy band mới (spec 005 SC-005)
     _cache.pop(f"overview_{current_user.id}", None)
     _cache.pop(f"practice_{current_user.id}", None)
-    return {"meta": {"code": 200, "message": "Nộp bài và chấm điểm thành công"}, "data": data}
+    return ok(data, message="Nộp bài và chấm điểm thành công")

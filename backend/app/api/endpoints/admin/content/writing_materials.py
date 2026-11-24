@@ -4,6 +4,7 @@ from typing import Any, Literal, Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app.api.responses import ok
 from app.core.security import User, require_admin
 from app.core.student_content_cache import StudentContentMutationRoute
 from app.services.writing import writing_task_materials as materials
@@ -23,25 +24,23 @@ class MaterialUpdate(BaseModel):
     sample_essay: Optional[str] = None
 
 
-def _ok(data: dict, message: str) -> dict:
-    return {"meta": {"code": 200, "message": message}, "data": data}
 
 
 @router.get("/writing-tasks/{section_id}/material")
 def get_material(section_id: str, current_user: User = Depends(require_admin)):
-    return _ok(materials.get_material(section_id), "OK")
+    return ok(materials.get_material(section_id), message="OK")
 
 
 @router.post("/writing-tasks/{section_id}/material/draft")
 async def draft_material(section_id: str, body: KindBody, current_user: User = Depends(require_admin)):
-    return _ok(await materials.draft_material(section_id, body.kind), "Đã soạn bản nháp, cần duyệt trước khi dùng")
+    return ok(await materials.draft_material(section_id, body.kind), message="Đã soạn bản nháp, cần duyệt trước khi dùng")
 
 
 @router.put("/writing-tasks/{section_id}/material")
 def update_material(section_id: str, body: MaterialUpdate, current_user: User = Depends(require_admin)):
-    return _ok(materials.update_material(section_id, body.model_dump(exclude_unset=True)), "Đã lưu bản nháp")
+    return ok(materials.update_material(section_id, body.model_dump(exclude_unset=True)), message="Đã lưu bản nháp")
 
 
 @router.post("/writing-tasks/{section_id}/material/approve")
 def approve_material(section_id: str, body: KindBody, current_user: User = Depends(require_admin)):
-    return _ok(materials.approve_material(section_id, body.kind, current_user.id), "Đã duyệt")
+    return ok(materials.approve_material(section_id, body.kind, current_user.id), message="Đã duyệt")

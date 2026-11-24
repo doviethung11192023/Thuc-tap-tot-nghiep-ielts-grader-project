@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
+from app.api.responses import ok
 from app.core.security import User, get_optional_user
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt, require_owned_attempt
 from app.services.expert.mock_expert_review_request import request_mock_expert_review
@@ -36,9 +37,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
 
     has_expert_review = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
 
-    return {
-        "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
-        "data": {
+    return ok({
             "attempt_id": attempt_id,
             "essay_id": essays[-1]["essay_id"] if essays else None,
             "essay_ids": {f"task{e['task_no']}": e["essay_id"] for e in essays},
@@ -46,8 +45,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
             "status": sub["status"],
             "has_expert_review": has_expert_review,
             "submitted_at": sub["submitted_at"],
-        },
-    }
+        }, message="Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm")
 
 
 @router.post("/attempts/{attempt_id}/retry-ai-grading")
@@ -66,15 +64,12 @@ async def retry_ai_grading(attempt_id: str, request: Request,
     for run in job.get("runs") or []:
         await enqueue_grading_run(redis, run["run_id"], skill)
 
-    return {
-        "meta": {"code": 200, "message": "Đã bắt đầu chấm lại bài thi bằng AI"},
-        "data": {
+    return ok({
             "attempt_id": attempt_id,
             "skill": skill,
             "evaluation_id": job.get("evaluation_id"),
             "runs": job.get("runs"),
-        },
-    }
+        }, message="Đã bắt đầu chấm lại bài thi bằng AI")
 
 
 @router.post("/attempts/{attempt_id}/submit-speaking")
@@ -88,4 +83,4 @@ async def submit_speaking_attempt(attempt_id: str, request: Request,
         await enqueue_grading_run(request.app.state.redis, job["runs"][0]["run_id"], "speaking")
 
     sub["has_expert_review"] = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
-    return {"meta": {"code": 200, "message": "Bài thi nói đã được ghi nhận"}, "data": sub}
+    return ok(sub, message="Bài thi nói đã được ghi nhận")
