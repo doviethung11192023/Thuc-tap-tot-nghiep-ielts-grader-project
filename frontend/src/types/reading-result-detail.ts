@@ -6,7 +6,8 @@ export interface CleanReadingKeywordMapping {
 }
 
 export interface CleanReadingQuestion {
-  id: number;
+  id: number | string;
+  group_id?: string | number;
   question_number: number;
   passage_number: number;
   question_type: string | number;

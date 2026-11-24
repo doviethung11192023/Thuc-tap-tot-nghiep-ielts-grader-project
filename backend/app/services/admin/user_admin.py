@@ -4,6 +4,7 @@ Danh sách người dùng và khoá/mở khoá (UC-19, FR-04).
 "Đã kích hoạt" = đã đăng nhập ít nhất một lần (Supabase Auth last_sign_in_at): thay cột
 is_activated cũ.
 """
+from time import monotonic
 from typing import Any, Optional
 
 from app.core.domain_errors import InvalidRequestError, NotFoundError
@@ -12,17 +13,25 @@ from app.core.supabase_access_token_verifier import forget_profile
 from app.db.supabase import db, supabase
 from app.services.admin.staff_accounts import write_audit
 
+_activated_cache: tuple[set[str], float] | None = None
+_ACTIVATED_TTL_SEC = 60.0
+
 
 def _activated_ids() -> set[str]:
+    global _activated_cache
+    now = monotonic()
+    if _activated_cache is not None and now - _activated_cache[1] < _ACTIVATED_TTL_SEC:
+        return _activated_cache[0]
     ids, page = set(), 1
     while True:
         try:
             users = supabase.auth.admin.list_users(page=page, per_page=1000)
         except Exception as e:
             print(f"⚠️ [Admin] list auth users: {e}")
-            return ids
+            return _activated_cache[0] if _activated_cache else ids
         ids |= {str(u.id) for u in users or [] if getattr(u, "last_sign_in_at", None)}
         if not users or len(users) < 1000:
+            _activated_cache = (ids, now)
             return ids
         page += 1
 
@@ -38,7 +47,7 @@ def _filtered(columns: str, role: Optional[str], search: Optional[str], **count_
 
 
 def list_users(page: int, limit: int, role: Optional[str], search: Optional[str]) -> dict[str, Any]:
-    """Một trang người dùng; total/active_count/locked_count tính trên toàn bộ kết quả lọc, không chỉ trang này."""
+    """Một trang người dùng; total/active/locked tính trên toàn bộ kết quả lọc, không chỉ trang này."""
     q = _filtered("id, email, full_name, avatar_key, role, is_active, created_at", role, search, count="exact")
     offset = (page - 1) * limit
     res = q.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
@@ -47,7 +56,15 @@ def list_users(page: int, limit: int, role: Optional[str], search: Optional[str]
               "is_activated": r["id"] in activated} for r in res.data or []]
     total = res.count if getattr(res, "count", None) is not None else len(items)
     locked = _filtered("id", role, search, count="exact").eq("is_active", False).limit(1).execute().count or 0
-    return {"items": items, "total": total, "active_count": total - locked, "locked_count": locked}
+    active = max(0, total - locked)
+    return {
+        "items": items,
+        "total": total,
+        "active_total": active,
+        "banned_total": locked,
+        "active_count": active,
+        "locked_count": locked,
+    }
 
 
 def set_user_active(admin_id: str, user_id: str, is_active: bool, reason: Optional[str]) -> None:

@@ -9,6 +9,7 @@ from app.schemas.user import (
     UserProgressResponse,
     UserUpdate,
 )
+from app.services.learning_profile.common import invalidate_user_profile_cache
 from app.services.practice import learner_profile_store as profiles
 
 router = APIRouter()
@@ -59,6 +60,7 @@ async def update_my_goals(goals: LearnerGoalUpdate, current_user: User = Depends
     if goal_dict.get("test_date"):
         goal_dict["test_date"] = goal_dict["test_date"].isoformat()
     data = profiles.save_goals(current_user.id, goal_dict)
+    invalidate_user_profile_cache(current_user.id)
     return {"meta": {"code": 200, "message": "Goals updated successfully"}, "data": data}
 
 

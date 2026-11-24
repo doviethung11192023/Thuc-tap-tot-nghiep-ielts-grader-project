@@ -16,7 +16,7 @@ from app.services.ai_monitoring import (
     model_pricing, tracing_retention as retention,
 )
 from app.services.ai_monitoring.ai_expert_gap_pairs import EvalPair
-from app.services.expert import dispatcher
+from app.services.expert import dispatcher, review_submit_service
 from ai_monitoring_test_support import ADMIN_ID, RichFakeSupabase
 
 NOW = datetime(2026, 11, 22, 5, 0, tzinfo=timezone.utc)
@@ -154,9 +154,15 @@ def test_expert_submit_still_succeeds_when_scoring_cannot_start(monkeypatch):
                       "created_at": "2026-11-10T00:00:00+00:00", "is_official": True}],
         review_requests=[{"id": "rq1"}], attempts=[{"id": "W1", "status": "waiting_expert", "learner_id": "l1"}],
         annotations=[], criterion_scores=[])
+    # Phần nộp bài nằm ở review_submit_service (dispatcher chỉ uỷ quyền, truyền db của nó vào)
     monkeypatch.setattr(dispatcher, "db", lambda: db)
-    monkeypatch.setattr(dispatcher, "notify_expert_completed", lambda *a: None)
-    monkeypatch.setattr(dispatcher, "invalidate_user_profile_cache", lambda *a: None)
+    monkeypatch.setattr(review_submit_service, "db", lambda: db)
+    monkeypatch.setattr(review_submit_service, "notify_expert_completed", lambda *a: None)
+    monkeypatch.setattr(review_submit_service, "invalidate_user_profile_cache", lambda *a: None)
+    monkeypatch.setattr(review_submit_service, "refresh_single_expert_tier", lambda *a, **k: None)
+    # Luật đủ nội dung khi nộp (số tiêu chí, độ dài nhận xét…) có test riêng; ở đây chỉ kiểm lỗi lúc gửi điểm
+    monkeypatch.setattr(review_submit_service, "validate_and_analyze_submission", lambda **k: {
+        "passed": True, "violations": [], "agrees_with_ai": False, "metrics": {"rubber_stamp_flag": False}})
     monkeypatch.setattr(scores.asyncio, "get_running_loop", lambda: (_ for _ in ()).throw(RuntimeError("no loop")))
     result = asyncio.run(dispatcher.submit_expert_final_review("as1", "x1", {"overall_band": 6.5, "feedback": "ok"}))
     assert result["status"] == "completed"

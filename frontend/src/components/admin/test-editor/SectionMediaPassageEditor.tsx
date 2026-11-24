@@ -7,6 +7,7 @@ import type { SkillType } from "@/types/exam";
 interface SectionMediaPassageEditorProps {
   skill: SkillType;
   audioKey: string;
+  previewUrl?: string;
   onAudioKeyChange: (val: string) => void;
   passage: string;
   onPassageChange: (val: string) => void;
@@ -17,12 +18,24 @@ interface SectionMediaPassageEditorProps {
 export function SectionMediaPassageEditor({
   skill,
   audioKey,
+  previewUrl,
   onAudioKeyChange,
   passage,
   onPassageChange,
   uploading,
   onFileUpload,
 }: SectionMediaPassageEditorProps) {
+  const r2Base = (process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "").replace(/\/$/, "");
+  const resolvedImageSrc = !audioKey
+    ? null
+    : audioKey.startsWith("http") || audioKey.startsWith("data:")
+    ? audioKey
+    : previewUrl && (previewUrl.startsWith("http") || previewUrl.startsWith("data:"))
+    ? previewUrl
+    : r2Base
+    ? `${r2Base}/${audioKey.replace(/^\//, "")}`
+    : null;
+
   return (
     <div className="space-y-4">
       {/* Audio upload cho Listening & Speaking */}
@@ -79,14 +92,10 @@ export function SectionMediaPassageEditor({
               <input type="file" accept="image/*" onChange={onFileUpload} className="hidden" />
             </label>
           </div>
-          {audioKey && (
+          {resolvedImageSrc && (
             <div className="pt-1">
               <img
-                src={
-                  audioKey.startsWith("http") || audioKey.startsWith("data:")
-                    ? audioKey
-                    : `${(process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "").replace(/\/$/, "")}/${audioKey.replace(/^\//, "")}`
-                }
+                src={resolvedImageSrc}
                 alt="Preview biểu đồ Writing Task 1"
                 className="max-h-44 rounded-lg border border-zinc-200 bg-white p-1.5 object-contain"
               />

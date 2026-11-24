@@ -50,9 +50,9 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
   const uploading = allQuestions.some((q) => answers[q.id]?.status === 'uploading');
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50 text-slate-900 flex flex-col">
+    <div className="h-full w-full overflow-y-auto bg-slate-950 text-slate-100 flex flex-col">
       {/* Top Header */}
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-6 py-3">
+      <header className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-xs border-b border-slate-800 px-4 sm:px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           {isMock ? (
             <div className="w-10" />
@@ -60,7 +60,7 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
             <button
               type="button"
               onClick={onBackToExam}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
               title="Quay lại phòng thi"
               aria-label="Quay lại phòng thi"
             >
@@ -69,10 +69,10 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
           )}
 
           <div className="text-center min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Kiểm tra trước khi nộp bài
             </p>
-            <h1 className="text-sm font-bold text-slate-900 truncate max-w-2xl">{testTitle}</h1>
+            <h1 className="text-sm font-bold text-white truncate max-w-2xl">{testTitle}</h1>
           </div>
 
           <div className="w-10" />
@@ -83,7 +83,7 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Part Filter + Question Cards */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-slate-200/90 px-4 py-3 shadow-2xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 rounded-2xl border border-slate-800 px-4 py-3 shadow-2xs">
             <div className="flex items-center gap-2">
               {parts.map(({ part_number: pn }) => (
                 <button
@@ -92,15 +92,15 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
                   onClick={() => setSelectedPart(pn)}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                     selectedPart === pn
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-[#932120] text-white shadow-xs'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
                   Part {pn}
                 </button>
               ))}
             </div>
-            <span className="text-xs font-semibold text-slate-500">
+            <span className="text-xs font-semibold text-slate-400">
               {questions.length} câu hỏi
             </span>
           </div>
@@ -111,10 +111,10 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
               return (
                 <article
                   key={q.id || idx}
-                  className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3"
+                  className="bg-slate-900 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-2xs space-y-3"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#932120]/25 border border-[#932120]/50 text-rose-200 text-xs font-extrabold">
                       Part {selectedPart} • Câu {idx + 1}
                     </span>
 
@@ -122,7 +122,7 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
                       <button
                         type="button"
                         onClick={() => onRetakeQuestion(selectedPart, idx)}
-                        className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 px-3 py-1.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs font-bold text-rose-300 hover:text-rose-200 px-3 py-1.5 rounded-xl bg-[#932120]/20 hover:bg-[#932120]/35 border border-[#932120]/40 transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>{answer ? 'Ghi âm lại' : 'Trả lời ngay'}</span>
@@ -130,30 +130,30 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
                     )}
                   </div>
 
-                  <p className="text-sm font-bold text-slate-800 leading-snug">{q.question}</p>
+                  <p className="text-sm font-bold text-white leading-snug">{q.question}</p>
 
                   {answer?.blobUrl && !isMock && (
                     <SpeakingDetailAudioPlayer src={answer.blobUrl} durationMs={answer.durationMs} />
                   )}
                   {!answer && (
-                    <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    <p className="text-xs font-medium text-amber-200 bg-amber-950/60 border border-amber-800/70 rounded-xl px-3 py-2">
                       Chưa có câu trả lời cho câu hỏi này.
                     </p>
                   )}
                   {answer?.status === 'uploading' && (
-                    <p className="text-xs font-medium text-blue-700 flex items-center gap-1.5">
+                    <p className="text-xs font-medium text-rose-300 flex items-center gap-1.5">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       Đang tải âm thanh lên hệ thống...
                     </p>
                   )}
                   {answer?.status === 'saved' && !answer.blobUrl && (
-                    <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Đã lưu bản ghi âm
                     </p>
                   )}
                   {answer?.status === 'failed' && (
-                    <div className="flex items-center justify-between gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                    <div className="flex items-center justify-between gap-2 text-xs text-rose-300 bg-red-950/60 border border-red-800/70 rounded-xl px-3 py-2">
                       <span>{answer.error}</span>
                       {answer.blobUrl && (
                         <button
@@ -173,48 +173,48 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
         </div>
 
         {/* Right: Sticky Submission Summary */}
-        <aside className="lg:col-span-4 lg:sticky lg:top-20 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-4">
+        <aside className="lg:col-span-4 lg:sticky lg:top-20 bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xs space-y-4">
           <div className="space-y-1">
-            <h2 className="text-base font-extrabold text-slate-900">Tổng kết bài thi</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-base font-extrabold text-white">Tổng kết bài thi</h2>
+            <p className="text-xs text-slate-400">
               Hoàn thành các câu trả lời trước khi gửi sang hệ thống AI chấm điểm.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="rounded-xl bg-slate-50 border border-slate-200/70 p-3">
-              <p className="text-[11px] font-semibold text-slate-500">Đã trả lời</p>
-              <p className="text-xl font-black text-blue-700 tabular-nums">
+            <div className="rounded-xl bg-slate-800/80 border border-slate-700 p-3">
+              <p className="text-[11px] font-semibold text-slate-400">Đã trả lời</p>
+              <p className="text-xl font-black text-rose-300 tabular-nums">
                 {answeredCount}/{allQuestions.length}
               </p>
             </div>
-            <div className="rounded-xl bg-slate-50 border border-slate-200/70 p-3">
-              <p className="text-[11px] font-semibold text-slate-500">Còn trống</p>
-              <p className="text-xl font-black text-slate-800 tabular-nums">{unanswered}</p>
+            <div className="rounded-xl bg-slate-800/80 border border-slate-700 p-3">
+              <p className="text-[11px] font-semibold text-slate-400">Còn trống</p>
+              <p className="text-xl font-black text-white tabular-nums">{unanswered}</p>
             </div>
           </div>
 
           {unanswered > 0 && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-xs font-medium text-amber-800 flex items-center gap-2">
+            <div className="rounded-xl bg-amber-950/60 border border-amber-800/70 px-3 py-2.5 text-xs font-medium text-amber-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>Còn {unanswered} câu chưa trả lời.</span>
             </div>
           )}
 
           {failed > 0 && (
-            <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-xs font-medium text-red-700">
+            <div className="rounded-xl bg-red-950/60 border border-red-800/70 px-3 py-2.5 text-xs font-medium text-rose-300">
               {failed} câu chưa lưu được và sẽ không được chấm nếu bạn nộp bây giờ.
             </div>
           )}
 
           {submitError && (
-            <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-xs font-medium text-red-700">
+            <div className="rounded-xl bg-red-950/60 border border-red-800/70 px-3 py-2.5 text-xs font-medium text-rose-300">
               {submitError}
             </div>
           )}
 
           {unanswered === 0 && failed === 0 && !submitError && (
-            <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2.5 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+            <div className="rounded-xl bg-emerald-950/60 border border-emerald-700/70 px-3 py-2.5 text-xs font-semibold text-emerald-300 flex items-center gap-2">
               <Sparkles className="w-4 h-4 shrink-0" />
               <span>Tất cả câu trả lời đã sẵn sàng để chấm điểm!</span>
             </div>
@@ -224,7 +224,7 @@ export const SpeakingReviewScreen: React.FC<SpeakingReviewScreenProps> = ({
             type="button"
             onClick={onSubmitForAnalysis}
             disabled={submitting || uploading}
-            className="w-full py-3.5 px-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors text-sm cursor-pointer"
+            className="w-full py-3.5 px-5 bg-[#932120] hover:bg-[#7a1a19] disabled:opacity-60 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors text-sm cursor-pointer"
           >
             {submitting || uploading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

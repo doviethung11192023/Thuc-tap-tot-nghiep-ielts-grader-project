@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { Compass } from 'lucide-react';
-import { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
+import type { CleanListeningExerciseGroup, CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
 import { CleanListeningScoreCard } from '@/components/exam/result-detail/CleanListeningScoreCard';
 import { CleanListeningTableRenderer } from '@/components/exam/result-detail/CleanListeningTableRenderer';
 import { CleanQuestionItemRenderer } from '@/components/exam/result-detail/CleanQuestionItemRenderer';
 import { CleanGroupDropdownExplanation } from '@/components/exam/result-detail/CleanGroupDropdownExplanation';
 import { CleanDetailSummaryCard } from '@/components/exam/result-detail/CleanDetailSummaryCard';
+import { CleanMatchingOptionsPool } from '@/components/exam/result-detail/clean-matching-options-pool';
 
 interface CleanListeningExerciseGroupsPaneProps {
   userName?: string;
@@ -56,9 +57,9 @@ export function CleanListeningExerciseGroupsPane({
 
         return (
           <div key={group.id || gIdx} className="space-y-4">
-            <div className="bg-white rounded-xl border border-blue-100 p-4 shadow-2xs space-y-1.5">
-              <div className="flex items-center gap-2 text-blue-900 font-bold text-xs md:text-sm">
-                <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">?</div>
+            <div className="bg-white rounded-xl border border-red-200/70 p-4 shadow-2xs space-y-1.5">
+              <div className="flex items-center gap-2 text-[#932120] font-bold text-xs md:text-sm">
+                <div className="w-5 h-5 rounded-full bg-[#932120] text-white flex items-center justify-center text-xs">?</div>
                 <span>Questions {group.question_start} - {group.question_end}</span>
               </div>
               <p className="text-xs md:text-sm font-semibold text-zinc-800">{group.title}</p>
@@ -103,6 +104,10 @@ export function CleanListeningExerciseGroupsPane({
                   </div>
                 ) : null}
 
+                {group.options_pool && group.options_pool.length > 0 && (
+                  <CleanMatchingOptionsPool optionsPool={group.options_pool} />
+                )}
+
                 {/* LS-03: Render đoạn văn ghi chú gốc (Complete the notes) nếu group có template */}
                 {group.template && (
                   <CleanDetailSummaryCard
@@ -117,21 +122,13 @@ export function CleanListeningExerciseGroupsPane({
                     <CleanQuestionItemRenderer
                       key={q.id}
                       question={q}
-                      optionsPool={group.options_pool}
+                      optionsPool={null}
+                      skill="listening"
                       onSelectEvidence={onSelectEvidenceText}
                       defaultExpanded={false}
                     />
                   ))}
                 </div>
-                <CleanGroupDropdownExplanation
-                  questions={groupQuestions}
-                  transcriptUtterances={transcriptUtterances}
-                  activeQuestionNumber={activeQuestionNumber}
-                  onSelectQuestion={onSelectQuestion}
-                  onPlayAtTime={onPlayAtTime}
-                  onSelectEvidenceText={onSelectEvidenceText}
-                  defaultExpanded={false}
-                />
               </div>
             )}
           </div>

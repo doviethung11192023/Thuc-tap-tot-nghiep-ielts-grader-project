@@ -18,10 +18,10 @@ export function PracticeHistoryRadarCard({ radarData, overallScore }: PracticeHi
 
   const chartData = [
     { skill: "Overall", score: overallScore },
-    { skill: "Listening", score: scoreMap["listening"] ?? 5.5 },
-    { skill: "Reading", score: scoreMap["reading"] ?? 5.5 },
-    { skill: "Speaking", score: scoreMap["speaking"] ?? 5.0 },
-    { skill: "Writing", score: scoreMap["writing"] ?? 5.0 },
+    { skill: "Listening", score: scoreMap["listening"] ?? 0 },
+    { skill: "Reading", score: scoreMap["reading"] ?? 0 },
+    { skill: "Speaking", score: scoreMap["speaking"] ?? 0 },
+    { skill: "Writing", score: scoreMap["writing"] ?? 0 },
   ];
 
   return (

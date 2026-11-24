@@ -17,7 +17,7 @@ export function WritingResultsView({ essayText, onRetake, returnUrl }: WritingRe
   const content = essayText || mockWritingExamDataset.sample_student_submission;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+    <div className="flex flex-col h-dvh w-full bg-zinc-50 overflow-hidden">
       <WritingResultsHeader onRetake={onRetake} returnUrl={returnUrl} />
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         <WritingEssayHighlightsPane essayText={content} highlights={result.highlights as any} />

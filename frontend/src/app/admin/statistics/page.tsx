@@ -1,16 +1,21 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, AlertTriangle, Users, FileText, Clock, Loader2, RotateCcw } from "lucide-react";
+import { Activity, AlertTriangle, Users, FileText, Clock, Loader2, RotateCcw, SearchCheck } from "lucide-react";
 import { getSystemStatistics } from "@/services/users";
-import toast from "react-hot-toast";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "sonner";
 import { KpiCard } from "@/components/admin/statistics/KpiCard";
+import { AdminExpertKpiTable, type ExpertKpiRow } from "@/components/admin/AdminExpertKpiTable";
 import { AlertsBadge } from "@/components/admin/ai-services/monitoring/AlertsBadge";
 import { ExpertGapCard } from "@/components/admin/ai-services/monitoring/ExpertGapCard";
+import { ChartSkeleton } from "@/components/ui/skeleton";
+import { BlurFadeCard, StaggerGrid } from "@/components/motion";
 
-interface SystemStats {
+// Nhật ký chấm AI và nút chấm lại nằm ở trang Service AI → Runs (spec 008), không lặp lại ở đây
+interface SystemStatisticsData {
   total_users?: number;
   total_essays?: number;
   essays_today?: number;
@@ -18,11 +23,29 @@ interface SystemStats {
   failed_runs?: number;
   finished_runs?: number;
   avg_processing_time?: number;
-  submissions_trend?: { date: string; count: number }[];
+  submissions_trend?: Array<{ date: string; count: number }>;
+  monthly_cohort_progression?: Array<{
+    month: string;
+    label: string;
+    avg_band: number;
+    active_learners: number;
+    total_attempts: number;
+  }>;
+  expert_kpis?: ExpertKpiRow[];
 }
 
+const AdminSubmissionsTrendChart = dynamic(
+  () => import("@/components/admin/AdminSubmissionsTrendChart").then((m) => m.AdminSubmissionsTrendChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-96" label="Đang tải biểu đồ xu hướng nộp bài..." /> }
+);
+
+const AdminMonthlyCohortChart = dynamic(
+  () => import("@/components/admin/AdminMonthlyCohortChart").then((m) => m.AdminMonthlyCohortChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-80" label="Đang tải biểu đồ cohort theo tháng..." /> }
+);
+
 export default function AdminStatisticsPage() {
-  const { data: stats, isLoading, isError, refetch } = useQuery<SystemStats>({
+  const { data: stats, isLoading, isError, refetch } = useQuery<SystemStatisticsData>({
     queryKey: ["admin-system-statistics"],
     queryFn: getSystemStatistics,
   });
@@ -46,7 +69,13 @@ export default function AdminStatisticsPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">AI System Health & Metrics</h1>
           <p className="text-sm sm:text-base text-zinc-500 mt-1">Giám sát hiệu suất, độ ổn định và chi phí vận hành mô hình AI IELTS Grader</p>
         </div>
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <Link
+            href="/admin/users"
+            className="min-h-[44px] bg-[#932120] hover:bg-[#7a1a19] text-white rounded-xl px-4 py-2 text-xs sm:text-sm font-bold shadow-xs inline-flex items-center gap-2"
+          >
+            <SearchCheck className="w-4 h-4" /> Minh chứng Học viên
+          </Link>
           <button
             type="button"
             onClick={() => void refetch()}
@@ -59,30 +88,25 @@ export default function AdminStatisticsPage() {
 
       <AlertsBadge />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
-        <KpiCard title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-blue-600" />} subtext="Total registered users" />
-        <KpiCard title="Writing Submissions" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng lượt làm Writing đã nộp (toàn thời gian)" />
-        <KpiCard title="Writing Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Lượt Writing nộp từ 0h hôm nay (giờ VN)" />
-        <KpiCard title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext={`${stats?.failed_runs ?? 0}/${stats?.finished_runs ?? 0} lượt chấm lỗi (Writing + Speaking, tính cả lượt đã chạy lại)`} />
-        <KpiCard title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Trung bình mỗi lượt chấm thành công (1 task Writing hoặc 1 bài Speaking)" />
-      </div>
+      <StaggerGrid autoAnimate={false} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
+        <KpiCard index={0} tone="crimson" title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-[#932120]" />} subtext="Total registered users" />
+        <KpiCard index={1} tone="emerald" title="Writing Submissions" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng lượt làm Writing đã nộp (toàn thời gian)" />
+        <KpiCard index={2} tone="crimson" title="Writing Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Lượt Writing nộp từ 0h hôm nay (giờ VN)" />
+        <KpiCard index={3} tone="amber" title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext={`${stats?.failed_runs ?? 0}/${stats?.finished_runs ?? 0} lượt chấm lỗi (Writing + Speaking, tính cả lượt đã chạy lại)`} />
+        <KpiCard index={4} tone="sky" title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Trung bình mỗi lượt chấm thành công (1 task Writing hoặc 1 bài Speaking)" />
+      </StaggerGrid>
 
-      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-zinc-200 shadow-xs w-full">
-        <h3 className="text-base sm:text-lg font-bold text-zinc-900 mb-5 flex items-center gap-2.5">
-          <Activity className="w-5 h-5 text-[#932120]" /> Lượt nộp bài 7 ngày qua (cả 4 kỹ năng, giờ VN)
-        </h3>
-        <div className="h-72 sm:h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={stats?.submissions_trend || []}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
-              <XAxis dataKey="date" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #e4e4e7", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} itemStyle={{ color: "#932120", fontWeight: "bold" }} />
-              <Line type="monotone" dataKey="count" name="Số bài" stroke="#932120" strokeWidth={3} dot={{ r: 4, fill: "#932120", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <BlurFadeCard>
+        <AdminSubmissionsTrendChart data={stats?.submissions_trend || []} />
+      </BlurFadeCard>
+
+      <BlurFadeCard>
+        <AdminMonthlyCohortChart data={stats?.monthly_cohort_progression || []} />
+      </BlurFadeCard>
+
+      <BlurFadeCard>
+        <AdminExpertKpiTable items={stats?.expert_kpis || []} interactive onPenaltyWaived={() => void refetch()} />
+      </BlurFadeCard>
 
       <ExpertGapCard />
     </div>

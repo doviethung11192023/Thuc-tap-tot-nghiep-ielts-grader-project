@@ -1,17 +1,22 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, GraduationCap, User as UserIcon, LogOut, ArrowLeft, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
+import { BookOpen, GraduationCap, User as UserIcon, LogOut, ArrowLeft, ShieldAlert, ArrowRight, Loader2, Menu, Search, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { openCommandPalette } from '@/components/ui/command-palette';
+import { MobileDrawer } from '@/components/ui/mobile-drawer';
 
 export default function ExpertLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
+  const pathname = usePathname();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
+    setMobileMenuOpen(false);
     await signOut();
     router.push('/login');
   };
@@ -96,42 +101,66 @@ export default function ExpertLayout({ children }: { children: React.ReactNode }
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
+    <div className="min-h-screen bg-[var(--ux-page)] font-sans flex flex-col">
       {/* Header */}
       <header className="bg-[#932120] text-white shadow-md sticky top-0 z-50 border-b border-[#7a1a19]">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-1.5 rounded-md">
+          <div className="flex items-center justify-between h-16 gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Mở menu Chuyên gia"
+                className="md:hidden p-2 -ml-1 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="bg-white/20 p-1.5 rounded-lg">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="font-bold text-base tracking-wider block leading-tight">
+                <span className="font-bold text-sm sm:text-base tracking-wider block leading-tight">
                   CỔNG CHUYÊN GIA CHẤM BÀI
                 </span>
-                <span className="text-[10px] text-red-200 uppercase tracking-widest font-semibold">
+                <span className="text-[10px] text-red-200 uppercase tracking-widest font-semibold hidden sm:block">
                   IELTS Expert Portal
                 </span>
               </div>
             </div>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1" aria-label="Điều hướng Chuyên gia">
               <Link
                 href="/expert/assignments"
-                className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white hover:bg-white/15 transition-colors"
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold text-white transition-colors ${
+                  pathname?.startsWith('/expert/assignments') ? 'bg-white/20 shadow-2xs' : 'hover:bg-white/15'
+                }`}
               >
                 Hàng đợi bài chấm
               </Link>
               <Link
                 href="/expert/profile"
-                className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white hover:bg-white/15 transition-colors"
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold text-white transition-colors ${
+                  pathname?.startsWith('/expert/profile') ? 'bg-white/20 shadow-2xs' : 'hover:bg-white/15'
+                }`}
               >
                 Hồ sơ & Trạng thái
               </Link>
             </nav>
-            
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
+              <button
+                type="button"
+                onClick={openCommandPalette}
+                aria-label="Mở bảng tìm nhanh (Ctrl+K)"
+                className="inline-flex items-center gap-2 h-8 px-2.5 sm:px-3 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-semibold text-white transition-colors cursor-pointer"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">Tìm nhanh</span>
+                <kbd className="hidden xl:inline-flex px-1 py-0.5 rounded bg-black/20 text-[10px] font-mono">
+                  Ctrl K
+                </kbd>
+              </button>
               <NotificationBell />
               <div className="text-right hidden sm:block">
                 <div className="text-xs font-bold text-white">{user.full_name || user.email}</div>
@@ -141,20 +170,57 @@ export default function ExpertLayout({ children }: { children: React.ReactNode }
                 {initials}
               </div>
               <button
+                type="button"
                 onClick={handleLogout}
-                className="text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
+                className="hidden sm:flex text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-md items-center gap-1.5 transition-colors cursor-pointer"
                 title="Đăng xuất"
               >
-                <LogOut className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Đăng xuất</span>
+                <LogOut className="w-3.5 h-3.5" /> <span>Đăng xuất</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
+      <MobileDrawer
+        open={mobileMenuOpen}
+        onOpenChange={setMobileMenuOpen}
+        direction="left"
+        title="Cổng Chuyên gia IELTS"
+        description={user.email}
+      >
+        <nav className="space-y-2">
+          <Link
+            href="/expert/assignments"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold ${
+              pathname?.startsWith('/expert/assignments') ? 'bg-[#932120] text-white' : 'text-[var(--ux-ink)] hover:bg-[var(--ux-surface-2)]'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" /> Hàng đợi bài chấm
+          </Link>
+          <Link
+            href="/expert/profile"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold ${
+              pathname?.startsWith('/expert/profile') ? 'bg-[#932120] text-white' : 'text-[var(--ux-ink)] hover:bg-[var(--ux-surface-2)]'
+            }`}
+          >
+            <UserIcon className="w-4 h-4" /> Hồ sơ & Trạng thái
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 text-left cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" /> Đăng xuất
+          </button>
+        </nav>
+      </MobileDrawer>
+
       {/* Content */}
-      <div className="flex-1 flex w-full mx-auto sm:px-6 lg:px-8 py-8">
-        <main className="flex-1">
+      <div className="flex-1 flex w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <main className="flex-1 min-w-0">
           {children}
         </main>
       </div>

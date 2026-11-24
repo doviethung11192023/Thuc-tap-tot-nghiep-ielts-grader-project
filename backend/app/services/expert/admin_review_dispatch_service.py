@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional
 
 from app.core.domain_errors import DomainError
 from app.db.supabase import db
-from app.services.expert.sla_service import TZ_VN, calculate_review_due_at
+from app.services.admin.staff_accounts import write_audit
+from app.services.expert.sla_service import TZ_VN, calculate_review_due_at, get_sla_hours
 from app.services.notifications.notification_service import notify_expert_assigned
 
 
@@ -245,10 +246,13 @@ def admin_assign_review_request(
             db().table("review_assignments").update({
                 "ended_at": now_vn.isoformat(),
                 "end_reason": "reassigned",
+                "reassigned_by": admin_user_id,
+                "admin_role": "admin",
                 "note": close_note,
             }).eq("id", a["id"]).execute()
 
-    due_at = calculate_review_due_at(now_vn, 48.0)
+    due_hours, _ = get_sla_hours()
+    due_at = calculate_review_due_at(now_vn, due_hours)
     new_asgn = db().table("review_assignments").insert({
         "request_id": request_id,
         "attempt_id": req["attempt_id"],
@@ -260,6 +264,14 @@ def admin_assign_review_request(
     db().table("review_requests").update({"status": "assigned"}).eq("id", request_id).execute()
 
     assignment_id = (new_asgn.data or [{}])[0].get("id")
+    write_audit(
+        admin_user_id,
+        "reassign_review" if open_asgns else "assign_review",
+        "review_requests",
+        request_id,
+        before={"expert_id": previous_expert_id} if previous_expert_id else None,
+        after={"expert_id": target_expert_id, "assignment_id": assignment_id, "note": note},
+    )
     notify_expert_assigned(
         assignment_id=assignment_id,
         attempt_id=req["attempt_id"],

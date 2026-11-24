@@ -63,8 +63,10 @@ def test_core_settings_hides_ai_keys_and_keeps_the_rest(client, fake_db):
         {"key": "ai_monthly_budget_usd", "value": 20}, {"key": "auto_submit_grace", "value": 10},
         {"key": "ai_tutor_config", "value": {"enabled": True}}]
     keys = sorted(r["key"] for r in client.get(SETTINGS).json()["data"])
-    # ai_tutor_config không thuộc spec 008: vẫn hiện và sửa được ở trang Cài đặt
-    assert keys == ["ai_tutor_config", "auto_submit_grace"]
+    # Key do trang Service AI quản lý bị ẩn; ai_tutor_config không thuộc spec 008 nên vẫn hiện và sửa được.
+    # Endpoint còn tự thêm cài đặt mặc định chưa có trong DB (vd. luật Expert), nên chỉ kiểm hai điều trên.
+    assert not {"ai_runtime_config", "trace_view_days", "ai_monthly_budget_usd"} & set(keys)
+    assert {"ai_tutor_config", "auto_submit_grace"} <= set(keys)
 
 
 def test_core_settings_put_of_ai_keys_is_400_and_does_not_write(client, fake_db):

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { apiErrorMessage, updateAiPricing } from "@/services/admin-ai-monitoring";
 import type { ModelPrice, PricingConfig } from "@/types/admin-ai-monitoring";
 

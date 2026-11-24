@@ -59,7 +59,7 @@ export function CleanListeningAudioBar({
         <button
           type="button"
           onClick={onRewind10}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-blue-600 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-[#932120] hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Lùi 10 giây"
         >
           <Rewind className="w-4 h-4" />
@@ -68,7 +68,7 @@ export function CleanListeningAudioBar({
         <button
           type="button"
           onClick={onTogglePlay}
-          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-full bg-[#932120] hover:bg-[#7a1a19] text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
           title={isPlaying ? "Tạm dừng" : "Phát âm thanh"}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
@@ -77,7 +77,7 @@ export function CleanListeningAudioBar({
         <button
           type="button"
           onClick={onForward10}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-blue-600 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-[#932120] hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Tới 10 giây"
         >
           <FastForward className="w-4 h-4" />
@@ -97,9 +97,9 @@ export function CleanListeningAudioBar({
       <div className="flex-1 relative flex items-center group h-6 cursor-pointer min-w-[120px]">
         {/* Track nền xám rõ nét */}
         <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden relative shadow-inner">
-          {/* Thanh fill tiến độ xanh dương */}
+          {/* Thanh fill tiến độ MoonLab */}
           <div
-            className="h-full bg-blue-600 rounded-full transition-all duration-75"
+            className="h-full bg-[#932120] rounded-full transition-all duration-75"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -115,7 +115,7 @@ export function CleanListeningAudioBar({
         />
         {/* Nút tròn thumb định vị theo % */}
         <div
-          className="absolute w-3.5 h-3.5 bg-blue-600 border-2 border-white rounded-full shadow-md pointer-events-none transition-transform group-hover:scale-125"
+          className="absolute w-3.5 h-3.5 bg-[#932120] border-2 border-white rounded-full shadow-md pointer-events-none transition-transform group-hover:scale-125"
           style={{ left: `calc(${progressPercent}% - 7px)` }}
         />
       </div>

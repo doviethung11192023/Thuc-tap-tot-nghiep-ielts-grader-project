@@ -58,14 +58,17 @@ def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depen
         elif attempts:
             status = "draft"
 
+        allowed_mode = t.get("allowed_mode") or "both"
         test_cards.append({
             "id": tid,
             "orderNumber": idx + 1,
             "title": t["title"],
+            "allowedMode": allowed_mode,
             "skills": [
                 {
                     "skill": t["skill"].capitalize(),
                     "status": status,
+                    "allowedMode": allowed_mode,
                     "latestBandScore": float(latest_band) if latest_band is not None else None,
                     "highestBandScore": float(highest_band) if highest_band is not None else None,
                     "hasVirtualRoom": t["skill"] == "speaking",

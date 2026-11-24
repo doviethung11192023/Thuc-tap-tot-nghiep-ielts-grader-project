@@ -57,7 +57,8 @@ from app.api.api_router import api_router
 @app.exception_handler(DomainError)
 async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
     """Lỗi nghiệp vụ của service → response cùng dạng HTTPException."""
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    detail: object = {"message": exc.detail, **exc.extra} if getattr(exc, "extra", None) else exc.detail
+    return JSONResponse(status_code=exc.status_code, content={"detail": detail})
 
 
 @app.exception_handler(Exception)

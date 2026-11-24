@@ -30,6 +30,80 @@ export interface LearnerGoal {
   updated_at?: string | null;
 }
 
+export type ExpertTier = "probation" | "standard" | "high_performer" | "top_expert";
+
+export interface ExpertPenaltyItem {
+  id: string;
+  expert_id: string;
+  assignment_id?: string | null;
+  reason: "sla_expired" | "high_decline_rate" | "admin_quality_flag" | string;
+  severity: "warning" | "throttle" | "cooldown" | "suspended" | string;
+  cooldown_until?: string | null;
+  note?: string | null;
+  waived_at?: string | null;
+  waive_reason?: string | null;
+  created_at: string;
+}
+
+export interface ExpertTierRequirement {
+  label: string;
+  current: string;
+  ok: boolean;
+}
+
+export interface ExpertPerformanceSnapshot {
+  id: string;
+  period_start: string;
+  period_end: string;
+  completed_count: number;
+  on_time_rate: number;
+  early_sla_rate: number;
+  completeness_first_pass_rate: number;
+  avg_turnaround_hours: number | null;
+  decline_rate: number;
+  rubber_stamp_count: number;
+  helpfulness_rate: number | null;
+  helpfulness_count: number;
+  tier: ExpertTier;
+}
+
+export interface ExpertRpsSummary {
+  rps_score: number;
+  rps_tier: "gold" | "standard" | "watchlist" | string;
+  tier?: ExpertTier | string;
+  tier_max_reviews?: number;
+  completed_count?: number;
+  on_time_rate?: number | null;
+  early_sla_rate?: number | null;
+  completeness_first_pass_rate?: number | null;
+  avg_turnaround_hours?: number | null;
+  decline_rate?: number;
+  rubber_stamp_count?: number;
+  helpfulness_rate?: number | null;
+  helpfulness_count?: number;
+  active_penalties_30d?: number;
+  active_penalties?: ExpertPenaltyItem[];
+  next_tier_requirements?: ExpertTierRequirement[];
+  overdue_30d: number;
+  penalty_level: number;
+  completed_30d?: number;
+  cooldown_until?: string | null;
+  is_suspended_by_penalty?: boolean;
+  consecutive_clean_reviews?: number;
+  breakdown?: {
+    sla_score: number;
+    depth_score: number;
+    consistency_score: number;
+    speed_score: number;
+    deduction: number;
+  };
+}
+
+export interface ExpertPerformanceDetail extends ExpertRpsSummary {
+  snapshots: ExpertPerformanceSnapshot[];
+  tier_max_cap: Record<string, number>;
+}
+
 export interface ExpertProfile {
   user_id: string;
   email: string;
@@ -40,6 +114,13 @@ export interface ExpertProfile {
   bio: string | null;
   active_reviews_count: number;
   created_at: string | null;
+  tier?: ExpertTier | string;
+  tier_max_reviews?: number;
+  cooldown_until?: string | null;
+  consecutive_clean_reviews?: number;
+  is_suspended_by_penalty?: boolean;
+  rps_summary?: ExpertRpsSummary | null;
+  performance_summary?: ExpertRpsSummary | null;
 }
 
 
@@ -104,6 +185,8 @@ export interface EvaluationResultDetail {
   is_score_overridden: boolean;
   evaluator_type?: "ai" | "expert" | string;
   expert_feedback?: string | null;
+  ai_evaluation?: { overall_band: number } | null;
+  expert_review?: { overall_band: number; feedback?: string | null } | null;
   sample_essay?: string | null;
   key_point_check?: KeyPointCheck | null;
   chart_source?: "answer_key" | "image" | null;
@@ -146,6 +229,8 @@ export interface GradingResult {
   is_score_overridden?: boolean;
   evaluator_type?: "ai" | "expert" | string;
   expert_feedback?: string | null;
+  ai_evaluation?: { overall_band: number } | null;
+  expert_review?: { overall_band: number; feedback?: string | null } | null;
   sibling_essays?: SiblingEssayItem[];
   scores: {
     overall_band: number;
@@ -285,7 +370,19 @@ export interface WorkspaceAnnotation {
   end_ms?: number | null;
 }
 
+export interface ExpertCompletenessRules {
+  min_criteria_count: number;
+  min_criterion_comment_chars: number;
+  min_overall_feedback_chars: number;
+  min_writing_annotations: number;
+  exempt_annotation_band?: number;
+  min_change_reason_chars?: number;
+  min_study_tip_chars?: number;
+  require_speaking_part_feedback: boolean;
+}
+
 export interface ExpertWorkspaceData {
+  completeness_rules?: ExpertCompletenessRules;
   assignment: ExpertAssignment;
   attempt: {
     id: string;
@@ -315,7 +412,7 @@ export interface ExpertWorkspaceData {
     task_type?: string;
   }>;
   ai_evaluation: {
-    evaluation: { id: string; overall_band: number; feedback: string } | null;
+    evaluation: { id: string; overall_band: number; feedback: string; status?: string | null } | null;
     criteria: CriterionScoreDetail[];
     annotations: WorkspaceAnnotation[];
   };

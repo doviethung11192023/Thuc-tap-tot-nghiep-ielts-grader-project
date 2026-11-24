@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useTransition } from "react";
+import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import {
   getTests,
   getTestSets,
@@ -7,7 +7,7 @@ import {
   deleteTest,
 } from "@/services/admin-content";
 import type { TestItem, TestSet, SkillType, ContentStatus, AllowedMode } from "@/types/exam";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { apiErrorDetail } from "@/lib/attempt-submission";
 
 interface CacheEntry {
@@ -38,6 +38,7 @@ export function useAdminTests(testFormat: "full" | "exercise" = "full") {
   const [loading, setLoading] = useState<boolean>(() => !initialCached);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPendingTransition, startTransition] = useTransition();
+  const requestSeqRef = useRef(0);
 
   useEffect(() => {
     getTestSets().then(setTestSets).catch(() => {});
@@ -45,6 +46,7 @@ export function useAdminTests(testFormat: "full" | "exercise" = "full") {
 
   const fetchTests = useCallback(
     async (isSilent = false) => {
+      const seq = ++requestSeqRef.current;
       const key = `${testFormat}_${page}_${limit}_${skill || ""}_${status || ""}_${testSetId || ""}_${difficulty || ""}_${allowedMode || ""}_${sortBy}_${search.trim()}`;
       if (!testsCacheMap.has(key) && !isSilent) setLoading(true);
       else setIsRefreshing(true);
@@ -54,14 +56,18 @@ export function useAdminTests(testFormat: "full" | "exercise" = "full") {
           page, limit, skill, status, test_set_id: testSetId, difficulty, allowed_mode: allowedMode, sort_by: sortBy, search: search.trim() || undefined,
           test_format: testFormat
         });
-        setTests(data.items);
-        setTotal(data.total);
         testsCacheMap.set(key, { items: data.items, total: data.total });
+        if (seq === requestSeqRef.current) {
+          setTests(data.items);
+          setTotal(data.total);
+        }
       } catch (err) {
         console.error("Failed to fetch tests:", err);
       } finally {
-        setLoading(false);
-        setIsRefreshing(false);
+        if (seq === requestSeqRef.current) {
+          setLoading(false);
+          setIsRefreshing(false);
+        }
       }
     },
     [testFormat, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]
@@ -76,6 +82,7 @@ export function useAdminTests(testFormat: "full" | "exercise" = "full") {
       setTotal(cached.total);
       fetchTests(true);
     } else {
+      setTests([]);
       fetchTests(false);
     }
   }, [fetchTests, testFormat, page, limit, skill, status, testSetId, difficulty, allowedMode, sortBy, search]);

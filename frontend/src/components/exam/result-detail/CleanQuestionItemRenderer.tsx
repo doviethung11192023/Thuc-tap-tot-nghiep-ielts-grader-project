@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { CleanReadingQuestion } from "@/types/reading-result-detail";
-import { CleanListeningQuestion } from "@/types/listening-result-detail";
+import type { CleanReadingQuestion } from "@/types/reading-result-detail";
+import type { CleanListeningQuestion } from "@/types/listening-result-detail";
 import { CleanQuestionDropdownExplanation } from '@/components/exam/result-detail/CleanQuestionDropdownExplanation';
 import { CleanMatchingOptionsPool } from '@/components/exam/result-detail/clean-matching-options-pool';
 import { CleanMultipleChoiceOptionsList } from '@/components/exam/result-detail/clean-multiple-choice-options-list';
@@ -12,6 +12,7 @@ type QuestionUnion = CleanReadingQuestion | CleanListeningQuestion;
 interface CleanQuestionItemRendererProps {
   question: QuestionUnion;
   optionsPool?: Array<{ key: string; text: string }> | null;
+  skill?: 'reading' | 'listening';
   onSelectEvidence?: (originalText: string, questionNumber?: number) => void;
   defaultExpanded?: boolean;
 }
@@ -19,6 +20,7 @@ interface CleanQuestionItemRendererProps {
 export function CleanQuestionItemRenderer({
   question,
   optionsPool,
+  skill = 'reading',
   onSelectEvidence,
   defaultExpanded = false
 }: CleanQuestionItemRendererProps) {
@@ -143,6 +145,7 @@ export function CleanQuestionItemRenderer({
           explanation4Steps={question.explanation_4_steps}
           evidenceText={question.evidence_text}
           keywordsMapping={question.keywords_mapping || []}
+          skill={skill}
           onSelectEvidence={onSelectEvidence}
           defaultExpanded={defaultExpanded}
         />

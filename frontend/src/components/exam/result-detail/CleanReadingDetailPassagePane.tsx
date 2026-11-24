@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useEffect } from "react";
-import { CleanReadingQuestion } from "@/types/reading-result-detail";
+import type { CleanReadingQuestion } from "@/types/reading-result-detail";
 
 export interface HighlightTarget {
   text: string;
@@ -182,9 +182,11 @@ export function CleanReadingDetailPassagePane({
         <span className="inline-block text-[11px] font-black uppercase tracking-wider text-[#932120] bg-red-50 px-3 py-1 rounded-full border border-red-100">
           Reading Passage {passageIndex + 1}
         </span>
-        <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mt-3 font-serif">
-          {title}
-        </h3>
+        {title && title.trim().toLowerCase() !== `reading passage ${passageIndex + 1}` && (
+          <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mt-3 font-serif">
+            {title}
+          </h3>
+        )}
       </div>
 
       <div className="space-y-4 text-zinc-800 text-sm md:text-[15.5px] leading-[1.75] font-serif">

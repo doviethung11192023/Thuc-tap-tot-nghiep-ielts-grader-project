@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { ReadingWorkspace } from '@/components/exam/reading/ReadingWorkspace';
+import { AttemptErrorBanner } from '@/components/exam/AttemptErrorBanner';
 import { ExamWorkspaceSkeleton } from '@/components/exam/shared/ExamWorkspaceSkeleton';
 import { ExamPageNotice } from '@/components/exam/shared/ExamPageNotice';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
@@ -24,7 +25,7 @@ export default function ReadingWorkspacePage() {
   const summaryPath = (id: string) =>
     `/test-practice/reading/${testId}/summary?attemptId=${id}&parts=${parts.join(',')}${returnQuery}`;
 
-  const { loading, attemptId, attemptError, deadlineMs, readingData, savedWork, closedAttempt } =
+  const { loading, attemptId, attemptError, attemptErrorStatus, deadlineMs, readingData, savedWork, closedAttempt } =
     useExamWorkspaceContent(testId, 'reading', mode);
   // Tự lưu đáp án lên server (FR-11): mất mạng, đóng tab hay đổi máy vẫn làm tiếp được
   const [answers, setAnswers] = useState<Record<number, string | string[]> | null>(null);
@@ -81,6 +82,14 @@ export default function ReadingWorkspacePage() {
 
   return (
     <div className="space-y-3">
+      <AttemptErrorBanner
+        skill="reading"
+        testId={testId}
+        mode={mode}
+        attemptError={attemptError}
+        attemptErrorStatus={attemptErrorStatus}
+        returnUrl={returnUrl}
+      />
       {submitError && (
         <div
           role="alert"
@@ -101,6 +110,8 @@ export default function ReadingWorkspacePage() {
         initialAnswers={savedWork?.answers}
         onAnswersChange={setAnswers}
         mode={mode}
+        attemptId={attemptId}
+        attemptError={attemptError}
         onAbandon={mode === 'exam' ? () => discardAttempt(attemptId) : undefined}
         deadlineMs={mode === 'exam' ? deadlineMs : null}
         selectedParts={parts}

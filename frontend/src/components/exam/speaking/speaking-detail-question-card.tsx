@@ -31,6 +31,21 @@ interface SpeakingDetailQuestionCardProps {
   onSeekPin: (responseId: string, startMs?: number | null) => void;
 }
 
+const RELEVANCE_VI: Record<string, string> = {
+  full: 'Đầy đủ',
+  relevant: 'Phù hợp',
+  partial: 'Một phần',
+  off_topic: 'Lạc đề',
+};
+
+const DEVELOPMENT_VI: Record<string, string> = {
+  well_developed: 'Triển khai tốt',
+  adequate: 'Đạt yêu cầu',
+  limited: 'Còn ngắn',
+  minimal: 'Rất ít',
+  underdeveloped: 'Chưa đủ ý',
+};
+
 export function SpeakingDetailQuestionCard({
   answer,
   index,
@@ -74,7 +89,7 @@ export function SpeakingDetailQuestionCard({
       <div className="space-y-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-extrabold">
+            <span className="px-2.5 py-0.5 rounded-lg bg-red-50 border border-red-200 text-[#932120] text-[11px] font-extrabold">
               Part {answer.part} • Câu {index + 1}
             </span>
             {pins.length > 0 && (
@@ -137,12 +152,12 @@ export function SpeakingDetailQuestionCard({
               <div className="flex flex-wrap gap-1.5">
                 {feedback?.relevance && (
                   <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-700">
-                    Liên quan: {feedback.relevance}
+                    Liên quan: {RELEVANCE_VI[feedback.relevance.toLowerCase()] ?? feedback.relevance}
                   </span>
                 )}
                 {feedback?.development && (
                   <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-700">
-                    Triển khai: {feedback.development}
+                    Triển khai: {DEVELOPMENT_VI[feedback.development.toLowerCase()] ?? feedback.development}
                   </span>
                 )}
               </div>
@@ -252,7 +267,7 @@ export function SpeakingDetailQuestionCard({
                     {feedback.useful_language.map((phrase, idx) => (
                       <span
                         key={`${phrase}-${idx}`}
-                        className="px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-800 text-[11px] font-medium"
+                        className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] font-medium"
                       >
                         {phrase}
                       </span>
@@ -262,12 +277,12 @@ export function SpeakingDetailQuestionCard({
               )}
 
               {feedback.upgraded_answer && (
-                <div className="rounded-xl border border-blue-200 bg-blue-50/50 overflow-hidden">
+                <div className="rounded-xl border border-red-200/80 bg-red-50/40 overflow-hidden">
                   <div className="flex items-center justify-between px-3 py-2">
                     <button
                       type="button"
                       onClick={() => setShowUpgrade((prev) => !prev)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-800 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#932120] hover:text-[#7a1a19] cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Câu trả lời nâng cấp</span>

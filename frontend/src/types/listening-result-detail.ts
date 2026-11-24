@@ -6,7 +6,7 @@ export interface CleanListeningKeywordMapping {
 }
 
 export interface CleanListeningQuestion {
-  id: number;
+  id: number | string;
   question_number: number;
   section_number: number;
   question_type: string | number;

@@ -64,6 +64,8 @@ class Settings(BaseSettings):
     speech_stt_compute_type: str = "auto"
     speech_stt_beam_size: int = 5
     speech_phoneme_model: str = "facebook/wav2vec2-lv-60-espeak-cv-ft"
+    # Set SPEECH_PRELOAD_MODELS=false on low-RAM CPU dev hosts to lazy-load on first Speaking test.
+    speech_preload_models: bool = True
     # Shared with Core API (header X-AI-Engine-Secret). Required: empty makes grading endpoints return 503
     # unless ALLOW_NO_SECRET=true, which is for a local machine only.
     ai_engine_secret: str = ""

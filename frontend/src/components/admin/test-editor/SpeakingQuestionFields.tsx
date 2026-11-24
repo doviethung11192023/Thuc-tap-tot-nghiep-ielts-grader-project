@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { Upload, Volume2, Loader2 } from "lucide-react";
 import { uploadMedia } from "@/services/admin-content";
 
@@ -30,8 +31,9 @@ export function SpeakingQuestionFields({
     try {
       const res = await uploadMedia(file, "audio/speaking");
       onPromptAudioKeyChange(res.url || res.key);
+      toast.success("Tải audio Speaking thành công");
     } catch (err: any) {
-      alert("Lỗi tải file audio lên Cloudflare R2");
+      toast.error("Lỗi tải file audio lên Cloudflare R2");
     } finally {
       setUploading(false);
     }

@@ -7,7 +7,9 @@ import { CleanListeningTranscriptPane } from '@/components/exam/result-detail/Cl
 import { CleanListeningExerciseGroupsPane } from '@/components/exam/result-detail/CleanListeningExerciseGroupsPane';
 import { CleanListeningDetailBottomBar } from '@/components/exam/result-detail/CleanListeningDetailBottomBar';
 import { CleanListeningDetailSkeleton } from '@/components/exam/result-detail/CleanListeningDetailSkeleton';
+import { CleanDetailErrorState } from '@/components/exam/result-detail/CleanDetailErrorState';
 import { useAttemptListeningDetail } from '@/hooks/useAttemptListeningDetail';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CleanListeningDetailViewProps {
   onBack?: () => void;
@@ -22,7 +24,8 @@ export function CleanListeningDetailView({
   attemptId,
   selectedParts
 }: CleanListeningDetailViewProps) {
-  const { data, loading } = useAttemptListeningDetail(attemptId);
+  const { user } = useAuth();
+  const { data, loading, error } = useAttemptListeningDetail(attemptId);
   const [activeSectionIndex, setActiveSectionIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -34,9 +37,9 @@ export function CleanListeningDetailView({
   const [highlightedEvidenceText, setHighlightedEvidenceText] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  const rawSections = data.sections || [];
-  const rawQuestions = data.questions || [];
-  const rawGroups = data.exercise_groups || [];
+  const rawSections = data?.sections || [];
+  const rawQuestions = data?.questions || [];
+  const rawGroups = data?.exercise_groups || [];
 
   const { filteredSections, filteredQuestions, filteredExerciseGroups } = useMemo(() => {
     if (!selectedParts?.length) return { filteredSections: rawSections, filteredQuestions: rawQuestions, filteredExerciseGroups: rawGroups };
@@ -132,10 +135,19 @@ export function CleanListeningDetailView({
 
   if (loading) return <CleanListeningDetailSkeleton />;
 
+  if (error || !data) {
+    return (
+      <CleanDetailErrorState
+        message={error || "Không có dữ liệu chi tiết cho bài làm này."}
+        onBack={onBack}
+      />
+    );
+  }
+
   const calculatedCorrectCount = filteredQuestions.filter(q => q.is_correct).length;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-100 overflow-hidden">
+    <div className="flex flex-col h-dvh w-full bg-zinc-100 overflow-hidden">
       <CleanListeningDetailHeader testId={data.test_id} onRetake={onRetake} onBack={onBack} />
 
       <CleanListeningAudioBar
@@ -182,6 +194,7 @@ export function CleanListeningDetailView({
         />
 
         <CleanListeningExerciseGroupsPane
+          userName={user?.full_name || user?.email?.split('@')[0] || 'Học viên'}
           submittedAt={data.submitted_at}
           overallBand={data.overall_band}
           correctCount={calculatedCorrectCount}

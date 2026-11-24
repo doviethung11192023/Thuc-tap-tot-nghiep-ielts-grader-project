@@ -67,7 +67,7 @@ export function ListeningResultsView({ testData, userAnswers, mode, onRetake }: 
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+    <div className="flex flex-col h-dvh w-full bg-zinc-50 overflow-hidden">
       {/* Top Banner */}
       <div className="bg-white border-b border-zinc-200 px-5 py-2.5 h-14 flex items-center justify-between shadow-xs shrink-0 z-20">
         <div className="flex items-center gap-3">

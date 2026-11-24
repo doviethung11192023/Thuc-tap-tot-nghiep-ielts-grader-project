@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { Sparkles, HelpCircle, Plus, Trash2 } from "lucide-react";
 
 interface CompletionSmartBuilderProps {
@@ -48,7 +49,7 @@ export function CompletionSmartBuilder({
         onPromptChange(cleanedPrompt);
       }
     } else {
-      alert("Cú pháp mẫu: [1: R242 / r 242] hoặc [89.99 / eighty nine]");
+      toast.error("Cú pháp mẫu: [1: R242 / r 242] hoặc [89.99 / eighty nine]");
     }
   };
 

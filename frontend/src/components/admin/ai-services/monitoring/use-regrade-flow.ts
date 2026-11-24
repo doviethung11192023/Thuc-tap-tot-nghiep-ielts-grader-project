@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { apiErrorMessage, previewRegrade, runRegrade } from "@/services/admin-ai-monitoring";
 import type { RegradePreview } from "@/types/admin-ai-monitoring";
 

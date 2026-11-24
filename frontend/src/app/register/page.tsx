@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { BookOpen, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -78,15 +78,15 @@ export default function RegisterPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-zinc-100 text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-zinc-900 mb-2">Đăng ký thành công!</h2>
-            <p className="text-zinc-600 mb-6">
+      <div className="relative min-h-screen overflow-hidden bg-[var(--ux-page)] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-[var(--ux-ink)]">
+        <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-[var(--ux-surface)] py-8 px-5 sm:px-10 rounded-2xl shadow-lg border border-[var(--ux-line)] text-center">
+            <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-extrabold text-[var(--ux-ink)] mb-2">Đăng ký thành công!</h2>
+            <p className="text-[var(--ux-ink-2)] text-sm mb-6 leading-relaxed">
               Chúng tôi đã gửi một email xác thực đến <strong>{email}</strong>. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam) và click vào link xác thực để kích hoạt tài khoản.
             </p>
-            <Link href="/login" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#932120] transition-all">
+            <Link href="/login" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] transition-all">
               Trở về trang Đăng nhập
             </Link>
           </div>
@@ -96,15 +96,25 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-zinc-900">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="relative min-h-screen overflow-hidden bg-[var(--ux-page)] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-[var(--ux-ink)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[720px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(147,33,32,0.12)_0%,rgba(217,119,6,0.06)_50%,transparent_75%)] blur-2xl"
+      />
+      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="flex justify-center">
-          <div className="bg-[#932120] p-3 rounded-xl shadow-lg">
-            <BookOpen className="w-10 h-10 text-white" />
+          <div className="bg-[#932120] p-3 rounded-2xl shadow-lg ring-4 ring-rose-100/80">
+            <BookOpen className="w-9 h-9 text-white" />
           </div>
         </div>
-        <div className="mt-6 flex justify-center border-b border-zinc-200">
-          <Link href="/login" className="px-8 py-3 text-sm font-bold text-zinc-500 hover:text-zinc-700 transition-colors">
+        <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-[var(--ux-ink)]">
+          MoonLab IELTS
+        </h1>
+        <p className="mt-1 text-xs font-medium text-[var(--ux-ink-2)]">
+          Tạo tài khoản học viên để lưu lộ trình &amp; bài chấm AI/Chuyên gia
+        </p>
+        <div className="mt-6 flex justify-center border-b border-[var(--ux-line)]">
+          <Link href="/login" className="px-8 py-3 text-sm font-bold text-[var(--ux-ink-2)] hover:text-[var(--ux-ink)] transition-colors">
             Đăng nhập
           </Link>
           <Link href="/register" className="px-8 py-3 text-sm font-bold text-[#932120] border-b-2 border-[#932120]">
@@ -113,12 +123,12 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-zinc-100">
-          <form className="space-y-6" action="#" method="POST" onSubmit={handleRegister}>
+      <div className="relative z-10 mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-[var(--ux-surface)] py-8 px-5 sm:px-10 rounded-2xl shadow-lg border border-[var(--ux-line)]">
+          <form className="space-y-5" action="#" method="POST" onSubmit={handleRegister}>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-zinc-700">
-                Full Name
+              <label htmlFor="name" className="block text-sm font-semibold text-[var(--ux-ink)]">
+                Họ và tên
               </label>
               <div className="mt-1">
                 <input
@@ -126,17 +136,18 @@ export default function RegisterPage() {
                   name="name"
                   type="text"
                   autoComplete="name"
+                  placeholder="Nguyễn Văn A"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:ring-[#932120] focus:border-[#932120] sm:text-sm transition-colors"
+                  className="appearance-none block w-full px-3.5 py-2.5 border border-[var(--ux-line-2)] rounded-xl shadow-2xs placeholder:text-[var(--ux-ink-3)] focus:outline-none focus:ring-2 focus:ring-[#932120]/25 focus:border-[#932120] sm:text-sm transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-                Email address
+              <label htmlFor="email" className="block text-sm font-semibold text-[var(--ux-ink)]">
+                Địa chỉ email
               </label>
               <div className="mt-1">
                 <input
@@ -144,17 +155,18 @@ export default function RegisterPage() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  placeholder="email@gmail.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:ring-[#932120] focus:border-[#932120] sm:text-sm transition-colors"
+                  className="appearance-none block w-full px-3.5 py-2.5 border border-[var(--ux-line-2)] rounded-xl shadow-2xs placeholder:text-[var(--ux-ink-3)] focus:outline-none focus:ring-2 focus:ring-[#932120]/25 focus:border-[#932120] sm:text-sm transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-                Password
+              <label htmlFor="password" className="block text-sm font-semibold text-[var(--ux-ink)]">
+                Mật khẩu
               </label>
               <div className="mt-1">
                 <input
@@ -162,10 +174,11 @@ export default function RegisterPage() {
                   name="password"
                   type="password"
                   autoComplete="new-password"
+                  placeholder="Tối thiểu 6 ký tự"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:ring-[#932120] focus:border-[#932120] sm:text-sm transition-colors"
+                  className="appearance-none block w-full px-3.5 py-2.5 border border-[var(--ux-line-2)] rounded-xl shadow-2xs placeholder:text-[var(--ux-ink-3)] focus:outline-none focus:ring-2 focus:ring-[#932120]/25 focus:border-[#932120] sm:text-sm transition-colors"
                 />
               </div>
             </div>
@@ -174,9 +187,9 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#932120] transition-all disabled:opacity-50"
+                className="w-full min-h-[42px] flex justify-center items-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#932120] hover:bg-[#7a1a19] transition-all disabled:opacity-50 cursor-pointer"
               >
-                {loading ? 'Đang đăng ký...' : 'Register'}
+                {loading ? 'Đang đăng ký...' : 'Đăng ký tài khoản'}
               </button>
             </div>
           </form>

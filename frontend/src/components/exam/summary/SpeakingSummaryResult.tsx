@@ -15,7 +15,7 @@ import {
 import { useSpeakingAttemptSummary } from '@/hooks/useSpeakingAttemptSummary';
 import { requestPracticeExpertReview } from '@/services/expert';
 import { retryAiGrading } from '@/services/student-test-practice';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 import {
   CriteriaGrid,
   OverallReport,
@@ -23,6 +23,7 @@ import {
   SpeechMetricsPanel,
 } from '../speaking/speaking-result-sections';
 import { SpeakingTestPromptsPanel } from '../speaking/speaking-prompt-card';
+import { DualEvaluationComparisonCard } from './DualEvaluationComparisonCard';
 
 interface SpeakingSummaryResultProps {
   testId?: string;
@@ -162,7 +163,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
               type="button"
               onClick={handleRetryAi}
               disabled={retryingAi}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#932120] hover:bg-[#7a1a19] disabled:opacity-60 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
             >
               {retryingAi ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -196,7 +197,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
                     className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                       isExpertOfficial
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                        : 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-red-50 border-red-200 text-[#932120]'
                     }`}
                   >
                     {isExpertOfficial ? (
@@ -220,7 +221,7 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
                   <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-1">
                     <Link
                       href={`/test-practice/speaking/${testId}/detail?attemptId=${attemptId}${returnQuery}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-full shadow-sm transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#932120] hover:bg-[#7a1a19] text-white font-bold text-xs sm:text-sm rounded-full shadow-sm transition-colors cursor-pointer"
                     >
                       <span>Xem chi tiết & Audio từng câu</span>
                       <ArrowRight className="w-4 h-4" />
@@ -248,14 +249,14 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center px-8 py-5 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md min-w-[170px] shrink-0">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-100">
+                <div className="flex flex-col items-center justify-center px-8 py-5 rounded-3xl bg-gradient-to-br from-[#932120] to-[#6a1514] text-white shadow-md min-w-[170px] shrink-0">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-red-100">
                     Overall Band
                   </span>
                   <span className="text-5xl font-black tracking-tight my-1 tabular-nums">
                     {data.overall_band?.toFixed(1)}
                   </span>
-                  <span className="text-[11px] font-semibold text-blue-100">Thang điểm 9.0</span>
+                  <span className="text-[11px] font-semibold text-red-100">Thang điểm 9.0</span>
                 </div>
               </div>
               {/* Trần điểm: trả lời thiếu (BR-23), nghe không rõ (BR-24), Part 2 hoặc cả bài quá ngắn (BR-25) */}
@@ -277,6 +278,15 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
             </section>
 
             {/* Bento 2-Column Analytics */}
+            <DualEvaluationComparisonCard
+              attemptId={attemptId}
+              aiBand={data.ai_evaluation?.overall_band}
+              expertBand={data.expert_review?.overall_band}
+              expertFeedback={data.expert_review?.feedback ?? speaking.feedback}
+              expertReviewStatus={data.expert_review_status}
+              expertReviewDueAt={data.expert_review_due_at}
+            />
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-7 space-y-5">
                 <CriteriaGrid criteria={speaking.criteria} />

@@ -1,61 +1,85 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  GraduationCap, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Settings, 
-  FileText, 
-  Loader2, 
-  Save, 
-  Mail, 
-  User as UserIcon,
-  AlertCircle
-} from 'lucide-react';
-import { getExpertProfile, updateExpertAvailability } from '@/services/expert';
-import { useAuth } from '@/hooks/useAuth';
-import toast from 'react-hot-toast';
-import { ExpertProfile } from '@/types';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Loader2, Lock, Save, Settings } from "lucide-react";
+import { m, useReducedMotion } from "motion/react";
+import { getExpertPerformance, getExpertProfile, updateExpertAvailability } from "@/services/expert";
+import { extractApiErrorMessage } from "@/lib/api-error";
+import { toast } from "sonner";
+import type { ExpertPerformanceDetail, ExpertProfile } from "@/types";
+import { ExpertRpsCard } from "@/components/expert/ExpertRpsCard";
+import { BlurFadeCard, SpotlightCard } from "@/components/motion";
+
+function formatVnDate(iso?: string | null): string | null {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "Asia/Ho_Chi_Minh",
+    });
+  } catch {
+    return iso;
+  }
+}
 
 export default function ExpertProfilePage() {
-  const { user } = useAuth();
+  const prefersReduced = useReducedMotion();
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
 
-  // Form state
   const [isAvailable, setIsAvailable] = useState(false);
   const [maxReviews, setMaxReviews] = useState(5);
-  const [bio, setBio] = useState('');
+  const [bio, setBio] = useState("");
 
   const { data: profile = null, isLoading: loading } = useQuery<ExpertProfile>({
-    queryKey: ['expert-profile'],
+    queryKey: ["expert-profile"],
     queryFn: getExpertProfile,
     staleTime: 2 * 60 * 1000,
   });
 
-  useEffect(() => {
-    if (!profile) return;
+  const { data: performance = null } = useQuery<ExpertPerformanceDetail>({
+    queryKey: ["expert-performance-me"],
+    queryFn: getExpertPerformance,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const profileSyncKey = profile
+    ? `${profile.user_id}:${profile.is_available}:${profile.max_active_reviews}:${profile.bio ?? ""}`
+    : "";
+  const [syncedKey, setSyncedKey] = useState("");
+  if (profile && syncedKey !== profileSyncKey) {
+    setSyncedKey(profileSyncKey);
     setIsAvailable(profile.is_available);
     setMaxReviews(profile.max_active_reviews);
-    setBio(profile.bio || '');
-  }, [profile]);
+    setBio(profile.bio || "");
+  }
+
+  const [nowMs] = useState(() => Date.now());
+  const tierMaxCap = profile?.tier_max_reviews ?? performance?.tier_max_reviews ?? 5;
+  const isCooldownLocked = Boolean(
+    profile?.is_suspended_by_penalty ||
+      (profile?.cooldown_until && new Date(profile.cooldown_until).getTime() > nowMs),
+  );
+  const cooldownFormatted = formatVnDate(profile?.cooldown_until);
 
   const handleSaveAvailability = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
       const updated = await updateExpertAvailability({
-        is_available: isAvailable,
-        max_active_reviews: Number(maxReviews),
-        bio: bio.trim() || undefined
+        is_available: isCooldownLocked ? false : isAvailable,
+        max_active_reviews: Math.min(Number(maxReviews), tierMaxCap),
+        bio: bio.trim() || undefined,
       });
-      queryClient.setQueryData(['expert-profile'], updated);
-      toast.success('Đã cập nhật trạng thái khả dụng thành công!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Lỗi khi cập nhật trạng thái');
+      queryClient.setQueryData(["expert-profile"], updated);
+      toast.success("Đã cập nhật trạng thái khả dụng thành công!");
+    } catch (err: unknown) {
+      toast.error(extractApiErrorMessage(err, "Lỗi khi cập nhật trạng thái"));
     } finally {
       setIsSaving(false);
     }
@@ -72,120 +96,160 @@ export default function ExpertProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Hồ sơ Chuyên gia & Trạng thái Nhận bài</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">Hồ sơ Chuyên gia &amp; Trạng thái Nhận bài</h1>
         <p className="text-sm text-zinc-500 mt-1">
-          Quản lý trạng thái sẵn sàng chấm bài (Available / Unavailable), chỉ tiêu bài chấm và giới thiệu chuyên môn (UC-14).
+          Quản lý trạng thái sẵn sàng chấm bài, chỉ tiêu bài chấm theo hạng và hiệu suất 30 ngày (UC-14).
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Left Column: Quick Status */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 text-center space-y-4">
-            <div className="w-20 h-20 bg-red-50 border border-red-100 rounded-full flex items-center justify-center text-3xl font-bold text-[#932120] mx-auto shadow-2xs">
-              {(profile?.full_name || 'E').charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900">{profile?.full_name || 'Chuyên gia'}</h2>
-              <p className="text-xs text-zinc-500">{profile?.email}</p>
-            </div>
-
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-              profile?.is_available ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-600'
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${profile?.is_available ? 'bg-green-500' : 'bg-zinc-400'}`}></span>
-              {profile?.is_available ? 'Đang Sẵn sàng nhận bài' : 'Tạm dừng nhận bài'}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 space-y-3">
-            <h3 className="font-bold text-sm text-zinc-800">Tải công việc hiện tại</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-zinc-600">
-                <span>Bài đang chấm / Tối đa:</span>
-                <span className="font-bold text-zinc-900">
-                  {profile?.active_reviews_count || 0} / {profile?.max_active_reviews || 5} bài
-                </span>
-              </div>
-              <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-[#932120] h-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(
-                      100, 
-                      ((profile?.active_reviews_count || 0) / (profile?.max_active_reviews || 5)) * 100
-                    )}%`
-                  }}
-                />
-              </div>
-              <p className="text-[11px] text-zinc-500 italic">
-                Hệ thống chỉ tự động phân công thêm khi bạn bật Available và số bài đang nhận chưa chạm giới hạn.
-              </p>
-            </div>
+      {isCooldownLocked && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 flex items-start gap-3 text-rose-900 shadow-xs">
+          <Lock className="w-5 h-5 text-[#932120] shrink-0 mt-0.5" />
+          <div className="text-xs space-y-1">
+            <p className="font-bold text-sm">
+              {profile?.is_suspended_by_penalty
+                ? "Tài khoản đang bị tạm ngưng điều phối tự động do vi phạm SLA"
+                : "Tài khoản đang trong thời gian tạm nghỉ điều phối (Cooldown)"}
+            </p>
+            <p>
+              {cooldownFormatted
+                ? `Mở lại dự kiến: ${cooldownFormatted} (GMT+7). `
+                : ""}
+              Bạn không thể tự bật Sẵn sàng nhận bài trong thời gian này. Vui lòng hoàn tất các bài còn lại hoặc liên hệ Admin.
+            </p>
           </div>
         </div>
+      )}
 
-        {/* Right Column: Settings Form (UC-14) */}
-        <div className="md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          <BlurFadeCard inView={false} index={0}>
+            <SpotlightCard
+              tone={profile?.is_available ? "emerald" : "crimson"}
+              className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 text-center space-y-4 overflow-hidden"
+            >
+              <div className="w-20 h-20 bg-red-50 border border-red-100 rounded-full flex items-center justify-center text-3xl font-bold text-[#932120] mx-auto shadow-2xs relative z-10">
+                {(profile?.full_name || "E").charAt(0).toUpperCase()}
+              </div>
+              <div className="relative z-10">
+                <h2 className="text-lg font-bold text-zinc-900">{profile?.full_name || "Chuyên gia"}</h2>
+                <p className="text-xs text-zinc-500">{profile?.email}</p>
+              </div>
+              <div
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold relative z-10 ${
+                  profile?.is_available ? "bg-emerald-100 text-emerald-800" : "bg-zinc-100 text-zinc-600"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${profile?.is_available ? "bg-emerald-500" : "bg-zinc-400"}`} />
+                {profile?.is_available ? "Đang Sẵn sàng nhận bài" : "Tạm dừng nhận bài"}
+              </div>
+            </SpotlightCard>
+          </BlurFadeCard>
+
+          <BlurFadeCard inView={false} index={1}>
+            <SpotlightCard tone="crimson" className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 space-y-3 overflow-hidden">
+              <h3 className="font-bold text-sm text-zinc-800 relative z-10">Tải công việc hiện tại</h3>
+              <div className="space-y-2 relative z-10">
+                <div className="flex justify-between text-xs text-zinc-600">
+                  <span>Bài đang chấm / Tối đa:</span>
+                  <span className="font-bold text-zinc-900 tabular-nums font-mono">
+                    {profile?.active_reviews_count || 0} / {profile?.max_active_reviews || 5} bài
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
+                  <m.div
+                    initial={prefersReduced ? false : { width: 0 }}
+                    animate={{
+                      width: `${Math.min(
+                        100,
+                        ((profile?.active_reviews_count || 0) / (profile?.max_active_reviews || 5)) * 100,
+                      )}%`,
+                    }}
+                    transition={{ duration: 0.65, ease: "easeOut" }}
+                    className="bg-[#932120] h-full rounded-full"
+                    style={
+                      prefersReduced
+                        ? {
+                            width: `${Math.min(
+                              100,
+                              ((profile?.active_reviews_count || 0) / (profile?.max_active_reviews || 5)) * 100,
+                            )}%`,
+                          }
+                        : undefined
+                    }
+                  />
+                </div>
+                {profile?.tier === "probation" && (
+                  <p className="text-[11px] font-semibold text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    Chuỗi bài chuẩn phục hồi: {profile.consecutive_clean_reviews ?? 0}/3
+                  </p>
+                )}
+              </div>
+            </SpotlightCard>
+          </BlurFadeCard>
+
+          <BlurFadeCard inView={false} index={2}>
+            <ExpertRpsCard rps={profile?.rps_summary} performance={performance} />
+          </BlurFadeCard>
+        </div>
+
+        <BlurFadeCard inView={false} index={3} className="md:col-span-2">
           <form onSubmit={handleSaveAvailability} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
               <Settings className="w-5 h-5 text-[#932120]" />
               <h3 className="font-bold text-zinc-900">Cấu hình Trạng thái Khả dụng (Availability)</h3>
             </div>
 
-            {/* Availability Toggle */}
             <div className="flex items-center justify-between p-4 bg-red-50/40 rounded-xl border border-red-100">
-              <div className="space-y-0.5">
-                <label className="text-sm font-bold text-zinc-900 cursor-pointer">
-                  Trạng thái nhận bài mới (Available)
-                </label>
+              <div className="space-y-0.5 pr-4">
+                <span className="text-sm font-bold text-zinc-900 block">Trạng thái nhận bài mới (Available)</span>
                 <p className="text-xs text-zinc-500">
-                  {isAvailable 
-                    ? 'Bạn đang sẵn sàng tiếp nhận các bài Mock Test Writing/Speaking hoặc yêu cầu chấm lại từ học viên.'
-                    : 'Tạm thời không nhận bài mới. Các bài đã gán trước đó vẫn giữ nguyên để chấm hoàn tất.'
-                  }
+                  {isCooldownLocked
+                    ? "Bị khóa tự động trong thời gian tạm nghỉ điều phối."
+                    : isAvailable
+                      ? "Bạn đang sẵn sàng tiếp nhận bài Mock Test & Practice từ hàng đợi."
+                      : "Tạm thời không nhận bài mới. Các bài đã gán trước đó vẫn giữ nguyên."}
                 </p>
               </div>
               <button
                 type="button"
+                aria-label="Bật tắt trạng thái nhận bài mới"
+                disabled={isCooldownLocked}
                 onClick={() => setIsAvailable(!isAvailable)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isAvailable ? 'bg-[#932120]' : 'bg-zinc-300'
-                }`}
+                className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  isCooldownLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                } ${isAvailable && !isCooldownLocked ? "bg-[#932120]" : "bg-zinc-300"}`}
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    isAvailable ? 'translate-x-5' : 'translate-x-0'
+                    isAvailable && !isCooldownLocked ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
               </button>
             </div>
 
-            {/* Max reviews */}
             <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase mb-1.5">
-                Số bài nhận chấm đồng thời tối đa (1 - 20 bài)
+              <label htmlFor="expert-max-reviews" className="block text-xs font-bold text-zinc-700 uppercase mb-1.5">
+                Số bài nhận chấm đồng thời tối đa (1 - {tierMaxCap} bài theo hạng {profile?.tier || "standard"})
               </label>
               <input
+                id="expert-max-reviews"
                 type="number"
-                min="1"
-                max="20"
+                min={1}
+                max={tierMaxCap}
                 value={maxReviews}
                 onChange={(e) => setMaxReviews(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:border-[#932120]"
+                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-lg text-sm font-mono tabular-nums focus:outline-none focus:border-[#932120]"
               />
-              <p className="text-xs text-zinc-500 mt-1">
-                Khi số bài đang chờ chấm đạt mốc này, hệ thống sẽ tạm dừng phân công bài mới cho bạn.
-              </p>
             </div>
 
-            {/* Bio */}
             <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase mb-1.5">
-                Giới thiệu & Bằng cấp chuyên môn (Bio)
+              <label htmlFor="expert-bio" className="block text-xs font-bold text-zinc-700 uppercase mb-1.5">
+                Giới thiệu &amp; Bằng cấp chuyên môn (Bio)
               </label>
               <textarea
+                id="expert-bio"
                 rows={4}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
@@ -198,15 +262,14 @@ export default function ExpertProfilePage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 bg-[#932120] hover:bg-[#7a1a19] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 bg-[#932120] hover:bg-[#7a1a19] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Lưu cấu hình
               </button>
             </div>
           </form>
-        </div>
-
+        </BlurFadeCard>
       </div>
     </div>
   );

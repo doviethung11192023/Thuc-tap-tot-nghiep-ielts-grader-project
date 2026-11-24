@@ -5,7 +5,7 @@ Tuân thủ BR-15, BR-16, BR-20 trong docs/source-of-truth.md.
 
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 from app.core.security import User, require_learner, get_optional_user
-from app.schemas.expert import LearnerQuotaResponse
+from app.schemas.expert import ExpertHelpfulnessRatingRequest, LearnerQuotaResponse
 from app.services.expert.quota_manager import (
     get_learner_quota_status,
     reserve_mock_expert_slot,
@@ -159,3 +159,68 @@ async def request_practice_expert_review(
         "request_id": insert_res.data[0]["id"],
         "message": "Đã gửi yêu cầu thẩm định Chuyên gia thành công (SLA hoàn tất trong 48 giờ làm việc)"
     }
+
+
+@router.get("/attempts/{attempt_id}/expert-rating")
+async def get_expert_helpfulness_rating(
+    attempt_id: str,
+    current_user: User = Depends(require_learner),
+):
+    """Kiểm tra học viên đã gửi đánh giá mức độ hữu ích cho bài chấm Chuyên gia hay chưa."""
+    attempt = get_owned_attempt(attempt_id, current_user.id)
+    if not attempt:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phiên làm bài không tồn tại")
+    rows = db().table("expert_helpfulness_ratings").select("*").eq("attempt_id", attempt_id).limit(1).execute().data or []
+    return {"rated": bool(rows), "rating": rows[0] if rows else None}
+
+
+@router.post("/attempts/{attempt_id}/expert-rating")
+async def submit_expert_helpfulness_rating(
+    attempt_id: str,
+    payload: ExpertHelpfulnessRatingRequest,
+    current_user: User = Depends(require_learner),
+):
+    """Học viên đánh giá ẩn danh mức độ hữu ích của nhận xét Chuyên gia (1 lần/attempt — FR-52, UC-44)."""
+    attempt = get_owned_attempt(attempt_id, current_user.id)
+    if not attempt:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Phiên làm bài không tồn tại hoặc không thuộc quyền sở hữu của bạn",
+        )
+    asgns = (
+        db().table("review_assignments")
+        .select("id, expert_id, ended_at, end_reason")
+        .eq("attempt_id", attempt_id)
+        .eq("end_reason", "completed")
+        .order("ended_at", desc=True)
+        .limit(1)
+        .execute()
+        .data
+        or []
+    )
+    if not asgns or not asgns[0].get("expert_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bài thi chưa có kết quả chấm hoàn tất từ Chuyên gia",
+        )
+    existing = db().table("expert_helpfulness_ratings").select("id").eq("attempt_id", attempt_id).limit(1).execute().data or []
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Bạn đã gửi đánh giá nhận xét cho bài chấm này trước đó",
+        )
+    ins = (
+        db().table("expert_helpfulness_ratings")
+        .insert({
+            "attempt_id": attempt_id,
+            "assignment_id": asgns[0]["id"],
+            "learner_id": current_user.id,
+            "expert_id": asgns[0]["expert_id"],
+            "is_helpful": payload.is_helpful,
+            "tags": payload.tags,
+        })
+        .execute()
+        .data
+        or [{}]
+    )
+    return {"status": "saved", "rating_id": ins[0].get("id")}

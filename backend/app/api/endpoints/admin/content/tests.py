@@ -8,7 +8,7 @@ from app.core.student_content_cache import StudentContentMutationRoute
 from app.core.domain_errors import DomainError
 from app.core.security import User, require_admin
 from app.schemas.exam_content import AllowedMode, ContentStatus, SkillType, TestCreate, TestStatusUpdate, TestUpdate
-from app.services.cms import cms_tests
+from app.services.cms import cms_clone, cms_tests
 
 router = APIRouter(route_class=StudentContentMutationRoute)
 
@@ -64,6 +64,13 @@ async def delete_test(test_id: str, current_user: User = Depends(require_admin))
     """Chỉ xoá được đề nháp chưa có bài làm; đề đã dùng thì lưu trữ (archive)."""
     cms_tests.delete_test(current_user.id, test_id)
     return {"meta": {"code": 200, "message": "Xóa bài thi thành công"}}
+
+
+@router.post("/tests/{test_id}/clone-draft", status_code=status.HTTP_201_CREATED)
+async def clone_test_draft(test_id: str, current_user: User = Depends(require_admin)):
+    """Nhân bản đề published/archived sang bản nháp mới để chỉnh sửa an toàn (BR-10)."""
+    data = cms_clone.clone_test_to_draft(current_user.id, test_id)
+    return {"meta": {"code": 201, "message": "Đã tạo bản nháp mới từ đề thi"}, "data": data}
 
 
 class BulkStatusRequest(BaseModel):

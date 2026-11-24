@@ -35,6 +35,31 @@ def _load_evaluations(attempt_id: str) -> tuple[Optional[dict[str, Any]], Option
     return (official or ai_eval), ai_eval
 
 
+def _review_request_meta(attempt_id: str) -> tuple[Optional[str], Optional[str]]:
+    """Trả về (expert_review_status, due_at mở hiện tại nếu có)."""
+    try:
+        reqs = db().table("review_requests").select("id, status").eq("attempt_id", attempt_id).limit(1).execute().data or []
+        if not reqs:
+            return None, None
+        req = reqs[0]
+        due_at = None
+        if req.get("status") in ("waiting", "assigned"):
+            asgns = (
+                db().table("review_assignments")
+                .select("due_at, ended_at")
+                .eq("attempt_id", attempt_id)
+                .is_("ended_at", "null")
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            due_at = asgns[0].get("due_at") if asgns else None
+        return req.get("status"), due_at
+    except Exception:
+        return None, None
+
+
 def _task_scores_and_comments(
     evaluation_id: str,
 ) -> tuple[dict[int, dict[str, float]], dict[int, dict[str, str]]]:
@@ -147,6 +172,31 @@ def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
     done = bool(tasks) and current is not None and current["status"] in ("done", "failed")
     eval_type = (current or {}).get("evaluator_type")
     expert_fb = (current or {}).get("feedback") if is_expert else None
+    rev_status, rev_due_at = _review_request_meta(attempt["id"])
+    ai_scores_map = (
+        _task_scores_and_comments(ai_eval["id"])[0]
+        if ai_eval and (not current or ai_eval["id"] != current["id"]) and ai_eval.get("status") == "done"
+        else scores_map
+    )
+    ai_eval_payload = (
+        {
+            "overall_band": float(ai_eval["overall_band"]),
+            "tasks": ai_scores_map,
+            "created_at": ai_eval.get("created_at"),
+        }
+        if ai_eval and ai_eval.get("status") == "done" and ai_eval.get("overall_band") is not None
+        else None
+    )
+    expert_eval_payload = (
+        {
+            "overall_band": float(current["overall_band"]),
+            "feedback": current.get("feedback"),
+            "tasks": scores_map,
+            "created_at": current.get("created_at"),
+        }
+        if is_expert and current and current.get("status") == "done" and current.get("overall_band") is not None
+        else None
+    )
     return {
         "attempt_id": attempt["id"], "test_id": attempt["test_id"],
         "title": (test[0]["title"] if test else None) or "IELTS Practice Test",
@@ -156,6 +206,8 @@ def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
         "submitted_at": attempt.get("submitted_at") or attempt.get("started_at"),
         "task_formats_result": [], "evaluator_type": eval_type,
         "evaluation_status": (current or {}).get("status"), "expert_feedback": expert_fb,
+        "expert_review_status": rev_status, "expert_review_due_at": rev_due_at,
+        "ai_evaluation": ai_eval_payload, "expert_review": expert_eval_payload,
         "writing": {"grading_done": done, "evaluator_type": eval_type, "expert_feedback": expert_fb, "tasks": tasks},
     }
 
@@ -211,6 +263,34 @@ def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[
     result, annotations = None, []
     if status == "completed" and len(scores) >= 4:
         output = run.get("output") or {}
+        ai_scores_for_task = (
+            (_task_scores_and_comments(ai_eval["id"])[0].get(task_no) or {})
+            if is_expert and ai_eval and ai_eval.get("status") == "done" and ai_eval["id"] != (current or {}).get("id")
+            else scores
+        )
+        ai_side = (
+            {
+                "overall_band": ai_scores_for_task.get("overall_band") or float(ai_eval.get("overall_band") or 0.0),
+                "task_response_score": ai_scores_for_task.get("task_response", 0.0),
+                "coherence_cohesion_score": ai_scores_for_task.get("coherence_cohesion", 0.0),
+                "lexical_resource_score": ai_scores_for_task.get("lexical_resource", 0.0),
+                "grammar_accuracy_score": ai_scores_for_task.get("grammatical_range_and_accuracy", 0.0),
+            }
+            if ai_eval and ai_eval.get("status") == "done" and (len(ai_scores_for_task) >= 4 or ai_eval.get("overall_band") is not None)
+            else None
+        )
+        expert_side = (
+            {
+                "overall_band": scores.get("overall_band") or float((current or {}).get("overall_band") or 0.0),
+                "task_response_score": scores.get("task_response", 0.0),
+                "coherence_cohesion_score": scores.get("coherence_cohesion", 0.0),
+                "lexical_resource_score": scores.get("lexical_resource", 0.0),
+                "grammar_accuracy_score": scores.get("grammatical_range_and_accuracy", 0.0),
+                "feedback": (current or {}).get("feedback"),
+            }
+            if is_expert and current and current.get("status") == "done"
+            else None
+        )
         result = {
             "overall_band": scores.get("overall_band") or float((current or {}).get("overall_band") or 0.0),
             "task_response_score": scores.get("task_response", 0.0),
@@ -222,6 +302,8 @@ def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[
             "is_score_overridden": is_expert,
             "evaluator_type": (current or {}).get("evaluator_type") or "ai",
             "expert_feedback": (current or {}).get("feedback") if is_expert else None,
+            "ai_evaluation": ai_side,
+            "expert_review": expert_side,
             # spec 006: bài mẫu đã duyệt, danh sách ý chính (Task 1 có đáp án), nguồn số liệu biểu đồ
             "sample_essay": approved_sample(essay["section_id"]) if essay.get("section_id") else None,
             "key_point_check": output.get("key_point_check"),

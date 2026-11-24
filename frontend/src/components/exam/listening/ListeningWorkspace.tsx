@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ListeningTestData } from "@/types/exam-listening";
@@ -12,9 +13,16 @@ import { ListeningAudioBar } from '@/components/exam/listening/ListeningAudioBar
 import { ListeningQuestionsPane } from '@/components/exam/listening/ListeningQuestionsPane';
 import { useListeningPlayer } from '@/hooks/useListeningPlayer';
 
+const PracticeAiTutorDrawer = dynamic(
+  () => import('@/components/exam/tutor/PracticeAiTutorDrawer').then((m) => m.PracticeAiTutorDrawer),
+  { ssr: false, loading: () => null }
+);
+
 interface ListeningWorkspaceProps {
   testData: ListeningTestData;
   mode: 'exam' | 'practice';
+  attemptId?: string | null;
+  attemptError?: string | null;
   selectedParts?: string[];
   returnUrl?: string;
   /** Thi thử (exam): gọi khi Learner thoát giữa chừng để backend ghi nhận abandoned. */
@@ -28,9 +36,12 @@ interface ListeningWorkspaceProps {
   onAnswersChange?: (answers: Record<number, string | string[]>) => void;
 }
 
-export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ListeningWorkspaceProps) {
+export function ListeningWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ListeningWorkspaceProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<number>(0);
+  const [activeAudioSection, setActiveAudioSection] = useState<number>(0);
+  const [examPhase, setExamPhase] = useState<'audio' | 'review' | 'expired'>('audio');
+  const [reviewSeconds, setReviewSeconds] = useState<number>(120);
   const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
 
   // Khôi phục bài đã lưu trên server khi nó tới; câu Learner vừa trả lời trước đó thì giữ bản mới
@@ -57,22 +68,78 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
   }, [testData.sections, selectedParts]);
 
   const currentSection = availableSections[activeSection] || availableSections[0];
+  const audioSection =
+    mode === 'exam'
+      ? availableSections[activeAudioSection] || availableSections[0]
+      : currentSection;
   const allQuestions = useMemo(() => availableSections.flatMap(s => s.question_groups.flatMap(g => g.questions)), [availableSections]);
 
+  const handleAudioEnded = () => {
+    if (mode !== 'exam') return;
+    if (activeAudioSection < availableSections.length - 1) {
+      setActiveAudioSection((prev) => prev + 1);
+    } else {
+      setExamPhase('review');
+      setReviewSeconds(120);
+    }
+  };
+
   const player = useListeningPlayer({
-    audioUrl: currentSection?.audio_url,
-    sectionKey: String(currentSection?.sectionNumber || currentSection?.section_number || activeSection),
-    defaultDuration: currentSection?.duration_seconds || 450,
+    audioUrl: audioSection?.audio_url,
+    sectionKey: String(
+      audioSection?.sectionNumber ||
+        audioSection?.section_number ||
+        (mode === 'exam' ? activeAudioSection : activeSection)
+    ),
+    defaultDuration: audioSection?.duration_seconds || 450,
+    autoPlayOnSectionChange: mode === 'exam',
+    onEnded: handleAudioEnded,
   });
 
   // BR-07: Listening Mock 30 phút cho cả 4 section (7,5 phút/section). Phải khớp deadline server
   // (tests.duration_minutes = 30), nếu dài hơn thì bài tự nộp lúc hết giờ bị server từ chối 409.
   const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4);
-  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
-  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, () => {
+  const latestAnswersRef = useRef(userAnswers);
+  const latestOnSubmitRef = useRef(onSubmit);
+  const autoSubmittedRef = useRef(false);
+
+  useEffect(() => {
+    latestAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  useEffect(() => {
+    latestOnSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+
+  const triggerAutoSubmit = useCallback(() => {
+    if (autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
+    setExamPhase('expired');
+    setIsSubmitModalOpen(false);
     setIsGrading(true);
-    Promise.resolve(onSubmit(userAnswers)).catch(() => setIsGrading(false));
-  });
+    Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current)).catch(() => {
+      autoSubmittedRef.current = false;
+      setIsGrading(false);
+    });
+  }, []);
+
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, triggerAutoSubmit);
+
+  useEffect(() => {
+    if (mode !== 'exam' || examPhase !== 'review') return;
+    const id = setInterval(() => {
+      setReviewSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(id);
+          triggerAutoSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [mode, examPhase, triggerAutoSubmit]);
 
   const handleToggleFlag = (qNumber: number) => {
     setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
@@ -123,19 +190,23 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full bg-zinc-50 rounded-2xl overflow-hidden shadow-lg border border-zinc-200 relative">
+    <div className="flex flex-col h-dvh w-full bg-zinc-50 overflow-hidden relative">
       <ListeningWorkspaceHeader
         title={testData.title}
         mode={mode}
         timerSeconds={timerSeconds}
         initialExamSeconds={initialExamSeconds}
+        examPhase={examPhase}
+        reviewSeconds={reviewSeconds}
+        activeAudioSectionNumber={audioSection?.sectionNumber || activeAudioSection + 1}
+        totalSections={availableSections.length}
         onExitClick={() => setIsExitModalOpen(true)}
         onSubmit={() => setIsSubmitModalOpen(true)}
       />
 
       <ListeningAudioBar
         audioRef={player.audioRef}
-        audioUrl={currentSection?.audio_url}
+        audioUrl={audioSection?.audio_url}
         isPlaying={player.isPlaying}
         isBuffering={player.isBuffering}
         audioError={player.audioError}
@@ -149,26 +220,61 @@ export function ListeningWorkspace({ testData, mode, selectedParts, returnUrl, o
         isMuted={player.isMuted}
         onToggleMute={player.toggleMute}
         mode={mode}
+        activeAudioSectionNumber={audioSection?.sectionNumber || activeAudioSection + 1}
+        totalSections={availableSections.length}
+        examPhase={examPhase}
         volume={player.volume}
         onVolumeChange={player.changeVolume}
         onSeek={player.seek}
         audioEventHandlers={player.audioEventHandlers}
       />
 
+      {mode === 'exam' && examPhase === 'review' && (
+        <div
+          role="status"
+          className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-center justify-between gap-4 shrink-0 text-xs sm:text-sm text-amber-900 font-medium"
+        >
+          <span>
+            Audio đã kết thúc. Bạn có <strong className="font-bold text-amber-950">{formatTimer(reviewSeconds)}</strong> để kiểm tra lại toàn bộ đáp án trước khi hệ thống tự động nộp bài.
+          </span>
+          <button
+            type="button"
+            onClick={handleConfirmSubmit}
+            className="px-3 py-1 rounded-lg bg-[#932120] text-white text-xs font-bold hover:bg-[#7a1a19] shrink-0 cursor-pointer"
+          >
+            Nộp bài ngay
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 flex overflow-hidden">
         <ListeningQuestionsPane
           availableSections={availableSections}
           activeSection={activeSection}
+          playingAudioSection={mode === 'exam' ? activeAudioSection : undefined}
+          isExamAudioPlaying={mode === 'exam' && player.isPlaying}
           currentSection={currentSection}
           allQuestions={allQuestions}
           answeredCount={answeredCount}
           userAnswers={userAnswers}
           flaggedQuestions={flaggedQuestions}
+          isLocked={mode === 'exam' && examPhase === 'expired'}
           onSectionChange={(idx) => setActiveSection(idx)}
           onAnswerChange={(qNum, val) => setUserAnswers(prev => ({ ...prev, [qNum]: val }))}
           onQuestionClick={handleQuestionPaletteClick}
           onToggleFlag={handleToggleFlag}
         />
+
+        {mode === 'practice' && (
+          <PracticeAiTutorDrawer
+            attemptId={attemptId}
+            attemptError={attemptError}
+            skill="listening"
+            mode={mode}
+            activeSectionNo={currentSection?.sectionNumber || activeSection + 1}
+            userAnswers={userAnswers}
+          />
+        )}
       </div>
 
       <ExitConfirmModal

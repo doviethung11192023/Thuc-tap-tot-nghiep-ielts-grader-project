@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Search, BookOpen, Headphones, PenTool, Mic, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { StaggerGrid } from "@/components/motion";
 import type { PublishedTestItem } from "@/types/test-practice";
 import type { FacetCounts } from "@/hooks/useStudentPublishedTests";
 import { DirectTestCard } from "./DirectTestCard";
@@ -156,7 +157,7 @@ export function StudentDirectTestsSection({
 
       {/* Grid bài thi với Smart Prefetch & Skeleton */}
       {loading && tests.length === 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6].map((idx) => (
             <div key={idx} className="bg-white rounded-2xl border border-zinc-200 p-4 space-y-3 animate-pulse">
               <div className="flex items-center justify-between">
@@ -173,11 +174,11 @@ export function StudentDirectTestsSection({
           ))}
         </div>
       ) : tests.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
-          {tests.map((test) => (
-            <DirectTestCard key={test.id} test={test} onOpenTestPrep={onOpenTestPrep} />
+        <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+          {tests.map((test, idx) => (
+            <DirectTestCard key={test.id} test={test} index={idx} onOpenTestPrep={onOpenTestPrep} />
           ))}
-        </div>
+        </StaggerGrid>
       ) : (
         <div className="bg-white p-12 rounded-2xl border border-zinc-200 text-center space-y-2">
           <BookOpen className="w-10 h-10 text-zinc-300 mx-auto" />

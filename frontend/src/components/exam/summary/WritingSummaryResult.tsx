@@ -17,12 +17,13 @@ import {
 } from 'lucide-react';
 import { useWritingAttemptSummary, WritingTaskSummary } from '@/hooks/useWritingAttemptSummary';
 import { WritingPromptChartCard } from '@/components/workspace/WritingPromptChartCard';
+import { DualEvaluationComparisonCard } from './DualEvaluationComparisonCard';
 import { requestPracticeExpertReview } from '@/services/expert';
 import { retryAiGrading } from '@/services/student-test-practice';
 import { useQueryClient } from '@tanstack/react-query';
 import { getEssayResults } from '@/services/essays';
 import { invalidatePracticeHistoryCache } from '@/services/practice-history-cache';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 interface WritingSummaryResultProps {
   testId: string;
@@ -265,6 +266,15 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
           <p className="text-sm text-emerald-950 leading-relaxed whitespace-pre-line">{data.expertFeedback}</p>
         </div>
       )}
+
+      <DualEvaluationComparisonCard
+        attemptId={attemptId}
+        aiBand={data?.aiEvaluation?.overall_band}
+        expertBand={data?.expertReview?.overall_band}
+        expertFeedback={data?.expertReview?.feedback ?? data?.expertFeedback}
+        expertReviewStatus={data?.expertReviewStatus}
+        expertReviewDueAt={data?.expertReviewDueAt}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-2xs space-y-3">

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import asyncio
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import zoneinfo
 
 from app.schemas.expert import (
@@ -13,13 +13,15 @@ from app.schemas.expert import (
 )
 from app.core.security import require_expert, User
 from app.db.supabase import db
-from app.services.expert.sla_service import is_within_decline_window, TZ_VN
+from app.services.expert.sla_service import get_sla_hours, is_within_decline_window, remaining_business_hours, TZ_VN
 from app.services.expert.dispatcher import (
     decline_assignment_by_expert,
     start_expert_grading_draft,
     submit_expert_final_review
 )
 from app.services.expert.expert_draft_service import save_expert_grading_draft
+from app.services.expert.expert_policy_config import TIER_MAX_CAP, get_completeness_rules
+from app.services.expert.expert_tier_evaluation_service import compute_expert_performance_metrics
 from app.services.storage.r2_storage import r2_storage
 from app.services.speaking.speaking_test_content import speaking_part_number
 from app.services.writing.writing_test_content import chart_image_url
@@ -46,6 +48,8 @@ async def get_expert_profile(current_user: User = Depends(require_expert)):
         .eq("expert_id", current_user.id).is_("ended_at", "null").execute()
     active_count = count_res.count if getattr(count_res, "count", None) is not None else len(count_res.data or [])
 
+    perf_summary = compute_expert_performance_metrics([current_user.id]).get(current_user.id)
+    tier = str((perf_summary or {}).get("tier") or expert_data.get("tier") or "standard")
     return ExpertProfileResponse(
         user_id=user_data["id"],
         email=user_data["email"],
@@ -55,8 +59,31 @@ async def get_expert_profile(current_user: User = Depends(require_expert)):
         max_active_reviews=expert_data.get("max_active_reviews", 5),
         bio=expert_data.get("bio"),
         active_reviews_count=active_count,
-        created_at=user_data.get("created_at")
+        created_at=user_data.get("created_at"),
+        tier=tier,
+        tier_max_reviews=TIER_MAX_CAP.get(tier, 5),
+        cooldown_until=expert_data.get("cooldown_until"),
+        consecutive_clean_reviews=int(expert_data.get("consecutive_clean_reviews") or 0),
+        is_suspended_by_penalty=bool(expert_data.get("is_suspended_by_penalty", False)),
+        rps_summary=perf_summary,
+        performance_summary=perf_summary,
     )
+
+@router.get("/me/performance")
+async def get_expert_performance_me(current_user: User = Depends(require_expert)):
+    """Lấy 6 chỉ số hiệu suất 30 ngày, tiến độ lên hạng, cảnh báo vi phạm & lịch sử tháng."""
+    metrics = compute_expert_performance_metrics([current_user.id], period="30d").get(current_user.id) or {}
+    snapshots = (
+        db().table("expert_performance_snapshots")
+        .select("*")
+        .eq("expert_id", current_user.id)
+        .order("period_start", desc=True)
+        .limit(6)
+        .execute()
+        .data
+        or []
+    )
+    return {**metrics, "snapshots": snapshots, "tier_max_cap": TIER_MAX_CAP}
 
 @router.patch("/me/availability", response_model=ExpertProfileResponse)
 async def update_expert_availability(
@@ -65,11 +92,47 @@ async def update_expert_availability(
 ):
     """
     Cập nhật trạng thái khả dụng (is_available: true/false), giới hạn số bài 
-    và tiểu sử chuyên môn của Expert (UC-14, FR-21).
+    và tiểu sử chuyên môn của Expert (UC-14, FR-21). Khóa bypass khi cooldown/suspended (B2).
     """
     fields_to_update = update_data.dict(exclude_unset=True)
     if not fields_to_update:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
+
+    ep_res = db().table("expert_profiles").select("*").eq("user_id", current_user.id).limit(1).execute()
+    if not ep_res.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expert profile not found")
+    ep = ep_res.data[0]
+    tier = str(ep.get("tier") or "standard")
+    tier_cap = TIER_MAX_CAP.get(tier, 5)
+    now_utc = datetime.now(timezone.utc)
+    cd_raw = ep.get("cooldown_until")
+    cd_dt = None
+    if cd_raw:
+        try:
+            parsed = datetime.fromisoformat(str(cd_raw).replace("Z", "+00:00"))
+            cd_dt = parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed.astimezone(timezone.utc)
+        except Exception:
+            cd_dt = None
+
+    if fields_to_update.get("is_available") is True:
+        if ep.get("is_suspended_by_penalty"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tài khoản đang tạm ngưng điều phối do vi phạm SLA. Vui lòng liên hệ Admin để xem xét.",
+            )
+        if cd_dt and cd_dt > now_utc:
+            until_vn = cd_dt.astimezone(TZ_VN).strftime("%H:%M %d/%m/%Y")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Tài khoản đang trong thời gian tạm nghỉ điều phối đến {until_vn} (GMT+7).",
+            )
+
+    if "max_active_reviews" in fields_to_update and fields_to_update["max_active_reviews"] is not None:
+        if int(fields_to_update["max_active_reviews"]) > tier_cap:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Hạng hiện tại ({tier}) chỉ cho phép nhận tối đa {tier_cap} bài đồng thời.",
+            )
 
     res = db().table("expert_profiles").update(fields_to_update).eq("user_id", current_user.id).execute()
     if not res.data:
@@ -115,6 +178,7 @@ async def list_expert_assignments(
 
     items = []
     now_vn = datetime.now(TZ_VN)
+    _, decline_hours = get_sla_hours()
 
     for a in rows:
         att = attempts_map.get(a["attempt_id"], {})
@@ -122,18 +186,14 @@ async def list_expert_assignments(
         test_title = test_info.get("title", f"Bài thi {att.get('skill', '').title()}")
         learner = learners_map.get(att.get("learner_id") or "", {})
 
-        assigned_at_dt = datetime.fromisoformat(a["assigned_at"])
-        due_at_dt = datetime.fromisoformat(a["due_at"])
-        if due_at_dt.tzinfo is None:
-            due_at_dt = due_at_dt.replace(tzinfo=TZ_VN)
-        
-        rem_sec = (due_at_dt - now_vn).total_seconds()
-        rem_hours = max(0.0, round(rem_sec / 3600.0, 1))
+        assigned_at_dt = datetime.fromisoformat(str(a["assigned_at"]).replace("Z", "+00:00"))
+        due_at_dt = datetime.fromisoformat(str(a["due_at"]).replace("Z", "+00:00"))
+        rem_hours = remaining_business_hours(now_vn, due_at_dt)
 
         can_decline = (
             a.get("ended_at") is None and 
             a.get("started_at") is None and 
-            is_within_decline_window(assigned_at_dt, 2.0, now_vn)
+            is_within_decline_window(assigned_at_dt, decline_hours, now_vn)
         )
 
         items.append(ExpertAssignmentItem(
@@ -222,7 +282,7 @@ async def get_assignment_workspace(
         ),
         asyncio.to_thread(
             lambda: db().table("evaluations")
-            .select("id, overall_band, feedback, created_at")
+            .select("id, overall_band, feedback, status, created_at")
             .eq("attempt_id", attempt_id)
             .eq("evaluator_type", "ai")
             .order("created_at", desc=True)
@@ -380,6 +440,7 @@ async def get_assignment_workspace(
         "learner_target": learner_target,
         "content": content_data,
         "criteria_definitions": all_criteria_res.data or [],
+        "completeness_rules": get_completeness_rules(),
         "ai_evaluation": {
             "evaluation": ai_eval,
             "criteria": ai_criteria,

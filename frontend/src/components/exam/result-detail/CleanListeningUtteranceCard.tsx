@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Play } from 'lucide-react';
-import { CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
+import type { CleanListeningQuestion, CleanListeningUtterance } from "@/types/listening-result-detail";
 
 interface CleanListeningUtteranceCardProps {
   utterance: CleanListeningUtterance;
@@ -82,9 +82,9 @@ export function CleanListeningUtteranceCard({
           id="active-listening-evidence"
           className="bg-amber-200/95 text-amber-950 font-medium px-1 py-0.5 rounded border-b-2 border-amber-500 selection:bg-amber-300 inline"
         >
-          <span className="inline-flex items-center text-[10px] font-bold bg-amber-500 text-white px-1 py-0.2 rounded-sm mr-1 align-baseline tracking-tight">
+          <span className="inline-flex items-center text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.2 rounded-sm mr-1.5 align-baseline tracking-tight">
             Câu {activeQuestionNumber}
-          </span>
+          </span>{' '}
           {matched}
         </mark>
         {after}
@@ -112,14 +112,15 @@ export function CleanListeningUtteranceCard({
           <span
             className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${badge.avatarBg}`}
           >
-            {badge.label[0]}
+            {(utterance.speaker_name || badge.label)[0]?.toUpperCase()}
           </span>
-          <span className="font-bold text-xs text-zinc-900">{badge.label}</span>
-          <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.bg}`}
-          >
-            {badge.label}
-          </span>
+          <span className="font-bold text-xs text-zinc-900">{utterance.speaker_name || badge.label}</span>
+          {utterance.role &&
+            utterance.role.trim().toLowerCase() !== (utterance.speaker_name || badge.label).trim().toLowerCase() && (
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.bg}`}>
+                {utterance.role}
+              </span>
+            )}
         </div>
 
         <button

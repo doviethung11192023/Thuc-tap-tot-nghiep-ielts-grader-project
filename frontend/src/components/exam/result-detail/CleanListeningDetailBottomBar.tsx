@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { CleanListeningSection } from "@/types/listening-result-detail";
+import type { CleanListeningSection } from "@/types/listening-result-detail";
 
 interface CleanListeningDetailBottomBarProps {
   sections: CleanListeningSection[];
@@ -49,15 +49,15 @@ export function CleanListeningDetailBottomBar({
               onClick={() => onSelectSection(idx)}
               className={`px-5 py-2 rounded-xl text-left transition-all border cursor-pointer ${
                 isActive
-                  ? 'border-blue-600 bg-white shadow-xs text-blue-900'
+                  ? 'border-[#932120] bg-red-50/40 shadow-xs text-[#932120]'
                   : 'border-zinc-200 bg-zinc-50 hover:bg-white text-zinc-600'
               }`}
             >
-              <div className={`font-bold text-xs uppercase tracking-wider ${isActive ? 'text-blue-600' : 'text-zinc-700'}`}>
-                LISTENING PART {idx + 1}
+              <div className={`font-bold text-xs uppercase tracking-wider ${isActive ? 'text-[#932120]' : 'text-zinc-700'}`}>
+                LISTENING PART {sec.section_number || idx + 1}
               </div>
               <div className="text-[11px] text-zinc-400 font-medium">
-                {getSectionScoreText(idx + 1)}
+                {getSectionScoreText(sec.section_number || idx + 1)}
               </div>
             </button>
           );

@@ -9,6 +9,7 @@ import {
   Mail,
   UserCheck,
   UserX,
+  SearchCheck,
 } from "lucide-react";
 import { User } from "@/types";
 
@@ -19,6 +20,8 @@ interface UserTableProps {
   resendingId: string | null;
   onToggleStatus: (targetUser: User) => void;
   onResendInvite: (targetUser: User) => void;
+  onOpenAudit?: (targetUser: User) => void;
+  onPrefetchAudit?: (userId: string) => void;
 }
 
 export function UserTable({
@@ -28,6 +31,8 @@ export function UserTable({
   resendingId,
   onToggleStatus,
   onResendInvite,
+  onOpenAudit,
+  onPrefetchAudit,
 }: UserTableProps) {
   const roleBadge = (role: string) => {
     switch (role) {
@@ -141,6 +146,17 @@ export function UserTable({
                           </button>
                         ) : (
                           <div className="w-8 h-8" aria-hidden="true" />
+                        )}
+                        {u.role === "learner" && onOpenAudit && (
+                          <button
+                            type="button"
+                            onMouseEnter={() => onPrefetchAudit?.(u.id)}
+                            onClick={() => onOpenAudit(u)}
+                            className="w-8 h-8 rounded-lg inline-flex items-center justify-center text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all shadow-2xs cursor-pointer"
+                            title="Xem Minh Chứng Số Liệu (White-Box Audit)"
+                          >
+                            <SearchCheck className="w-4 h-4" />
+                          </button>
                         )}
                         <button
                           onClick={() => onToggleStatus(u)}

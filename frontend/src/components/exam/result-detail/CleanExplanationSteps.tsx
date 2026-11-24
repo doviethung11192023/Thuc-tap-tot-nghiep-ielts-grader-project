@@ -1,27 +1,14 @@
 "use client";
 
 import React from 'react';
+import { renderSafeInlineMarkdown } from '@/lib/safe-markdown-inline';
 
 interface CleanExplanationStepsProps {
   explanation4Steps?: string;
 }
 
-// RD-07: Hỗ trợ parse Markdown in đậm **text** và in nghiêng _text_
 function renderFormattedText(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*|_[^_]+_)/g);
-  return (
-    <>
-      {parts.map((part, idx) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={idx} className="font-bold text-zinc-900">{part.slice(2, -2)}</strong>;
-        }
-        if (part.startsWith('_') && part.endsWith('_')) {
-          return <em key={idx} className="italic text-zinc-600 font-medium">{part.slice(1, -1)}</em>;
-        }
-        return <span key={idx}>{part}</span>;
-      })}
-    </>
-  );
+  return renderSafeInlineMarkdown(text);
 }
 
 function renderTable(tableLines: string[], keyPrefix: number) {
@@ -115,7 +102,7 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
             elements.push(
               <div
                 key={lIdx}
-                className="my-1.5 p-2.5 rounded-lg border-l-4 border-blue-500 bg-blue-50/60 text-blue-950 text-xs sm:text-sm"
+                className="my-1.5 p-2.5 rounded-lg border-l-4 border-[#932120] bg-red-50/60 text-zinc-900 text-xs sm:text-sm"
               >
                 {renderFormattedText(trimmed.replace(/^>\s*/, ''))}
               </div>
@@ -124,7 +111,7 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
             const bulletContent = trimmed.replace(/^([•\-*]\s*)/, '');
             elements.push(
               <div key={lIdx} className="flex items-start gap-1.5 pl-2 text-zinc-800 text-xs sm:text-sm">
-                <span className="text-blue-500 font-bold shrink-0">•</span>
+                <span className="text-[#932120] font-bold shrink-0">•</span>
                 <span>{renderFormattedText(bulletContent)}</span>
               </div>
             );
@@ -150,8 +137,8 @@ export function CleanExplanationSteps({ explanation4Steps }: CleanExplanationSte
 
         return (
           <div key={cIdx} className="space-y-1.5">
-            <div className="font-bold text-zinc-900 text-sm flex items-center gap-1.5 text-blue-950">
-              <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
+            <div className="font-bold text-zinc-900 text-sm flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#932120] inline-block" />
               <span>{title}</span>
             </div>
             <div className="pl-3.5 space-y-2 text-zinc-700">{elements}</div>

@@ -52,13 +52,16 @@ export function useExamWorkspaceContent(
   const [speakingData, setSpeakingData] = useState<MockSpeakingExamDataset | null>(initS);
   const [attemptMode, setAttemptMode] = useState<"practice" | "mock" | null>(null);
   const [attemptError, setAttemptError] = useState<string | null>(null);
+  const [attemptErrorStatus, setAttemptErrorStatus] = useState<number | null>(null);
+  const startedKeyRef = useRef<string | null>(null);
   // Bài đã lưu trên server khi làm tiếp bài dở, kể cả trên máy khác (FR-11)
   const [savedWork, setSavedWork] = useState<SavedWork | null>(null);
-  // Promise của lần bắt đầu attempt (1 lần duy nhất, kể cả khi StrictMode chạy effect hai lần)
+  // Promise của lần bắt đầu attempt (1 lần duy nhất mỗi (testId, skill, mode), kể cả khi StrictMode chạy effect hai lần)
   const startRef = useRef<Promise<{ attempt_id?: string } | null> | null>(null);
 
   useEffect(() => {
     let mounted = true;
+    const startKey = `${testId}:${skill}:${mode}`;
 
     async function loadContent() {
       if (!testId) {
@@ -66,12 +69,22 @@ export function useExamWorkspaceContent(
         return;
       }
 
-      // Khởi tạo phiên thi trong nền 1 lần duy nhất, tránh duplicate do React StrictMode
+      // Khởi tạo phiên thi 1 lần duy nhất cho mỗi cặp (testId, skill, mode); tự reset khi chuyển chế độ
+      if (startedKeyRef.current !== startKey) {
+        startedKeyRef.current = startKey;
+        startRef.current = null;
+        setAttemptId(null);
+        setAttemptMode(null);
+        setAttemptError(null);
+        setAttemptErrorStatus(null);
+        setDeadlineMs(null);
+        setSavedWork(null);
+        setClosedAttempt(null);
+      }
       if (!startRef.current) {
         startRef.current = startTestAttempt(testId, mode === "exam" ? "mock" : "practice", skill)
           .then((attemptRes) => {
-            // Không chặn theo `mounted`: StrictMode (dev) chạy cleanup trước khi request xong
-            // nhưng hasStartedRef khiến effect lần hai không gọi lại, nên attemptId sẽ mãi null.
+            if (startedKeyRef.current !== startKey) return null;
             if (attemptRes?.closed) {
               // Quay lại bài Mock đã kết thúc: trang chuyển tới kết quả thay vì mở lại phòng thi
               setClosedAttempt(attemptRes as ClosedAttempt);
@@ -90,7 +103,9 @@ export function useExamWorkspaceContent(
             return attemptRes;
           })
           .catch((e) => {
+            if (startedKeyRef.current !== startKey) return null;
             console.warn("Could not start attempt session in background:", e);
+            setAttemptErrorStatus(e?.response?.status ?? null);
             setAttemptError(e?.response?.data?.detail || "Không bắt đầu được bài thi");
             return null;
           });
@@ -99,10 +114,11 @@ export function useExamWorkspaceContent(
       // Tải và hiển thị nội dung đề thi ngay lập tức
       try {
         // Thi thử: nội dung chỉ trả cho chủ attempt (đề Mock không xem trước được)
+        const currentCached = mode === "exam" ? null : getExamContentCache(testId);
         const contentData = mode === "exam"
           ? await startRef.current.then((a) => (a?.attempt_id ? getAttemptExamContent(a.attempt_id) : null))
-          : cached ? cached : await prefetchExamContent(testId);
-        if (mounted && contentData && !cached) {
+          : currentCached ? currentCached : await prefetchExamContent(testId);
+        if (mounted && contentData && (mode === "exam" || !currentCached)) {
           if (skill === "reading") {
             const mapped = mapToReadingTestData(contentData);
             if (mapped) setReadingData(mapped);
@@ -135,6 +151,7 @@ export function useExamWorkspaceContent(
     attemptId,
     attemptMode,
     attemptError,
+    attemptErrorStatus,
     deadlineMs,
     savedWork,
     closedAttempt,

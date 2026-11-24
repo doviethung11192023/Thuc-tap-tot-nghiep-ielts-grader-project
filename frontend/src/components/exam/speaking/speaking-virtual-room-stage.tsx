@@ -66,25 +66,25 @@ export const SpeakingVirtualRoomStage: React.FC<SpeakingVirtualRoomStageProps> =
   return (
     <div className="flex-1 flex flex-col justify-between space-y-4">
       <div className="flex items-center justify-between px-2">
-        <div className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-          <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold">
+        <div className="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+          <span className="px-2.5 py-0.5 rounded-lg bg-[#932120]/25 border border-[#932120]/50 text-rose-200 text-xs font-extrabold">
             Part {partNumber}
           </span>
-          <span className="text-slate-400">›</span>
+          <span className="text-slate-500">›</span>
           <span>
             Câu {questionIndex + 1} / {totalQuestions}
           </span>
         </div>
       </div>
 
-      <div className="flex-1 w-full bg-gradient-to-b from-[#006fe6] to-[#0082f6] rounded-3xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden flex flex-col justify-between min-h-[420px]">
+      <div className="flex-1 w-full bg-gradient-to-b from-slate-900 via-[#2a1215] to-[#4a1416] border border-red-900/40 rounded-3xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden flex flex-col justify-between min-h-[420px]">
         <div className="flex justify-center mb-4 h-12">
           {canReplay && (
             <button
               type="button"
               onClick={onReplayPrompt}
               aria-label="Nghe lại câu hỏi"
-              className="w-12 h-12 rounded-2xl bg-white/95 hover:bg-white text-blue-600 shadow-md flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="w-12 h-12 rounded-2xl bg-slate-800/95 hover:bg-slate-700 text-rose-300 border border-slate-700 shadow-md flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer"
               title="Nghe lại câu hỏi"
             >
               <Volume2 className="w-6 h-6" />
@@ -99,11 +99,11 @@ export const SpeakingVirtualRoomStage: React.FC<SpeakingVirtualRoomStageProps> =
                 {cueCard.topic}
               </h2>
               {cueCard.bullet_points.length > 0 && (
-                <div className="space-y-1.5 text-xs sm:text-sm text-blue-50">
+                <div className="space-y-1.5 text-xs sm:text-sm text-rose-50">
                   <p className="font-semibold text-white">You should say:</p>
                   {cueCard.bullet_points.map((point, index) => (
                     <div key={index} className="flex items-start gap-2">
-                      <span className="text-blue-200 font-bold">•</span>
+                      <span className="text-rose-300 font-bold">•</span>
                       <span>{point}</span>
                     </div>
                   ))}
@@ -140,11 +140,11 @@ export const SpeakingVirtualRoomStage: React.FC<SpeakingVirtualRoomStageProps> =
             </div>
           )}
 
-          <div className="absolute -bottom-4 left-0 right-0 h-16 bg-white/20 blur-md rounded-t-[50%] pointer-events-none" />
+          <div className="absolute -bottom-4 left-0 right-0 h-16 bg-rose-500/15 blur-md rounded-t-[50%] pointer-events-none" />
           <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center text-blue-600 border-2 border-blue-200">
+            <div className="w-16 h-16 rounded-2xl bg-slate-900 shadow-xl flex items-center justify-center text-[#932120] border-2 border-[#932120]/50">
               <div className="relative">
-                <Sparkles className="w-8 h-8 text-blue-600" />
+                <Sparkles className="w-8 h-8 text-rose-400" />
                 {isRecording && (
                   <span className="absolute -top-1 -right-1 flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />

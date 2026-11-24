@@ -1,36 +1,20 @@
-export interface SkillScore {
-  skill: string;
-  score: number;
-  count?: number;
-}
+import type {
+  CriterionMasteryItem,
+  MonthlyProgressionPoint,
+  MonthlyScorecard,
+  PersonalizedRoadmap,
+  SkillDiagnosticBand,
+  SkillScore,
+} from "./learning-roadmap";
 
-export interface ActivityDay {
-  date: string;
-  minutes: number;
-}
-
-export interface QuestionTypeResult {
-  id: string;
-  type: string;
-  averageScore: number;
-  lastPracticeTime: string;
-  skill: string;
-}
-
-export interface TestHistoryItem {
-  id: string;
-  testName: string;
-  score: number;
-  type: string;
-  skill: string;
-  submittedAt: string;
-}
+export * from "./learning-roadmap";
 
 export interface HeatmapDay {
   day_of_week: string;
   date: string;
   minutes: number;
   is_future: boolean;
+  is_frozen?: boolean;
 }
 
 export interface HeatmapWeek {
@@ -53,6 +37,12 @@ export interface LearningProfileGoals {
   /** Overall theo BR-02; null khi chưa đủ band 4 kỹ năng */
   predicted_band: number | null;
   target_band: number;
+  target_listening?: number;
+  target_reading?: number;
+  target_writing?: number;
+  target_speaking?: number;
+  confidence_label?: string;
+  waiting_expert_count?: number;
   progress_percent: number;
   /** null khi Learner chưa chọn ngày thi */
   test_date: string | null;
@@ -148,15 +138,105 @@ export interface RecentSubmissionItem {
   link: string;
 }
 
+export interface AdaptiveStreakData {
+  current_streak: number;
+  longest_streak: number;
+  mode: 'standard' | 'sprint' | string;
+  daily_target_minutes: number;
+  days_until_exam: number | null;
+  last_active_date?: string | null;
+  today_minutes: number;
+  today_completed: number;
+  today_met: boolean;
+  today_progress_pct: number;
+  freezes_earned: number;
+  freezes_used: number;
+  freezes_remaining: number;
+  max_freezes_per_month: number;
+  frozen_dates?: string[];
+  weekly_goal_days?: number;
+  weekly_completed_days?: number;
+  reminder_enabled?: boolean;
+  hours_until_midnight_vn?: number;
+  can_repair?: boolean;
+  broken_streak_backup?: number;
+  repair_deadline_at?: string | null;
+  repair_progress?: {
+    completed: number;
+    required: number;
+  };
+  grace_recovery?: {
+    eligible: boolean;
+    recovered_today?: boolean;
+    recoverable_streak: number;
+    requirement?: string | null;
+  };
+}
+
+export interface StreakSummaryData {
+  current_streak: number;
+  longest_streak: number;
+  mode: 'standard' | 'sprint' | string;
+  daily_target_minutes: number;
+  days_until_exam: number | null;
+  today_met: boolean;
+  today_minutes: number;
+  today_completed: number;
+  freezes_remaining: number;
+  max_freezes_per_month: number;
+  weekly_goal_days: number;
+  weekly_completed_days: number;
+  reminder_enabled: boolean;
+  hours_until_midnight_vn: number;
+  can_repair: boolean;
+  broken_streak_backup: number;
+  repair_deadline_at: string | null;
+  repair_progress: { completed: number; required: number };
+}
+
+export interface StudyPlanUpdatePayload {
+  weekly_goal_days?: 3 | 5 | 7;
+  reminder_enabled?: boolean;
+}
+
+export interface LearnerBadgeItem {
+  id: string;
+  pillar: 'streak' | 'mastery' | 'breakthrough' | string;
+  tier: 'bronze' | 'silver' | 'gold' | string;
+  title: string;
+  description: string;
+  current_value: number;
+  target_value: number;
+  progress_pct: number;
+  unlocked: boolean;
+}
+
+export interface LearnerBadgesData {
+  summary: {
+    unlocked_count: number;
+    total_count: number;
+    gold_count: number;
+    silver_count: number;
+    bronze_count: number;
+  };
+  badges: LearnerBadgeItem[];
+}
+
 export interface LearningProfileOverviewData {
   kpis: LearningProfileKPIs;
   dashboard_stats?: DashboardStats;
   recent_submissions?: RecentSubmissionItem[];
   goals: LearningProfileGoals;
   study_milestones?: StudyMilestone[];
+  skill_diagnostics?: Record<string, SkillDiagnosticBand>;
+  roadmap?: PersonalizedRoadmap;
+  monthly_progression?: MonthlyProgressionPoint[];
+  monthly_scorecard?: MonthlyScorecard;
   radar_data: SkillScore[];
   donut_data: DonutItem[];
   heatmap_weeks: HeatmapWeek[];
+  adaptive_streak?: AdaptiveStreakData;
+  badges?: LearnerBadgesData;
   current_bands?: CurrentBands;
   exam?: ExamCountdown;
 }
@@ -193,6 +273,8 @@ export interface QuestionHighlightItem {
   type_name: string;
   total_attempts: number;
   accuracy_rate: number;
+  metric_type?: "accuracy" | "band";
+  avg_band?: number;
   note?: string;
   delta_badge?: string;
 }
@@ -211,12 +293,15 @@ export interface QuestionTypeReportRow {
   correct: number;
   incorrect: number;
   accuracy: number;
+  metric_type?: "accuracy" | "band";
+  avg_band?: number;
   last_practiced: string;
 }
 
 export interface PracticeHistoryItem {
   id: string;
   test_id?: string;
+  mode?: string;
   status?: string;
   testName: string;
   type_badge: string;
@@ -233,6 +318,12 @@ export interface LearningProfileTestPracticeData {
   highlights: QuestionTypeHighlights;
   question_type_report: QuestionTypeReportRow[];
   recent_history: PracticeHistoryItem[];
+  criterion_mastery?: {
+    writing: CriterionMasteryItem[];
+    speaking: CriterionMasteryItem[];
+  };
+  monthly_progression?: MonthlyProgressionPoint[];
+  monthly_scorecard?: MonthlyScorecard;
 }
 
 export interface GoalUpdatePayload {

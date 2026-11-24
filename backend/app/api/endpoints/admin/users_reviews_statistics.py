@@ -6,16 +6,17 @@ from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.core.security import User, require_admin
 from app.schemas.admin import AdminAssignReviewRequest, AdminCreateAdminRequest, UserStatusUpdate
-from app.schemas.expert import AdminCreateExpertRequest
-from app.services.admin import staff_accounts, system_statistics, user_admin
+from app.schemas.expert import AdminCreateExpertRequest, AdminWaivePenaltyRequest
+from app.services.admin import expert_kpi_service, learner_audit_service, learner_audit_trace, staff_accounts, system_statistics, user_admin
 from app.services.expert.admin_review_dispatch_service import (
     admin_assign_review_request,
     list_admin_reviews,
 )
 from app.services.expert.dispatcher import auto_dispatch_pending_requests
+from app.services.expert.penalty_circuit_breaker import waive_penalty
 
 router = APIRouter()
-STATISTICS_CACHE_KEY = "admin:statistics:v2"   # v2: giờ VN, cùng đơn vị bài Writing, kèm số lượt chấm
+STATISTICS_CACHE_KEY = "admin:statistics:v3"   # v3: giờ VN, cùng đơn vị bài Writing, kèm cohort & KPI Chuyên gia
 
 
 @router.get("/users")
@@ -62,7 +63,7 @@ async def create_admin(admin_req: AdminCreateAdminRequest, current_user: User = 
 
 @router.get("/statistics")
 async def get_statistics(request: Request, current_user: User = Depends(require_admin)):
-    """Người dùng, bài viết, tỉ lệ lỗi AI, thời gian chấm, xu hướng 7 ngày (FR-29)."""
+    """Người dùng, bài viết, tỉ lệ lỗi AI, thời gian chấm, xu hướng 7 ngày & KPI Chuyên gia (FR-29)."""
     redis = request.app.state.redis
     cached = await redis.get(STATISTICS_CACHE_KEY)
     if cached:
@@ -115,3 +116,48 @@ async def assign_review_to_expert(
         "meta": {"code": 200, "message": f"Đã {action_label} bài chấm cho {data.get('expert_email')}"},
         "data": data,
     }
+
+
+@router.get("/learners/analytics")
+async def get_admin_learners_analytics(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=50),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(require_admin),
+):
+    """Bảng hội tụ thống kê học viên (3-Query Bulk Vectorized)."""
+    return {"meta": {"code": 200}, "data": learner_audit_service.list_learners_analytics(page, limit, search)}
+
+
+@router.get("/learners/{user_id}/audit")
+async def get_admin_learner_audit(user_id: str, current_user: User = Depends(require_admin)):
+    """Hồ sơ Minh chứng Trắng 360° cho mọi số liệu hiển thị của một học viên."""
+    return {"meta": {"code": 200}, "data": learner_audit_trace.get_learner_whitebox_audit(user_id)}
+
+
+@router.get("/experts/performance")
+async def get_admin_experts_performance(
+    period: str = Query("30d", description="30d hoặc YYYY-MM"),
+    tier: Optional[str] = Query(None, description="probation | standard | high_performer | top_expert"),
+    flagged_only: bool = Query(False, description="Chỉ lọc chuyên gia có dấu hiệu rubber-stamp"),
+    current_user: User = Depends(require_admin),
+):
+    """Báo cáo hiệu suất 4-Tier, chỉ số vận hành & vi phạm của Chuyên gia (FR-50, FR-51)."""
+    data = expert_kpi_service.get_expert_performance_report(period=period, tier=tier, flagged_only=flagged_only)
+    return {"meta": {"code": 200, "message": "Success"}, "data": data}
+
+
+@router.post("/penalties/{penalty_id}/waive")
+async def waive_expert_penalty(
+    penalty_id: str,
+    payload: AdminWaivePenaltyRequest,
+    request: Request,
+    current_user: User = Depends(require_admin),
+):
+    """Admin miễn phạt vi phạm của Expert kèm giải trình và tự tính lại hạng/cooldown (FR-51)."""
+    data = waive_penalty(penalty_id=penalty_id, admin_id=current_user.id, waive_reason=payload.waive_reason)
+    try:
+        await request.app.state.redis.delete(STATISTICS_CACHE_KEY)
+    except Exception:
+        pass
+    return {"meta": {"code": 200, "message": "Đã miễn phạt và cập nhật lại hạng Chuyên gia"}, "data": data}

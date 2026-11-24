@@ -11,7 +11,14 @@ export type NotificationType =
   | 'expert_requested'
   | 'expert_assigned'
   | 'expert_reassigned'
-  | 'expert_complete';
+  | 'expert_complete'
+  | 'streak_reminder'
+  | 'streak_freeze_used'
+  | 'badge_unlocked'
+  | 'expert_sla_warning'
+  | 'expert_sla_expired'
+  | 'expert_penalty_notice'
+  | 'admin_expert_suspended';
 
 export interface AppNotification {
   id: string;

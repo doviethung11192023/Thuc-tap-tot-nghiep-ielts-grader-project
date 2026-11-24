@@ -3,7 +3,7 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { apiErrorMessage, syncAiPricing } from "@/services/admin-ai-monitoring";
 import type { ModelPrice, PriceSyncModelResult, PricingConfig } from "@/types/admin-ai-monitoring";
 import { formatDateTime } from "@/lib/utils";

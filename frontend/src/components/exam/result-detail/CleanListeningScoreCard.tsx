@@ -34,7 +34,7 @@ export function CleanListeningScoreCard({
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 p-4 md:p-5 flex items-center justify-between shadow-2xs">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-xs">
+        <div className="w-11 h-11 rounded-full bg-[#932120] flex items-center justify-center text-white shadow-xs">
           <span className="font-bold text-base">{userName.slice(0, 1).toUpperCase()}</span>
         </div>
         <div>
@@ -50,7 +50,7 @@ export function CleanListeningScoreCard({
           <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
             Điểm
           </div>
-          <div className="text-xl font-black text-blue-600">
+          <div className="text-xl font-black text-[#932120]">
             {overallBand == null ? '—' : overallBand.toFixed(1)}
           </div>
         </div>
