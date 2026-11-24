@@ -5,6 +5,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 
+from app.api.responses import ok, created
 from app.core.security import User, get_optional_user
 from app.core.student_content_cache import get_or_load
 from app.services.practice.attempt_saved_work import load_saved_work, save_work
@@ -38,7 +39,7 @@ def start_test_attempt(req: StartAttemptRequest, current_user: Optional[User] = 
     # Làm tiếp bài dở (kể cả trên máy khác): trả bài đã lưu trên server (FR-11)
     if not data.get("closed"):
         data["saved_work"] = load_saved_work({"id": data["attempt_id"], "skill": data["skill"]})
-    return {"meta": {"code": 201, "message": "Bắt đầu bài thi thành công"}, "data": data}
+    return created(data, message="Bắt đầu bài thi thành công")
 
 
 class StartMockRequest(BaseModel):
@@ -51,7 +52,7 @@ def start_mock(req: StartMockRequest, current_user: Optional[User] = Depends(get
     if not current_user:
         raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để làm bài thi")
     data = start_random_mock(str(current_user.id), (req.skill or "").lower())
-    return {"meta": {"code": 201, "message": "Bắt đầu bài thi thử"}, "data": data}
+    return created(data, message="Bắt đầu bài thi thử")
 
 
 @router.get("/mock/summary")
@@ -59,7 +60,7 @@ def get_mock_summary(current_user: Optional[User] = Depends(get_optional_user)):
     """Số đề Mock còn lại và bài Mock đang dở theo từng kỹ năng."""
     if not current_user:
         raise HTTPException(status_code=401, detail="Vui lòng đăng nhập")
-    return {"meta": {"code": 200}, "data": mock_summary(str(current_user.id))}
+    return ok(mock_summary(str(current_user.id)))
 
 
 class SaveWorkRequest(BaseModel):
@@ -77,7 +78,7 @@ def save_attempt_work(attempt_id: str, req: SaveWorkRequest,
     if not current_user or not attempt:
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
     saved_at = save_work(attempt, req.answers, req.task1_text, req.task2_text, req.parts)
-    return {"meta": {"code": 200}, "data": {"saved_at": saved_at}}
+    return ok({"saved_at": saved_at})
 
 
 @router.get("/attempts/{attempt_id}/content")
@@ -91,9 +92,9 @@ def get_attempt_exam_content(attempt_id: str, current_user: Optional[User] = Dep
     if attempt["skill"] == "writing" and attempt["mode"] == "practice":
         content = with_practice_outlines(content)          # dàn ý gợi ý, Mock không có (spec 006)
     extra = {"confirmed_answers": confirmed_answers(attempt["id"])} if attempt["skill"] == "speaking" else {}
-    return {"meta": {"code": 200}, "data": {
+    return ok({
         **content, **extra, "attempt_id": attempt["id"], "mode": attempt["mode"],
-        "started_at": attempt["started_at"], "deadline_at": attempt.get("deadline_at")}}
+        "started_at": attempt["started_at"], "deadline_at": attempt.get("deadline_at")})
 
 
 def _load_published_content(test_id: str, skill: Optional[str]) -> Optional[dict]:
@@ -117,4 +118,4 @@ async def get_test_exam_content_direct(test_id: str, request: Request, skill: Op
         lambda: _load_published_content(test_id, skill))
     if not content:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
-    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": content}
+    return ok(content, cached=cached)

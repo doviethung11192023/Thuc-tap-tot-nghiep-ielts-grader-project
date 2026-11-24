@@ -11,6 +11,9 @@ import zoneinfo
 import json
 from typing import Dict, Any, Optional
 from app.db.supabase import db
+import logging
+
+logger = logging.getLogger(__name__)
 
 TZ_VN = zoneinfo.ZoneInfo("Asia/Ho_Chi_Minh")
 
@@ -42,7 +45,7 @@ async def get_system_capacity_settings() -> Dict[str, int]:
             "practice_review_weekly_quota": int(settings_map.get("practice_review_weekly_quota", 3))
         }
     except Exception as e:
-        print(f"[QuotaManager] Lỗi đọc system_settings: {e}")
+        logger.warning(f"[QuotaManager] Lỗi đọc system_settings: {e}")
         return {
             "expert_weekly_capacity": 50,
             "mock_expert_weekly_quota": 2,

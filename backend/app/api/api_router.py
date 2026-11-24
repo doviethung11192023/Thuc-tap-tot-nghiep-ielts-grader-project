@@ -1,5 +1,8 @@
 from fastapi import APIRouter
-from app.api.endpoints import essays, users, auth, expert, notifications, admin_tutor
+from app.api.endpoints import expert
+from app.api.endpoints.account import auth, notifications, users
+from app.api.endpoints.admin import tutor as admin_tutor
+from app.api.endpoints.student_practice import essay_results
 from app.api.endpoints.admin import (
     ai_monitoring as admin_ai_monitoring,
     ai_services as admin_ai_services,
@@ -19,7 +22,7 @@ from app.api.endpoints.admin.content import (
 from app.api.endpoints.student_practice import student_practice_router
 
 api_router = APIRouter()
-api_router.include_router(essays.router, prefix="/essays", tags=["Essays"])
+api_router.include_router(essay_results.router, prefix="/essays", tags=["Essays"])
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(admin_tests.router, prefix="/admin", tags=["Admin Tests"])

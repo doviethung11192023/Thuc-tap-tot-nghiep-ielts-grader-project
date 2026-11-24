@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from app.api.responses import ok
 from app.core.security import User, get_optional_user
 from app.services.practice.practice_attempt_lifecycle import require_owned_attempt
 from app.services.speaking.speaking_upload_service import confirm_upload, create_upload
@@ -24,11 +25,11 @@ class SpeakingConfirmRequest(BaseModel):
 def request_speaking_upload(attempt_id: str, req: SpeakingUploadRequest,
                                   current_user: Optional[User] = Depends(get_optional_user)):
     attempt = require_owned_attempt(attempt_id, current_user, "speaking")
-    return {"meta": {"code": 200}, "data": create_upload(attempt, req.question_id, req.content_type)}
+    return ok(create_upload(attempt, req.question_id, req.content_type))
 
 
 @router.post("/attempts/{attempt_id}/speaking-uploads/{response_id}/confirm")
 def confirm_speaking_upload(attempt_id: str, response_id: str, req: SpeakingConfirmRequest,
                                   current_user: Optional[User] = Depends(get_optional_user)):
     attempt = require_owned_attempt(attempt_id, current_user, "speaking")
-    return {"meta": {"code": 200}, "data": confirm_upload(attempt, response_id, req.duration_ms)}
+    return ok(confirm_upload(attempt, response_id, req.duration_ms))

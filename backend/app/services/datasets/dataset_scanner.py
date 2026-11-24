@@ -5,6 +5,9 @@ from collections import Counter
 from app.core.domain_errors import NotFoundError
 from app.db.supabase import db
 from app.services.datasets.dataset_path_resolver import DEFAULT_DATASET_ROOT, resolve_dataset_paths
+import logging
+
+logger = logging.getLogger(__name__)
 
 def _scan_rl_tests(de_bai_dir: Path, existing: set, summary: dict, pending: list, all_tests: list):
     rl_dir = de_bai_dir / "listening_reading" / "445_Recent_Actual_Test"
@@ -95,7 +98,7 @@ def scan_dataset(root_path: Optional[str] = None) -> Dict[str, Any]:
         for t in res.data or []:
             existing_set.add((t["title"].strip().lower()[:280], t["skill"].strip().lower()))
     except Exception as e:
-        print(f"Error fetching existing tests from Supabase: {e}")
+        logger.error(f"Error fetching existing tests from Supabase: {e}", exc_info=True)
 
     summary = {s: {"total": 0, "imported": 0, "pending": 0} for s in ["reading", "listening", "writing", "speaking"]}
     pending_samples: List[Dict[str, Any]] = []

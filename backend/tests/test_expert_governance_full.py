@@ -6,8 +6,9 @@ from fastapi import HTTPException
 import pytest
 from tests.fake_supabase import FakeSupabase
 
-from app.api.endpoints import expert as expert_ep
+from app.services.expert import expert_profile_service
 from app.api.endpoints.student_practice import expert_requests
+from app.services.expert import learner_expert_review_service
 from app.core.domain_errors import DomainError
 from app.core.security import User
 from app.schemas.expert import ExpertAvailabilityUpdate, ExpertHelpfulnessRatingRequest
@@ -38,7 +39,7 @@ def _criteria_payload(comment: str = "Lập luận khá mạch lạc, triển kh
 def _patch_all(monkeypatch, fake: FakeSupabase):
     for mod in (
         expert_policy_config, review_completeness_validator, expert_tier_evaluation_service,
-        penalty_circuit_breaker, sla_cron_service, dispatcher, review_submit_service, expert_ep, expert_requests,
+        penalty_circuit_breaker, sla_cron_service, dispatcher, review_submit_service, expert_profile_service, learner_expert_review_service,
     ):
         if hasattr(mod, "db"):
             monkeypatch.setattr(mod, "db", lambda: fake)
@@ -189,18 +190,18 @@ def test_b2_availability_lock_and_tier_cap(monkeypatch):
     _patch_all(monkeypatch, fake)
     user = User(id="e1", email="e1@moonlab.vn", role="expert")
 
-    with pytest.raises(HTTPException) as exc_cd:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(is_available=True), current_user=user))
+    with pytest.raises(DomainError) as exc_cd:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(is_available=True).dict(exclude_unset=True))
     assert exc_cd.value.status_code == 403
 
     fake.tables["expert_profiles"][0].update({"cooldown_until": None, "is_suspended_by_penalty": True})
-    with pytest.raises(HTTPException) as exc_susp:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(is_available=True), current_user=user))
+    with pytest.raises(DomainError) as exc_susp:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(is_available=True).dict(exclude_unset=True))
     assert exc_susp.value.status_code == 403
 
     fake.tables["expert_profiles"][0].update({"is_suspended_by_penalty": False, "tier": "standard"})
-    with pytest.raises(HTTPException) as exc_cap:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(max_active_reviews=8), current_user=user))
+    with pytest.raises(DomainError) as exc_cap:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(max_active_reviews=8).dict(exclude_unset=True))
     assert exc_cap.value.status_code == 400
 
 
@@ -305,7 +306,7 @@ def test_b3_b6_new_expert_tier_probation_recovery_snapshots_and_rating(monkeypat
         "att1", ExpertHelpfulnessRatingRequest(is_helpful=True, tags=["clear_actionable"]), current_user=learner
     )
     assert saved["status"] == "saved"
-    with pytest.raises(HTTPException) as exc_dup:
+    with pytest.raises(DomainError) as exc_dup:
         expert_requests.submit_expert_helpfulness_rating(
             "att1", ExpertHelpfulnessRatingRequest(is_helpful=False, tags=["too_brief"]), current_user=learner
         )
@@ -323,7 +324,7 @@ def test_admin_settings_expert_governance_validation(monkeypatch):
         system_settings=[{"key": "expert_cooldown_min_active_pool", "value": {"value": 3}}],
         audit_logs=[],
     )
-    monkeypatch.setattr(admin_core, "db", lambda: fake)
+    monkeypatch.setattr("app.services.admin.system_settings_service.db", lambda: fake)
     monkeypatch.setattr("app.services.admin.staff_accounts.db", lambda: fake)
 
     admin_user = User(id="adm-1", email="admin@ieltsgrader.edu.vn", role="admin")
@@ -351,7 +352,7 @@ def test_admin_settings_expert_governance_validation(monkeypatch):
     assert res_pool["data"]["value"] == {"value": 4}
     assert any(a["action"] == "update_expert_completeness_rules" for a in fake.tables["audit_logs"])
 
-    with pytest.raises(HTTPException) as bad_band:
+    with pytest.raises(DomainError) as bad_band:
         asyncio.run(
             admin_core.update_system_setting(
                 "expert_completeness_rules",
@@ -362,7 +363,7 @@ def test_admin_settings_expert_governance_validation(monkeypatch):
         )
     assert bad_band.value.status_code == 400
 
-    with pytest.raises(HTTPException) as bad_pool:
+    with pytest.raises(DomainError) as bad_pool:
         asyncio.run(
             admin_core.update_system_setting(
                 "expert_cooldown_min_active_pool",

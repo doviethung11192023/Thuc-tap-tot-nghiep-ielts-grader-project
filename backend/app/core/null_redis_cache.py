@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger(__name__)
 """
 No-op stand-in for the ARQ Redis pool, used when Redis is not reachable at startup.
 
@@ -24,7 +27,7 @@ class NullRedisCache:
         return 0
 
     async def enqueue_job(self, function, *args, **kwargs):
-        print(f"⚠️ [Queue] Redis unavailable, {function} left for the recovery cron")
+        logger.warning(f"⚠️ [Queue] Redis unavailable, {function} left for the recovery cron")
         return None
 
     async def close(self):

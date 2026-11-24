@@ -5,6 +5,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from app.api.responses import ok
 from app.core.config import settings
 from app.core.security import User, require_admin
 from app.services.admin.staff_accounts import write_audit
@@ -83,22 +84,19 @@ async def get_admin_tutor_overview(request: Request, current_user: User = Depend
             "default_model": env_info.get("default_model") or "",
         }
 
-    return {
-        "meta": {"code": 200, "message": "OK"},
-        "data": {
+    return ok({
             "config": cfg,
             "defaults": DEFAULT_AI_TUTOR_CONFIG,
             "stats": stats,
             "providers": providers,
             "ai_engine_reachable": bool(env_status),
-        },
-    }
+        }, message="OK")
 
 
 @router.put("/tutor/secrets")
 def update_admin_tutor_secrets(body: TutorSecretsUpdateBody, current_user: User = Depends(require_admin)):
     masked = save_tutor_secret_overrides(str(current_user.id), body.secrets)
-    return {"meta": {"code": 200, "message": "Đã cập nhật khóa API mã hóa thành công"}, "data": {"masked_overrides": masked}}
+    return ok({"masked_overrides": masked}, message="Đã cập nhật khóa API mã hóa thành công")
 
 
 @router.post("/tutor/ping")
@@ -126,12 +124,12 @@ async def ping_admin_tutor_model(body: TutorPingBody, current_user: User = Depen
     except HTTPException:
         raise
     except Exception as exc:
-        return {"meta": {"code": 200, "message": "Không kết nối được AI Engine"}, "data": {"ok": False, "error": str(exc)[:200]}}
-    return {"meta": {"code": 200, "message": "OK"}, "data": result}
+        return ok({"ok": False, "error": str(exc)[:200]}, message="Không kết nối được AI Engine")
+    return ok(result, message="OK")
 
 
 @router.post("/tutor/flush-cache")
 async def flush_admin_tutor_cache(request: Request, current_user: User = Depends(require_admin)):
     removed = await flush_quick_chip_cache(getattr(request.app.state, "redis", None))
     write_audit(str(current_user.id), "flush_ai_tutor_cache", "redis", "tutor:cache:*", after={"removed": removed})
-    return {"meta": {"code": 200, "message": f"Đã xóa {removed} mục cache gợi ý nhanh"}, "data": {"removed": removed}}
+    return ok({"removed": removed}, message=f"Đã xóa {removed} mục cache gợi ý nhanh")

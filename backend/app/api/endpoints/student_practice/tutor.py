@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.api.responses import ok
 from app.core.security import User, get_current_user
 from app.services.tutor.tutor_config_store import extract_public_ui_config, get_tutor_config_cached
 from app.services.tutor.tutor_context_builder import (
@@ -58,9 +59,7 @@ async def get_tutor_session(attempt_id: str, request: Request, current_user: Use
     quota = await get_quota_status(redis, str(current_user.id), int(cfg["hourly_quota"]))
     messages = await load_session_messages(redis, str(current_user.id), attempt_id)
     title, groups = list_public_question_groups(attempt["test_id"])
-    return {
-        "meta": {"code": 200, "message": "OK"},
-        "data": {
+    return ok({
             "attempt_id": attempt_id,
             "skill": attempt["skill"],
             "test_title": title,
@@ -68,8 +67,7 @@ async def get_tutor_session(attempt_id: str, request: Request, current_user: Use
             "quota": quota,
             "question_groups": groups,
             "messages": messages,
-        },
-    }
+        }, message="OK")
 
 
 @router.post("/tutor/stream")
@@ -138,7 +136,7 @@ async def stream_tutor_chat(body: TutorStreamBody, request: Request, current_use
 async def reset_tutor_session(attempt_id: str, request: Request, current_user: User = Depends(get_current_user)):
     verify_practice_attempt(attempt_id, str(current_user.id), get_tutor_config_cached())
     await clear_session(getattr(request.app.state, "redis", None), str(current_user.id), attempt_id)
-    return {"meta": {"code": 200, "message": "Đã tạo phiên hội thoại mới"}, "data": {"cleared": True}}
+    return ok({"cleared": True}, message="Đã tạo phiên hội thoại mới")
 
 
 @router.post("/tutor/feedback")
@@ -147,4 +145,4 @@ async def submit_tutor_feedback(body: TutorFeedbackBody, request: Request, curre
     redis = getattr(request.app.state, "redis", None)
     updated = await set_message_feedback(redis, str(current_user.id), body.attempt_id, body.message_id, body.rating)
     await record_llm_feedback_telemetry(redis, message_id=body.message_id, rating=body.rating, namespace="tutor")
-    return {"meta": {"code": 200, "message": "Cảm ơn đánh giá của bạn"}, "data": {"updated": updated}}
+    return ok({"updated": updated}, message="Cảm ơn đánh giá của bạn")

@@ -7,6 +7,9 @@ Mỗi thao tác là một function DB để evaluation và attempt đổi trạn
 """
 from app.db.supabase import db
 from app.services.notifications.notification_service import notify_ai_grading_result
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _drop_learner_profile_cache(attempt_id: str) -> None:
@@ -16,7 +19,7 @@ def _drop_learner_profile_cache(attempt_id: str) -> None:
         if att and att[0].get("learner_id"):
             invalidate_user_profile_cache(att[0]["learner_id"])
     except Exception as e:
-        print(f"[CacheDrop] Warning: {e}")
+        logger.warning(f"[CacheDrop] Warning: {e}")
 
 
 def fail_ai_evaluation(evaluation_id: str, attempt_id: str, attempt_status: str = "grading_failed") -> None:

@@ -29,6 +29,12 @@ from app.services.ai_monitoring.tracing_retention import purge_old_ai_traces
 from app.services.learning_profile.streak_nudge_cron import run_daily_streak_nudge
 from app.services.practice.mock_auto_submit import auto_submit_overdue_mocks
 from app.services.speaking.speaking_audio_retention import purge_expired_speaking_audio
+import logging
+
+from app.core.logging_config import configure_logging
+
+configure_logging()   # arq import module này khi khởi động nên cấu hình ở đây là đủ cho cả hai worker
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -44,30 +50,30 @@ async def grade_run_task(ctx, run_id: str) -> str:
 async def recover_stale_runs_task(ctx):
     counts = await recover_stale_grading_runs(ctx["redis"])
     if any(counts.values()):
-        print(f"♻️ [Recovery] {counts}")
+        logger.info(f"♻️ [Recovery] {counts}")
 
 
 async def auto_submit_mocks_task(ctx):
     """Tự nộp bài Mock quá deadline + 30 s bằng phần đã lưu (FR-12, BR-21)."""
     counts = await auto_submit_overdue_mocks(ctx["redis"])
     if counts:
-        print(f"⏰ [AutoSubmit] {counts}")
+        logger.info(f"⏰ [AutoSubmit] {counts}")
 
 
 async def purge_speaking_audio_task(ctx):
-    print(f"🧹 [Retention] removed {purge_expired_speaking_audio()} audio files")
+    logger.info(f"🧹 [Retention] removed {purge_expired_speaking_audio()} audio files")
 
 
 async def purge_ai_traces_task(ctx):
     """Xoá trace Langfuse từ 90 ngày, output/lỗi lượt chấm lỗi từ 180 ngày; giữ số liệu sử dụng (spec 008, FR-030)."""
-    print(f"🧹 [Retention] AI traces {await purge_old_ai_traces()}")
+    logger.info(f"🧹 [Retention] AI traces {await purge_old_ai_traces()}")
 
 
 async def sync_model_prices_task(ctx):
     """Kiểm giá model với trang giá của nhà cung cấp mỗi ngày; giá đổi thì cập nhật và ghi audit (spec 008)."""
     status = await asyncio.to_thread(sync_model_prices)
     changed = [m for m, r in status["models"].items() if r["status"] == "updated"]
-    print(f"💲 [PriceSync] đổi giá: {changed or 'không'}; lỗi nguồn: {status['errors'] or 'không'}")
+    logger.info(f"💲 [PriceSync] đổi giá: {changed or 'không'}; lỗi nguồn: {status['errors'] or 'không'}")
 
 
 async def expert_sla_and_dispatch_task(ctx):
@@ -75,14 +81,14 @@ async def expert_sla_and_dispatch_task(ctx):
     expired = expire_overdue_assignments()
     dispatched = await auto_dispatch_pending_requests()
     if expired or dispatched:
-        print(f"⏱️ [Expert SLA Cron] expired={expired}, dispatched={dispatched}")
+        logger.info(f"⏱️ [Expert SLA Cron] expired={expired}, dispatched={dispatched}")
 
 
 async def expert_sla_reminder_task(ctx):
     """Gửi nhắc nhở mốc 12h và khẩn cấp 6h trước hạn SLA cho Chuyên gia."""
     sent = send_sla_deadline_warnings()
     if sent:
-        print(f"🔔 [Expert SLA Warning Cron] sent={sent}")
+        logger.warning(f"🔔 [Expert SLA Warning Cron] sent={sent}")
 
 
 async def evaluate_expert_tiers_task(ctx):
@@ -90,19 +96,19 @@ async def evaluate_expert_tiers_task(ctx):
     now_vn = datetime.now(TZ_VN)
     processed = evaluate_all_expert_tiers(close_previous_month=(now_vn.hour == 1 and now_vn.day == 1))
     if processed and now_vn.hour == 1:
-        print(f"🏅 [Expert Tier Cron] evaluated={processed}, snapshot_closed={now_vn.day == 1}")
+        logger.info(f"🏅 [Expert Tier Cron] evaluated={processed}, snapshot_closed={now_vn.day == 1}")
 
 
 async def close_overdue_mock_attempts_task(ctx):
     closed = auto_close_overdue_mock_attempts()
     if closed:
-        print(f"⌛ [Mock Timeout Cron] closed={closed}")
+        logger.info(f"⌛ [Mock Timeout Cron] closed={closed}")
 
 
 async def learner_streak_nudge_task(ctx):
     res = run_daily_streak_nudge(force_hour_check=True)
     if res.get("reminders_sent") or res.get("freeze_notices_sent"):
-        print(f"🔥 [Streak Nudge Cron] {res}")
+        logger.info(f"🔥 [Streak Nudge Cron] {res}")
 
 
 class WorkerSettings:

@@ -10,6 +10,9 @@ from typing import Any, Awaitable, Callable, Tuple
 from fastapi import Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.routing import APIRoute
+import logging
+
+logger = logging.getLogger(__name__)
 
 VERSION_KEY = "student-content:version"
 _MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
@@ -33,14 +36,14 @@ async def get_or_load(redis: Any, namespace: str, key: str, ttl_seconds: int,
         if cached is not None:
             return json.loads(cached), True
     except Exception as e:
-        print(f"⚠️ [Cache] không đọc được {namespace}: {e}")
+        logger.warning(f"⚠️ [Cache] không đọc được {namespace}: {e}")
 
     data = await run_in_threadpool(load)
     if data is not None and cache_key:
         try:
             await redis.setex(cache_key, ttl_seconds, json.dumps(data))
         except Exception as e:
-            print(f"⚠️ [Cache] không ghi được {namespace}: {e}")
+            logger.warning(f"⚠️ [Cache] không ghi được {namespace}: {e}")
     return data, False
 
 
@@ -48,7 +51,7 @@ async def invalidate_student_content(redis: Any) -> None:
     try:
         await redis.incr(VERSION_KEY)
     except Exception as e:
-        print(f"⚠️ [Cache] không xoá được cache Learner: {e}")
+        logger.warning(f"⚠️ [Cache] không xoá được cache Learner: {e}")
 
 
 class StudentContentMutationRoute(APIRoute):

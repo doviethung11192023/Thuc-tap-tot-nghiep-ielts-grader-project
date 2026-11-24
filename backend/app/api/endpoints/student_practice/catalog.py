@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import Optional, List, Dict, Any
+from app.api.responses import ok
 from app.core.security import get_optional_user, User
 from app.core.student_content_cache import get_or_load
 from app.services.practice import practice_catalog
@@ -23,14 +24,14 @@ async def list_published_tests(
     result_data, cached = await get_or_load(
         request.app.state.redis, "catalog", cache_key, _CATALOG_TTL_SECONDS,
         lambda: practice_catalog.list_tests(page, limit, skill, difficulty, search))
-    return {"meta": {"code": 200, "cached": True} if cached else {"code": 200}, "data": result_data}
+    return ok(result_data, cached=cached)
 
 @router.get("/sets")
 def list_exam_collections(current_user: Optional[User] = Depends(get_optional_user)):
     """Danh sách các bộ đề thi IELTS đã xuất bản kèm tiến độ học viên (Batch Optimized)."""
     test_sets, all_tests, completed_test_ids = practice_catalog.collections_source(current_user.id if current_user else None)
     collections = format_collection_cards(test_sets, all_tests, completed_test_ids)
-    return {"meta": {"code": 200}, "data": collections}
+    return ok(collections)
 
 @router.get("/sets/{set_id}")
 def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depends(get_optional_user)):
@@ -87,14 +88,11 @@ def get_exam_collection_detail(set_id: str, current_user: Optional[User] = Depen
 
     completed_count = sum(1 for tc in test_cards if any(s["status"] == "completed" for s in tc["skills"]))
 
-    return {
-        "meta": {"code": 200},
-        "data": {
+    return ok({
             "id": test_set["id"],
             "title": test_set["name"],
             "imageUrl": DEFAULT_COVER_IMAGES[0],
             "testsCount": len(test_cards),
             "completedTestsCount": completed_count,
             "tests": test_cards
-        }
-    }
+        })

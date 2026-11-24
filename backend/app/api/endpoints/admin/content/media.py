@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, s
 from typing import Optional
 import uuid
 import os
+from app.api.responses import created
 from app.core.security import require_admin, User
 from app.services.storage.r2_storage import r2_storage
 
@@ -50,13 +51,10 @@ async def upload_media_file(
         content_type=file.content_type
     )
 
-    return {
-        "meta": {"code": 201, "message": "Tải tệp lên Cloudflare R2 thành công"},
-        "data": {
+    return created({
             "key": key,
             "url": public_url,
             "filename": file.filename,
             "size_bytes": len(file_bytes),
             "content_type": file.content_type
-        }
-    }
+        }, message="Tải tệp lên Cloudflare R2 thành công")

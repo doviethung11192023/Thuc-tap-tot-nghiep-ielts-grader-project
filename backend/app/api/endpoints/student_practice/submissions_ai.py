@@ -2,12 +2,14 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
+from app.api.responses import ok
 from app.core.security import User, get_optional_user
-from app.db.supabase import db
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt, require_owned_attempt
 from app.services.expert.mock_expert_review_request import request_mock_expert_review
+from app.services.grading.attempt_retry_service import create_retry_job
 from app.services.grading.grading_queue import enqueue_grading_run
 from app.services.speaking.speaking_submission_service import submit_speaking
 from app.services.writing.writing_attempt_service import submit_writing
@@ -35,9 +37,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
 
     has_expert_review = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
 
-    return {
-        "meta": {"code": 200, "message": "Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm"},
-        "data": {
+    return ok({
             "attempt_id": attempt_id,
             "essay_id": essays[-1]["essay_id"] if essays else None,
             "essay_ids": {f"task{e['task_no']}": e["essay_id"] for e in essays},
@@ -45,8 +45,7 @@ async def submit_writing_attempt(attempt_id: str, req: WritingSubmissionRequest,
             "status": sub["status"],
             "has_expert_review": has_expert_review,
             "submitted_at": sub["submitted_at"],
-        },
-    }
+        }, message="Bài thi viết đã được nộp và chuyển sang pipeline AI chấm điểm")
 
 
 @router.post("/attempts/{attempt_id}/retry-ai-grading")
@@ -59,42 +58,18 @@ async def retry_ai_grading(attempt_id: str, request: Request,
         raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại")
 
     skill = attempt["skill"]
-    task_nos = None
-    if skill == "writing":
-        essays = db().table("essays").select("id, word_count, content, writing_tasks(task_type)") \
-            .eq("attempt_id", attempt_id).execute().data or []
-        non_empty = [e for e in essays if (e.get("word_count") or 0) > 0 or (e.get("content") or "").strip()]
-        if not non_empty:
-            raise HTTPException(status_code=400, detail="Bài viết trống, không thể chấm lại")
-        task_nos = sorted({1 if (e.get("writing_tasks") or {}).get("task_type") == "task1" else 2 for e in non_empty})
-    else:
-        confirmed = db().table("speaking_responses").select("id") \
-            .eq("attempt_id", attempt_id).not_.is_("confirmed_at", "null").limit(1).execute().data or []
-        if not confirmed:
-            raise HTTPException(status_code=400, detail="Bài nói chưa có câu trả lời nào được lưu, không thể chấm lại")
-
-    res = db().rpc("create_ai_grading_job", {
-        "p_attempt_id": attempt_id,
-        "p_skill": skill,
-        "p_task_nos": task_nos,
-    }).execute()
-
-    job = res.data or {}
-    db().table("attempts").update({"status": "grading"}).eq("id", attempt_id).execute()
+    job = await run_in_threadpool(create_retry_job, attempt_id, skill)
 
     redis = getattr(request.app.state, "redis", None)
     for run in job.get("runs") or []:
         await enqueue_grading_run(redis, run["run_id"], skill)
 
-    return {
-        "meta": {"code": 200, "message": "Đã bắt đầu chấm lại bài thi bằng AI"},
-        "data": {
+    return ok({
             "attempt_id": attempt_id,
             "skill": skill,
             "evaluation_id": job.get("evaluation_id"),
             "runs": job.get("runs"),
-        },
-    }
+        }, message="Đã bắt đầu chấm lại bài thi bằng AI")
 
 
 @router.post("/attempts/{attempt_id}/submit-speaking")
@@ -108,4 +83,4 @@ async def submit_speaking_attempt(attempt_id: str, request: Request,
         await enqueue_grading_run(request.app.state.redis, job["runs"][0]["run_id"], "speaking")
 
     sub["has_expert_review"] = await request_mock_expert_review(attempt, sub, getattr(request.app.state, "redis", None))
-    return {"meta": {"code": 200, "message": "Bài thi nói đã được ghi nhận"}, "data": sub}
+    return ok(sub, message="Bài thi nói đã được ghi nhận")

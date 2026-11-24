@@ -16,6 +16,9 @@ from app.services.writing.writing_bands import to_half_band
 from app.clients.ai_engine.grading_client import call_ai_grade_speaking
 from app.clients.ai_engine.run_usage import run_context
 from app.services.ai_monitoring.run_usage_recorder import done_columns, failed_columns
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Khoá trong JSON AI engine → mã tiêu chí trong bảng criteria
 CRITERION_CODES = {"fc": "FC", "lr": "LR", "gra": "GRA", "pr": "P"}
@@ -102,7 +105,7 @@ def _store_scores(evaluation_id: str, result: dict[str, Any]) -> None:
 
 
 async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: str) -> None:
-    print(f"🔧 [Worker] speaking attempt={attempt_id} evaluation={evaluation_id}")
+    logger.info(f"🔧 [Worker] speaking attempt={attempt_id} evaluation={evaluation_id}")
     started = time.monotonic()
     result = None      # kết quả engine; lỗi về sau vẫn ghi được token đã tốn
     try:
@@ -126,9 +129,9 @@ async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: st
             "prompt_versions": result.get("prompt_versions"), "finished_at": _now_iso(),
             "latency_ms": int((time.monotonic() - started) * 1000), **done_columns(result),
         }).eq("id", run_id).execute()
-        print(f"✅ [Worker] speaking attempt {attempt_id} done")
+        logger.info(f"✅ [Worker] speaking attempt {attempt_id} done")
     except Exception as e:
-        print(f"❌ [Worker] speaking attempt {attempt_id} failed: {e}")
+        logger.error(f"❌ [Worker] speaking attempt {attempt_id} failed: {e}", exc_info=True)
         db().table("grading_runs").update({
             "status": "failed", "error": str(e)[:2000], "finished_at": _now_iso(),
             "latency_ms": int((time.monotonic() - started) * 1000), **failed_columns(e, result),
@@ -137,4 +140,4 @@ async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: st
         try:
             finalize_speaking_evaluation(evaluation_id)
         except Exception as e:
-            print(f"⚠️ [Worker] finalize {evaluation_id} failed: {e}")
+            logger.warning(f"⚠️ [Worker] finalize {evaluation_id} failed: {e}")

@@ -7,6 +7,9 @@ Lỗi đọc bảng giá không được làm hỏng lượt chấm: chi phí đ
 from typing import Any, Optional
 
 from app.services.ai_monitoring import model_pricing
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _cost(usage: list[dict[str, Any]]) -> Optional[float]:
@@ -15,7 +18,7 @@ def _cost(usage: list[dict[str, Any]]) -> Optional[float]:
     try:
         return model_pricing.compute_cost(usage, model_pricing.get_prices())
     except Exception as e:
-        print(f"⚠️ [Usage] không tính được chi phí: {e}")
+        logger.warning(f"⚠️ [Usage] không tính được chi phí: {e}")
         return None
 
 

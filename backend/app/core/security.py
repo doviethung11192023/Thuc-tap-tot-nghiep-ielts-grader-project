@@ -9,6 +9,9 @@ from app.core.supabase_access_token_verifier import (
     JwksUnavailable, cached_profile, forget_profile, remember_profile, verify_access_token,
 )
 from app.db.supabase import db, supabase
+import logging
+
+logger = logging.getLogger(__name__)
 
 security = HTTPBearer()
 
@@ -38,7 +41,7 @@ async def _authenticated_user_id(token: str) -> Optional[str]:
     try:
         return await run_in_threadpool(verify_access_token, token)
     except JwksUnavailable as e:
-        print(f"⚠️ [Auth] không tải được JWKS, hỏi GoTrue: {e}")
+        logger.warning(f"⚠️ [Auth] không tải được JWKS, hỏi GoTrue: {e}")
         return await run_in_threadpool(_user_id_from_gotrue, token)
 
 
@@ -72,7 +75,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except HTTPException:
         raise
     except Exception as e:
-        print(f"[SECURITY DEBUG] Auth exception: {e}")
+        logger.warning(f"[SECURITY DEBUG] Auth exception: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -81,13 +84,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.is_active:
-        print(f"[SECURITY 403] User {current_user.id} is inactive (is_active={current_user.is_active})")
+        logger.warning(f"[SECURITY 403] User {current_user.id} is inactive (is_active={current_user.is_active})")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
     return current_user
 
 async def require_admin(current_user: User = Depends(get_current_active_user)) -> User:
     if current_user.role != "admin":
-        print(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'admin' is required!")
+        logger.warning(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'admin' is required!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail=f"Quyền truy cập bị từ chối: Tài khoản có vai trò '{current_user.role}', nhưng chức năng này yêu cầu vai trò 'admin'"
@@ -96,7 +99,7 @@ async def require_admin(current_user: User = Depends(get_current_active_user)) -
 
 async def require_expert(current_user: User = Depends(get_current_active_user)) -> User:
     if current_user.role != "expert":
-        print(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'expert' is required!")
+        logger.warning(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'expert' is required!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail=f"Quyền truy cập bị từ chối: Tài khoản có vai trò '{current_user.role}', nhưng chức năng này yêu cầu vai trò 'expert'"
@@ -105,7 +108,7 @@ async def require_expert(current_user: User = Depends(get_current_active_user)) 
 
 async def require_learner(current_user: User = Depends(get_current_active_user)) -> User:
     if current_user.role != "learner":
-        print(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'learner' is required!")
+        logger.warning(f"[SECURITY 403] User {current_user.id} has role='{current_user.role}', but 'learner' is required!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail=f"Quyền truy cập bị từ chối: Tài khoản có vai trò '{current_user.role}', nhưng chức năng này yêu cầu vai trò 'learner'"

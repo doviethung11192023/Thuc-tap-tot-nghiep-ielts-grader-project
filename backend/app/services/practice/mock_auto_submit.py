@@ -19,6 +19,9 @@ from app.services.listening_reading.lr_grading_service import submit_lr
 from app.services.practice.practice_attempt_lifecycle import LATE_GRACE_SECONDS, now_utc
 from app.services.speaking.speaking_submission_service import submit_speaking
 from app.services.writing.writing_attempt_service import submit_writing
+import logging
+
+logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 200    # còn sót thì phút sau làm tiếp
 
@@ -55,7 +58,7 @@ async def auto_submit_overdue_mocks(redis: Any) -> dict[str, int]:
         except ConflictError:
             outcome = "skipped"
         except Exception as e:     # một bài lỗi không chặn các bài khác; phút sau thử lại
-            print(f"⚠️ [AutoSubmit] attempt {attempt['id']} failed: {e}")
+            logger.warning(f"⚠️ [AutoSubmit] attempt {attempt['id']} failed: {e}")
             outcome = "failed"
         counts[outcome] = counts.get(outcome, 0) + 1
     return counts
