@@ -2,6 +2,8 @@
 
 Cập nhật 2026-11-23, sau đợt cấu trúc lại (`plans/261123-1130-source-code-restructure/plan.md`). Thiết kế và nghiệp vụ: [`source-of-truth.md`](source-of-truth.md).
 
+📌 Sơ đồ kiến trúc, luồng chấm, trạng thái và ERD: [`diagrams/README.md`](diagrams/README.md).
+
 ## 1. Ba phần chạy độc lập
 
 | Phần | Thư mục | Nói chuyện với | Không được |

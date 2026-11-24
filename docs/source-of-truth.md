@@ -272,6 +272,8 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 **Nguyên tắc:** chấm AI là **bất đồng bộ**. Core API nhận bài và trả về ngay; worker chấm; trình duyệt nhận kết quả qua Supabase Realtime, có polling dự phòng (ADR-02).
 
+📌 Sơ đồ tương ứng: [`attempt-state-machine`](diagrams/attempt-state-machine.drawio.png), [`expert-review-flow`](diagrams/expert-review-flow.drawio.png), [`speaking-flow`](diagrams/speaking-flow.drawio.png).
+
 | Sơ đồ | Nội dung chính |
 |---|---|
 | SD-00 | Luồng tổng: bắt đầu bài, nộp, L/R chấm ngay, W/S đẩy job vào hàng đợi, worker chạy AI và lưu evaluation, Expert chấm (Mock) và lưu bản chính thức, Realtime báo kết quả |
@@ -311,7 +313,7 @@ Upload media lên R2, rồi TTS chạy nền, rồi xem trước, rồi Publish.
 
 ## 7. Thiết kế cơ sở dữ liệu (đích: 34 bảng, 2 view, 47 FK; bỏ `mock_sessions` ngày 2026-11-09, thêm `writing_task_materials` ngày 2026-11-11, thêm `ai_provider_secrets` ngày 2026-11-22)
 
-ERD vẽ theo ký hiệu Chen. Có 4 phép chuyên biệt hoá (specialisation):
+ERD vẽ theo ký hiệu Chen. Bản tổng quan các bảng chính trong repo: [`erd-overview`](diagrams/erd-overview.drawio.png). Có 4 phép chuyên biệt hoá (specialisation):
 
 | Thực thể cha | Kiểu con | Cách ánh xạ |
 |---|---|---|
@@ -472,6 +474,8 @@ Quy tắc cần nhiều dòng dữ liệu hoặc cần đọc cấu hình (chu�
 ---
 
 ## 8. Kiến trúc
+
+📌 Sơ đồ: [`system-architecture`](diagrams/system-architecture.drawio.png), [`writing-grading-flow`](diagrams/writing-grading-flow.drawio.png), [`speaking-flow`](diagrams/speaking-flow.drawio.png). Bản chữ ở [`diagrams/README.md`](diagrams/README.md).
 
 ```
 Browser (Next.js 16: Learner / Expert / Admin portal)
@@ -686,7 +690,18 @@ AI engine (nội bộ, chỉ worker được gọi): `POST /grade` (Writing), `P
 
 ## 10. Danh mục sơ đồ
 
-Gốc: `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để sửa) và `.png` (để xem).
+**Trong repo (`docs/diagrams/`, cập nhật 2026-11-23):** 6 sơ đồ lõi vẽ theo code hiện tại, mỗi sơ đồ có `.drawio` (sửa bằng extension Draw.io Integration), `.drawio.png` (xem) và bản chữ cho agent trong [`diagrams/README.md`](diagrams/README.md). Sửa sơ đồ thì sửa cả bản chữ.
+
+| File | Nội dung | Mục SoT |
+|---|---|---|
+| `system-architecture` | Các khối, hướng gọi, dịch vụ ngoài | §8 |
+| `writing-grading-flow` | Pipeline chấm Writing Task 1 và Task 2 | §8 |
+| `speaking-flow` | Từ ghi âm đến điểm Speaking | §8 |
+| `expert-review-flow` | Tạo, giao, kết thúc yêu cầu Expert | §6 |
+| `attempt-state-machine` | Trạng thái `attempts.status` | §6 |
+| `erd-overview` | Quan hệ giữa các bảng chính | §7 |
+
+**Bộ 37 sơ đồ cho báo cáo (ngoài repo, có thể lệch code):** gốc `~/Downloads/Tat-ca-so-do-drawio/`. Mỗi sơ đồ có `.drawio` (để sửa) và `.png` (để xem).
 
 | Thư mục | File | Hình trong báo cáo |
 |---|---|---|
