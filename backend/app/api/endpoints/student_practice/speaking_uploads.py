@@ -21,14 +21,14 @@ class SpeakingConfirmRequest(BaseModel):
 
 
 @router.post("/attempts/{attempt_id}/speaking-uploads")
-async def request_speaking_upload(attempt_id: str, req: SpeakingUploadRequest,
+def request_speaking_upload(attempt_id: str, req: SpeakingUploadRequest,
                                   current_user: Optional[User] = Depends(get_optional_user)):
     attempt = require_owned_attempt(attempt_id, current_user, "speaking")
     return {"meta": {"code": 200}, "data": create_upload(attempt, req.question_id, req.content_type)}
 
 
 @router.post("/attempts/{attempt_id}/speaking-uploads/{response_id}/confirm")
-async def confirm_speaking_upload(attempt_id: str, response_id: str, req: SpeakingConfirmRequest,
+def confirm_speaking_upload(attempt_id: str, response_id: str, req: SpeakingConfirmRequest,
                                   current_user: Optional[User] = Depends(get_optional_user)):
     attempt = require_owned_attempt(attempt_id, current_user, "speaking")
     return {"meta": {"code": 200}, "data": confirm_upload(attempt, response_id, req.duration_ms)}

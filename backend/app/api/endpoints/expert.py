@@ -27,7 +27,7 @@ from app.services.writing.writing_test_content import chart_image_url
 router = APIRouter()
 
 @router.get("/me", response_model=ExpertProfileResponse)
-async def get_expert_profile(current_user: User = Depends(require_expert)):
+def get_expert_profile(current_user: User = Depends(require_expert)):
     """
     Lấy thông tin hồ sơ của Expert, trạng thái khả dụng nhận bài, 
     và số lượng bài đang được phân công (UC-14, FR-21).
@@ -59,7 +59,7 @@ async def get_expert_profile(current_user: User = Depends(require_expert)):
     )
 
 @router.patch("/me/availability", response_model=ExpertProfileResponse)
-async def update_expert_availability(
+def update_expert_availability(
     update_data: ExpertAvailabilityUpdate,
     current_user: User = Depends(require_expert)
 ):
@@ -75,10 +75,10 @@ async def update_expert_availability(
     if not res.data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update expert profile")
 
-    return await get_expert_profile(current_user=current_user)
+    return get_expert_profile(current_user=current_user)
 
 @router.get("/assignments", response_model=List[ExpertAssignmentItem])
-async def list_expert_assignments(
+def list_expert_assignments(
     status_filter: Optional[str] = "active", # 'active', 'completed', 'all'
     current_user: User = Depends(require_expert)
 ):

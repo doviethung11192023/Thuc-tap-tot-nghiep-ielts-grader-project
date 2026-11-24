@@ -1,6 +1,7 @@
 """Bắt đầu bài làm và tải nội dung đề (không kèm đáp án — ràng buộc 8) — UC-07/08/09/10."""
 from typing import Any, Dict, Optional
 
+from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 
@@ -25,7 +26,7 @@ class StartAttemptRequest(BaseModel):
 
 
 @router.post("/attempts/start", status_code=status.HTTP_201_CREATED)
-async def start_test_attempt(req: StartAttemptRequest, current_user: Optional[User] = Depends(get_optional_user)):
+def start_test_attempt(req: StartAttemptRequest, current_user: Optional[User] = Depends(get_optional_user)):
     """Tạo attempt mới (hoặc làm tiếp attempt dở của đề này). Chỉ Learner đã đăng nhập."""
     if not current_user:
         raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để làm bài thi")
@@ -45,7 +46,7 @@ class StartMockRequest(BaseModel):
 
 
 @router.post("/mock/start", status_code=status.HTTP_201_CREATED)
-async def start_mock(req: StartMockRequest, current_user: Optional[User] = Depends(get_optional_user)):
+def start_mock(req: StartMockRequest, current_user: Optional[User] = Depends(get_optional_user)):
     """Bài Mock mới: hệ thống chọn ngẫu nhiên một đề Learner chưa làm (UC-08). Hết đề → 409."""
     if not current_user:
         raise HTTPException(status_code=401, detail="Vui lòng đăng nhập để làm bài thi")
@@ -54,7 +55,7 @@ async def start_mock(req: StartMockRequest, current_user: Optional[User] = Depen
 
 
 @router.get("/mock/summary")
-async def get_mock_summary(current_user: Optional[User] = Depends(get_optional_user)):
+def get_mock_summary(current_user: Optional[User] = Depends(get_optional_user)):
     """Số đề Mock còn lại và bài Mock đang dở theo từng kỹ năng."""
     if not current_user:
         raise HTTPException(status_code=401, detail="Vui lòng đăng nhập")
@@ -69,7 +70,7 @@ class SaveWorkRequest(BaseModel):
 
 
 @router.put("/attempts/{attempt_id}/work")
-async def save_attempt_work(attempt_id: str, req: SaveWorkRequest,
+def save_attempt_work(attempt_id: str, req: SaveWorkRequest,
                             current_user: Optional[User] = Depends(get_optional_user)):
     """Tự lưu bài lên server (FR-11, NFR-03). Đã nộp hoặc quá deadline + 30 s → 409."""
     attempt = get_owned_attempt(attempt_id, current_user.id if current_user else None)
@@ -80,7 +81,7 @@ async def save_attempt_work(attempt_id: str, req: SaveWorkRequest,
 
 
 @router.get("/attempts/{attempt_id}/content")
-async def get_attempt_exam_content(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
+def get_attempt_exam_content(attempt_id: str, current_user: Optional[User] = Depends(get_optional_user)):
     """Nội dung đề của một attempt; chỉ chủ bài (hoặc Admin) xem được."""
     is_admin = bool(current_user and current_user.role == "admin")
     attempt = get_owned_attempt(attempt_id, current_user.id if current_user else None, is_admin)
@@ -107,7 +108,8 @@ def _load_published_content(test_id: str, skill: Optional[str]) -> Optional[dict
 async def get_test_exam_content_direct(test_id: str, request: Request, skill: Optional[str] = None):
     """Nội dung đề Practice theo test_id (hoặc slug), có cache Redis. Đề Mock chỉ xem qua attempt
     (/attempts/{id}/content) để không ai đọc trước đề thi thử."""
-    test = resolve_test(test_id, skill)
+    # resolve_test đọc Supabase đồng bộ: chạy trong threadpool để không chặn event loop
+    test = await run_in_threadpool(resolve_test, test_id, skill)
     if not test or test.get("allowed_mode") == "mock":
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại")
     content, cached = await get_or_load(

@@ -190,7 +190,7 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 
 **Bài toán:** tự lưu mỗi 15 s, 5.000 người cùng làm, tức tối đa **≈ 333 lượt lưu/giây** nếu ai cũng lưu đều. Đến hạn nộp, cả 5.000 bài nộp gần như cùng lúc.
 
-**Hiện trạng (phát hiện khi rà code):** Core API chạy 1 tiến trình uvicorn; các endpoint `async` gọi client Supabase **đồng bộ**, nên mỗi lượt gọi DB chặn cả event loop. Ở mức này API phục vụ được khoảng vài chục request/giây (📏 cần đo). Phải sửa trước khi nói chuyện 5.000 người.
+**Hiện trạng:** Core API chạy 1 tiến trình uvicorn. ✅ 2026-11-24 đã sửa lỗi event loop bị chặn: 61 endpoint `async def` gọi client Supabase **đồng bộ** đổi thành `def` (chạy trong threadpool), có test chặn tái phát. 📏 6 request song song trước xếp hàng 0,4 → 2,0 s, sau 0,4 → 0,6 s; reload 4 trang Learner trung bình 1,73 s → 0,67 s (giảm ~62%, kèm sửa AuthGuard không chờ hồ sơ và gọi song song thẻ "Bước tiếp theo"). Chưa load test nhiều người (📏 cần đo).
 
 **Giải pháp theo lớp:**
 

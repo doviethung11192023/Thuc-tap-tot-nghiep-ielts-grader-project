@@ -6,7 +6,7 @@ from app.core.config import settings
 router = APIRouter()
 
 @router.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Dùng để test trực tiếp trên Swagger UI.
     Username: Email bạn đã đăng ký trên Supabase.

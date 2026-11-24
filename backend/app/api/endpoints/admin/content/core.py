@@ -38,7 +38,7 @@ def _parse_id(item_id: str) -> tuple:
 
 # --- Band Conversions (Bảng Quy Đổi Điểm Thô Sang Band Score) ---
 @router.get("/core/band-conversions")
-async def get_band_conversions(
+def get_band_conversions(
     skill: Optional[SkillType] = Query(None, description="Lọc theo skill: listening, reading"),
     current_user: User = Depends(require_admin)
 ):
@@ -50,7 +50,7 @@ async def get_band_conversions(
     return {"meta": {"code": 200}, "data": [_with_id(r) for r in res.data or []]}
 
 @router.post("/core/band-conversions", status_code=status.HTTP_201_CREATED)
-async def create_band_conversion(
+def create_band_conversion(
     data: BandConversionCreate,
     current_user: User = Depends(require_admin)
 ):
@@ -75,7 +75,7 @@ async def create_band_conversion(
     return {"meta": {"code": 201, "message": "Thêm khoảng quy đổi thành công"}, "data": _with_id(res.data[0])}
 
 @router.put("/core/band-conversions/{item_id}")
-async def update_band_conversion(
+def update_band_conversion(
     item_id: str,
     data: BandConversionCreate,
     current_user: User = Depends(require_admin)
@@ -103,7 +103,7 @@ async def update_band_conversion(
     return {"meta": {"code": 200, "message": "Cập nhật thành công"}, "data": _with_id(res.data[0])}
 
 @router.delete("/core/band-conversions/{item_id}")
-async def delete_band_conversion(
+def delete_band_conversion(
     item_id: str,
     current_user: User = Depends(require_admin)
 ):
@@ -117,14 +117,14 @@ async def delete_band_conversion(
 
 # --- System Settings (Cấu Hình Tham Số Hệ Thống) ---
 @router.get("/core/settings")
-async def get_system_settings(current_user: User = Depends(require_admin)):
+def get_system_settings(current_user: User = Depends(require_admin)):
     """Lấy danh sách các cấu hình và tham số hệ thống."""
     res = db().table("system_settings").select("*").order("key").execute()
     # Khoá ai_* và trace_view_days do trang Service AI quản lý, không lộ ở trình sửa JSON chung (spec 008)
     return {"meta": {"code": 200}, "data": [r for r in (res.data or []) if not is_ai_managed_setting(r["key"])]}
 
 @router.put("/core/settings/{key}")
-async def update_system_setting(
+def update_system_setting(
     key: str,
     data: SystemSettingUpdate,
     current_user: User = Depends(require_admin)

@@ -19,7 +19,7 @@ from starlette.concurrency import run_in_threadpool
 router = APIRouter(route_class=StudentContentMutationRoute)
 
 @router.get("/ingest/scan", response_model=DatasetScanResponse)
-async def scan_dataset_endpoint(
+def scan_dataset_endpoint(
     dataset_path: Optional[str] = Query(None),
     current_user: User = Depends(require_admin)
 ):

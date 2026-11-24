@@ -28,7 +28,7 @@ def _ok(data: dict, message: str) -> dict:
 
 
 @router.get("/writing-tasks/{section_id}/material")
-async def get_material(section_id: str, current_user: User = Depends(require_admin)):
+def get_material(section_id: str, current_user: User = Depends(require_admin)):
     return _ok(materials.get_material(section_id), "OK")
 
 
@@ -38,10 +38,10 @@ async def draft_material(section_id: str, body: KindBody, current_user: User = D
 
 
 @router.put("/writing-tasks/{section_id}/material")
-async def update_material(section_id: str, body: MaterialUpdate, current_user: User = Depends(require_admin)):
+def update_material(section_id: str, body: MaterialUpdate, current_user: User = Depends(require_admin)):
     return _ok(materials.update_material(section_id, body.model_dump(exclude_unset=True)), "Đã lưu bản nháp")
 
 
 @router.post("/writing-tasks/{section_id}/material/approve")
-async def approve_material(section_id: str, body: KindBody, current_user: User = Depends(require_admin)):
+def approve_material(section_id: str, body: KindBody, current_user: User = Depends(require_admin)):
     return _ok(materials.approve_material(section_id, body.kind, current_user.id), "Đã duyệt")
