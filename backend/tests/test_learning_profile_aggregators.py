@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from app.services.learning_profile import overview_aggregator, practice_aggregator
+from app.services.learning_profile import overview_aggregator
 from app.services.learning_profile.common import _cache
 
 
@@ -23,30 +23,32 @@ def _mock_attempts():
     ]
 
 
-def test_overview_and_practice_consistent_averages(monkeypatch):
+def _fake_current_bands(bands: dict, overall):
+    """Thay compute_current_bands (BR-12, spec 005) để test không đọc DB."""
+    return lambda uid, attempts: {"current_bands": {
+        **{s: {"band": bands.get(s)} for s in ("listening", "reading", "writing", "speaking")},
+        "overall": overall,
+    }, "exam": {"test_date": None}, "goal_set": True}
+
+
+def test_overview_radar_uses_br12_current_bands(monkeypatch):
     _cache.clear()
     attempts = _mock_attempts()
     goal = {"input_band": 5.0, "target_overall": 7.5, "test_date": "2026-12-31"}
-
     monkeypatch.setattr(overview_aggregator, "get_user_attempts", lambda uid: attempts)
     monkeypatch.setattr(overview_aggregator, "get_learner_goal", lambda uid: goal)
-    monkeypatch.setattr(practice_aggregator, "get_user_attempts", lambda uid: attempts)
-    monkeypatch.setattr(practice_aggregator, "compute_question_type_accuracy",
-                        lambda uid, s: {"report": [], "highlights": {}})
+    monkeypatch.setattr(overview_aggregator, "compute_current_bands",
+                        _fake_current_bands({"writing": 5.5, "reading": 2.0, "listening": None}, None))
 
     ov = overview_aggregator.compute_learning_profile_overview("u1")
-    pr = practice_aggregator.compute_learning_profile_test_practice("u1")
-
     radar = {r["skill"]: r["score"] for r in ov["radar_data"]}
-    assert radar["Writing"] == pr["skill_averages"]["Writing"]["average"] == 5.5
-    assert radar["Reading"] == pr["skill_averages"]["Reading"]["average"] == 2.0
-    assert radar["Listening"] == pr["skill_averages"]["Listening"]["average"] == 0.0
+    # Band kỹ năng = band hiện tại BR-12, không phải trung bình mọi bài; chưa đủ dữ liệu → 0 trên radar
+    assert radar["Writing"] == 5.5
+    assert radar["Reading"] == 2.0
+    assert radar["Listening"] == 0.0
     assert radar["Speaking"] == 0.0
-    assert pr["skill_averages"]["Speaking"]["average"] is None
-    # Overall only averages skills with real scores (> 0): (5.5 + 2.0) / 2 = 3.75 -> 4.0
-    assert radar["Overview"] == 4.0
-    # No prev_week attempts -> delta must be None (never hardcoded 0.5)
-    assert pr["skill_averages"]["Writing"]["delta"] is None
+    # Overall BR-02 chỉ có khi đủ 4 kỹ năng; thiếu thì 0 trên radar
+    assert radar["Overview"] == 0.0
 
 
 def test_writing_zero_attempts_does_not_fallback_to_input_band(monkeypatch):
@@ -54,6 +56,7 @@ def test_writing_zero_attempts_does_not_fallback_to_input_band(monkeypatch):
     monkeypatch.setattr(overview_aggregator, "get_user_attempts", lambda uid: [])
     monkeypatch.setattr(overview_aggregator, "get_learner_goal",
                         lambda uid: {"input_band": 5.0, "target_overall": 7.0, "test_date": "2026-12-31"})
+    monkeypatch.setattr(overview_aggregator, "compute_current_bands", _fake_current_bands({}, None))
 
     ov = overview_aggregator.compute_learning_profile_overview("u_empty")
     radar = {r["skill"]: r["score"] for r in ov["radar_data"]}

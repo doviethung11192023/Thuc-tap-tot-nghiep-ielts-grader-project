@@ -5,6 +5,7 @@ import type {
   GoalUpdatePayload,
   StreakSummaryData,
   StudyPlanUpdatePayload,
+  LearnerNextStep,
 } from "@/types/learning-profile";
 
 export async function getLearningProfileOverview(): Promise<LearningProfileOverviewData> {
@@ -17,6 +18,14 @@ export async function getLearningProfileOverview(): Promise<LearningProfileOverv
 export async function getLearningProfileTestPractice(): Promise<LearningProfileTestPracticeData> {
   const res = await apiClient.get<{ meta: { code: number }; data: LearningProfileTestPracticeData }>(
     "/api/v1/test-practice/learning-profile/test-practice"
+  );
+  return res.data.data;
+}
+
+/** Thẻ "Bước tiếp theo": tính lại mỗi lần xem (spec 005) */
+export async function getLearnerNextStep(): Promise<LearnerNextStep> {
+  const res = await apiClient.get<{ meta: { code: number }; data: LearnerNextStep }>(
+    "/api/v1/test-practice/learning-profile/next-step"
   );
   return res.data.data;
 }

@@ -18,6 +18,8 @@ interface SystemStatisticsData {
   total_essays?: number;
   essays_today?: number;
   ai_error_rate?: number;
+  failed_runs?: number;
+  finished_runs?: number;
   avg_processing_time?: number;
   submissions_trend?: Array<{ date: string; count: number }>;
   monthly_cohort_progression?: Array<{
@@ -154,10 +156,10 @@ export default function AdminStatisticsPage() {
 
       <StaggerGrid autoAnimate={false} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 w-full">
         <KpiCard index={0} tone="crimson" title="Total Users" value={stats?.total_users?.toString() || "0"} icon={<Users className="w-5 h-5 text-[#932120]" />} subtext="Total registered users" />
-        <KpiCard index={1} tone="emerald" title="Total Essays" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng bài Writing trong hệ thống" />
-        <KpiCard index={2} tone="crimson" title="Essays Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Essays submitted today" />
-        <KpiCard index={3} tone="amber" title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext="Evaluation error rate" />
-        <KpiCard index={4} tone="sky" title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Average evaluation time" />
+        <KpiCard index={1} tone="emerald" title="Writing Submissions" value={stats?.total_essays?.toString() || "0"} icon={<FileText className="w-5 h-5 text-emerald-600" />} subtext="Tổng lượt làm Writing đã nộp (toàn thời gian)" />
+        <KpiCard index={2} tone="crimson" title="Writing Today" value={stats?.essays_today?.toString() || "0"} icon={<Activity className="w-5 h-5 text-[#932120]" />} subtext="Lượt Writing nộp từ 0h hôm nay (giờ VN)" />
+        <KpiCard index={3} tone="amber" title="AI Error Rate" value={`${stats?.ai_error_rate || 0}%`} isPositive={false} icon={<AlertTriangle className="w-5 h-5 text-red-600" />} subtext={`${stats?.failed_runs ?? 0}/${stats?.finished_runs ?? 0} lượt chấm lỗi (Writing + Speaking, tính cả lượt đã chạy lại)`} />
+        <KpiCard index={4} tone="sky" title="Avg Processing Time" value={`${stats?.avg_processing_time || 0}s`} icon={<Clock className="w-5 h-5 text-amber-600" />} subtext="Trung bình mỗi lượt chấm thành công (1 task Writing hoặc 1 bài Speaking)" />
       </StaggerGrid>
 
       <BlurFadeCard>

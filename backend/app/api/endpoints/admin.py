@@ -16,6 +16,7 @@ from app.services.expert.dispatcher import auto_dispatch_pending_requests
 from app.services.expert.penalty_circuit_breaker import waive_penalty
 
 router = APIRouter()
+STATISTICS_CACHE_KEY = "admin:statistics:v3"   # v3: giờ VN, cùng đơn vị bài Writing, kèm cohort & KPI Chuyên gia
 
 
 @router.get("/users")
@@ -64,11 +65,11 @@ async def create_admin(admin_req: AdminCreateAdminRequest, current_user: User = 
 async def get_statistics(request: Request, current_user: User = Depends(require_admin)):
     """Người dùng, bài viết, tỉ lệ lỗi AI, thời gian chấm, xu hướng 7 ngày & KPI Chuyên gia (FR-29)."""
     redis = request.app.state.redis
-    cached = await redis.get("admin:statistics:v3")
+    cached = await redis.get(STATISTICS_CACHE_KEY)
     if cached:
         return json.loads(cached)
     result = {"meta": {"code": 200}, "data": system_statistics.system_statistics()}
-    await redis.setex("admin:statistics:v3", 300, json.dumps(result))
+    await redis.setex(STATISTICS_CACHE_KEY, 300, json.dumps(result))
     return result
 
 
@@ -165,7 +166,7 @@ async def waive_expert_penalty(
     """Admin miễn phạt vi phạm của Expert kèm giải trình và tự tính lại hạng/cooldown (FR-51)."""
     data = waive_penalty(penalty_id=penalty_id, admin_id=current_user.id, waive_reason=payload.waive_reason)
     try:
-        await request.app.state.redis.delete("admin:statistics:v3")
+        await request.app.state.redis.delete(STATISTICS_CACHE_KEY)
     except Exception:
         pass
     return {"meta": {"code": 200, "message": "Đã miễn phạt và cập nhật lại hạng Chuyên gia"}, "data": data}

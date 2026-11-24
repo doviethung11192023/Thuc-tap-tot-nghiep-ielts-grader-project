@@ -64,11 +64,12 @@ class Settings(BaseSettings):
     speech_stt_compute_type: str = "auto"
     speech_stt_beam_size: int = 5
     speech_phoneme_model: str = "facebook/wav2vec2-lv-60-espeak-cv-ft"
-    # Shared with Core API. Empty disables the check, for local development only.
+    # Shared with Core API (header X-AI-Engine-Secret). Required: empty makes grading endpoints return 503
+    # unless ALLOW_NO_SECRET=true, which is for a local machine only.
     ai_engine_secret: str = ""
+    allow_no_secret: bool = False
 
     # Server
-    enable_ngrok: bool = False
     server_reload: bool = False
 
     @property

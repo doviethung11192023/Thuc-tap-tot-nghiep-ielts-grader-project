@@ -63,7 +63,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
+tools/browser-automation/lib/
 lib64/
 parts/
 sdist/
@@ -96,6 +97,8 @@ data/
 # docs/ cá nhân không commit, trừ tài liệu gốc mà CLAUDE.md trỏ tới
 docs/*
 !docs/source-of-truth.md
+!docs/defense-highlights.md
+!docs/project-roadmap.md
 
 # ==========================================
 # LOCAL DATA & TOOLING (không commit)

@@ -154,14 +154,20 @@ def test_expert_official_evaluation_merges_scores_comments_and_ai_runs(monkeypat
     assert [a["id"] for a in res["inline_annotations"]] == ["ann_exp"]
 
 
-def test_zero_word_orphan_essay_filtered_when_written_essay_exists(monkeypatch):
+def test_blank_task_in_scope_shown_as_not_attempted(monkeypatch):
+    # BR-04: essays chỉ có task trong phạm vi bài; task bỏ trống vẫn hiện ("Chưa làm") và tính band 0
     tables = _seed_base()
     tables["essays"][1]["content"] = "   "
     tables["essays"][1]["word_count"] = 0
+    tables["grading_runs"] = [r for r in tables["grading_runs"] if r["task_no"] != 2]
+    tables["criterion_scores"] = [r for r in tables["criterion_scores"] if r["task_no"] != 2]
     fake = FakeSupabase(**tables)
     monkeypatch.setattr(writing_result_views, "db", lambda: fake)
 
     summary = writing_result_views.build_attempt_summary(fake.tables["attempts"][0])
-    assert [t["essay_id"] for t in summary["writing"]["tasks"]] == ["e1"]
+    by_id = {t["essay_id"]: t for t in summary["writing"]["tasks"]}
+    assert list(by_id) == ["e1", "e2"]
+    assert by_id["e2"]["status"] == "not_attempted"
+    assert by_id["e2"]["scores"] is None
     res = writing_result_views.build_essay_result("e1", "u1", is_admin=False)
-    assert [s["essay_id"] for s in res["sibling_essays"]] == ["e1"]
+    assert [s["essay_id"] for s in res["sibling_essays"]] == ["e1", "e2"]

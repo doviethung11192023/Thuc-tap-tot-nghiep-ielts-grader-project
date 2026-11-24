@@ -3,13 +3,14 @@ Tổng hợp evaluation AI khi mọi grading_run đã xong (SD-02 bước 19, ST
 
 - Còn run đang chạy → chờ.
 - Có run lỗi → evaluation failed, attempt grading_failed.
-- Xong hết → band task (BR-04) → band attempt (T1 + 2·T2)/3 → evaluation done.
+- Xong hết → band task (BR-04) → band attempt (T1 + 2·T2)/3, task trong phạm vi mà bỏ trống = 0 → evaluation done.
 """
 from collections import defaultdict
 
 from app.db.supabase import db
 from app.services.practice.ai_evaluation_outcome import fail_ai_evaluation, publish_ai_evaluation
 from app.services.writing.writing_bands import attempt_band, task_band
+from app.services.writing.writing_task_scope import expected_task_nos
 
 
 def finalize_writing_evaluation(evaluation_id: str) -> None:
@@ -37,8 +38,7 @@ def finalize_writing_evaluation(evaluation_id: str) -> None:
         print(f"❌ [Worker] attempt {attempt_id}: missing criterion scores")
         return
 
-    att_rows = conn.table("attempts").select("id, mode").eq("id", attempt_id).execute().data or []
-    att_mode = (att_rows[0].get("mode") if att_rows else None) or "practice"
-    band = attempt_band({t: task_band(by_task[t]) for t in graded_tasks}, mode=att_mode)
+    attempt = conn.table("attempts").select("id, test_id, mode").eq("id", attempt_id).execute().data[0]
+    band = attempt_band({t: task_band(by_task[t]) for t in graded_tasks}, expected_task_nos(attempt))
     publish_ai_evaluation(evaluation_id, attempt_id, band)
     print(f"✅ [Worker] attempt {attempt_id} -> scored (band {band}, tasks {sorted(graded_tasks)})")

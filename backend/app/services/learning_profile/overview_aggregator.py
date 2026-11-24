@@ -19,7 +19,7 @@ from .learner_badges_service import compute_learner_badges
 from .gamification_state_store import get_gamification_state, sync_new_badge_notifications
 from .question_type_aggregator import compute_question_type_accuracy
 from .valid_study_day import load_attempt_quality_map
-
+from app.services.learner_journey.next_step_builder import compute_current_bands
 
 def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     """Tổng hợp dữ liệu thực tế cho Tab Tổng quan (Overview) chuẩn IELTS (BR-12, BR-17, Monthly)."""
@@ -52,15 +52,13 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
         return round_to_ielts_band(sum(valid) / len(valid)) if valid else 0.0
 
     all_bands = [float(a["band"]) for a in scored_attempts if float(a["band"]) > 0]
-    w_score = avg_hist(bands_by_skill["writing"])
-    l_score = avg_hist(bands_by_skill["listening"])
-    r_score = avg_hist(bands_by_skill["reading"])
-    s_score = avg_hist(bands_by_skill["speaking"])
-
-    practiced_vals = [sc for sc in (w_score, l_score, r_score, s_score) if sc > 0]
-    avg_band = round_to_ielts_band(sum(practiced_vals) / len(practiced_vals)) if practiced_vals else 0.0
+    # Band hiện tại theo BR-12 (spec 005): không dùng band tự nhập, chưa đủ dữ liệu thì None
+    journey = compute_current_bands(user_id, attempts)
+    cb = journey["current_bands"]
+    l_score, r_score, w_score, s_score = (cb[s]["band"] or 0.0 for s in ("listening", "reading", "writing", "speaking"))
+    avg_band = round_to_ielts_band(sum(all_bands) / len(all_bands)) if all_bands else 0.0
     best_band = round_to_ielts_band(max(all_bands)) if all_bands else 0.0
-    predicted_band = roadmap_bundle["predicted_overall"] if practiced_vals else round_to_ielts_band(goal["input_band"])
+    predicted_band = cb["overall"]
 
     high_conf_cnt = sum(1 for d in sk_diag.values() if d["confidence"] == "high")
     low_conf_cnt = sum(1 for d in sk_diag.values() if d["confidence"] == "low")
@@ -68,7 +66,7 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     waiting_expert_total = sum(d["waiting_expert_count"] for d in sk_diag.values())
 
     prog_pct = 0
-    if goal["target_overall"] > goal["input_band"]:
+    if predicted_band is not None and goal["target_overall"] > goal["input_band"]:
         prog_pct = min(100, max(0, round(((predicted_band - goal["input_band"]) / (goal["target_overall"] - goal["input_band"])) * 100)))
 
     all_dates = [d for d in (to_vn_date_str(a.get("submitted_at") or a.get("started_at")) for a in attempts if a.get("status") in ("scored", "waiting_expert", "grading") or a.get("submitted_at")) if d]
@@ -97,7 +95,7 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
 
     radar_data = [
         {"skill": "Writing", "score": w_score, "count": len(bands_by_skill["writing"])},
-        {"skill": "Overview", "score": avg_band, "count": len(scored_attempts)},
+        {"skill": "Overview", "score": predicted_band or 0.0, "count": len(attempts)},
         {"skill": "Listening", "score": l_score, "count": len(bands_by_skill["listening"])},
         {"skill": "Reading", "score": r_score, "count": len(bands_by_skill["reading"])},
         {"skill": "Speaking", "score": s_score, "count": len(bands_by_skill["speaking"])},
@@ -138,7 +136,14 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
     qt_report = compute_question_type_accuracy(user_id, scored_attempts).get("report") if scored_attempts else []
     scored_ids = [a["id"] for a in scored_attempts if a.get("id")][:50]
     badge_answers = get_user_answers_cached(user_id, scored_ids) if scored_ids else []
-    badges = compute_learner_badges(attempts, adaptive_streak, goal, predicted_band, qt_report, answers=badge_answers)
+    badges = compute_learner_badges(
+        attempts,
+        adaptive_streak,
+        goal,
+        predicted_band if predicted_band is not None else roadmap_bundle["predicted_overall"],
+        qt_report,
+        answers=badge_answers,
+    )
     sync_new_badge_notifications(user_id, badges, gstate)
 
     result = {
@@ -160,8 +165,10 @@ def compute_learning_profile_overview(user_id: str) -> Dict[str, Any]:
             "target_writing": goal.get("target_writing", goal["target_overall"]),
             "target_speaking": goal.get("target_speaking", goal["target_overall"]),
             "confidence_label": overall_conf, "waiting_expert_count": waiting_expert_total,
-            "progress_percent": prog_pct, "test_date": goal["test_date"],
+            "progress_percent": prog_pct, "test_date": journey["exam"]["test_date"],
+            "goal_set": journey["goal_set"],
         },
+        "current_bands": cb, "exam": journey["exam"],
         "study_milestones": roadmap_bundle["study_milestones"],
         "skill_diagnostics": sk_diag,
         "roadmap": roadmap_bundle["roadmap"],

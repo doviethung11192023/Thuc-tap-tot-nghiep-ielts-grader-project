@@ -1,25 +1,21 @@
-import asyncio
-import hashlib
-import time
+from typing import Any, Optional
 
 from fastapi import Depends, HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from jose import jwt, JWTError
 
-from app.core.config import settings
+from app.core.supabase_access_token_verifier import (
+    JwksUnavailable, cached_profile, forget_profile, remember_profile, verify_access_token,
+)
 from app.db.supabase import db, supabase
 
 security = HTTPBearer()
-_TOKEN_CACHE_TTL = 120.0
-_PROFILE_CACHE_TTL = 60.0
-_token_cache: dict[str, tuple[str, float]] = {}
-_profile_cache: dict[tuple[str, str], tuple["User", float]] = {}
-_auth_lock = asyncio.Lock()
 
 
 def invalidate_auth_profile_cache(user_id: str) -> None:
-    _profile_cache.pop(("profile", user_id), None)
+    """Tên cũ của forget_profile (ADR-32): xoá cache hồ sơ sau khi đổi role hoặc is_active."""
+    forget_profile(user_id)
 
 
 class User(BaseModel):
@@ -27,16 +23,28 @@ class User(BaseModel):
     role: str                 # learner | expert | admin (profiles.role)
     is_active: bool = True
 
-def _verified_sub(token: str) -> str | None:
-    """sub của access token Supabase sau khi kiểm chữ ký + hạn + audience; sai → None."""
-    secret = (settings.SUPABASE_JWT_SECRET or "").strip()
-    if not secret:
-        return None
+
+def _user_id_from_gotrue(token: str) -> Optional[str]:
+    """Dự phòng khi chưa tải được JWKS: hỏi GoTrue như cách cũ (chậm, gọi mạng)."""
     try:
-        payload = jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
-    except JWTError:
+        res = supabase.auth.get_user(token)
+        return res.user.id if res and res.user else None
+    except Exception:
         return None
-    return payload.get("sub") if payload.get("role") == "authenticated" else None
+
+
+async def _authenticated_user_id(token: str) -> Optional[str]:
+    """Kiểm token bằng khoá công khai (ADR-32). Chạy trong threadpool vì lần tải JWKS có gọi mạng."""
+    try:
+        return await run_in_threadpool(verify_access_token, token)
+    except JwksUnavailable as e:
+        print(f"⚠️ [Auth] không tải được JWKS, hỏi GoTrue: {e}")
+        return await run_in_threadpool(_user_id_from_gotrue, token)
+
+
+def _load_profile(user_id: str) -> Optional[dict[str, Any]]:
+    rows = db().table("profiles").select("id, role, is_active").eq("id", user_id).execute().data
+    return rows[0] if rows else None
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
@@ -46,59 +54,20 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing Token"
         )
-    
+
     try:
-        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
-        now = time.monotonic()
-        cached_token = _token_cache.get(token_hash)
-        user_id = cached_token[0] if cached_token and now < cached_token[1] else None
-
-        if not user_id:
-            # Ưu tiên xác thực chữ ký JWT HS256 cục bộ (< 0.1ms) để tránh round-trip mạng mỗi request
-            user_id = _verified_sub(token)
-            if user_id:
-                _token_cache[token_hash] = (user_id, now + _TOKEN_CACHE_TTL)
-
-        # Fallback sang Supabase GoTrue API khi local decode không khả dụng (ví dụ ES256 JWKS), dùng singleflight lock
-        if not user_id:
-            async with _auth_lock:
-                now_locked = time.monotonic()
-                cached_token = _token_cache.get(token_hash)
-                if cached_token and now_locked < cached_token[1]:
-                    user_id = cached_token[0]
-                else:
-                    try:
-                        user_res = await asyncio.to_thread(lambda: db().auth.get_user(token))
-                        if user_res and user_res.user:
-                            user_id = user_res.user.id
-                            _token_cache[token_hash] = (user_id, time.monotonic() + _TOKEN_CACHE_TTL)
-                    except Exception:
-                        pass
-
+        user_id = await _authenticated_user_id(token)
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
 
-        cache_key = ("profile", user_id)
-        now = time.monotonic()
-        cached = _profile_cache.get(cache_key)
-        if cached and now < cached[1]:
-            return cached[0]
-
-        async with _auth_lock:
-            now_locked = time.monotonic()
-            cached = _profile_cache.get(cache_key)
-            if cached and now_locked < cached[1]:
-                return cached[0]
-
-            p = await asyncio.to_thread(
-                lambda: db().table("profiles").select("id, role, is_active").eq("id", user_id).execute()
-            )
-            if not p.data:
+        profile = cached_profile(user_id)
+        if profile is None:
+            profile = await run_in_threadpool(_load_profile, user_id)
+            if profile is None:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                     detail="User profile not found in database. Account may not be fully initialized.")
-            user_obj = User(id=p.data[0]["id"], role=p.data[0]["role"], is_active=p.data[0]["is_active"])
-            _profile_cache[cache_key] = (user_obj, time.monotonic() + _PROFILE_CACHE_TTL)
-            return user_obj
+            remember_profile(profile)
+        return User(id=profile["id"], role=profile["role"], is_active=profile["is_active"])
 
     except HTTPException:
         raise
@@ -149,8 +118,10 @@ async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(
     if not credentials or not credentials.credentials:
         return None
     try:
-        return await get_current_user(credentials)
+        user = await get_current_user(credentials)
     except Exception:
         return None
+    # Tài khoản bị khoá (FR-04) coi như chưa đăng nhập, kể cả khi JWT cũ chưa hết hạn
+    return user if user.is_active else None
 
 

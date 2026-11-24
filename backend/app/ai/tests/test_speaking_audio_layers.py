@@ -22,6 +22,15 @@ def _whole(samples: np.ndarray) -> list[SpeechSegment]:
     return [SpeechSegment(0.0, samples.size / SAMPLE_RATE)]
 
 
+def test_speech_span_runs_from_first_to_last_word_and_ignores_silence_around_it():
+    samples = _silence(2.0)
+    segments = [SpeechSegment(0.5, 3.0), SpeechSegment(4.0, 6.5)]       # pause inside, quiet before and after
+    quality = measure_quality(np.concatenate([samples, _silence(8.0)]), segments)
+    assert quality.speech_span_seconds == pytest.approx(6.0)
+    assert quality.duration_seconds == pytest.approx(10.0)
+    assert measure_quality(samples, []).speech_span_seconds == 0.0
+
+
 def test_counts_syllables_from_loudness_peaks():
     samples = _syllables(count=12, rate_hz=4.0)
     features = extract_acoustic_features(samples, _whole(samples))

@@ -40,6 +40,11 @@ def _configure_espeak() -> None:
     EspeakWrapper.set_data_path(espeakng_loader.get_data_path())
 
 
+def load_model() -> None:
+    """Load wav2vec2 at startup, so the first test after a restart does not wait for it."""
+    _load()
+
+
 def _load():
     global _model, _processor
     with _lock:

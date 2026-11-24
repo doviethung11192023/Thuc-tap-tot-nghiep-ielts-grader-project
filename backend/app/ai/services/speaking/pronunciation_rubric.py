@@ -20,18 +20,23 @@ from services.speaking.audio_signal import AudioQuality
 from services.speaking.phoneme_comparison import ComparisonSummary
 from utils.band_rounding import normalize_band
 
-RUBRIC_VERSION = "provisional-2"
+RUBRIC_VERSION = "provisional-3"
 
-# Mean word confidence (0–1) → starting band, highest first.
-_CONFIDENCE_BANDS = ((0.95, 8.0), (0.91, 7.0), (0.85, 6.0), (0.78, 5.0), (0.68, 4.0), (0.0, 3.0))
+# Mean word confidence (0–1) → starting band, highest first. provisional-3 (2026-11-13) moved every
+# step up: provisional-2 came from L2-ARCTIC graduate students reading prepared text, which is easier
+# for Whisper than spontaneous learner speech and scored real learner tests above examiner level.
+_CONFIDENCE_BANDS = ((0.97, 8.0), (0.94, 7.0), (0.90, 6.0), (0.85, 5.0), (0.78, 4.0), (0.0, 3.0))
 UNRELIABLE_CAP = 6.0            # same rule as the speaking/common/pr prompt for missing data
 _MIN_WORDS = 30
 _MIN_SNR_DB = 10.0
 _MAX_CLIPPING = 0.01
 _MONOTONE_SEMITONES = 3.0
 _LIVELY_SEMITONES = 8.0
-# The transcript reads as confident speech while the audio matches it badly. A person who is truly
-# hard to understand lowers both, so this points at the recording: replay through speakers, reverb.
+# The transcript reads as confident speech while the audio matches it badly. Two causes look the same
+# here: a bad recording (replay through speakers, reverb) or speech Whisper smoothed into likely words.
+# Real tests showed both: a video replayed through speakers (confidence 0.88, accuracy 0.45) and a
+# learner who rated their own test band 2-3 (0.83, 0.57). So this note never blames the recording
+# alone: P is capped and the hint is to re-record, and BR-24 still caps every criterion on a clean file.
 _DISAGREE_MAX_ACCURACY = 0.6
 _DISAGREE_MIN_CONFIDENCE = 0.7
 
@@ -72,19 +77,20 @@ def _reliability_notes(quality: AudioQuality, comparison: ComparisonSummary, wor
     return tuple(notes)
 
 
-def _prosody_adjustment(pitch_range: float) -> float:
+def _prosody_adjustment(pitch_range: float, reliable: bool) -> float:
+    """No bonus on an unreliable recording: echo, replay and noise inflate the measured pitch range."""
     if pitch_range < _MONOTONE_SEMITONES:
         return -0.5
-    if pitch_range >= _LIVELY_SEMITONES:
+    if pitch_range >= _LIVELY_SEMITONES and reliable:
         return 0.5
     return 0.0
 
 
 def assess_pronunciation(comparison: ComparisonSummary, quality: AudioQuality, word_confidence: float,
                          pitch_range: float, rhythm_npvi: float) -> PronunciationAssessment:
-    band = next(value for floor, value in _CONFIDENCE_BANDS if word_confidence >= floor)
-    band += _prosody_adjustment(pitch_range)
     notes = _reliability_notes(quality, comparison, word_confidence)
+    band = next(value for floor, value in _CONFIDENCE_BANDS if word_confidence >= floor)
+    band += _prosody_adjustment(pitch_range, reliable=not notes)
     if notes:
         band = min(band, UNRELIABLE_CAP)
     return PronunciationAssessment(

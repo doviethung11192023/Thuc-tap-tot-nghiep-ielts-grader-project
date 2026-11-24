@@ -12,11 +12,16 @@ import asyncio
 import json
 import logging
 from dataclasses import asdict
+from typing import TYPE_CHECKING
 
 from services.langfuse.prompt_manager import PromptManager, WritingTask
 from services.llm_client import get_async_llm_client, llm_extra_body, strip_markdown_fence
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
+from services.sub_indicator_levels import clamp_levels, task_sub_levels
 from utils.annotation_normalizer import apply_corrections, drop_unsupported_numbers, locate_and_dedupe
+
+if TYPE_CHECKING:
+    from services.key_point_checker import KeyPointCheck
 
 logger = logging.getLogger(__name__)
 
@@ -45,14 +50,19 @@ def _map_items(items: list) -> list[str]:
     return res
 
 
-def _criterion_block(llm_criteria: dict, key: str, agent: AgentCriterionOutput) -> dict:
+def _criterion_block(llm_criteria: dict, key: str, agent: AgentCriterionOutput,
+                     key_check: dict | None = None) -> dict:
     node = llm_criteria.get(key, {}) if isinstance(llm_criteria, dict) else {}
+    raw_levels = node.get("sub_levels") if isinstance(node, dict) else None
+    sub_levels = task_sub_levels(raw_levels, agent.band, key_check) if key == "task_response" \
+        else clamp_levels(raw_levels, agent.band)
     sub = node.get("sub_criteria", node) if isinstance(node, dict) else {}
     # Frontend renders sub_criteria as Record<string, string>.
     sub = {str(k): v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)
            for k, v in sub.items()} if isinstance(sub, dict) else {}
     return {
         "sub_criteria": sub,
+        "sub_levels": sub_levels,
         "feedback": {
             "strengths": _map_items(agent.strengths),
             "areas_to_improve": _map_items(agent.issues),
@@ -106,6 +116,7 @@ class SynthesisService:
         max_retries: int = 2,
         task: WritingTask = "task2",
         visual_description: str = "",
+        key_check: "KeyPointCheck | None" = None,
     ) -> dict:
         feedback = {
             f"{attr}_feedback": json.dumps(asdict(getattr(all_agent_outputs, attr)), ensure_ascii=False)
@@ -137,7 +148,8 @@ class SynthesisService:
                 **{key: getattr(all_agent_outputs, attr).band for key, attr in _CRITERIA.items()},
             },
             "criteria_analysis": {
-                key: _criterion_block(llm_criteria, key, getattr(all_agent_outputs, attr))
+                key: _criterion_block(llm_criteria, key, getattr(all_agent_outputs, attr),
+                                      key_check.to_dict() if key_check else None)
                 for key, attr in _CRITERIA.items()
             },
             "inline_annotations": annotations,

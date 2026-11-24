@@ -145,6 +145,9 @@ def build_speaking_summary(attempt: dict[str, Any]) -> dict[str, Any]:
             "overall": output.get("overall"),
             "pronunciation": output.get("pronunciation"),
             "speech_metrics": output.get("speech_metrics"),
+            "coverage": output.get("coverage"),     # trần theo số câu đã trả lời (BR-23); bài cũ: None
+            "intelligibility": output.get("intelligibility"),   # trần khi âm thanh khớp kém transcript (BR-24)
+            "length": output.get("length"),     # trần khi Part 2 quá ngắn hoặc cả bài quá ít từ (BR-25)
         },
     }
 
@@ -164,6 +167,10 @@ def _metrics_by_response(response_ids: list[str]) -> dict[str, dict[str, float]]
     return grouped
 
 
+def _feedback_by_response(output: dict[str, Any]) -> dict[str, dict[str, list]]:
+    """Lỗi, điểm mạnh, từ có thể phát âm chưa rõ của từng câu (spec 007); bài chấm trước đó không có."""
+    return {row["response_id"]: {key: row.get(key) or [] for key in ("edits", "strengths", "pronunciation_hints")}
+            for row in output.get("responses") or [] if row.get("response_id")}
 def _annotations_by_response(evaluation_id: str) -> dict[str, list[dict[str, Any]]]:
     try:
         rows = db().table("annotations").select(
@@ -189,6 +196,8 @@ def build_speaking_detail(attempt: dict[str, Any]) -> dict[str, Any]:
     done = bool(evaluation and evaluation["status"] == "done")
     output = _run_output(attempt["id"], evaluation) if done else {}
     ann_map = _annotations_by_response(evaluation["id"]) if done and evaluation else {}
+    feedback = _feedback_by_response(output)      # lỗi, điểm mạnh, từ phát âm chưa rõ của AI (spec 007)
+    empty = {"edits": [], "strengths": [], "pronunciation_hints": []}
     items = []
     for answer in answers:
         response = response_by_id.get(answer["response_id"]) or {}
@@ -199,5 +208,6 @@ def build_speaking_detail(attempt: dict[str, Any]) -> dict[str, Any]:
             "metrics": metrics.get(answer["response_id"], {}),
             "annotations": ann_map.get(answer["response_id"], []),
             "audio_url": r2_storage.presign_private_get(answer["audio_key"], AUDIO_URL_SECONDS) if audio_available else None,
+            **feedback.get(answer["response_id"], empty),
         })
     return {**summary, "answers": items, "parts": output.get("parts"), "criteria_detail": _criterion_details(output)}

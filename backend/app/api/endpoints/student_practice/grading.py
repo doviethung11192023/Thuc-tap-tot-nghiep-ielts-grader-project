@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.core.security import User, get_optional_user
+from app.services.learning_profile.common import _cache
 from app.services.listening_reading.lr_grading_service import submit_lr
 from app.services.practice.practice_attempt_lifecycle import get_owned_attempt
 
@@ -29,4 +30,7 @@ async def submit_reading_listening_answers(attempt_id: str, req: SubmitAnswersRe
     if attempt["skill"] not in ("reading", "listening"):
         raise HTTPException(status_code=400, detail="Chức năng này chỉ áp dụng cho Reading và Listening")
     data = submit_lr(attempt, req.answers, req.parts, req.time_spent_sec)
+    # Dashboard xem ngay sau khi nộp phải thấy band mới (spec 005 SC-005)
+    _cache.pop(f"overview_{current_user.id}", None)
+    _cache.pop(f"practice_{current_user.id}", None)
     return {"meta": {"code": 200, "message": "Nộp bài và chấm điểm thành công"}, "data": data}

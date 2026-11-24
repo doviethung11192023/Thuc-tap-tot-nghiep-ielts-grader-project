@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 from app.db.supabase import db
 from app.services.writing.writing_bands import task_band
+from app.services.writing.writing_task_materials import approved_sample
 from app.services.writing.writing_test_content import chart_image_url
 
 RUN_TO_ESSAY_STATUS = {"running": "evaluating", "done": "completed", "failed": "failed"}
@@ -19,7 +20,7 @@ CODE_TO_SCORE_KEY = {
     "GRA": "grammatical_range_and_accuracy",
 }
 _ESSAY_SELECT = (
-    "id, attempt_id, content, word_count, updated_at, "
+    "id, attempt_id, section_id, content, word_count, updated_at, "
     "writing_tasks(task_type, prompt_category, task_prompt, chart_image_key, min_words)"
 )
 
@@ -115,9 +116,8 @@ def _essays_with_task(attempt_id: str) -> list[dict[str, Any]]:
     rows = db().table("essays").select(_ESSAY_SELECT).eq("attempt_id", attempt_id).execute().data or []
     for e in rows:
         e["task_no"] = 1 if (e.get("writing_tasks") or {}).get("task_type") == "task1" else 2
-    non_empty = [e for e in rows if (e.get("word_count") or 0) > 0 or (e.get("content") or "").strip()]
-    filtered = non_empty if non_empty else rows
-    return sorted(filtered, key=lambda e: e["task_no"])
+    # Giữ cả task bỏ trống: essays chỉ có task trong phạm vi bài, task trống hiện "Chưa làm" và tính band 0 (BR-04)
+    return sorted(rows, key=lambda e: e["task_no"])
 
 
 def _build_criteria_analysis(raw: dict[str, Any], comments: dict[str, str], is_expert: bool) -> dict[str, Any]:
@@ -155,8 +155,9 @@ def build_attempt_summary(attempt: dict[str, Any]) -> dict[str, Any]:
         output = run.get("output") or {}
         tscores = scores_map.get(tno) or {}
         status = _resolve_status(current, run, tscores)
-        # Never fall back to criterion weakness comments inside strengths
-        strengths = _feedback(output, "strengths") if not is_expert else _feedback(output, "strengths")
+        if not run and not (e.get("word_count") or 0) and status == "pending":
+            status = "not_attempted"     # task không có lượt chấm và không có chữ: Learner bỏ trống, không phải đang chờ chấm
+        strengths = _feedback(output, "strengths")
         tasks.append({
             "task": f"task{tno}", "task_no": tno, "essay_id": e["id"], "status": status,
             "word_count": e.get("word_count") or 0, "content": e.get("content") or "",
@@ -303,6 +304,10 @@ def build_essay_result(essay_id: str, user_id: str, is_admin: bool) -> Optional[
             "expert_feedback": (current or {}).get("feedback") if is_expert else None,
             "ai_evaluation": ai_side,
             "expert_review": expert_side,
+            # spec 006: bài mẫu đã duyệt, danh sách ý chính (Task 1 có đáp án), nguồn số liệu biểu đồ
+            "sample_essay": approved_sample(essay["section_id"]) if essay.get("section_id") else None,
+            "key_point_check": output.get("key_point_check"),
+            "chart_source": output.get("chart_source"),
         }
         annotations = [{
             "id": a["id"], "type": a["type"], "category": "TR" if a["category"] == "TA" else a["category"],

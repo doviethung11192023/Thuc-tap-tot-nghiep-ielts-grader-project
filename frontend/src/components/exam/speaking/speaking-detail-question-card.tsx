@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { SpeakingPromptDisplay } from './speaking-prompt-card';
 import { SpeakingDetailAudioPlayer } from './speaking-detail-audio-player';
+import { SpeakingAnswerFeedback } from './speaking-answer-feedback';
 import {
   formatMs,
   QUESTION_METRIC_META,
@@ -61,6 +62,10 @@ export function SpeakingDetailQuestionCard({
   }, [expandUpgradesSignal]);
 
   const pins = answer.annotations ?? [];
+  // Spec 007: bài chấm từ bản này có lỗi gạch chân, điểm mạnh, từ phát âm chưa rõ; bài cũ chỉ có transcript
+  const hasDetailedFeedback = Boolean(
+    answer.edits?.length || answer.strengths?.length || answer.pronunciation_hints?.length
+  );
   const metrics = answer.metrics ?? {};
   const availableMetrics = QUESTION_METRIC_META.filter((m) => metrics[m.key] !== undefined);
 
@@ -157,9 +162,19 @@ export function SpeakingDetailQuestionCard({
                 )}
               </div>
             </div>
-            <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-              {answer.transcript || 'Không nghe được câu trả lời.'}
-            </p>
+            {hasDetailedFeedback ? (
+              <SpeakingAnswerFeedback
+                transcript={answer.transcript}
+                audioUrl={answer.audio_url}
+                edits={answer.edits ?? []}
+                strengths={answer.strengths ?? []}
+                hints={answer.pronunciation_hints ?? []}
+              />
+            ) : (
+              <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
+                {answer.transcript || 'Không nghe được câu trả lời.'}
+              </p>
+            )}
           </div>
 
           {pins.length > 0 && (

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ReadingTestData } from '@/types/exam';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
@@ -28,27 +29,28 @@ interface ReadingWorkspaceProps {
   /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
   deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
+  /** Bài đã lưu trên server khi làm tiếp (FR-11): số câu -> câu trả lời. */
+  initialAnswers?: Record<string, string | string[]>;
+  /** Báo mỗi lần đáp án đổi để trang cha tự lưu lên server. */
+  onAnswersChange?: (answers: Record<number, string | string[]>) => void;
 }
 
-export function ReadingWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ReadingWorkspaceProps) {
+export function ReadingWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ReadingWorkspaceProps) {
   const router = useRouter();
-  const draftKey = `ielts_reading_draft_${testData.test_id}`;
   const [activePassage, setActivePassage] = useState(0);
   const [fontSize, setFontSize] = useState<number>(17);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>(() => {
-    if (mode !== 'practice') return {};
-    try {
-      if (typeof window === 'undefined') return {};
-      const saved = localStorage.getItem(draftKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return parsed;
-      }
-    } catch {
-      // Ignore malformed draft
-    }
-    return {};
-  });
+  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+
+  // Khôi phục bài đã lưu trên server khi nó tới; câu Learner vừa trả lời trước đó thì giữ bản mới
+  // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
+  const [restoredFrom, setRestoredFrom] = useState<typeof initialAnswers>(undefined);
+  if (initialAnswers !== restoredFrom) {
+    setRestoredFrom(initialAnswers);
+    const restored: Record<number, string | string[]> = {};
+    Object.entries(initialAnswers || {}).forEach(([num, value]) => { restored[Number(num)] = value; });
+    setUserAnswers(prev => ({ ...restored, ...prev }));
+  }
+  useEffect(() => { onAnswersChange?.(userAnswers); }, [userAnswers, onAnswersChange]);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [highlightedEvidence, setHighlightedEvidence] = useState<{ paragraph: string; quote: string } | null>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
@@ -72,60 +74,16 @@ export function ReadingWorkspace({ testData, mode, attemptId, attemptError, sele
   const allQuestions = useMemo(() => availablePassages.flatMap(p => p.question_groups.flatMap(g => g.questions)), [availablePassages]);
 
   const initialExamSeconds = Math.max(1, availablePassages.length) * 20 * 60;
-  const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
-  const latestAnswersRef = useRef(userAnswers);
-  const latestOnSubmitRef = useRef(onSubmit);
-  const deadlineMsRef = useRef(deadlineMs);
-  const autoSubmittedRef = useRef(false);
-
-  useEffect(() => {
-    latestAnswersRef.current = userAnswers;
-  }, [userAnswers]);
-
-  useEffect(() => {
-    latestOnSubmitRef.current = onSubmit;
-  }, [onSubmit]);
-
-  // Thi thử: hạn do server giữ (BR-07, nộp trễ quá 30 s bị từ chối). Cập nhật ref để interval tự kẹp theo deadline server.
-  useEffect(() => {
-    deadlineMsRef.current = deadlineMs;
-  }, [deadlineMs]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimerSeconds((prev) => {
-        if (mode !== 'exam') {
-          return prev + 1;
-        }
-        const serverRemaining = deadlineMsRef.current
-          ? Math.max(0, Math.floor((deadlineMsRef.current - Date.now()) / 1000))
-          : prev;
-        const nextVal = Math.min(prev <= 1 ? 0 : prev - 1, serverRemaining);
-        if (nextVal <= 0) {
-          if (!autoSubmittedRef.current) {
-            autoSubmittedRef.current = true;
-            setIsExpired(true);
-            setIsSubmitModalOpen(false);
-            setTimeout(() => {
-              setIsGrading(true);
-              Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current))
-                .then(() => {
-                  try {
-                    localStorage.removeItem(draftKey);
-                  } catch {
-                    // Ignore storage error
-                  }
-                })
-                .catch(() => setIsGrading(false));
-            }, 0);
-          }
-          return 0;
-        }
-        return nextVal;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [mode, draftKey]);
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, () => {
+    setIsExpired(true);
+    setIsSubmitModalOpen(false);
+    setIsGrading(true);
+    Promise.resolve(onSubmit(userAnswers)).catch(() => {
+      setIsExpired(false);
+      setIsGrading(false);
+    });
+  });
 
   const handleSelectEvidence = (paragraphId: string, quote: string) => {
     setHighlightedEvidence({ paragraph: paragraphId, quote });
@@ -170,11 +128,6 @@ export function ReadingWorkspace({ testData, mode, attemptId, attemptError, sele
     setIsGrading(true);
     try {
       await onSubmit(userAnswers);
-      try {
-        localStorage.removeItem(draftKey);
-      } catch {
-        // Ignore storage error
-      }
     } catch {
       setIsGrading(false);
     }
@@ -244,20 +197,10 @@ export function ReadingWorkspace({ testData, mode, attemptId, attemptError, sele
         onContinue={() => setIsExitModalOpen(false)}
         onExitDiscard={async () => {
           setIsExitModalOpen(false);
-          try {
-            localStorage.removeItem(draftKey);
-          } catch {
-            // Ignore storage error
-          }
           if (mode === 'exam') await onAbandon?.();
           router.push(returnUrl || '/test-practice');
         }}
         onSaveDraftAndExit={() => {
-          try {
-            localStorage.setItem(draftKey, JSON.stringify(userAnswers));
-          } catch (e) {
-            console.error("Failed to save draft:", e);
-          }
           setIsExitModalOpen(false);
           router.push(returnUrl || '/test-practice');
         }}

@@ -83,18 +83,30 @@ def test_collection_detail_source_selects_allowed_mode():
 
 
 def test_start_attempt_maps_mock_already_taken_to_409_conflict():
-    """PM-PT06: DB constraint mock_test_already_taken MUST map cleanly to ConflictError (HTTP 409), never HTTP 500."""
-    mock_db = MagicMock()
-    learner_q = MagicMock()
-    learner_q.select.return_value.eq.return_value.execute.return_value.data = [{"user_id": "u1"}]
-    att_q = MagicMock()
-    att_q.select.return_value.eq.return_value.eq.return_value.eq.return_value.execute.return_value.data = []
-    att_q.insert.return_value.execute.side_effect = RuntimeError("{'message': 'mock_test_already_taken', 'code': '23514'}")
-    mock_db.table.side_effect = lambda name: learner_q if name == "learner_profiles" else att_q
+    """PM-PT06: UC-08 blocks direct unstarted Mock creation with ConflictError (409) and returns closed=True when finished."""
+    from tests.fake_supabase import FakeSupabase
 
     test_row = {"id": "t-mock-1", "skill": "reading", "status": "published", "allowed_mode": "mock", "duration_minutes": 60}
-    with patch.object(practice_attempt_lifecycle, "db", return_value=mock_db):
+    fake_unstarted = FakeSupabase(learner_profiles=[{"user_id": "u1"}], attempts=[])
+    with patch.object(practice_attempt_lifecycle, "db", return_value=fake_unstarted):
         with pytest.raises(ConflictError) as exc:
             practice_attempt_lifecycle.start_attempt("u1", test_row, "mock")
-        assert "BR-12" in str(exc.value)
+        assert "ngẫu nhiên" in str(exc.value).lower()
+
+    done_attempt = {
+        "id": "a-done",
+        "learner_id": "u1",
+        "test_id": "t-mock-1",
+        "skill": "reading",
+        "mode": "mock",
+        "status": "scored",
+        "auto_submitted": False,
+        "submitted_at": "2026-11-10T01:00:00+00:00",
+        "started_at": "2026-11-10T00:00:00+00:00",
+    }
+    fake_finished = FakeSupabase(learner_profiles=[{"user_id": "u1"}], attempts=[done_attempt])
+    with patch.object(practice_attempt_lifecycle, "db", return_value=fake_finished):
+        closed_res = practice_attempt_lifecycle.start_attempt("u1", test_row, "mock")
+        assert closed_res["closed"] is True
+        assert closed_res["attempt_id"] == "a-done"
 

@@ -2,10 +2,12 @@
 Vòng đời attempt dùng chung cho mọi kỹ năng (ST_attempt, UC-07/08).
 
 - start_attempt: chỉ Learner; đề phải published và cho phép mode; đang có attempt dở
-  của đề này thì làm tiếp (UC-08 E3); Mock có deadline do server đặt (FR-10).
+  của đề này thì làm tiếp (UC-08 E3). Mock theo test_id chỉ để làm tiếp: bài Mock mới do
+  mock_attempt_draw chọn đề ngẫu nhiên, deadline do server đặt (FR-10).
 - get_owned_attempt: không phải chủ → None (API trả 404, không lộ sự tồn tại).
-- ensure_can_submit, require_submitted: chỉ lần nộp đầu rời được in_progress (UC-08 E1); nộp muộn hơn
-  deadline quá 30 s bị từ chối (BR-07).
+- past_deadline: quá deadline + 30 s (BR-07). Nộp lúc đó không bị từ chối: bài được chấm bằng phần đã lưu
+  trên server trước hạn, không nhận nội dung client gửi kèm (BR-21, spec 004).
+- require_submitted: chỉ lần nộp đầu rời được in_progress (UC-08 E1).
 """
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -41,19 +43,22 @@ def start_attempt(user_id: str, test: dict[str, Any], mode: str) -> dict[str, An
         else duration
     )
     open_res = db().table("attempts").select("*").eq("learner_id", user_id).eq("test_id", test["id"]) \
-        .eq("status", "in_progress").execute()
-    attempt = None
-    for row in open_res.data or []:
-        if past_deadline(row) or row.get("mode") != mode:
-            if row.get("mode") == "mock":
-                db().table("attempts").update({"status": "abandoned"}).eq("id", row["id"]).eq("status", "in_progress").execute()
-            else:
-                db().table("evaluations").delete().eq("attempt_id", row["id"]).execute()
-                db().table("attempts").delete().eq("id", row["id"]).eq("status", "in_progress").execute()
-            continue
-        if attempt is None:
-            attempt = row
-    if not attempt:
+        .eq("status", "in_progress").limit(1).execute()
+    if open_res.data:
+        attempt = open_res.data[0]
+    elif mode == "mock":
+        # Đề Mock do hệ thống chọn (mock_attempt_draw); theo test_id chỉ được làm tiếp bài đã bắt đầu.
+        # Bài đã kết thúc (tự nộp khi hết giờ, nộp ở tab khác): trả bài đó để trang chuyển tới kết quả (spec 004 US2).
+        closed = db().table("attempts").select("id, status, auto_submitted, submitted_at") \
+            .eq("learner_id", user_id).eq("test_id", test["id"]).eq("mode", "mock") \
+            .order("started_at", desc=True).limit(1).execute().data
+        if closed:
+            c = closed[0]
+            return {"closed": True, "attempt_id": c["id"], "status": c["status"],
+                    "auto_submitted": bool(c.get("auto_submitted")), "submitted_at": c.get("submitted_at"),
+                    "test_id": test["id"], "skill": test["skill"], "mode": "mock"}
+        raise ConflictError("Đề thi thử do hệ thống chọn ngẫu nhiên. Hãy bắt đầu từ mục Thi thử.")
+    else:
         start = now_utc()
         try:
             res = db().table("attempts").insert({
@@ -100,12 +105,6 @@ def past_deadline(attempt: dict[str, Any]) -> bool:
     """Đã quá deadline + 30 s ân hạn (BR-07)."""
     deadline = attempt.get("deadline_at")
     return bool(deadline) and now_utc() > datetime.fromisoformat(deadline) + timedelta(seconds=LATE_GRACE_SECONDS)
-
-
-def ensure_can_submit(attempt: dict[str, Any]) -> None:
-    """Nộp muộn hơn deadline + ân hạn → 409. Khoá attempt nằm trong function submit_* của DB."""
-    if past_deadline(attempt):
-        raise ConflictError("Đã quá thời gian làm bài")
 
 
 def require_submitted(result: Optional[dict[str, Any]]) -> dict[str, Any]:

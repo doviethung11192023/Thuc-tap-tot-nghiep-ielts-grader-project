@@ -41,8 +41,31 @@ def load_answers(attempt_id: str) -> list[dict[str, Any]]:
         "response_id": r["id"], "audio_key": r["audio_key"], "duration_ms": r.get("duration_ms"),
         "part": part_by_section[r["section_id"]], "question": question_by_id[r["speaking_question_id"]]["prompt"],
         "order_no": question_by_id[r["speaking_question_id"]]["order_no"],
+        "question_id": r["speaking_question_id"],
     } for r in responses]
     return sorted(answers, key=lambda a: (a["part"], a["order_no"]))
+
+
+def load_unanswered(attempt_id: str, answered_question_ids: set[str]) -> list[dict[str, Any]]:
+    """Câu của đề chưa có bản ghi confirm, để AI engine áp trần theo số câu đã trả lời (BR-23).
+
+    Speaking luôn làm cả đề (không chọn Part), nên tổng số câu là mọi câu của đề.
+    """
+    conn = db()
+    attempt = conn.table("attempts").select("test_id").eq("id", attempt_id).execute().data
+    if not attempt:
+        return []
+    sections = conn.table("sections").select("id, order_no, title").eq("test_id", attempt[0]["test_id"]) \
+        .execute().data or []
+    if not sections:
+        return []
+    part_by_section = {s["id"]: speaking_part_number(s) for s in sections}
+    questions = conn.table("speaking_questions").select("id, speaking_part_id, order_no, prompt") \
+        .in_("speaking_part_id", list(part_by_section)).execute().data or []
+    missing = [{"part": part_by_section[q["speaking_part_id"]], "question": q["prompt"], "order_no": q["order_no"]}
+               for q in questions if q["id"] not in answered_question_ids]
+    return [{"part": q["part"], "question": q["question"]}
+            for q in sorted(missing, key=lambda q: (q["part"], q["order_no"]))]
 
 
 def _request_answers(answers: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -83,7 +106,8 @@ async def grade_speaking_attempt(attempt_id: str, evaluation_id: str, run_id: st
         answers = load_answers(attempt_id)
         title_rows = db().table("attempts").select("tests(title)").eq("id", attempt_id).execute().data
         title = ((title_rows[0].get("tests") or {}).get("title") if title_rows else None) or "IELTS Speaking Test"
-        result = await call_ai_grade_speaking(title, _request_answers(answers))
+        unanswered = load_unanswered(attempt_id, {a["question_id"] for a in answers})
+        result = await call_ai_grade_speaking(title, _request_answers(answers), unanswered)
         _store_responses(result)
         if result.get("no_speech"):
             fail_ai_evaluation(evaluation_id, attempt_id, "no_speech")   # mọi câu đều im lặng (ST_attempt)

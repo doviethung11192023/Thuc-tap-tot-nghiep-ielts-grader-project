@@ -1,16 +1,23 @@
 """
 Dashboard hệ thống (UC-23, FR-29) và giám sát chấm AI (UC-24, FR-30: lượt chạy lỗi, độ trễ).
 
-Bài viết = essays (bài Writing trong attempt).
-Tỉ lệ lỗi AI và thời gian xử lý lấy từ grading_runs (NFR-05).
+- "Hôm nay" và các ngày trong biểu đồ tính theo giờ Việt Nam (UTC+7), không theo UTC.
+- Bài Writing = lượt làm Writing đã nộp (attempts skill=writing, submitted_at có giá trị); tổng và hôm nay
+  cùng đơn vị. Biểu đồ xu hướng đếm lượt nộp của cả 4 kỹ năng.
+- Tỉ lệ lỗi và thời gian xử lý tính trên grading_runs (NFR-05: một lượt = một task Writing hoặc một bài
+  Speaking), gồm cả lượt lỗi rồi được chạy lại; trả kèm số lượt để giao diện ghi rõ mẫu số.
 """
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from app.db.supabase import db
 from app.services.admin.expert_kpi_service import get_expert_kpis
+from app.services.learner_journey.journey_constants import VN_TZ
 
 RUN_STATUS_LABEL = {"done": "COMPLETED", "failed": "FAILED", "running": "RUNNING"}
+TREND_DAYS = 7
+PAGE_SIZE = 1000   # PostgREST trả tối đa 1000 dòng mỗi lần
+EPOCH = datetime(1970, 1, 1, tzinfo=VN_TZ)
 
 
 def _count(table: str, **filters) -> int:
@@ -21,40 +28,61 @@ def _count(table: str, **filters) -> int:
     return res.count or 0
 
 
+def _submitted(since: datetime, until: datetime | None = None, skill: str | None = None) -> int:
+    q = db().table("attempts").select("id", count="exact").gte("submitted_at", since.isoformat())
+    if until is not None:
+        q = q.lt("submitted_at", until.isoformat())
+    if skill:
+        q = q.eq("skill", skill)
+    return q.limit(1).execute().count or 0
+
+
+def _done_latencies() -> list[int]:
+    out, offset = [], 0
+    while True:
+        rows = (db().table("grading_runs").select("latency_ms").eq("status", "done")
+                .range(offset, offset + PAGE_SIZE - 1).execute().data or [])
+        out += [r["latency_ms"] for r in rows if r.get("latency_ms")]
+        if len(rows) < PAGE_SIZE:
+            return out
+        offset += PAGE_SIZE
+
+
+def _submitted_per_vn_day(since: datetime, until: datetime) -> dict[Any, int]:
+    """Số lượt nộp theo ngày giờ VN trong [since, until): một lượt đọc thay vì một query mỗi ngày."""
+    counts: dict[Any, int] = {}
+    offset = 0
+    while True:
+        rows = (db().table("attempts").select("submitted_at")
+                .gte("submitted_at", since.isoformat()).lt("submitted_at", until.isoformat())
+                .order("submitted_at").range(offset, offset + PAGE_SIZE - 1).execute().data or [])
+        for r in rows:
+            day = datetime.fromisoformat(r["submitted_at"].replace("Z", "+00:00")).astimezone(VN_TZ).date()
+            counts[day] = counts.get(day, 0) + 1
+        if len(rows) < PAGE_SIZE:
+            return counts
+        offset += PAGE_SIZE
+
+
 def system_statistics() -> dict[str, Any]:
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    runs = db().table("grading_runs").select("status, latency_ms").execute().data or []
-    finished = [r for r in runs if r["status"] in ("done", "failed")]
-    failed = sum(1 for r in finished if r["status"] == "failed")
-    latencies = [r["latency_ms"] for r in runs if r["status"] == "done" and r.get("latency_ms")]
-
-    start_day = today - timedelta(days=6)
-    end_day = today + timedelta(days=1)
-    recent_attempts = (
-        db().table("attempts").select("submitted_at")
-        .gte("submitted_at", start_day.isoformat())
-        .lt("submitted_at", end_day.isoformat())
-        .execute().data or []
-    )
-    day_counts: dict[str, int] = {}
-    for row in recent_attempts:
-        sub_at = row.get("submitted_at")
-        if sub_at:
-            key = str(sub_at)[:10]
-            day_counts[key] = day_counts.get(key, 0) + 1
-
+    today = datetime.now(VN_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    day_counts = _submitted_per_vn_day(today - timedelta(days=TREND_DAYS - 1), today + timedelta(days=1))
     trend = []
-    for i in range(6, -1, -1):
+    for i in range(TREND_DAYS - 1, -1, -1):
         day = today - timedelta(days=i)
-        trend.append({"date": day.strftime("%d/%m"), "count": day_counts.get(day.strftime("%Y-%m-%d"), 0)})
+        trend.append({"date": day.strftime("%d/%m"), "count": day_counts.get(day.date(), 0)})
 
-    essays_today = (db().table("attempts").select("id", count="exact").eq("skill", "writing")
-                    .gte("submitted_at", today.isoformat()).limit(1).execute().count or 0)
+    done_runs = _count("grading_runs", status=("eq", "done"))
+    failed_runs = _count("grading_runs", status=("eq", "failed"))
+    finished_runs = done_runs + failed_runs
+    latencies = _done_latencies()
     return {
         "total_users": _count("profiles"),
-        "total_essays": _count("essays"),
-        "essays_today": essays_today,
-        "ai_error_rate": round(failed / len(finished) * 100, 2) if finished else 0.0,
+        "total_essays": _submitted(EPOCH, skill="writing"),
+        "essays_today": _submitted(today, skill="writing"),
+        "ai_error_rate": round(failed_runs / finished_runs * 100, 2) if finished_runs else 0.0,
+        "failed_runs": failed_runs,
+        "finished_runs": finished_runs,
         "avg_processing_time": round(sum(latencies) / len(latencies) / 1000, 1) if latencies else 0.0,
         "submissions_trend": trend,
         "monthly_cohort_progression": _monthly_cohort_progression(),
@@ -63,8 +91,7 @@ def system_statistics() -> dict[str, Any]:
 
 
 def _monthly_cohort_progression(months: int = 6) -> list[dict[str, Any]]:
-    vn_tz = timezone(timedelta(hours=7))
-    now_vn = datetime.now(vn_tz)
+    now_vn = datetime.now(VN_TZ)
     cutoff = (now_vn.replace(day=1) - timedelta(days=months * 31)).isoformat()
     rows = (
         db()
@@ -87,7 +114,7 @@ def _monthly_cohort_progression(months: int = 6) -> list[dict[str, Any]]:
             continue
         try:
             dt = datetime.fromisoformat(str(sub_at).replace("Z", "+00:00"))
-            ym = (dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt).astimezone(vn_tz).strftime("%Y-%m")
+            ym = (dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt).astimezone(VN_TZ).strftime("%Y-%m")
         except Exception:
             continue
         if ym in buckets:

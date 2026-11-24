@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { SpeakingWorkspace } from '@/components/exam/SpeakingWorkspace';
 import { ExamWorkspaceSkeleton } from '@/components/exam/ExamWorkspaceSkeleton';
 import { useExamWorkspaceContent } from '@/hooks/useExamWorkspaceContent';
 import { discardAttempt, submitSpeakingAttempt } from '@/services/student-test-practice';
+import { ExamPageNotice } from '@/components/exam/ExamPageNotice';
+import { closedAttemptMessage } from '@/utils/attempt-submission';
+import { notifyAttemptSubmitted } from '@/stores/notification-store';
 
 export default function SpeakingWorkspacePage() {
   const router = useRouter();
@@ -14,11 +17,18 @@ export default function SpeakingWorkspacePage() {
   const testId = routeParams?.testId as string;
 
   const searchParams = useSearchParams();
-  const requestedMode = (searchParams.get('mode') as 'exam' | 'practice') || 'exam';
+  const requestedMode = (searchParams.get('mode') as 'exam' | 'practice') || 'practice';
   const returnUrl = searchParams.get('returnUrl') || '';
 
-  const { loading, attemptId, attemptMode, attemptError, deadlineMs, speakingData } =
+  const { loading, attemptId, attemptMode, attemptError, deadlineMs, speakingData, closedAttempt } =
     useExamWorkspaceContent(testId, 'speaking', requestedMode);
+
+  // Bài Mock đã kết thúc (tự nộp khi hết giờ): tới thẳng kết quả (spec 004 US2)
+  useEffect(() => {
+    if (closedAttempt && closedAttempt.status !== 'abandoned') {
+      router.replace(`/test-practice/speaking/${testId}/summary?attemptId=${closedAttempt.attempt_id}`);
+    }
+  }, [closedAttempt, router, testId]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Attempt dở có thể khác mode trên URL; quy tắc phòng thi đi theo attempt thật trên server.
@@ -31,6 +41,7 @@ export default function SpeakingWorkspacePage() {
     const summaryPath = `/test-practice/speaking/${testId}/summary?attemptId=${attemptId}${returnQuery}`;
     try {
       await submitSpeakingAttempt(attemptId);
+      notifyAttemptSubmitted(attemptId, speakingData?.title || 'IELTS Speaking Test', summaryPath);
       router.push(summaryPath);
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -41,6 +52,8 @@ export default function SpeakingWorkspacePage() {
       setSubmitError(typeof detail === 'string' ? detail : 'Không nộp được bài. Hãy kiểm tra mạng rồi thử lại.');
     }
   };
+
+  if (closedAttempt) return <ExamPageNotice message={closedAttemptMessage(closedAttempt)} />;
 
   if (attemptError || (!loading && !speakingData)) {
     return (

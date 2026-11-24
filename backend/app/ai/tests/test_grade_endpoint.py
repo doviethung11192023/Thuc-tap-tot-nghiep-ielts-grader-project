@@ -5,10 +5,14 @@ from fastapi.testclient import TestClient
 import main as serve
 from services.langfuse.prompt_manager import PromptFetchError
 
+SECRET = "test-engine-secret"
+
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(serve, "warm_up_nlp_tools", lambda: None)
+    import main     # the lifespan lives in main: stub its warm-ups so tests never load NLP or speech models
+    for name in ("warm_up_nlp_tools", "load_stt_model", "load_phoneme_model"):
+        monkeypatch.setattr(main, name, lambda: None)
     calls = []
 
     async def fake_pipeline(**kwargs):
@@ -16,7 +20,10 @@ def client(monkeypatch):
         return {"task_type": kwargs["task_type"] or "task2", "scores": {"overall_band": 6.5}}
 
     monkeypatch.setattr(serve, "run_grading_pipeline", fake_pipeline)
-    with TestClient(serve.app) as c:
+    settings = main.get_settings()
+    monkeypatch.setattr(settings, "ai_engine_secret", SECRET)
+    monkeypatch.setattr(settings, "allow_no_secret", False)
+    with TestClient(serve.app, headers={"X-AI-Engine-Secret": SECRET}) as c:
         c.calls = calls
         yield c
 
@@ -50,3 +57,24 @@ def test_prompt_fetch_error_maps_to_502(client, monkeypatch):
     res = client.post("/grade", json={"title": "x", "essay": "Text."})
     assert res.status_code == 502
     assert "TA_TASK1" in res.json()["detail"]
+
+
+def test_wrong_secret_is_forbidden(client):
+    res = client.post("/grade", json={"title": "t", "essay": "Text."}, headers={"X-AI-Engine-Secret": "nope"})
+    assert res.status_code == 403
+    assert client.calls == []
+
+
+def test_missing_secret_config_fails_closed(client, monkeypatch):
+    """Deploy quên đặt AI_ENGINE_SECRET: không ai chấm được, kể cả request không có header."""
+    monkeypatch.setattr(serve.get_settings(), "ai_engine_secret", "")
+    res = client.post("/grade", json={"title": "t", "essay": "Text."}, headers={"X-AI-Engine-Secret": ""})
+    assert res.status_code == 503
+    assert client.calls == []
+
+
+def test_allow_no_secret_opens_endpoint_for_local_runs(client, monkeypatch):
+    settings = serve.get_settings()
+    monkeypatch.setattr(settings, "ai_engine_secret", "")
+    monkeypatch.setattr(settings, "allow_no_secret", True)
+    assert client.post("/grade", json={"title": "t", "essay": "Text."}, headers={"X-AI-Engine-Secret": ""}).status_code == 200

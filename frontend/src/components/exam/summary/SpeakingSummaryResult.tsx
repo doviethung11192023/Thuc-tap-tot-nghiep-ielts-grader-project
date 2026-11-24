@@ -259,6 +259,22 @@ export const SpeakingSummaryResult: React.FC<SpeakingSummaryResultProps> = ({
                   <span className="text-[11px] font-semibold text-red-100">Thang điểm 9.0</span>
                 </div>
               </div>
+              {/* Trần điểm: trả lời thiếu (BR-23), nghe không rõ (BR-24), Part 2 hoặc cả bài quá ngắn (BR-25) */}
+              {speaking.coverage?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-4">
+                  {speaking.coverage.note} Hãy trả lời đủ các câu để được chấm đầy đủ.
+                </p>
+              )}
+              {speaking.intelligibility?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-3">
+                  {speaking.intelligibility.note} Hãy nói chậm và rõ từng từ, thu âm nơi yên tĩnh.
+                </p>
+              )}
+              {speaking.length?.note && (
+                <p className="text-xs font-semibold text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mt-3">
+                  {speaking.length.note}
+                </p>
+              )}
             </section>
 
             {/* Bento 2-Column Analytics */}

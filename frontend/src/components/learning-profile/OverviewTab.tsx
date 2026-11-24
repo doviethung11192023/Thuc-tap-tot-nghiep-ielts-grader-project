@@ -11,6 +11,9 @@ import { LearningProfileHeatmap } from "./LearningProfileHeatmap";
 import { AdaptiveStreakCard } from "./AdaptiveStreakCard";
 import { LearnerBadgesShowcase } from "./LearnerBadgesShowcase";
 import { ChartSkeleton } from "@/components/ui/skeleton";
+import { NextStepCard } from "./NextStepCard";
+import { CurrentBandsRow } from "./CurrentBandsRow";
+import { useLearnerNextStep } from "@/hooks/useLearnerNextStep";
 import type { LearningProfileOverviewData } from "@/types/learning-profile";
 
 const MonthlyProgressSection = dynamic(
@@ -41,6 +44,10 @@ export function OverviewTab({ userName, data, loading, onOpenGoalModal, onRefres
     );
   }
 
+  return <OverviewContent userName={userName} data={data} onOpenGoalModal={onOpenGoalModal} onRefresh={onRefresh} />;
+}
+
+function OverviewContent({ userName, data, onOpenGoalModal, onRefresh }: Omit<OverviewTabProps, "loading"> & { data: LearningProfileOverviewData }) {
   const {
     kpis,
     goals,
@@ -56,6 +63,9 @@ export function OverviewTab({ userName, data, loading, onOpenGoalModal, onRefres
     adaptive_streak,
     badges,
   } = data;
+  // Thẻ "Bước tiếp theo" tải lại khi mục tiêu, ngày thi hoặc số bài làm đổi (spec 005)
+  const refreshKey = `${goals.goal_set}|${goals.target_band}|${goals.test_date}|${kpis.total_tests_taken}|${kpis.total_cups}`;
+  const nextStep = useLearnerNextStep(refreshKey);
 
   return (
     <div className="space-y-6 w-full">
@@ -70,7 +80,13 @@ export function OverviewTab({ userName, data, loading, onOpenGoalModal, onRefres
       {/* 1b. Adaptive Streak */}
       <AdaptiveStreakCard streak={adaptive_streak} onRefresh={onRefresh} />
 
-      {/* 2. Lộ Trình Luyện Đề Cá Nhân Hóa (Ưu tiên hành động học ngay trên đầu trang) */}
+      {/* 1c. Lộ trình học (spec 005): bước tiếp theo + band hiện tại theo BR-12 */}
+      <NextStepCard {...nextStep} onOpenGoalModal={onOpenGoalModal} />
+      {data.current_bands && (
+        <CurrentBandsRow bands={data.current_bands} exam={data.exam} onOpenGoalModal={onOpenGoalModal} />
+      )}
+
+      {/* 2. Lộ Trình Luyện Đề Cá Nhân Hóa */}
       <PersonalizedRoadmapSection roadmap={roadmap} milestones={study_milestones} />
 
       {/* 3. Theo Dõi Trình Độ Thay Đổi Hàng Tháng */}

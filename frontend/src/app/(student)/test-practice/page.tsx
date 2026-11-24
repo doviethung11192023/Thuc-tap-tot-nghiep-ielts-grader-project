@@ -4,10 +4,9 @@ import React, { useState } from "react";
 import { Library, Target } from "lucide-react";
 import { m } from "motion/react";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { useExamCollections } from "@/hooks/useExamCollection";
 import { useStudentPublishedTests } from "@/hooks/useStudentPublishedTests";
 import { StudentPracticeBanner } from "@/components/exam/student-practice/StudentPracticeBanner";
-import { StudentCollectionsSection } from "@/components/exam/student-practice/StudentCollectionsSection";
+import { StudentMockLauncherSection } from "@/components/exam/student-practice/StudentMockLauncherSection";
 import { StudentDirectTestsSection } from "@/components/exam/student-practice/StudentDirectTestsSection";
 import { StudentSkillExercisesSection } from "@/components/exam/student-practice/StudentSkillExercisesSection";
 import { PracticeHistorySidebarWidget } from "@/components/exam/student-practice/PracticeHistorySidebarWidget";
@@ -15,7 +14,6 @@ import { TestPrepModal } from "@/components/exam/TestPrepModal";
 import type { PublishedTestItem } from "@/types/test-practice";
 
 export default function TestPracticePage() {
-  const { collections, loading: collectionsLoading } = useExamCollections();
   const {
     page,
     setPage,
@@ -28,6 +26,9 @@ export default function TestPracticePage() {
     setSearch,
     tests,
     total,
+    catalogTotal,
+    skillCounts,
+    difficultyCounts,
     loading,
   } = useStudentPublishedTests(12);
 
@@ -132,14 +133,14 @@ export default function TestPracticePage() {
 
             {activeTab === "explore" && (
               <div className="text-xs font-semibold text-[var(--ux-ink-2)] hidden sm:block">
-                Đang phục vụ <strong className="text-[var(--ux-ink)] tabular-nums"><AnimatedNumber value={total} /></strong> đề thi chuẩn hóa
+                Đang phục vụ <strong className="text-[var(--ux-ink)] tabular-nums"><AnimatedNumber value={catalogTotal} /></strong> đề thi chuẩn hóa
               </div>
             )}
           </div>
 
           {activeTab === "explore" && (
             <div className="space-y-6">
-              <StudentCollectionsSection collections={collections} loading={collectionsLoading} />
+              <StudentMockLauncherSection />
               <StudentDirectTestsSection
                 skill={skill}
                 setSkill={setSkill}
@@ -153,6 +154,8 @@ export default function TestPracticePage() {
                 setPage={setPage}
                 limit={limit}
                 loading={loading}
+                skillCounts={skillCounts}
+                difficultyCounts={difficultyCounts}
                 onOpenTestPrep={handleOpenTestPrep}
               />
             </div>

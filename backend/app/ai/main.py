@@ -11,13 +11,16 @@ Endpoints:
                           "image_url": "https://..." (optional, Task 1 chart) }
                   → frontend JSON result (scores, criteria_analysis,
                     inline_annotations, overall_upgraded_essay, word_count, task_type)
-    POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}] }
+    POST /draft-material  body: { kind, task_type, title, image_url?, answer_key? } → draft (spec 006)
+    GET  /grading-fingerprint?task_type=  → hash of pipeline, models, production prompt versions
+    POST /grade-speaking  body: { "title": "...", "answers": [{response_id, part, question, audio_url}],
+                                  "unanswered": [{part, question}] (optional) }
                   → transcripts, speech metrics, 4 criteria, feedback. Requires X-AI-Engine-Secret.
     GET  /health
     GET  /
 
-Env (see .env.example): PORT (default 8001), LOG_LEVEL, ENABLE_NGROK (default false),
-NGROK_AUTH_TOKEN, NGROK_STATIC_DOMAIN, SERVER_RELOAD (default false).
+Env (see .env.example): PORT (default 8001), LOG_LEVEL, SERVER_RELOAD (default false),
+AI_ENGINE_SECRET (required; same value as the Core API), ALLOW_NO_SECRET (local only, default false).
 """
 
 import asyncio
@@ -41,24 +44,46 @@ logger = get_logger(__name__)
 from settings.config import get_settings  # noqa: E402
 from services.grading_pipeline import (  # noqa: E402
     PromptFetchError,
+    normalize_task,
     run_grading_pipeline,
     warm_up_nlp_tools,
 )
 from services.reference_corpus import ReferenceCorpusError  # noqa: E402
+from services.grading_fingerprint import grading_fingerprint  # noqa: E402
+from services.material_drafter import MaterialRequestError, draft_material  # noqa: E402
+from services.prompt_builder import get_prompt_manager  # noqa: E402
 from services.speaking.speaking_grading_pipeline import SpeakingAnswerInput, run_speaking_pipeline  # noqa: E402
 from services.tutor_router import router as tutor_router  # noqa: E402
+from services.speaking.speaking_coverage_cap import UnansweredQuestion  # noqa: E402
+from services.speaking.phoneme_recognizer import load_model as load_phoneme_model  # noqa: E402
+from services.speaking.speech_transcriber import load_model as load_stt_model  # noqa: E402
 
 MAX_ESSAY_CHARS = 20_000
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings = get_settings()
+    if not settings.ai_engine_secret.strip():
+        if settings.allow_no_secret:
+            logger.warning("AI_ENGINE_SECRET empty and ALLOW_NO_SECRET=true: grading endpoints are open (local only)")
+        else:
+            logger.error("AI_ENGINE_SECRET is not set: /grade, /grade-speaking, /draft-material will return 503")
     try:
         logger.info("Warming up LanguageTool + spaCy...")
         await asyncio.to_thread(warm_up_nlp_tools)
         logger.info("NLP tools ready")
     except Exception as e:  # first request will retry the lazy initialisation
         logger.warning("NLP warm-up failed: %s", e, exc_info=True)
+    # about 10 s otherwise paid by the first Speaking test after each restart; the two models load side by
+    # side, and one failing does not stop the other (the first Speaking test loads a missing one lazily)
+    logger.info("Loading speech models (Whisper, wav2vec2)...")
+    outcomes = await asyncio.gather(asyncio.to_thread(load_stt_model), asyncio.to_thread(load_phoneme_model),
+                                    return_exceptions=True)
+    for name, outcome in zip(("Whisper", "wav2vec2"), outcomes):
+        if isinstance(outcome, Exception):
+            logger.warning("%s warm-up failed: %s", name, outcome, exc_info=outcome)
+    logger.info("Speech models warm-up finished")
     yield
 
 
@@ -85,6 +110,15 @@ class GradeRequest(BaseModel):
     essay: str = Field(..., min_length=1, max_length=MAX_ESSAY_CHARS)
     task_type: str | None = None   # "task1" | "task2"; missing → task2 (backward compatible)
     image_url: str | None = None   # Task 1 chart/diagram (R2 public URL or any http(s) URL)
+    answer_key: dict | None = None # Task 1 Admin-approved answer key: replaces the vision pass (spec 006)
+
+
+class DraftMaterialRequest(BaseModel):
+    kind: str                      # "answer_key" | "outline" | "sample"
+    task_type: str = "task2"
+    title: str = Field(..., min_length=1, max_length=MAX_ESSAY_CHARS)
+    image_url: str | None = None
+    answer_key: dict | None = None # approved key; required for Task 1 outline/sample
 
 
 class SpeakingAnswerRequest(BaseModel):
@@ -95,15 +129,27 @@ class SpeakingAnswerRequest(BaseModel):
     duration_ms: int | None = None
 
 
+class UnansweredQuestionRequest(BaseModel):
+    part: int = Field(..., ge=1, le=3)
+    question: str
+
+
 class GradeSpeakingRequest(BaseModel):
     title: str = ""
     answers: list[SpeakingAnswerRequest] = Field(..., min_length=1)
+    unanswered: list[UnansweredQuestionRequest] = []   # questions with no recording (BR-23)
 
 
 def require_engine_secret(x_ai_engine_secret: str | None = Header(default=None)) -> None:
     """Only the Core API may spend LLM quota here (STRIDE: direct calls to the AI engine)."""
-    expected = get_settings().ai_engine_secret
-    if expected and not secrets.compare_digest(x_ai_engine_secret or "", expected):
+    settings = get_settings()
+    expected = settings.ai_engine_secret.strip()
+    if not expected:
+        # Fail closed: a deploy that forgot the secret must not serve grading to anyone who can reach it.
+        if settings.allow_no_secret:
+            return
+        raise HTTPException(status_code=503, detail="AI_ENGINE_SECRET is not configured")
+    if not secrets.compare_digest(x_ai_engine_secret or "", expected):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
@@ -117,7 +163,7 @@ def health():
     return {"status": "healthy"}
 
 
-@app.post("/grade")
+@app.post("/grade", dependencies=[Depends(require_engine_secret)])
 async def grade(req: GradeRequest):
     """Run the full grading pipeline on the submitted essay."""
     if not req.essay.strip():
@@ -128,6 +174,7 @@ async def grade(req: GradeRequest):
             essay=req.essay,
             task_type=req.task_type,
             image_url=req.image_url,
+            answer_key=req.answer_key,
         )
     except PromptFetchError as e:
         logger.error("Langfuse prompt missing: %s", e)
@@ -140,11 +187,38 @@ async def grade(req: GradeRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/draft-material", dependencies=[Depends(require_engine_secret)])
+async def draft_material_endpoint(req: DraftMaterialRequest):
+    """AI draft of per-task material; the Core API stores it as a draft for Admin approval (ADR-30)."""
+    try:
+        content = await draft_material(req.kind, normalize_task(req.task_type), req.title, req.image_url,
+                                       req.answer_key, get_prompt_manager())
+        return {"kind": req.kind, "content": content}
+    except MaterialRequestError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except PromptFetchError as e:
+        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
+    except Exception as e:
+        logger.error("Material draft failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/grading-fingerprint", dependencies=[Depends(require_engine_secret)])
+async def grading_fingerprint_endpoint(task_type: str = "task2"):
+    """Hash of pipeline, models and production prompt versions; the Core API keys its cache on it."""
+    try:
+        return {"fingerprint": await asyncio.to_thread(
+            grading_fingerprint, normalize_task(task_type), get_prompt_manager())}
+    except PromptFetchError as e:
+        raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
+
+
 @app.post("/grade-speaking", dependencies=[Depends(require_engine_secret)])
 async def grade_speaking(req: GradeSpeakingRequest):
     """Speech layers, then LLM. Slow, so the Core API calls this from a background task."""
     try:
-        return await run_speaking_pipeline(req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers])
+        return await run_speaking_pipeline(req.title, [SpeakingAnswerInput(**a.model_dump()) for a in req.answers],
+                                           [UnansweredQuestion(q.part, q.question) for q in req.unanswered])
     except PromptFetchError as e:
         logger.error("Langfuse prompt missing: %s", e)
         raise HTTPException(status_code=502, detail=f"Prompt configuration error: {e}")
@@ -153,42 +227,12 @@ async def grade_speaking(req: GradeSpeakingRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── Ngrok Tunnel Helper ───────────────────────────────────────────────────────
-def start_ngrok(port: int) -> str | None:
-    settings = get_settings()
-    token = settings.ngrok_auth_token or os.getenv("NGROK_AUTH_TOKEN")
-    domain = settings.ngrok_static_domain or os.getenv("NGROK_STATIC_DOMAIN")
-
-    if not token:
-        logger.warning("[ngrok] NGROK_AUTH_TOKEN not set — skipping ngrok tunnel")
-        return None
-
-    try:
-        from pyngrok import conf, ngrok
-
-        conf.get_default().auth_token = token
-        kwargs = {"domain": domain} if domain else {}
-        tunnel = ngrok.connect(port, "http", **kwargs)
-        public_url = tunnel.public_url
-        logger.info("[ngrok] Tunnel active: %s -> http://localhost:%d", public_url, port)
-        return public_url
-    except ImportError:
-        logger.error("[ngrok] pyngrok not installed. Run: uv add pyngrok")
-    except Exception as e:
-        logger.error("[ngrok] Failed to start tunnel: %s", e, exc_info=True)
-    return None
-
-
 def run_server():
     settings = get_settings()
     port = int(os.getenv("PORT", 8001))
 
     logger.info("=" * 60)
     logger.info("  IELTS Grader API — local: http://localhost:%d (POST /grade, /docs)", port)
-    if settings.enable_ngrok:
-        public_url = start_ngrok(port)
-        if public_url:
-            logger.info("  ngrok public URL: %s/grade", public_url)
     logger.info("=" * 60)
 
     uvicorn.run(

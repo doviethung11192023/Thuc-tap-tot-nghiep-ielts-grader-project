@@ -3,8 +3,10 @@ Nộp và chấm Listening/Reading (SD-04): chấm ngay trong request.
 
 - Section được chấm: các part đã chọn (req.parts theo order_no), mặc định cả đề.
 - Mọi câu trong các section đó được lưu vào answers (câu bỏ trống = sai).
-- Band quy đổi từ `band_conversions`: đề < 40 câu được quy đổi tỷ lệ sang thang 40 (`round(raw * 40 / count)`).
+- Band chỉ khi bài phủ đủ 40 câu (BR-03, ADR-19); làm lẻ thì chỉ có "x / y câu đúng".
 - Nộp lần 2 trả lại kết quả lần đầu (SD-04: double submission returns the first result).
+- Quá deadline + 30 s (tự nộp hoặc nộp muộn): chấm đáp án đã lưu trên server, bỏ qua đáp án client gửi
+  (BR-21). Điểm thô, số câu và band do DB tính lại từ các dòng đã ghi.
 """
 from typing import Any, Optional
 
@@ -21,7 +23,8 @@ from app.services.listening_reading.lr_test_content import (
     lr_part,
 )
 from app.db.supabase import db
-from app.services.practice.practice_attempt_lifecycle import ensure_can_submit, require_submitted
+from app.services.practice.attempt_saved_work import saved_lr_answers
+from app.services.practice.practice_attempt_lifecycle import past_deadline, require_submitted
 
 
 def _invalidate_profile(learner_id: Any) -> None:
@@ -133,15 +136,13 @@ def grade_lr_sections(
     return rows, raw, len(rows)
 
 
-def compute_proportional_band(skill: str, raw_score: int, question_count: int) -> Optional[float]:
-    if question_count <= 0:
-        return None
-    scaled_raw = min(40, max(0, round(raw_score * 40 / question_count)))
-    return lookup_band(skill, scaled_raw)
+def band_if_full_test(skill: str, raw_score: int, question_count: int) -> Optional[float]:
+    """BR-03/ADR-19: chỉ quy ra band khi bài phủ đủ 40 câu; làm lẻ thì chỉ có "x / y câu đúng"."""
+    return lookup_band(skill, raw_score) if question_count == 40 else None
 
 
 def submit_lr(attempt: dict[str, Any], answers: dict[str, Any], parts: Optional[list[int]],
-              time_spent: Optional[int] = None) -> dict[str, Any]:
+              time_spent: Optional[int] = None, auto: bool = False) -> dict[str, Any]:
     if attempt["status"] == "scored":
         return _result(attempt, time_spent)
     test = load_lr_test(attempt["test_id"])
@@ -151,17 +152,19 @@ def submit_lr(attempt: dict[str, Any], answers: dict[str, Any], parts: Optional[
     if not sections:
         raise InvalidRequestError("Không có phần thi nào được chọn")
 
-    ensure_can_submit(attempt)
+    late = auto or past_deadline(attempt)
+    if late:
+        answers = saved_lr_answers(attempt["id"])
     qids = [q["id"] for s in sections for g in (lr_part(s).get("question_groups") or [])
             for q in g.get("questions") or []]
     key_rows = load_lr_question_keys(qids)
     keys = {qid: row.get("accepted_answers") or [] for qid, row in key_rows.items()}
 
     rows, raw, count = grade_lr_sections(sections, answers, keys)
-    band = compute_proportional_band(attempt["skill"], raw, count)
+    band = band_if_full_test(attempt["skill"], raw, count)
     updated = require_submitted(db().rpc("submit_lr_attempt", {
         "p_attempt_id": attempt["id"], "p_section_ids": [s["id"] for s in sections], "p_answers": rows,
-        "p_raw_score": raw, "p_question_count": count, "p_band": band,
+        "p_raw_score": raw, "p_question_count": count, "p_band": band, "p_auto": late,
     }).execute().data)
     _invalidate_profile(attempt.get("learner_id"))
     return _result(updated, time_spent)

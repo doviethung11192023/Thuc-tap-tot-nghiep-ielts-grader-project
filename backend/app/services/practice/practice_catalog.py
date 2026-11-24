@@ -18,7 +18,7 @@ def _test_row(t: dict[str, Any]) -> dict[str, Any]:
 def list_tests(page: int, limit: int, skill: Optional[str], difficulty: Optional[str], search: Optional[str]) -> dict[str, Any]:
     q = db().table("tests").select(
         "id, title, skill, duration_minutes, difficulty, allowed_mode, test_set_id, test_sets(id, name), created_at",
-        count="exact").eq("status", "published")
+        count="exact").eq("status", "published").neq("allowed_mode", "mock")     # đề Mock không lộ ra danh mục
     if skill and skill.lower() != "all":
         q = q.eq("skill", skill.lower())
     if difficulty and difficulty.lower() != "all":

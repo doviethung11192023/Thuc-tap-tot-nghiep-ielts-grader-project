@@ -59,6 +59,7 @@ function formatBand(value?: number | null): string {
 function TaskStatusBadge({ task }: { task: WritingTaskSummary }) {
   if (task.status === 'completed') return <span className="text-emerald-700 font-bold">Đã chấm</span>;
   if (task.status === 'failed') return <span className="text-red-700 font-bold">Chấm lỗi</span>;
+  if (task.status === 'not_attempted') return <span className="text-zinc-500 font-bold">Không làm</span>;
   return (
     <span className="text-amber-700 font-bold inline-flex items-center gap-1">
       <Loader2 className="w-3 h-3 animate-spin" /> {task.status === 'evaluating' ? 'AI đang chấm...' : 'Đang chờ chấm'}
@@ -294,7 +295,8 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
                     <span className={t.word_count >= min ? 'font-bold text-emerald-700' : 'font-bold text-amber-700'}>
                       {t.word_count} từ (Chuẩn ≥ {min})
                     </span>
-                    <strong className="text-[#932120]">Band {formatBand(t.scores?.overall_band)}</strong>
+                    {/* Task bỏ trống trong bài làm cả 2 task tính band 0 (BR-04) */}
+                    <strong className="text-[#932120]">Band {t.status === 'not_attempted' ? '0.0' : formatBand(t.scores?.overall_band)}</strong>
                   </div>
                 </div>
               );
@@ -359,10 +361,12 @@ export const WritingSummaryResult: React.FC<WritingSummaryResultProps> = ({
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại</span>
           </Link>
+          {data?.mode !== 'mock' && (   /* đề Mock không làm lại được */
           <Link href={`/test-practice/writing/${testId}${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`} className="min-h-[44px] px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-1 sm:flex-initial">
             <RotateCcw className="w-4 h-4" />
             <span>Làm lại bài</span>
           </Link>
+          )}
           {done && data?.status !== 'waiting_expert' && !isExpertOfficial && (
             <button
               type="button"

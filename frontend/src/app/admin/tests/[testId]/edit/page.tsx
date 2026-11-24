@@ -14,6 +14,7 @@ import {
 } from "@/services/admin-content";
 import { SectionEditor } from "@/components/admin/SectionEditor";
 import type { TestItem, ContentStatus, AllowedMode, TestDifficulty } from "@/types/exam";
+import { apiErrorDetail } from "@/utils/attempt-submission";
 
 export default function ExamBuilderPage() {
   const params = useParams();
@@ -74,8 +75,8 @@ export default function ExamBuilderPage() {
       });
       toast.success("Đã lưu thông tin bài thi thành công!");
       await loadTest();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Lỗi khi lưu thông tin bài thi");
+    } catch (err: unknown) {
+      toast.error(apiErrorDetail(err) || "Lỗi khi lưu thông tin bài thi");
     } finally {
       setSaving(false);
     }

@@ -95,6 +95,15 @@ def test_monotone_speech_loses_half_a_band():
     assert flat == normal - 0.5
 
 
+def test_lively_intonation_adds_half_a_band_only_on_a_reliable_recording():
+    normal = assess_pronunciation(_comparison(), CLEAN, 0.80, 5.0, 50.0).band
+    assert assess_pronunciation(_comparison(), CLEAN, 0.80, 10.0, 50.0).band == normal + 0.5
+    # the 2026-11-12 test: channels disagree (accuracy 0.57), confidence 0.825, pitch range 23 semitones
+    disagree = assess_pronunciation(_comparison(accuracy=0.57), CLEAN, 0.825, 23.0, 60.0)
+    assert disagree.reliability_notes == ("channels_disagree",)
+    assert disagree.band == 4.0           # provisional-3: 0.825 starts at 4, no intonation bonus
+
+
 def test_noisy_recording_is_capped_and_labelled_not_punished_further():
     noisy = AudioQuality(60.0, 50.0, -20.0, 0.0, 5.0)
     result = assess_pronunciation(_comparison(), noisy, 0.97, 5.0, 50.0)

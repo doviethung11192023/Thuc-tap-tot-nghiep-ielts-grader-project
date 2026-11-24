@@ -1,3 +1,5 @@
+import type { SpeakingEdit, SpeakingPronunciationHint, SpeakingStrength } from './speaking-feedback-types';
+
 export interface SpeakingAnnotation {
   id: string;
   category: string;
@@ -18,6 +20,10 @@ export interface SpeakingAnswerDetail {
   metrics?: Record<string, number> | null;
   audio_url: string | null;
   annotations?: SpeakingAnnotation[];
+  /** Spec 007: lỗi GRA/LR neo vị trí trong transcript, điểm mạnh, từ có thể phát âm chưa rõ (AI) */
+  edits?: SpeakingEdit[];
+  strengths?: SpeakingStrength[];
+  pronunciation_hints?: SpeakingPronunciationHint[];
 }
 
 export interface PartFeedbackAnswer {
@@ -62,7 +68,7 @@ export interface SpeakingDetail {
   evaluator_type?: string | null;
   expert_review_status?: string | null;
   submitted_at?: string | null;
-  speaking?: SpeakingSummaryPayload | null;
+  speaking?: (SpeakingSummaryPayload & { pronunciation?: { phoneme_usable?: boolean } | null }) | null;
   answers: SpeakingAnswerDetail[];
   parts: Record<string, PartFeedback | null> | null;
 }

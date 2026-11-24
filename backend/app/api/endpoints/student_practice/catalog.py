@@ -16,9 +16,9 @@ async def list_published_tests(
     skill: Optional[str] = None,
     difficulty: Optional[str] = None,
     search: Optional[str] = None,
-    current_user: Optional[User] = Depends(get_optional_user)
 ):
-    """Danh sách bài thi đã xuất bản cho học viên làm bài, có cache Redis."""
+    """Danh sách bài thi đã xuất bản cho học viên làm bài, có cache Redis. Không cần đăng nhập: bỏ bước
+    xác thực để cache hit trả về trong vài ms (ADR-32)."""
     cache_key = f"{page}_{limit}_{skill or ''}_{difficulty or ''}_{search or ''}"
     result_data, cached = await get_or_load(
         request.app.state.redis, "catalog", cache_key, _CATALOG_TTL_SECONDS,

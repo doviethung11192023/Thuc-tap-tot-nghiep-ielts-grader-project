@@ -197,6 +197,17 @@ def test_sys08_history_order_highlights_and_donut_scored_only(monkeypatch):
         "input_band": 4.5, "target_overall": 6.5, "target_listening": 6.5, "target_reading": 6.5,
         "target_writing": 6.0, "target_speaking": 6.0, "test_date": "",
     })
+    monkeypatch.setattr(
+        "app.services.learner_journey.journey_data_readers.goal_row",
+        lambda _u: {
+            "target_overall": 6.5,
+            "target_listening": 6.5,
+            "target_reading": 6.5,
+            "target_writing": 6.0,
+            "target_speaking": 6.0,
+            "test_date": None,
+        },
+    )
     overview_aggregator.set_to_cache("overview_v2_u_donut", None, ttl_seconds=0)
     ov = overview_aggregator.compute_learning_profile_overview("u_donut")
     donut_map = {d["name"]: d["value"] for d in ov["donut_data"]}

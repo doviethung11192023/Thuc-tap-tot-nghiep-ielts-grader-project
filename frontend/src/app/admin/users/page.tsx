@@ -82,8 +82,8 @@ export default function AdminUsersPage() {
 
   const users: User[] = accountsData?.items || [];
   const total = viewMode === "analytics" ? analyticsData?.total || 0 : accountsData?.total || 0;
-  const activeTotal: number | undefined = accountsData?.active_total;
-  const bannedTotal: number | undefined = accountsData?.banned_total;
+  const activeTotal: number | undefined = accountsData?.active_total ?? accountsData?.active_count;
+  const bannedTotal: number | undefined = accountsData?.banned_total ?? accountsData?.locked_count;
 
   const handleToggleStatus = async (targetUser: User) => {
     if (currentUser?.id === targetUser.id) return toast.error("Không thể tự khóa tài khoản của chính mình!");
@@ -108,7 +108,6 @@ export default function AdminUsersPage() {
       setResendingId(null);
     }
   };
-
   return (
     <div className="space-y-6 sm:space-y-8 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

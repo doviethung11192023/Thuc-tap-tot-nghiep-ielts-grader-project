@@ -96,6 +96,12 @@ export const SpeakingResultsView: React.FC<SpeakingResultsViewProps> = ({ attemp
           </div>
         )}
 
+        {detail?.speaking?.pronunciation?.phoneme_usable === false && (
+          <p className="text-xs text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mb-4">
+            Bản ghi có vẻ bị méo hoặc phát qua loa, nên hệ thống không chỉ ra từ phát âm chưa rõ. Hãy ghi âm trực tiếp, gần micro để nhận gợi ý từng từ.
+          </p>
+        )}
+
         {!failed && !detail && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
             <div className="lg:col-span-4 space-y-4">

@@ -32,6 +32,14 @@ export interface SpeakingOverallReport {
   seven_day_plan?: { day: number; task: string }[];
 }
 
+/** Trần band khi làm thiếu câu (BR-23). max_band null: không bị giới hạn. Bài chấm trước khi có luật: null. */
+export interface SpeakingCoverage {
+  answered: number;
+  total: number;
+  max_band: number | null;
+  note: string | null;
+}
+
 export interface SpeakingAttemptSummary {
   title: string;
   status: string;
@@ -50,6 +58,11 @@ export interface SpeakingAttemptSummary {
     overall: SpeakingOverallReport | null;
     pronunciation: SpeakingPronunciationEvidence | null;
     speech_metrics: Record<string, number> | null;
+    coverage?: SpeakingCoverage | null;
+    /** Trần khi âm thanh khớp kém với transcript (BR-24); bài cũ: null. */
+    intelligibility?: { max_band: number | null; note: string | null } | null;
+    /** Trần khi Part 2 quá ngắn hoặc cả bài quá ít từ (BR-25); bài cũ: null. */
+    length?: { note: string | null } | null;
   };
 }
 

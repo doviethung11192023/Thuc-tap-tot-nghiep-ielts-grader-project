@@ -1,11 +1,11 @@
-"""Unit tests cho chuẩn hóa Reading content, khớp đáp án, chấm multi-select và quy đổi Band tỷ lệ."""
+"""Unit tests cho chuẩn hóa Reading content, khớp đáp án, chấm multi-select và band chỉ khi đủ 40 câu (BR-03)."""
 from app.services.listening_reading.lr_answer_matching import (
     accepted_forms,
     is_correct,
     multiselect_match_count,
 )
 from app.services.listening_reading.lr_grading_service import (
-    compute_proportional_band,
+    band_if_full_test,
     grade_lr_sections,
 )
 from app.services.listening_reading.lr_test_content import (
@@ -140,15 +140,15 @@ def test_seed_normalization_and_roman_sorting():
     assert mapped["questions"][0]["is_correct"] is True
 
 
-def test_proportional_band_scaling(monkeypatch):
+def test_band_only_for_full_40_questions(monkeypatch):
     captured: list[tuple[str, int]] = []
 
     def fake_lookup(skill: str, raw: int) -> float:
         captured.append((skill, raw))
-        return 7.0 if raw == 31 else 9.0
+        return 7.0
 
     monkeypatch.setattr("app.services.listening_reading.lr_grading_service.lookup_band", fake_lookup)
-    assert compute_proportional_band("reading", 30, 39) == 7.0
-    assert compute_proportional_band("reading", 13, 13) == 9.0
-    assert compute_proportional_band("reading", 40, 40) == 9.0
-    assert captured == [("reading", 31), ("reading", 40), ("reading", 40)]
+    assert band_if_full_test("reading", 30, 39) is None     # đề 39 câu: không quy đổi (BR-03, ADR-19)
+    assert band_if_full_test("reading", 13, 13) is None     # luyện 1 passage: chỉ "x / y câu đúng"
+    assert band_if_full_test("reading", 30, 40) == 7.0
+    assert captured == [("reading", 30)]

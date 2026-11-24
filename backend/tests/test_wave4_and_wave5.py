@@ -45,19 +45,37 @@ def test_wave4_passage_template_and_explanation_normalizers():
 
 
 def test_wave4_publish_40_question_gate(monkeypatch):
+    from app.services.cms import cms_publish_validation
+
+    qs_39 = [{"id": f"q{i}", "number": i + 1, "question_options": []} for i in range(39)]
+    qs_micro = [{"id": "qm1", "number": 1, "question_options": []}]
     fake = FakeSupabase(
         tests=[
-            {"id": "t_39", "skill": "reading", "source_name": "cambridge", "status": "draft"},
-            {"id": "t_micro", "skill": "reading", "source_name": "micro_exercise", "status": "draft"},
+            {
+                "id": "t_39",
+                "skill": "reading",
+                "source_type": "original",
+                "source_name": "cambridge",
+                "license": None,
+                "status": "draft",
+                "sections": [{"id": "s1", "order_no": 1, "lr_sections": [{"passage": "P", "audio_key": None, "question_groups": [{"id": "g1", "question_type": "completion", "select_count": None, "group_options": [], "questions": qs_39}]}]}],
+            },
+            {
+                "id": "t_micro",
+                "skill": "reading",
+                "source_type": "original",
+                "source_name": "micro_exercise",
+                "license": None,
+                "status": "draft",
+                "sections": [{"id": "s2", "order_no": 1, "lr_sections": [{"passage": "P", "audio_key": None, "question_groups": [{"id": "g2", "question_type": "completion", "select_count": None, "group_options": [], "questions": qs_micro}]}]}],
+            },
         ],
-        sections=[
-            {"id": "s1", "test_id": "t_39"},
-            {"id": "s2", "test_id": "t_micro"},
-        ],
-        questions=[{"id": f"q{i}", "lr_section_id": "s1"} for i in range(39)] + [{"id": "qm1", "lr_section_id": "s2"}],
+        sections=[{"id": "s1", "test_id": "t_39"}, {"id": "s2", "test_id": "t_micro"}],
+        question_keys=[{"question_id": q["id"], "accepted_answers": ["ans"]} for q in (qs_39 + qs_micro)],
         audit_logs=[],
     )
     monkeypatch.setattr(cms_tests, "db", lambda: fake)
+    monkeypatch.setattr(cms_publish_validation, "db", lambda: fake)
     monkeypatch.setattr("app.services.admin.staff_accounts.db", lambda: fake)
 
     with pytest.raises(InvalidRequestError):

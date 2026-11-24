@@ -46,10 +46,21 @@ def writing_tasks_of(test: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(tasks, key=lambda t: t["task_no"])
 
 
+# {test_id: {task_no: section_id}}. Gọi ở mỗi lần tự lưu Writing (FR-11), nên cache để bớt một lần đọc DB
+# mỗi request, giống _lr_questions của L/R. Section của đề đã publish không đổi; đề chưa có task nào
+# (đang soạn) thì không cache, để lần sau đọc lại.
+_task_sections_cache: dict[str, dict[int, str]] = {}
+
+
 def load_writing_task_sections(test_id: str) -> dict[int, str]:
     """{task_no: section_id} của đề Writing."""
-    test = load_writing_test(test_id)
-    return {t["task_no"]: t["section_id"] for t in writing_tasks_of(test)} if test else {}
+    cached = _task_sections_cache.get(test_id)
+    if cached is None:
+        test = load_writing_test(test_id)
+        cached = {t["task_no"]: t["section_id"] for t in writing_tasks_of(test)} if test else {}
+        if cached:
+            _task_sections_cache[test_id] = cached
+    return dict(cached)        # bản sao: nơi gọi có sửa cũng không làm hỏng cache
 
 
 def to_writing_content(test: dict[str, Any]) -> dict[str, Any]:

@@ -8,7 +8,7 @@ export interface WritingTaskSummary {
   task: "task1" | "task2" | string;
   task_no?: number;
   essay_id: string;
-  status: "pending" | "evaluating" | "completed" | "failed" | string;
+  status: "pending" | "evaluating" | "completed" | "failed" | "not_attempted" | string;
   word_count: number;
   content?: string;
   task_prompt?: string;
@@ -30,10 +30,12 @@ export interface WritingTaskSummary {
 export interface WritingAttemptSummary {
   title: string;
   status: string;
-  mode?: string;
+  mode?: string;   // "mock": đề không làm lại được
   overallBand: number;
   submittedAt?: string;
   gradingDone: boolean;
+  /** AI chấm lỗi (grading_failed): Admin chạy lại, bài làm vẫn được lưu */
+  gradingFailed: boolean;
   evaluatorType?: "ai" | "expert" | string | null;
   evaluationStatus?: string | null;
   expertFeedback?: string | null;
@@ -76,6 +78,7 @@ export function useWritingAttemptSummary(attemptId?: string) {
           overallBand: Number(res?.overall_band ?? 0),
           submittedAt: res?.submitted_at,
           gradingDone: Boolean(writing.grading_done) && res?.status !== "grading",
+          gradingFailed: res?.status === "grading_failed",
           evaluatorType: writing.evaluator_type ?? res?.evaluator_type ?? null,
           evaluationStatus: res?.evaluation_status ?? null,
           expertFeedback: writing.expert_feedback ?? res?.expert_feedback ?? null,

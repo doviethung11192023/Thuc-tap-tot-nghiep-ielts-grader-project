@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
+import { useExamCountdown } from '@/hooks/useExamCountdown';
 import { ListeningTestData } from '@/mocks/exam-listening';
 import { ExitConfirmModal } from './ExitConfirmModal';
 import { SubmitConfirmModal } from './SubmitConfirmModal';
@@ -30,31 +30,31 @@ interface ListeningWorkspaceProps {
   /** Hạn nộp của thi thử theo đồng hồ client (ms); null nếu không có. */
   deadlineMs?: number | null;
   onSubmit: (userAnswers: Record<number, string | string[]>) => Promise<void> | void;
+  /** Bài đã lưu trên server khi làm tiếp (FR-11): số câu -> câu trả lời. */
+  initialAnswers?: Record<string, string | string[]>;
+  /** Báo mỗi lần đáp án đổi để trang cha tự lưu lên server. */
+  onAnswersChange?: (answers: Record<number, string | string[]>) => void;
 }
 
-export function ListeningWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit }: ListeningWorkspaceProps) {
+export function ListeningWorkspace({ testData, mode, attemptId, attemptError, selectedParts, returnUrl, onAbandon, deadlineMs, onSubmit, initialAnswers, onAnswersChange }: ListeningWorkspaceProps) {
   const router = useRouter();
-  const draftKey = `ielts_listening_draft_${testData.test_id}`;
   const [activeSection, setActiveSection] = useState<number>(0);
   const [activeAudioSection, setActiveAudioSection] = useState<number>(0);
   const [examPhase, setExamPhase] = useState<'audio' | 'review' | 'expired'>('audio');
   const [reviewSeconds, setReviewSeconds] = useState<number>(120);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>(() => {
-    if (mode !== 'practice') return {};
-    try {
-      if (typeof window === 'undefined') return {};
-      const saved = localStorage.getItem(draftKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return parsed;
-      }
-    } catch {
-      // Ignore malformed draft
-    }
-    return {};
-  });
+  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
+
+  // Khôi phục bài đã lưu trên server khi nó tới; câu Learner vừa trả lời trước đó thì giữ bản mới
+  // Mốc ban đầu là undefined: bài đã lưu có sẵn ngay lúc mở (Mock tải đề sau khi có attempt) cũng được khôi phục
+  const [restoredFrom, setRestoredFrom] = useState<typeof initialAnswers>(undefined);
+  if (initialAnswers !== restoredFrom) {
+    setRestoredFrom(initialAnswers);
+    const restored: Record<number, string | string[]> = {};
+    Object.entries(initialAnswers || {}).forEach(([num, value]) => { restored[Number(num)] = value; });
+    setUserAnswers(prev => ({ ...restored, ...prev }));
+  }
+  useEffect(() => { onAnswersChange?.(userAnswers); }, [userAnswers, onAnswersChange]);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
-  const [draftSavedNotice, setDraftSavedNotice] = useState<string | null>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isGrading, setIsGrading] = useState<boolean>(false);
@@ -96,12 +96,11 @@ export function ListeningWorkspace({ testData, mode, attemptId, attemptError, se
     onEnded: handleAudioEnded,
   });
 
-  // Safety exam timer aligned with server deadline_at (includes review buffer on backend)
-  const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4) + 120;
-  const [timerSeconds, setTimerSeconds] = useState<number>(mode === 'exam' ? initialExamSeconds : 0);
+  // BR-07: Listening Mock 30 phút cho cả 4 section (7,5 phút/section). Phải khớp deadline server
+  // (tests.duration_minutes = 30), nếu dài hơn thì bài tự nộp lúc hết giờ bị server từ chối 409.
+  const initialExamSeconds = Math.round((Math.max(1, availableSections.length) * 30 * 60) / 4);
   const latestAnswersRef = useRef(userAnswers);
   const latestOnSubmitRef = useRef(onSubmit);
-  const deadlineMsRef = useRef(deadlineMs);
   const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
@@ -112,73 +111,35 @@ export function ListeningWorkspace({ testData, mode, attemptId, attemptError, se
     latestOnSubmitRef.current = onSubmit;
   }, [onSubmit]);
 
-  useEffect(() => {
-    deadlineMsRef.current = deadlineMs;
-  }, [deadlineMs]);
-
-  useEffect(() => {
-    if (mode !== 'practice') return;
-    if (Object.keys(userAnswers).length === 0) return;
-    try {
-      localStorage.setItem(draftKey, JSON.stringify(userAnswers));
-    } catch {
-      // Ignore storage quota errors
-    }
-  }, [userAnswers, mode, draftKey]);
-
-  const triggerAutoSubmit = () => {
+  const triggerAutoSubmit = useCallback(() => {
     if (autoSubmittedRef.current) return;
     autoSubmittedRef.current = true;
     setExamPhase('expired');
     setIsSubmitModalOpen(false);
-    setTimeout(() => {
-      setIsGrading(true);
-      Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current))
-        .then(() => {
-          try {
-            localStorage.removeItem(draftKey);
-          } catch {
-            // Ignore storage error
-          }
-        })
-        .catch(() => setIsGrading(false));
-    }, 0);
-  };
+    setIsGrading(true);
+    Promise.resolve(latestOnSubmitRef.current(latestAnswersRef.current)).catch(() => {
+      autoSubmittedRef.current = false;
+      setIsGrading(false);
+    });
+  }, []);
+
+  // Hết giờ thi thử: nộp bài mới nhất (server chấm bản đã lưu nếu tới muộn, BR-21)
+  const timerSeconds = useExamCountdown(mode, initialExamSeconds, deadlineMs, triggerAutoSubmit);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (mode !== 'exam') {
-        setTimerSeconds((prev) => prev + 1);
-        return;
-      }
-
-      if (examPhase === 'review') {
-        setReviewSeconds((prev) => {
-          if (prev <= 1) {
-            triggerAutoSubmit();
-            return 0;
-          }
-          return prev - 1;
-        });
-        return;
-      }
-
-      if (examPhase === 'expired') return;
-
-      setTimerSeconds((prev) => {
-        const serverRemaining = deadlineMsRef.current
-          ? Math.max(0, Math.floor((deadlineMsRef.current - Date.now()) / 1000))
-          : prev;
-        const nextVal = Math.min(prev <= 1 ? 0 : prev - 1, serverRemaining);
-        if (nextVal <= 0) {
+    if (mode !== 'exam' || examPhase !== 'review') return;
+    const id = setInterval(() => {
+      setReviewSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(id);
           triggerAutoSubmit();
           return 0;
         }
-        return nextVal;
+        return prev - 1;
       });
     }, 1000);
-    return () => clearInterval(interval);
-  }, [mode, draftKey, examPhase]);
+    return () => clearInterval(id);
+  }, [mode, examPhase, triggerAutoSubmit]);
 
   const handleToggleFlag = (qNumber: number) => {
     setFlaggedQuestions((prev) => ({ ...prev, [qNumber]: !prev[qNumber] }));
@@ -215,11 +176,6 @@ export function ListeningWorkspace({ testData, mode, attemptId, attemptError, se
     setIsGrading(true);
     try {
       await onSubmit(userAnswers);
-      try {
-        localStorage.removeItem(draftKey);
-      } catch {
-        // Ignore storage error
-      }
     } catch {
       setIsGrading(false);
     }
@@ -227,30 +183,14 @@ export function ListeningWorkspace({ testData, mode, attemptId, attemptError, se
 
   const formatTimer = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
+  // Bài đã tự lưu lên server (FR-11): thoát rồi quay lại vẫn làm tiếp được
   const handleSaveDraft = () => {
-    try {
-      localStorage.setItem(draftKey, JSON.stringify(userAnswers));
-      const now = new Date();
-      setDraftSavedNotice(`Đã lưu nháp lúc ${now.toTimeString().slice(0, 8)}`);
-    } catch (e) {
-      console.error("Save draft error:", e);
-    }
     setIsExitModalOpen(false);
     router.push(returnUrl || '/test-practice');
   };
 
   return (
     <div className="flex flex-col h-dvh w-full bg-zinc-50 overflow-hidden relative">
-      {draftSavedNotice && (
-        <div
-          role="status"
-          className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-900 shadow-lg"
-        >
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>{draftSavedNotice}</span>
-        </div>
-      )}
-
       <ListeningWorkspaceHeader
         title={testData.title}
         mode={mode}
@@ -343,11 +283,6 @@ export function ListeningWorkspace({ testData, mode, attemptId, attemptError, se
         onContinue={() => setIsExitModalOpen(false)}
         onExitDiscard={async () => {
           setIsExitModalOpen(false);
-          try {
-            localStorage.removeItem(draftKey);
-          } catch {
-            // Ignore storage error
-          }
           if (mode === 'exam') await onAbandon?.();
           router.push(returnUrl || '/test-practice');
         }}

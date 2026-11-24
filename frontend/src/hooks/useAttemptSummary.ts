@@ -9,6 +9,7 @@ export interface CleanSummaryData {
   time_spent: string;
   submitted_at: string;
   task_formats_result: any[];
+  mode?: string;   // "mock": đề không làm lại được (Mock chọn ngẫu nhiên, không lặp đề)
 }
 
 function formatSubmittedDate(dateStr?: string): string {
@@ -56,6 +57,7 @@ export function useAttemptSummary(attemptId: string | undefined, skill: string) 
         }
         setData({
           title: res.title || `IELTS ${skill === 'reading' ? 'Reading' : 'Listening'} Test`,
+          mode: res.mode,
           overall_band: res.overall_band == null ? null : Number(res.overall_band),
           correct_count: Number(res.correct_count ?? 0),
           total_questions: Number(res.total_questions || 0),

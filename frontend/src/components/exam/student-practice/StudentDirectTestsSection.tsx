@@ -4,6 +4,7 @@ import React from "react";
 import { Search, BookOpen, Headphones, PenTool, Mic, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { StaggerGrid } from "@/components/motion";
 import type { PublishedTestItem } from "@/types/test-practice";
+import type { FacetCounts } from "@/hooks/useStudentPublishedTests";
 import { DirectTestCard } from "./DirectTestCard";
 
 interface StudentDirectTestsSectionProps {
@@ -19,6 +20,9 @@ interface StudentDirectTestsSectionProps {
   setPage: (p: number) => void;
   limit: number;
   loading: boolean;
+  /** Số đề theo từng kỹ năng / độ khó, đã áp các bộ lọc còn lại */
+  skillCounts: FacetCounts;
+  difficultyCounts: FacetCounts;
   onOpenTestPrep: (test: PublishedTestItem) => void;
 }
 
@@ -31,7 +35,7 @@ const SKILL_OPTIONS = [
 ];
 
 const DIFFICULTY_OPTIONS = [
-  { value: "All", label: "Độ khó: Tất cả" },
+  { value: "All", label: "Tất cả" },
   { value: "easy", label: "Dễ" },
   { value: "medium", label: "Vừa" },
   { value: "hard", label: "Khó" },
@@ -50,8 +54,12 @@ export function StudentDirectTestsSection({
   setPage,
   limit,
   loading,
+  skillCounts,
+  difficultyCounts,
   onOpenTestPrep,
 }: StudentDirectTestsSectionProps) {
+  const countOf = (counts: FacetCounts, value: string) => counts[value === "All" ? "All" : value.toLowerCase()] || 0;
+
   const totalPages = Math.ceil(total / limit) || 1;
 
   const getSkillIcon = (s: string) => {
@@ -76,33 +84,67 @@ export function StudentDirectTestsSection({
           </p>
         </div>
         <div className="text-xs font-semibold text-zinc-500">
-          Tổng cộng: <strong className="text-zinc-900">{total}</strong> bài thi
+          Kết quả lọc: <strong className="text-zinc-900">{total}</strong> bài thi
         </div>
       </div>
 
-      {/* Filters Bar & Search — flex-wrap 2 hàng trên viewport nhỏ để không cắt mất Writing/Speaking/Khó */}
-      <div className="flex flex-col gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-zinc-200 shadow-2xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 shrink-0">Độ khó:</span>
-            {DIFFICULTY_OPTIONS.map((opt) => (
+      {/* Bộ lọc: hàng kỹ năng, hàng độ khó + tìm kiếm; xuống dòng thay vì tràn ngang */}
+      <div className="space-y-2.5 bg-white p-3 sm:p-3.5 rounded-2xl border border-zinc-200 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 w-16 shrink-0">Kỹ năng</span>
+          {SKILL_OPTIONS.map((opt) => {
+            const isActive = skill.toLowerCase() === opt.value.toLowerCase();
+            return (
               <button
                 key={opt.value}
-                onClick={() => setDifficulty(opt.value)}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                  difficulty.toLowerCase() === opt.value.toLowerCase()
-                    ? "bg-zinc-800 text-white shadow-xs"
-                    : "bg-zinc-50 text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
+                onClick={() => setSkill(opt.value)}
+                aria-pressed={isActive}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  isActive ? "bg-[#932120] text-white shadow-xs" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                 }`}
               >
-                {opt.label}
+                {opt.value !== "All" && getSkillIcon(opt.value)}
+                <span>{opt.label}</span>
+                <span className={`text-[10px] font-semibold ${isActive ? "text-white/80" : "text-zinc-400"}`}>
+                  {countOf(skillCounts, opt.value)}
+                </span>
               </button>
-            ))}
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 w-16 shrink-0">Độ khó</span>
+            {DIFFICULTY_OPTIONS.map((opt) => {
+              const isActive = difficulty.toLowerCase() === opt.value.toLowerCase();
+              const count = countOf(difficultyCounts, opt.value);
+              const isEmpty = count === 0 && !isActive;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setDifficulty(opt.value)}
+                  disabled={isEmpty}
+                  aria-pressed={isActive}
+                  title={isEmpty ? "Chưa có đề ở mức này" : undefined}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-zinc-800 text-white shadow-xs cursor-pointer"
+                      : isEmpty
+                      ? "bg-zinc-50 text-zinc-300 border border-zinc-100 cursor-not-allowed"
+                      : "bg-zinc-50 text-zinc-600 border border-zinc-200 hover:bg-zinc-100 cursor-pointer"
+                  }`}
+                >
+                  <span>{opt.label}</span>
+                  <span className={`text-[10px] ${isActive ? "text-white/70" : "text-zinc-400"}`}>{count}</span>
+                </button>
+              );
+            })}
           </div>
 
-          <div className="relative w-full md:w-72 shrink-0">
+          <div className="relative w-full lg:w-72 shrink-0">
             <input
-              type="text"
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo tên bài thi..."
@@ -110,24 +152,6 @@ export function StudentDirectTestsSection({
             />
             <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-zinc-100">
-          <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mr-1 shrink-0">Kỹ năng:</span>
-          {SKILL_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setSkill(opt.value)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                skill.toLowerCase() === opt.value.toLowerCase()
-                  ? "bg-[#932120] text-white shadow-xs"
-                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-              }`}
-            >
-              {opt.value !== "All" && getSkillIcon(opt.value)}
-              <span>{opt.label}</span>
-            </button>
-          ))}
         </div>
       </div>
 

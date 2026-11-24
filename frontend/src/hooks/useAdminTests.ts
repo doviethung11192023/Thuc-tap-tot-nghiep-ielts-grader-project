@@ -8,6 +8,7 @@ import {
 } from "@/services/admin-content";
 import type { TestItem, TestSet, SkillType, ContentStatus, AllowedMode } from "@/types/exam";
 import { toast } from "sonner";
+import { apiErrorDetail } from "@/utils/attempt-submission";
 
 interface CacheEntry {
   items: TestItem[];
@@ -94,17 +95,25 @@ export function useAdminTests(testFormat: "full" | "exercise" = "full") {
       toast.success("Cập nhật trạng thái thành công");
       testsCacheMap.clear();
       fetchTests(true);
-    } catch (_) {
-      toast.error("Cập nhật trạng thái thất bại");
+    } catch (err) {
+      // Backend trả lý do cụ thể, ví dụ đề chưa qua kiểm tra trước khi publish (FR-27)
+      toast.error(apiErrorDetail(err) || "Cập nhật trạng thái thất bại", { duration: 8000 });
     }
   };
 
   const handleBulkStatus = async (newStatus: ContentStatus) => {
     if (selectedIds.length === 0) return;
     try {
-      await bulkUpdateTestStatus(selectedIds, newStatus);
-      toast.success(`Đã cập nhật ${selectedIds.length} bài thi thành công!`);
-      setSelectedIds([]);
+      const res = await bulkUpdateTestStatus(selectedIds, newStatus);
+      // Backend cập nhật từng đề; đề không hợp lệ nằm trong res.errors chứ không làm hỏng cả lô
+      const failed: { test_id: string; detail: string }[] = res?.errors || [];
+      const done = selectedIds.length - failed.length;
+      if (done > 0) toast.success(`Đã cập nhật ${done}/${selectedIds.length} bài thi`);
+      if (failed.length > 0) {
+        const titleOf = (id: string) => tests.find((t) => t.id === id)?.title || id;
+        toast.error(failed.map((f) => `${titleOf(f.test_id)}: ${f.detail}`).join("\n"), { duration: 10000 });
+      }
+      setSelectedIds(failed.map((f) => f.test_id));
       testsCacheMap.clear();
       fetchTests(true);
     } catch (_) {

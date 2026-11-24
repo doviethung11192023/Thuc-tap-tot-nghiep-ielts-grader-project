@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, Settings, BookOpen, Headphones, PenTool, Mic, Lock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { prefetchExamContent } from '@/services/exam-content-cache';
+import { startRandomMock, type MockSkill } from '@/services/student-test-practice';
 import { getLearnerExpertQuota } from '@/services/expert';
 import type { LearnerQuota } from '@/types';
 
@@ -26,6 +27,7 @@ export function TestPrepModal({ testId, testTitle, skill, allowedMode = 'both', 
   const [selectedMode, setSelectedMode] = useState<'exam' | 'practice'>(canPractice ? 'practice' : 'exam');
   const mode: 'exam' | 'practice' = !canPractice ? 'exam' : !canMock ? 'practice' : selectedMode;
   const [selectedParts, setSelectedParts] = useState<number[]>(() => getAllParts(skill));
+  const [startError, setStartError] = useState<string | null>(null);
   const [quota, setQuota] = useState<LearnerQuota | null>(null);
 
   useEffect(() => {
@@ -48,11 +50,26 @@ export function TestPrepModal({ testId, testTitle, skill, allowedMode = 'both', 
     setSelectedParts((prev) => (prev.includes(partNum) ? prev.filter((p) => p !== partNum) : [...prev, partNum].sort()));
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const s = skill.toLowerCase();
     const effectiveMode = !canPractice ? 'exam' : !canMock ? 'practice' : mode;
-    const partsParam = (effectiveMode === 'exam' ? getAllParts(skill) : selectedParts).join(',');
-    const base = s === 'speaking' ? `/test-practice/${s}/${testId}?mode=${effectiveMode}` : `/test-practice/${s}/${testId}?mode=${effectiveMode}&parts=${partsParam}`;
+    if (effectiveMode === 'exam') {
+      setStartError(null);
+      // Thi thử: hệ thống chọn ngẫu nhiên một đề Mock chưa làm của kỹ năng này (UC-08)
+      try {
+        const attempt = await startRandomMock(s as MockSkill);
+        const base = `/test-practice/${s}/${attempt.test_id}?mode=exam`;
+        router.push(returnUrl ? `${base}&returnUrl=${encodeURIComponent(returnUrl)}` : base);
+      } catch (err) {
+        const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+        setStartError(typeof detail === 'string' ? detail : 'Không bắt đầu được bài thi thử.');
+      }
+      return;
+    }
+    const partsParam = selectedParts.join(',');
+    const base = s === 'speaking'
+      ? `/test-practice/${s}/${testId}?mode=${effectiveMode}`
+      : `/test-practice/${s}/${testId}?mode=${effectiveMode}&parts=${partsParam}`;
     router.push(returnUrl ? `${base}&returnUrl=${encodeURIComponent(returnUrl)}` : base);
   };
 
@@ -124,8 +141,11 @@ export function TestPrepModal({ testId, testTitle, skill, allowedMode = 'both', 
                 </div>
                 <p className="text-xs text-zinc-500 leading-relaxed">
                   {!canMock ? 'Đề thi này chỉ mở chế độ Luyện tập (Practice).'
-                    : (skill === 'Writing' || skill === 'Speaking') ? `Đếm ngược chuẩn thi thật. Bảo lưu suất Chuyên gia (Còn ${quota?.mock_remaining ?? 2}/2 tuần này).`
-                    : 'Đếm ngược chuẩn thi thật (BR-12). Hết giờ tự nộp, không dùng AI Tutor.'}
+                    : `Hệ thống chọn ngẫu nhiên một đề ${skill} bạn chưa làm, đếm ngược chuẩn thi thật. ${
+                        (skill === 'Writing' || skill === 'Speaking')
+                          ? `Bảo lưu suất Chuyên gia chấm (Còn ${quota?.mock_remaining ?? 2}/2 tuần này).`
+                          : 'Hết giờ tự động nộp bài. Bắt buộc làm toàn bộ các phần.'
+                      }`}
                 </p>
               </button>
             </div>
@@ -169,6 +189,10 @@ export function TestPrepModal({ testId, testTitle, skill, allowedMode = 'both', 
                 </>
               )}
             </div>
+          )}
+
+          {startError && (
+            <p role="alert" className="text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{startError}</p>
           )}
 
           <div className="bg-red-50 border border-red-200/70 rounded-xl p-3 flex items-center gap-3 text-sm text-[#932120]">

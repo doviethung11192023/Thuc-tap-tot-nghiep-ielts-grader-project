@@ -70,7 +70,7 @@ export function GoalSetterModal({ isOpen, onClose, currentGoals, onSave, saving 
       target_reading: Number(targetR),
       target_writing: Number(targetW),
       target_speaking: Number(targetS),
-      test_date: testDate,
+      ...(testDate ? { test_date: testDate } : {}),
     });
     if (success) onClose();
   };

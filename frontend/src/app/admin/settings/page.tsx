@@ -18,6 +18,7 @@ import { SystemSettingsCards } from "@/components/admin/SystemSettingsCards";
 import { AdminExpertGovernanceConfigCard } from "@/components/admin/AdminExpertGovernanceConfigCard";
 import { AdminRoadmapConfigTab } from "@/components/admin/AdminRoadmapConfigTab";
 import { AdminAiTutorConfigTab } from "@/components/admin/AdminAiTutorConfigTab";
+import { apiErrorDetail } from "@/utils/attempt-submission";
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<"band" | "settings" | "roadmap" | "ai_tutor">("band");
@@ -75,9 +76,10 @@ export default function AdminSettingsPage() {
       });
       toast.success("Cập nhật quy đổi điểm thành công!");
     } catch (err: unknown) {
-      toast.error(extractApiErrorMessage(err, "Lỗi khi cập nhật quy đổi điểm"));
-      void reloadAll();   // đưa ô nhập về giá trị đang lưu
+      toast.error(apiErrorDetail(err) || extractApiErrorMessage(err, "Lỗi khi cập nhật quy đổi điểm"));
     }
+    // Luôn tải lại: mã dòng là "skill:raw_min", đổi raw_min thì mã đổi theo; lỗi thì đưa ô nhập về giá trị đang lưu
+    void reloadAll();
   };
 
   const handleSettingSave = async (key: string, value: Record<string, unknown>) => {

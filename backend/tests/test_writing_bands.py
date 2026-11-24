@@ -36,11 +36,35 @@ def test_attempt_band_task2_weighs_double():
 def test_attempt_band_single_task_practice():
     assert attempt_band({2: 7.5}) == 7.5
     assert attempt_band({1: 6.0}) == 6.0
-    assert attempt_band({1: 8.0}, mode="practice") == 8.0
-    assert attempt_band({2: 7.5}, mode="practice") == 7.5
 
 
-def test_attempt_band_mock_missing_task_penalized_zero():
-    assert attempt_band({1: 8.0}, mode="mock") == 2.5    # (8 + 0)/3 = 2.67 -> 2.5
-    assert attempt_band({2: 6.0}, mode="mock") == 4.0    # (0 + 12)/3 = 4.0
-    assert attempt_band({1: 7.0, 2: 6.0}, mode="mock") == 6.5
+def test_attempt_band_blank_task_in_scope_counts_as_zero():
+    # Mở cả bài, chỉ viết Task 1: Task 2 = 0 → (6 + 0) / 3 = 2.0 (BR-04, chốt 2026-11-12)
+    assert attempt_band({1: 6.0}, {1, 2}) == 2.0
+    assert attempt_band({2: 6.0}, {1, 2}) == 4.0          # bỏ Task 1: (0 + 12) / 3
+    assert attempt_band({1: 7.0, 2: 6.0}, {1, 2}) == 6.5  # đủ 2 task: như cũ
+
+
+def test_attempt_band_chosen_single_task_keeps_its_band():
+    assert attempt_band({1: 6.0}, {1}) == 6.0
+    assert attempt_band({2: 7.5}, {2}) == 7.5
+    assert attempt_band({1: 6.0}, set()) == 6.0           # bài cũ chưa ghi phạm vi
+
+
+def test_writing_task_sections_cached_per_test(monkeypatch):
+    """Tự lưu Writing đọc cấu trúc đề một lần; đề chưa có task thì không cache."""
+    from app.services.writing import writing_test_content as content
+    content._task_sections_cache.clear()
+    loads = []
+    tests = {"t1": {"sections": [{"id": "s2", "order_no": 2, "writing_tasks": [{"task_type": "task2"}]},
+                                 {"id": "s1", "order_no": 1, "writing_tasks": [{"task_type": "task1"}]}]},
+             "draft": {"sections": []}}
+    monkeypatch.setattr(content, "load_writing_test", lambda tid: loads.append(tid) or tests[tid])
+
+    first = content.load_writing_task_sections("t1")
+    first[1] = "mutated"
+    assert content.load_writing_task_sections("t1") == {1: "s1", 2: "s2"}
+    content.load_writing_task_sections("draft")
+    content.load_writing_task_sections("draft")
+    assert loads == ["t1", "draft", "draft"]
+    content._task_sections_cache.clear()

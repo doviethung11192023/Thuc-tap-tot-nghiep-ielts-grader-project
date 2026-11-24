@@ -49,7 +49,7 @@ def compute_learner_badges(
     attempts: list[dict[str, Any]],
     streak_data: dict[str, Any],
     goal: dict[str, Any],
-    predicted_band: float,
+    predicted_band: float | None,
     question_type_stats: list[dict[str, Any]] | None = None,
     cfg: dict[str, Any] | None = None,
     answers: list[dict[str, Any]] | None = None,
@@ -91,7 +91,7 @@ def compute_learner_badges(
 
     input_band = float(goal.get("input_band") or 4.0)
     target_overall = float(goal.get("target_overall") or 6.5)
-    overall_delta = round(max(0.0, float(predicted_band) - input_band), 1) if scored else 0.0
+    overall_delta = round(max(0.0, float(predicted_band) - input_band), 1) if (scored and predicted_band is not None) else 0.0
     pb_delta = _max_skill_pb_delta(scored)
     delta_band = max(overall_delta, pb_delta)
 
@@ -113,7 +113,7 @@ def compute_learner_badges(
         _badge("mastery_gold", "mastery", "gold", "Thạo dạng Chuyên sâu", f"Đạt >= {int(min_acc)}% (>= 20 câu/dạng, cách 24h) ở >= {min_types} dạng L/R hoặc >= {min_scored} bài", mg_cur, mg_tgt, mastery_gold_ok),
         _badge("breakthrough_bronze", "breakthrough", "bronze", "Bước nhảy Đầu tiên", f"Tăng >= +{req_delta} Band so với đầu vào hoặc trung bình 5 bài trước", delta_band, req_delta, len(scored) > 0 and delta_band >= req_delta),
         _badge("breakthrough_silver", "breakthrough", "silver", "Chạm ngưỡng Bứt phá", f"Đạt từ Band {req_silver_band} trở lên ở ít nhất 1 kỹ năng", best_skill_band, req_silver_band, best_skill_band >= req_silver_band),
-        _badge("breakthrough_gold", "breakthrough", "gold", "Cán đích Mục tiêu", f"Điểm dự báo chạm/vượt mục tiêu Band {target_overall:.1f}", round(float(predicted_band), 1) if scored else 0.0, target_overall, len(scored) > 0 and float(predicted_band) >= target_overall),
+        _badge("breakthrough_gold", "breakthrough", "gold", "Cán đích Mục tiêu", f"Điểm dự báo chạm/vượt mục tiêu Band {target_overall:.1f}", round(float(predicted_band), 1) if (scored and predicted_band is not None) else 0.0, target_overall, len(scored) > 0 and predicted_band is not None and float(predicted_band) >= target_overall),
     ]
 
     return {

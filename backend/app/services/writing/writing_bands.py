@@ -26,10 +26,10 @@ def task_band(criterion_bands: list[float]) -> float:
     return ielts_round(sum(criterion_bands) / len(criterion_bands))
 
 
-def attempt_band(task_bands: dict[int, float], mode: str = "practice") -> float:
-    """BR-04: Task 2 nặng gấp đôi Task 1; mock bỏ trống 1 task tính 0.0, practice 1 task lấy band task đó."""
-    if 1 in task_bands and 2 in task_bands:
-        return ielts_round((task_bands[1] + 2 * task_bands[2]) / 3)
-    if mode == "mock":
-        return ielts_round((task_bands.get(1, 0.0) + 2 * task_bands.get(2, 0.0)) / 3)
-    return ielts_round(next(iter(task_bands.values())))
+def attempt_band(task_bands: dict[int, float], expected_tasks: Optional[set[int]] = None) -> float:
+    """BR-04: Task 2 nặng gấp đôi Task 1. Task trong phạm vi bài (expected_tasks) mà bỏ trống = band 0;
+    Practice chỉ chọn một task thì lấy band của task đó."""
+    bands = {no: 0.0 for no in expected_tasks or ()} | task_bands
+    if 1 in bands and 2 in bands:
+        return ielts_round((bands[1] + 2 * bands[2]) / 3)
+    return ielts_round(next(iter(bands.values())))
