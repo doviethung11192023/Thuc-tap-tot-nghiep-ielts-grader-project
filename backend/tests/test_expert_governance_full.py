@@ -6,7 +6,7 @@ from fastapi import HTTPException
 import pytest
 from tests.fake_supabase import FakeSupabase
 
-from app.api.endpoints import expert as expert_ep
+from app.services.expert import expert_profile_service
 from app.api.endpoints.student_practice import expert_requests
 from app.core.domain_errors import DomainError
 from app.core.security import User
@@ -38,7 +38,7 @@ def _criteria_payload(comment: str = "Lập luận khá mạch lạc, triển kh
 def _patch_all(monkeypatch, fake: FakeSupabase):
     for mod in (
         expert_policy_config, review_completeness_validator, expert_tier_evaluation_service,
-        penalty_circuit_breaker, sla_cron_service, dispatcher, review_submit_service, expert_ep, expert_requests,
+        penalty_circuit_breaker, sla_cron_service, dispatcher, review_submit_service, expert_profile_service, expert_requests,
     ):
         if hasattr(mod, "db"):
             monkeypatch.setattr(mod, "db", lambda: fake)
@@ -189,18 +189,18 @@ def test_b2_availability_lock_and_tier_cap(monkeypatch):
     _patch_all(monkeypatch, fake)
     user = User(id="e1", email="e1@moonlab.vn", role="expert")
 
-    with pytest.raises(HTTPException) as exc_cd:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(is_available=True), current_user=user))
+    with pytest.raises(DomainError) as exc_cd:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(is_available=True).dict(exclude_unset=True))
     assert exc_cd.value.status_code == 403
 
     fake.tables["expert_profiles"][0].update({"cooldown_until": None, "is_suspended_by_penalty": True})
-    with pytest.raises(HTTPException) as exc_susp:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(is_available=True), current_user=user))
+    with pytest.raises(DomainError) as exc_susp:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(is_available=True).dict(exclude_unset=True))
     assert exc_susp.value.status_code == 403
 
     fake.tables["expert_profiles"][0].update({"is_suspended_by_penalty": False, "tier": "standard"})
-    with pytest.raises(HTTPException) as exc_cap:
-        asyncio.run(expert_ep.update_expert_availability(ExpertAvailabilityUpdate(max_active_reviews=8), current_user=user))
+    with pytest.raises(DomainError) as exc_cap:
+        expert_profile_service.update_expert_availability(user.id, ExpertAvailabilityUpdate(max_active_reviews=8).dict(exclude_unset=True))
     assert exc_cap.value.status_code == 400
 
 
