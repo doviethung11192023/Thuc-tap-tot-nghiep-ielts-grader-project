@@ -164,6 +164,7 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - Đáp án L/R nằm ở bảng riêng, không bao giờ gửi xuống trình duyệt trước khi nộp. Transcript Listening (chứa đáp án) bị thu quyền đọc theo **cột**: Learner gọi thẳng Supabase cũng không đọc được (rà soát 2026-11-09 phát hiện lỗ này).
 - AI engine chỉ chạy trong mạng nội bộ, có secret header, không truy cập DB.
 - Access token kiểm bằng khoá công khai ES256 của Supabase (JWKS), không dùng secret dùng chung: lộ `.env` của backend cũng không ký được token admin; token HS256 hay `alg=none` bị từ chối, có test (ADR-32).
+- Đã tự kiểm thử tấn công thật (2026-11-24, `docs/quality-security-evaluation.md`): IDOR 13/13 trả 404, Learner gọi API Admin/Expert bị 403, RLS chặn tự đổi role; XSS chặn hai lớp: DOMPurify cho HTML đề (22/22 payload bị lọc) và CSP có nonce (mã chèn thẳng vào DOM vẫn không chạy, không `fetch` ra domain lạ được); không có SQL injection. Đã sửa: CORS phản chiếu mọi origin, thiếu header chống clickjacking, open redirect qua `next`/`returnUrl`, lỗi 500 lộ chi tiết. Chấm theo ISO/IEC 25010 + OWASP Top 10: 6,6 → 7,7/10.
 - Giọng nói theo Nghị định 13/2023: xin đồng ý trước lần ghi đầu, bucket riêng tư, link ký ngắn hạn, tự xoá sau 180 ngày.
 
 ## 6. Luồng Expert sát thực tế vận hành (🔧, spec 003)
