@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cpu } from "lucide-react";
+import { Bot } from "lucide-react";
 
 const TABS = [
   { href: "/admin/ai-services", label: "Tổng quan", exact: true },
@@ -25,7 +25,7 @@ export default function AiServicesLayout({ children }: { children: React.ReactNo
       <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-zinc-900 flex items-center gap-2.5">
-            <Cpu className="w-6 h-6 text-[#932120]" />
+            <Bot className="w-6 h-6 text-[#932120]" />
             Service AI
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">Giám sát và cấu hình AI engine chấm bài: sức khoẻ, model, API key, lượt chấm, chi phí, prompt.</p>
