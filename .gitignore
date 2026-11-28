@@ -115,3 +115,6 @@ private/
 tools/browser-automation/node_modules/
 dataset_clean/
 plans/
+
+# Mẫu env cho deploy (chỉ placeholder) — rule env/ ở trên dành cho virtualenv
+!deploy/env/
