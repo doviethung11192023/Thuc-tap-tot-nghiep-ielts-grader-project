@@ -155,7 +155,7 @@ export function extractSentenceForBlank(template?: string, qNum?: number): strin
     if (fromTable) return fromTable;
   }
 
-  let cleaned = template
+  const cleaned = template
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(?:td|th|tr|p|div|li)>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
