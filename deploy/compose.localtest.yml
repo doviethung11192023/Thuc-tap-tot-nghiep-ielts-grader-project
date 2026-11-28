@@ -1,0 +1,49 @@
+# Thử compose.prod.yml trên máy dev, không cần GHCR, torch hay Cloudflare.
+# - fastapi/worker build từ ./backend (tag ielts-localtest/backend:${IMAGE_TAG}), không pull.
+# - ai-engine = máy chủ Python nhỏ chỉ trả /health; cloudflared = busybox sleep.
+# - CHỈ file này publish cổng (127.0.0.1) để smoke test chạy từ máy chủ.
+#
+# Cách chạy (ENV_DIR trỏ tới thư mục chứa backend.env, ai-engine.env giả):
+#   export ENV_DIR=/tmp/ielts-env IMAGE_TAG=local
+#   docker compose -p ielts-lt -f compose.prod.yml -f deploy/compose.localtest.yml \
+#     --env-file deploy/env/compose.env.example up -d --build
+#   EXPECT_CF_BLOCK=0 sh deploy/smoke-test.sh http://127.0.0.1:18000
+services:
+  fastapi:
+    build: ./backend
+    image: ielts-localtest/backend:${IMAGE_TAG}
+    pull_policy: never
+    ports:
+      - "127.0.0.1:${LOCALTEST_PORT:-18000}:8000"
+
+  worker:
+    image: ielts-localtest/backend:${IMAGE_TAG}
+    pull_policy: never
+
+  worker-speaking:
+    image: ielts-localtest/backend:${IMAGE_TAG}
+    pull_policy: never
+
+  ai-engine:
+    image: python:3.11-slim
+    command:
+      - python
+      - -c
+      - |
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+        class H(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200 if self.path == "/health" else 404)
+                self.end_headers()
+                self.wfile.write(b'{"status":"healthy"}')
+        HTTPServer(("0.0.0.0", 8001), H).serve_forever()
+    volumes: !override []
+    mem_limit: 128m
+
+  cloudflared:
+    image: busybox:1.36
+    entrypoint: ["sleep"]
+    command: ["3600"]
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s

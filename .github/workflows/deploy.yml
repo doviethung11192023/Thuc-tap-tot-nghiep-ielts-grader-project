@@ -1,0 +1,157 @@
+name: Deploy
+
+# push main: build -> scan -> (duyệt tay ở Environment production) -> deploy lên VPS.
+# workflow_dispatch + image_tag: deploy lại / rollback tay một tag đã có trên GHCR (bỏ qua build và scan).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag image đã có trên GHCR (SHA đầy đủ) để deploy lại hoặc rollback. Để trống = build từ commit hiện tại."
+        required: false
+        type: string
+
+# Không để hai lượt deploy chồng nhau, và không huỷ lượt đang chạy giữa chừng
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  build-push:
+    name: Build and push (${{ matrix.image }})
+    if: ${{ github.event_name == 'push' || inputs.image_tag == '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - image: ielts-backend
+            context: ./backend
+            build_args: ""
+          - image: ielts-ai-engine
+            context: ./ai-engine
+            build_args: "TORCH_VARIANT=cpu"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Image name (owner viết thường)
+        id: name
+        env:
+          OWNER: ${{ github.repository_owner }}
+          IMAGE: ${{ matrix.image }}
+        run: echo "ref=ghcr.io/${OWNER,,}/${IMAGE}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.name.outputs.ref }}:${{ github.sha }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  scan:
+    name: Trivy (${{ matrix.image }})
+    needs: build-push
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ielts-backend, ielts-ai-engine]
+    steps:
+      - name: Image name (owner viết thường)
+        id: name
+        env:
+          OWNER: ${{ github.repository_owner }}
+          IMAGE: ${{ matrix.image }}
+        run: echo "ref=ghcr.io/${OWNER,,}/${IMAGE}" >> "$GITHUB_OUTPUT"
+
+      # Chặn CRITICAL đã có bản vá; lỗ hổng chưa có bản vá không chặn (không sửa được)
+      - uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ steps.name.outputs.ref }}:${{ github.sha }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          vuln-type: os,library
+
+  deploy:
+    name: Deploy to VPS
+    needs: [build-push, scan]
+    # Dispatch với image_tag: build/scan bị bỏ qua (skipped) nhưng vẫn deploy được
+    if: ${{ !cancelled() && (needs.scan.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.image_tag != '')) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Bật Required reviewers cho Environment này trong GitHub UI (Settings -> Environments)
+    environment: production
+    permissions:
+      contents: read
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      DEPLOY_USER: deploy
+      IMAGE_TAG: ${{ inputs.image_tag != '' && inputs.image_tag || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Kiểm tra tag
+        run: |
+          if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
+            echo "image_tag không hợp lệ" >&2
+            exit 1
+          fi
+
+      - name: Cấu hình SSH (ghim host key, không tắt StrictHostKeyChecking)
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Copy compose và script lên VPS
+        run: |
+          SSH_OPTS=(-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o IdentitiesOnly=yes)
+          scp "${SSH_OPTS[@]}" compose.prod.yml "${DEPLOY_USER}@${VPS_HOST}:/srv/ielts/compose.prod.yml"
+          scp "${SSH_OPTS[@]}" deploy/deploy.sh deploy/smoke-test.sh "${DEPLOY_USER}@${VPS_HOST}:/srv/ielts/deploy/"
+
+      - name: Deploy (có smoke test và tự rollback)
+        run: |
+          SSH_OPTS=(-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o IdentitiesOnly=yes)
+          # Tag đã kiểm regex ở bước trên, nên mở rộng phía client là chủ ý
+          # shellcheck disable=SC2029
+          ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${VPS_HOST}" \
+            "chmod +x /srv/ielts/deploy/*.sh && /srv/ielts/deploy/deploy.sh '${IMAGE_TAG}'"
+
+      - name: Dọn khoá SSH
+        if: ${{ always() }}
+        run: rm -f ~/.ssh/deploy_key
