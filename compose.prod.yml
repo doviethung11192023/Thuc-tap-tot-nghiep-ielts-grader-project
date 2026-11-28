@@ -1,0 +1,169 @@
+# Production stack cho 1 droplet. KHÔNG publish cổng nào: ingress duy nhất là Cloudflare Tunnel
+# (cloudflared kết nối RA ngoài, trỏ public hostname -> http://fastapi:8000).
+# Chạy: docker compose -p ielts -f compose.prod.yml --env-file /srv/ielts/compose.env up -d
+# Biến (compose.env): GHCR_OWNER, IMAGE_TAG, REDIS_PASSWORD, TUNNEL_TOKEN, ENV_DIR (mặc định /srv/ielts).
+# Giới hạn RAM cộng lại ~6,5 GB trên droplet 8 GB (phần còn lại cho OS + swap).
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Cấu hình bảo mật chung: không leo quyền, bỏ mọi capability, rootfs chỉ đọc (ghi vào /tmp tmpfs).
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp
+  restart: unless-stopped
+  logging: *default-logging
+
+x-backend-image: &backend-image
+  image: ghcr.io/${GHCR_OWNER}/ielts-backend:${IMAGE_TAG}
+
+x-backend-env: &backend-env
+  PYTHONDONTWRITEBYTECODE: "1"
+  # Ghi đè REDIS_URL trong env_file để mật khẩu chỉ cần khai báo một chỗ (compose.env)
+  REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+  AI_ENGINE_URL: http://ai-engine:8001/grade
+  AI_ENGINE_SPEAKING_URL: http://ai-engine:8001/grade-speaking
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:2025.11.1
+    command: tunnel --no-autoupdate --metrics 127.0.0.1:60123 run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "--metrics", "127.0.0.1:60123", "ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    mem_limit: 128m
+    <<: *hardening
+
+  fastapi:
+    <<: [*hardening, *backend-image]
+    env_file: ${ENV_DIR:-/srv/ielts}/backend.env
+    environment:
+      <<: *backend-env
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 1g
+
+  # ARQ: chấm Writing + cron (khôi phục lượt chấm bỏ dở, xoá audio 180 ngày...)
+  worker:
+    <<: [*hardening, *backend-image]
+    command: arq app.worker.tasks.WorkerSettings
+    env_file: ${ENV_DIR:-/srv/ielts}/backend.env
+    environment:
+      <<: *backend-env
+      WRITING_CONCURRENCY: ${WRITING_CONCURRENCY:-4}
+    healthcheck:
+      # arq ghi khoá sức khoẻ vào Redis (mặc định mỗi 1 giờ), --check đọc lại khoá đó
+      test: ["CMD", "arq", "--check", "app.worker.tasks.WorkerSettings"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    stop_grace_period: 120s
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 768m
+
+  # ARQ: chấm Speaking, mỗi lần một bài (engine CPU chỉ chạy một bài một lúc)
+  worker-speaking:
+    <<: [*hardening, *backend-image]
+    command: arq app.worker.tasks.SpeakingWorkerSettings
+    env_file: ${ENV_DIR:-/srv/ielts}/backend.env
+    environment:
+      <<: *backend-env
+      SPEAKING_CONCURRENCY: ${SPEAKING_CONCURRENCY:-1}
+    healthcheck:
+      test: ["CMD", "arq", "--check", "app.worker.tasks.SpeakingWorkerSettings"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    stop_grace_period: 300s   # đợi bài Speaking đang chấm xong trước khi dừng
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 768m
+
+  # Chỉ trong mạng nội bộ. CPU: faster-whisper small.en int8.
+  ai-engine:
+    image: ghcr.io/${GHCR_OWNER}/ielts-ai-engine:${IMAGE_TAG}
+    env_file: ${ENV_DIR:-/srv/ielts}/ai-engine.env
+    environment:
+      PORT: "8001"
+      CORE_API_URL: http://fastapi:8000
+      SPEECH_DEVICE: cpu
+      SPEECH_STT_MODEL: small.en
+      SPEECH_STT_COMPUTE_TYPE: int8
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - hf_cache:/home/app/.cache/huggingface
+      - ${ENV_DIR:-/srv/ielts}/reference_corpus:/app/data/reference_corpus:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=5).status == 200 else 1)"]
+      interval: 20s
+      timeout: 8s
+      retries: 5
+      start_period: 120s   # nạp model + spaCy
+    mem_limit: 3500m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # read_only chưa bật: language-tool-python / spaCy có thể ghi vào ~/.cache. Bật sau khi thử trên image thật.
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    logging: *default-logging
+
+  redis:
+    image: redis:7.4.2-alpine
+    user: redis
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --maxmemory 192mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  hf_cache:
+  redis_data:
