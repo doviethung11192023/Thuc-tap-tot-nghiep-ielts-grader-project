@@ -38,7 +38,7 @@ jobs:
             context: ./backend
             build_args: ""
             # Env giả đủ để Core khởi động và trả /health (không gọi Supabase lúc start)
-            smoke_env: "-e SUPABASE_URL=https://ci-dummy.supabase.invalid -e SUPABASE_KEY=ci-dummy -e SUPABASE_JWT_SECRET=ci-dummy-jwt-secret-0123456789abcdef -e AI_ENGINE_SECRET=ci-dummy"
+            smoke_env: "-e SUPABASE_URL=https://ci-dummy.supabase.invalid -e SUPABASE_KEY=ci-dummy -e SUPABASE_JWT_SECRET=ci-dummy-jwt-secret-0123456789abcdef -e AI_ENGINE_SECRET=ci-dummy" # gitleaks:allow (secret giả cho smoke test)
           - image: ielts-ai-engine
             context: ./ai-engine
             build_args: "TORCH_VARIANT=cpu"

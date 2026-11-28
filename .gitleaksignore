@@ -4,3 +4,4 @@
 445771feac68f0ffcdc38c77b1d49ba5560e25ca:backend/tests/test_ai_services_keys.py:generic-api-key:12
 e46982251d5fb9b1c2ee4d0de34d3f95b052edae:frontend/src/hooks/useStudentPublishedTests.ts:generic-api-key:16
 b0c2beb9f8ab72eaf4d8bd9abe5e6894f2495e1a:.github/workflows/ci.yml:generic-api-key:30
+cf6bc2ac3438abc66bb879cac82fd51a0917ba9c:.github/workflows/deploy.yml:generic-api-key:41
