@@ -162,6 +162,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: backend
+          pull: true
           push: false
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
@@ -169,6 +170,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ai-engine
+          pull: true
           push: false
           build-args: |
             TORCH_VARIANT=cpu

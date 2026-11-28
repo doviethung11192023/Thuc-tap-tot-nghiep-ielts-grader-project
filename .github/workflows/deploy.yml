@@ -1,7 +1,7 @@
 name: Deploy
 
-# push main: build -> scan -> (duyệt tay ở Environment production) -> deploy lên VPS.
-# workflow_dispatch + image_tag: deploy lại / rollback tay một tag đã có trên GHCR (bỏ qua build và scan).
+# push main: build -> smoke -> Trivy -> push GHCR -> (duyệt tay ở Environment production) -> deploy lên VPS.
+# workflow_dispatch + image_tag: deploy lại / rollback tay một tag đã có trên GHCR (bỏ qua build).
 on:
   push:
     branches: [main]
@@ -20,11 +20,13 @@ concurrency:
 permissions: {}
 
 jobs:
+  # Kiểm image TRƯỚC khi đẩy lên registry (học từ pipeline Jenkins: smoke rồi mới push):
+  # build vào docker local -> chạy thử tới khi healthy -> Trivy -> push. Image lỗi không bao giờ lên GHCR.
   build-push:
-    name: Build and push (${{ matrix.image }})
+    name: Build, kiểm, push (${{ matrix.image }})
     if: ${{ github.event_name == 'push' || inputs.image_tag == '' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     permissions:
       contents: read
       packages: write
@@ -35,9 +37,12 @@ jobs:
           - image: ielts-backend
             context: ./backend
             build_args: ""
+            # Env giả đủ để Core khởi động và trả /health (không gọi Supabase lúc start)
+            smoke_env: "-e SUPABASE_URL=https://ci-dummy.supabase.invalid -e SUPABASE_KEY=ci-dummy -e SUPABASE_JWT_SECRET=ci-dummy-jwt-secret-0123456789abcdef -e AI_ENGINE_SECRET=ci-dummy"
           - image: ielts-ai-engine
             context: ./ai-engine
             build_args: "TORCH_VARIANT=cpu"
+            smoke_env: "-e ALLOW_NO_SECRET=true -e SPEECH_PRELOAD_MODELS=false"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,9 +53,49 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
           IMAGE: ${{ matrix.image }}
-        run: echo "ref=ghcr.io/${OWNER,,}/${IMAGE}" >> "$GITHUB_OUTPUT"
+        run: echo "ref=ghcr.io/${OWNER,,}/${IMAGE}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
+
+      # pull: luôn lấy base image mới nhất (bản vá OS) thay vì dùng bản cũ trong cache
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          platforms: linux/amd64
+          pull: true
+          load: true
+          push: false
+          tags: ${{ steps.name.outputs.ref }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      - name: Smoke test image (chạy tới khi healthy, không root)
+        env:
+          REF: ${{ steps.name.outputs.ref }}
+          SMOKE_ENV: ${{ matrix.smoke_env }}
+        run: |
+          test "$(docker run --rm --entrypoint whoami "$REF")" != root
+          # shellcheck disable=SC2086 # SMOKE_ENV là danh sách cờ -e cố ý tách từ
+          cid=$(docker run -d $SMOKE_ENV "$REF")
+          for _ in $(seq 1 40); do
+            health=$(docker inspect -f '{{.State.Health.Status}}' "$cid")
+            [ "$health" = healthy ] && break
+            [ "$health" = unhealthy ] && break
+            sleep 5
+          done
+          echo "health=$health"
+          [ "$health" = healthy ] || { docker logs --tail 80 "$cid"; exit 1; }
+          docker rm -f "$cid" >/dev/null
+
+      # Chặn CRITICAL đã có bản vá; lỗ hổng chưa có bản vá không chặn (không sửa được)
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.name.outputs.ref }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          vuln-type: os,library
 
       - uses: docker/login-action@v3
         with:
@@ -58,53 +103,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.context }}
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.name.outputs.ref }}:${{ github.sha }}
-          build-args: ${{ matrix.build_args }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
-
-  scan:
-    name: Trivy (${{ matrix.image }})
-    needs: build-push
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: read
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [ielts-backend, ielts-ai-engine]
-    steps:
-      - name: Image name (owner viết thường)
-        id: name
+      - name: Push
         env:
-          OWNER: ${{ github.repository_owner }}
-          IMAGE: ${{ matrix.image }}
-        run: echo "ref=ghcr.io/${OWNER,,}/${IMAGE}" >> "$GITHUB_OUTPUT"
-
-      # Chặn CRITICAL đã có bản vá; lỗ hổng chưa có bản vá không chặn (không sửa được)
-      - uses: aquasecurity/trivy-action@0.28.0
-        env:
-          TRIVY_USERNAME: ${{ github.actor }}
-          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          image-ref: ${{ steps.name.outputs.ref }}:${{ github.sha }}
-          severity: CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
-          vuln-type: os,library
+          REF: ${{ steps.name.outputs.ref }}
+        run: docker push "$REF"
 
   deploy:
     name: Deploy to VPS
-    needs: [build-push, scan]
+    needs: [build-push]
     # Dispatch với image_tag: build/scan bị bỏ qua (skipped) nhưng vẫn deploy được
-    if: ${{ !cancelled() && (needs.scan.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.image_tag != '')) }}
+    if: ${{ !cancelled() && (needs.build-push.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.image_tag != '')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     # Bật Required reviewers cho Environment này trong GitHub UI (Settings -> Environments)
@@ -155,3 +163,18 @@ jobs:
       - name: Dọn khoá SSH
         if: ${{ always() }}
         run: rm -f ~/.ssh/deploy_key
+
+      # Báo kết quả lên Discord (học từ pipeline công ty). Không đặt secret DISCORD_WEBHOOK thì bỏ qua.
+      - name: Thông báo Discord
+        if: ${{ always() }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RESULT: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "$DISCORD_WEBHOOK" ] || { echo "Chưa đặt DISCORD_WEBHOOK, bỏ qua"; exit 0; }
+          if [ "$RESULT" = success ]; then title="✅ IELTS Grader — deploy thành công"; color=3066993
+          else title="❌ IELTS Grader — deploy thất bại (đã rollback nếu smoke lỗi)"; color=15158332; fi
+          jq -n --arg t "$title" --arg d "Tag: \`${IMAGE_TAG:0:12}\` · [Xem log]($RUN_URL)" --argjson c "$color" \
+            '{embeds: [{title: $t, description: $d, color: $c}]}' \
+            | curl -sS -H "Content-Type: application/json" -X POST -d @- "$DISCORD_WEBHOOK" >/dev/null

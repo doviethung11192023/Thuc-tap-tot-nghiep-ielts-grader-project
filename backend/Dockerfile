@@ -2,6 +2,10 @@
 # compose overrides the command (arq app.worker.tasks.WorkerSettings / SpeakingWorkerSettings) and the healthcheck.
 FROM python:3.11-slim
 
+# Vá lỗ hổng gói hệ điều hành và công cụ pip đi kèm image gốc (Trivy báo libzstd1, wheel, jaraco.context)
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade pip setuptools wheel
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     HOME=/home/app

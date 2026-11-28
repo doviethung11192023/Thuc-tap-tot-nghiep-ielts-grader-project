@@ -36,9 +36,10 @@ FROM python:3.11-slim AS runtime
 
 # Java for language-tool-python (grammar checker). espeak-ng ships inside espeakng-loader and
 # audio decoding uses PyAV (wheels bundle ffmpeg), so no other system packages are needed.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     default-jre-headless \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Non-root user; HOME holds the Hugging Face / language-tool caches (mount a volume on /home/app/.cache to persist)
 RUN groupadd --gid 10001 app \
@@ -51,11 +52,17 @@ ENV HOME=/home/app \
     PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8001
+    PORT=8001 \
+    LTP_PATH=/opt/language_tool \
+    JAVA_TOOL_OPTIONS="-Xms64m -Xmx768m -XX:+UseSerialGC -XX:TieredStopAtLevel=1"
 
 WORKDIR /app
 
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
+# Tải sẵn LanguageTool (~250 MB) lúc build: container khởi động không phải tải từ Internet mỗi lần,
+# healthcheck không bị chậm/chập chờn. Đặt ngoài HOME để volume cache không che mất.
+RUN python -c "from language_tool_python.download_lt import download_lt; download_lt()" \
+    && chmod -R a+rX /opt/language_tool
 # Source (see .dockerignore: no .env, tests, scripts, data)
 COPY --chown=app:app . .
 
