@@ -1,7 +1,8 @@
 # Deploy: việc phải làm và lý do
 
 > **Dùng khi:** chuẩn bị đưa hệ thống lên môi trường công khai (VPS + domain thật). Đọc hết trước khi deploy; mỗi mục ghi *vì sao* để không bỏ sót khi cấu hình khác đi.
-> **Cập nhật lần cuối:** 2026-11-24 (sau đợt vá XSS, clickjacking, open redirect). Đổi gì liên quan deploy thì sửa file này cùng commit.
+> **Cập nhật lần cuối:** 2026-11-28 (có `compose.prod.yml`, CI/CD, runbook `deploy/README.md`). Đổi gì liên quan deploy thì sửa file này cùng commit.
+> **Làm theo thứ tự:** `deploy/README.md` (dựng VPS, Tunnel, GitHub Environment, deploy lần đầu, rollback) → file này (giá trị biến, cấu hình Supabase, lý do).
 > Thiết kế gốc: `docs/source-of-truth.md` §8 (kiến trúc), §9 (bảo mật). Đánh giá bảo mật chi tiết: `docs/quality-security-evaluation.md` (không commit).
 
 Ký hiệu: ⛔ bỏ qua là có lỗ hổng hoặc hỏng chức năng · ⚠️ nên làm · ✅ đã làm sẵn trong code, chỉ cần kiểm.
@@ -57,16 +58,16 @@ Ký hiệu: ⛔ bỏ qua là có lỗ hổng hoặc hỏng chức năng · ⚠�
 | ⛔ Sau khi đã chuyển: **revoke** khoá HS256 "Previous" ở Settings → JWT Keys, bỏ `SUPABASE_JWT_SECRET` khỏi `.env` và `config.py` | Còn trong danh sách "previously used" thì Supabase vẫn chấp nhận token ký HS256. Khoá ký hiện tại đã là ECC P-256 (Core kiểm bằng JWKS) |
 | ⚠️ Bật MFA cho mọi thành viên org (2026-11-24: 3/3 chưa bật) | Tài khoản Dashboard bị chiếm = mất toàn bộ DB và cấu hình Auth |
 
-## 3. Mạng và cổng (`docker-compose.yml` hiện là cấu hình dev)
+## 3. Mạng và cổng (production: `compose.prod.yml`; `docker-compose.yml` chỉ dùng dev)
 
 | Việc | Vì sao |
 |---|---|
-| ⛔ **Chặn `/api/v1/internal/*` từ Internet** (ở reverse proxy, hoặc tách route nội bộ sang cổng không publish) | Route này trả **API key AI đã giải mã**, chỉ bảo vệ bằng `AI_ENGINE_SECRET`. Core phải mở ra Internet, nên lộ secret = lộ mọi key. Chặn ở mạng thì lộ secret không còn đủ |
-| ⛔ **Không publish Redis** (`6379:6379` đang mở trong compose) | Redis không mật khẩu: ai vào được là đọc/ghi hàng đợi chấm |
-| ⛔ **Không publish Phoenix** (`6006`, `4317`) | Trace chứa nội dung bài làm |
+| ✅ **Chặn `/api/v1/internal/*` từ Internet** — lớp 1: rule WAF Cloudflare (tạo tay, xem `deploy/README.md`); lớp 2 có sẵn: `backend/app/core/internal_path_guard.py` trả 404 khi request có `CF-Connecting-IP` | Route này trả **API key AI đã giải mã**, chỉ bảo vệ bằng `AI_ENGINE_SECRET`. Core phải mở ra Internet, nên lộ secret = lộ mọi key. Chặn ở mạng thì lộ secret không còn đủ |
+| ✅ **Không publish Redis**: `compose.prod.yml` không có `ports` nào, Redis có `requirepass` (`REDIS_PASSWORD` trong `compose.env`) | Ai vào được Redis là đọc/ghi hàng đợi chấm |
+| ✅ **Không chạy Phoenix** ở production | Trace chứa nội dung bài làm |
 | ⛔ AI engine không có `ports` | Giữ nguyên như compose hiện tại; chỉ Core và worker gọi tới |
-| ⚠️ Core API đứng sau reverse proxy (Traefik / Cloudflare), không mở thẳng `8000` | TLS, HSTS, rate limit, chặn `/internal` ở một chỗ |
-| ⚠️ Bật HSTS ở reverse proxy | Chặn hạ cấp HTTPS → HTTP |
+| ✅ Core API chỉ vào được qua Cloudflare Tunnel; VPS chỉ mở cổng 22 (khoá SSH, `deploy/bootstrap-vps.sh`) | TLS, WAF, rate limit ở Cloudflare; không lộ IP gốc |
+| ⚠️ Bật HSTS ở Cloudflare (SSL/TLS → Edge Certificates) cho `api.<domain>` | Core không tự đặt header bảo mật nào; JSON API chỉ cần HSTS + `nosniff`, đặt ở Cloudflare (Transform Rules) |
 
 ## 4. Header bảo mật và CSP (đã có trong code, kiểm sau deploy)
 
@@ -85,9 +86,11 @@ Ký hiệu: ⛔ bỏ qua là có lỗ hổng hoặc hỏng chức năng · ⚠�
 
 ## 6. Phụ thuộc
 
-- ⛔ Nâng Next.js ≥ 16.4.6 (advisory critical với 16.2.10 hiện tại), build và kiểm lại giao diện.
+- ✅ Next.js 16.4.6 (2026-11-28). Thư viện AI engine có lỗ hổng đã nâng trong `uv.lock`. CI job `security` chặn lỗ hổng mới (pip-audit, `npm audit` critical, gitleaks; dương tính giả trong `.gitleaksignore`); `deploy.yml` quét image bằng Trivy.
 
 ## 7. Kiểm sau deploy (smoke test)
+
+Phần API chạy tự động: `deploy/smoke-test.sh` (gọi trong `deploy.sh`, smoke fail thì tự rollback về tag trước). Kiểm tay thêm:
 
 ```bash
 D=https://<domain-frontend>
