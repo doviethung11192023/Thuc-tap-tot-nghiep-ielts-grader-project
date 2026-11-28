@@ -1,0 +1,65 @@
+# Lab Jenkins + Portainer CE trên laptop. Chạy: docker compose -f jenkins/compose.yml up -d --build
+# Biến cấu hình đặt trong jenkins/.env (đã bị .gitignore). Bắt buộc: JENKINS_ADMIN_PASSWORD.
+name: ielts-jenkins-lab
+
+services:
+  jenkins:
+    build: .
+    image: ielts-jenkins:lab
+    # CHỈ loopback: UI Jenkins không lộ ra mạng LAN.
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false -Xmx768m"
+      JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID:-admin}
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?Đặt JENKINS_ADMIN_PASSWORD trong jenkins/.env}
+      DOCKERHUB_USER: ${DOCKERHUB_USER:-changeme}
+      DOCKERHUB_TOKEN: ${DOCKERHUB_TOKEN:-changeme}
+      PORTAINER_API_KEY: ${PORTAINER_API_KEY:-changeme}
+      DISCORD_WEBHOOK: ${DISCORD_WEBHOOK:-changeme}
+      PORTAINER_URL: ${PORTAINER_URL:-http://portainer:9000}
+      PORTAINER_STACK: ${PORTAINER_STACK:-ielts-lab}
+      PORTAINER_ENDPOINT_ID: ${PORTAINER_ENDPOINT_ID:-1}
+      # git từ chối repo mount từ ngoài (khác chủ sở hữu); cho phép mọi thư mục (chỉ trong lab, repo mount chỉ đọc)
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      # CẢNH BÁO BẢO MẬT: có docker.sock = quyền root trên daemon Docker (tạo container mount được cả ổ đĩa
+      # VM). Chấp nhận được cho lab laptop, KHÔNG làm vậy trên server dùng chung. Cách an toàn hơn trên
+      # production: agent riêng (VM/docker-in-docker rootless) hoặc socket-proxy chỉ mở các lệnh cần.
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Repo trên laptop, chỉ đọc: để job dùng URL file:///repo khi chưa push lên GitHub.
+      - ${LAB_REPO_DIR:-..}:/repo:ro
+    # Jenkins chạy bằng user jenkins (uid 1000); nhóm 0 cho phép đọc docker.sock trên Docker Desktop
+    # (socket ở đó thuộc root). Trên Linux thuần: đặt DOCKER_GID=$(getent group docker | cut -d: -f3).
+    group_add:
+      - "${DOCKER_GID:-0}"
+    mem_limit: 1500m
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/login"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:2.39.9
+    # -H: tự tạo environment "local" (id 1) nối docker.sock, khỏi bấm wizard "Get Started"
+    command: ["-H", "unix:///var/run/docker.sock"]
+    # CHỈ loopback. 9000 = HTTP (cho Jenkins gọi trong mạng compose, lab), 9443 = HTTPS tự ký (UI).
+    ports:
+      - "127.0.0.1:9443:9443"
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - portainer_data:/data
+      # Cùng cảnh báo docker.sock như trên: Portainer điều khiển daemon, nên API key Portainer = quyền root.
+      - /var/run/docker.sock:/var/run/docker.sock
+    mem_limit: 256m
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+  portainer_data:

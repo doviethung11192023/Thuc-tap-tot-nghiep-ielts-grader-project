@@ -1,0 +1,121 @@
+# Stack cho lab, dán/cập nhật vào Portainer (jenkins/scripts/portainer-deploy.sh làm việc đó).
+# Vì sao không dùng thẳng compose.prod.yml:
+#  - image của prod ở GHCR (ghcr.io/${GHCR_OWNER}/...), lab dùng Docker Hub (${REGISTRY_USER});
+#  - prod đọc env_file /srv/ielts/*.env: Portainer chạy compose trong container của nó nên không thấy file này;
+#  - prod có cloudflared + ai-engine 3,5 GB, quá nặng cho laptop 6 GB.
+# Cùng tên service (fastapi, worker, worker-speaking, ai-engine, redis) và cùng cách harden với compose.prod.yml,
+# nên smoke test (deploy/smoke-test.sh) chạy y như production. Biến Jenkins truyền qua Portainer: IMAGE_TAG, REGISTRY_USER.
+# Trên Droplet (J2): dùng compose.prod.yml đổi 'ghcr.io' thành 'docker.io' và nhúng env vào stack (Portainer có mục Environment).
+
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  restart: unless-stopped
+
+x-backend: &backend
+  <<: *hardening
+  image: docker.io/${REGISTRY_USER}/ielts-backend:${IMAGE_TAG}
+  read_only: true
+  tmpfs:
+    - /tmp
+  environment:
+    # Giá trị giả, đủ để Core khởi động (cùng bộ với smoke test trong CI). KHÔNG dùng secret thật trong lab.
+    SUPABASE_URL: https://lab-dummy.supabase.invalid
+    SUPABASE_KEY: lab-dummy
+    SUPABASE_JWT_SECRET: lab-dummy-jwt-secret-0123456789abcdef
+    AI_ENGINE_SECRET: lab-dummy
+    ENABLE_API_DOCS: "false"
+    PYTHONDONTWRITEBYTECODE: "1"
+    REDIS_URL: redis://:${REDIS_PASSWORD:-lab-redis-password}@redis:6379
+    AI_ENGINE_URL: http://ai-engine:8001/grade
+    AI_ENGINE_SPEAKING_URL: http://ai-engine:8001/grade-speaking
+
+services:
+  fastapi:
+    <<: *backend
+    # Lộ ra loopback laptop để tự curl thử; trên Droplet bỏ dòng này (ingress là Cloudflare Tunnel).
+    ports:
+      - "127.0.0.1:${LAB_API_PORT:-18000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 512m
+
+  worker:
+    <<: *backend
+    command: arq app.worker.tasks.WorkerSettings
+    healthcheck:
+      test: ["CMD", "arq", "--check", "app.worker.tasks.WorkerSettings"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 384m
+
+  worker-speaking:
+    <<: *backend
+    command: arq app.worker.tasks.SpeakingWorkerSettings
+    healthcheck:
+      test: ["CMD", "arq", "--check", "app.worker.tasks.SpeakingWorkerSettings"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      redis:
+        condition: service_healthy
+    mem_limit: 384m
+
+  ai-engine:
+    <<: *hardening
+    image: docker.io/${REGISTRY_USER}/ielts-ai-engine:${IMAGE_TAG}
+    environment:
+      PORT: "8001"
+      CORE_API_URL: http://fastapi:8000
+      ALLOW_NO_SECRET: "true"          # lab: không cần AI_ENGINE_SECRET
+      SPEECH_PRELOAD_MODELS: "false"   # không nạp model Whisper lúc khởi động (nhẹ RAM)
+      SPEECH_DEVICE: cpu
+      PYTHONDONTWRITEBYTECODE: "1"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=5).status == 200 else 1)"]
+      interval: 20s
+      timeout: 8s
+      retries: 5
+      start_period: 120s
+    mem_limit: 2g
+
+  redis:
+    <<: *hardening
+    image: redis:7.4.2-alpine
+    user: redis
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --maxmemory 128mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-lab-redis-password}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:-lab-redis-password}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    read_only: true
+    tmpfs:
+      - /tmp
+    mem_limit: 192m
+
+volumes:
+  redis_data:
