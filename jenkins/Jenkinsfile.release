@@ -1,0 +1,195 @@
+// Jenkins RELEASE pipeline (mẫu Jenkinsfile-master của công ty): chỉ chạy tay, không trigger.
+// Giống công ty: parameters DEPLOY + IMAGE_TAG (mặc định prodDDMMYYYY giờ Asia/Ho_Chi_Minh), options
+//   timestamps/disableConcurrentBuilds/logRotator 30/timeout, ghi image ID bằng docker inspect, chỉ push tag có ngày.
+// Cải tiến so với công ty:
+//   1. IMAGE_TAG validate bằng regex và CẤM tag động (dev, latest, master, main).
+//   2. KHÔNG ghi đè tag đã tồn tại trên Docker Hub: tag đã có = chế độ REDEPLOY (không build/push) -> đây là ROLLBACK:
+//      chạy lại với tag cũ là Portainer kéo đúng image cũ, không build lại từ code hiện tại.
+//   3. Build mới vẫn qua Smoke tới healthy + Trivy trước khi push (công ty không có). Không chạy lại pytest: job dev
+//      đã chạy test trên cùng commit; release phải bấm trên branch/commit đã xanh ở job dev.
+//   4. Deploy dùng stack API của Portainer (cả stack), không curl -k, rồi smoke sau deploy bằng smoke-test.sh.
+
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '30'))
+    timeout(time: 40, unit: 'MINUTES')
+  }
+
+  // Không có triggers: chỉ bấm tay "Build with Parameters".
+  parameters {
+    booleanParam(name: 'DEPLOY', defaultValue: false,
+                 description: 'Deploy lên Portainer sau khi có image (tắt = chỉ build + push tag, deploy tay sau)')
+    string(name: 'IMAGE_TAG', defaultValue: "prod${new Date().format('ddMMyyyy', TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))}",
+           description: 'Tag release (chữ, số, _ . -). Tag đã tồn tại trên Docker Hub = redeploy/rollback, không build lại.')
+  }
+
+  // ---- Cấu hình ở đầu file (xem jenkins/casc.yaml <- jenkins/.env) ----
+  environment {
+    REGISTRY_USER         = "${env.DOCKERHUB_USER}"
+    PORTAINER_URL         = "${env.PORTAINER_URL}"
+    PORTAINER_STACK       = "${env.PORTAINER_STACK}"
+    PORTAINER_ENDPOINT_ID = "${env.PORTAINER_ENDPOINT_ID}"
+    BACKEND_SMOKE_ENV     = '-e SUPABASE_URL=https://ci-dummy.supabase.invalid -e SUPABASE_KEY=ci-dummy -e SUPABASE_JWT_SECRET=ci-dummy-jwt-secret-0123456789abcdef -e AI_ENGINE_SECRET=ci-dummy'
+    ENGINE_SMOKE_ENV      = '-e ALLOW_NO_SECRET=true -e SPEECH_PRELOAD_MODELS=false'
+  }
+
+  stages {
+    stage('Validate') {
+      steps {
+        script {
+          if (!env.REGISTRY_USER || env.REGISTRY_USER == 'null' || env.REGISTRY_USER == 'changeme') {
+            error 'Chưa đặt DOCKERHUB_USER trong jenkins/.env (xem jenkins/README.md)'
+          }
+          if (!(params.IMAGE_TAG ==~ /^[A-Za-z0-9_.-]{1,128}$/)) {
+            error "IMAGE_TAG không hợp lệ: '${params.IMAGE_TAG}'"
+          }
+          if (params.IMAGE_TAG in ['dev', 'latest', 'master', 'main']) {
+            error "IMAGE_TAG '${params.IMAGE_TAG}' là tag động, không dùng cho release"
+          }
+          env.BACKEND_REF = "${env.REGISTRY_USER}/ielts-backend:${params.IMAGE_TAG}"
+          env.ENGINE_REF = "${env.REGISTRY_USER}/ielts-ai-engine:${params.IMAGE_TAG}"
+          currentBuild.description = "${params.IMAGE_TAG}${params.DEPLOY ? ' (deploy)' : ''}"
+        }
+      }
+    }
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+        script { env.GIT_SHA = sh(returnStdout: true, script: 'git rev-parse HEAD').trim() }
+      }
+    }
+
+    // Tag đã có trên Docker Hub (cả 2 image) -> REDEPLOY. Chưa có -> BUILD. Có một trong hai -> dừng (trạng thái lạ).
+    stage('Resolve') {
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-creds') {
+            def b = sh(returnStatus: true, script: 'docker manifest inspect "$BACKEND_REF" >/dev/null 2>&1') == 0
+            def e = sh(returnStatus: true, script: 'docker manifest inspect "$ENGINE_REF" >/dev/null 2>&1') == 0
+            if (b != e) {
+              error "Chỉ một trong hai image có tag ${params.IMAGE_TAG} trên Docker Hub (backend=${b}, ai-engine=${e}); xử lý tay"
+            }
+            env.MODE = b ? 'REDEPLOY' : 'BUILD'
+          }
+          echo "Chế độ: ${env.MODE} (commit ${env.GIT_SHA})"
+          if (env.MODE == 'REDEPLOY' && !params.DEPLOY) {
+            error "Tag ${params.IMAGE_TAG} đã tồn tại và DEPLOY đang tắt: không có gì để làm (không ghi đè tag)"
+          }
+        }
+      }
+    }
+
+    stage('Build') {
+      when { expression { env.MODE == 'BUILD' } }
+      steps {
+        sh '''
+          docker build --pull -t "$BACKEND_REF" backend
+          docker build --pull --build-arg TORCH_VARIANT=cpu -t "$ENGINE_REF" ai-engine
+          # Ghi image ID (như công ty) để đối chiếu sau này
+          {
+            echo "git_sha=$GIT_SHA"
+            echo "$BACKEND_REF $(docker inspect --format '{{.Id}}' "$BACKEND_REF")"
+            echo "$ENGINE_REF $(docker inspect --format '{{.Id}}' "$ENGINE_REF")"
+          } | tee image-ids.txt
+        '''
+        archiveArtifacts artifacts: 'image-ids.txt'
+      }
+    }
+
+    stage('Smoke image') {
+      when { expression { env.MODE == 'BUILD' } }
+      steps {
+        sh '''
+          # shellcheck disable=SC2086
+          jenkins/scripts/smoke-image.sh "$BACKEND_REF" $BACKEND_SMOKE_ENV
+          # shellcheck disable=SC2086
+          jenkins/scripts/smoke-image.sh "$ENGINE_REF" $ENGINE_SMOKE_ENV
+        '''
+      }
+    }
+
+    stage('Trivy') {
+      when { expression { env.MODE == 'BUILD' } }
+      steps {
+        sh '''
+          jenkins/scripts/trivy-scan.sh "$BACKEND_REF"
+          jenkins/scripts/trivy-scan.sh "$ENGINE_REF"
+        '''
+      }
+    }
+
+    // Chỉ push tag có ngày, không có :latest hay :dev (khác ':dev' mutable của job dev)
+    stage('Push Docker Hub') {
+      when { expression { env.MODE == 'BUILD' } }
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-creds') {
+            sh '''
+              docker push "$BACKEND_REF"
+              docker push "$ENGINE_REF"
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Deploy Portainer') {
+      when { expression { params.DEPLOY } }
+      steps {
+        withCredentials([string(credentialsId: 'portainer-api-key', variable: 'PORTAINER_API_KEY')]) {
+          withEnv(["IMAGE_TAG=${params.IMAGE_TAG}"]) {
+            sh 'jenkins/scripts/portainer-deploy.sh'
+          }
+        }
+      }
+    }
+
+    stage('Post-deploy smoke') {
+      when { expression { params.DEPLOY } }
+      steps {
+        withEnv(["IMAGE_TAG=${params.IMAGE_TAG}"]) {
+          sh 'jenkins/scripts/post-deploy-smoke.sh "$PORTAINER_STACK" "$IMAGE_TAG"'
+        }
+      }
+    }
+  }
+
+  post {
+    success { script { notifyDiscord('success') } }
+    failure { script { notifyDiscord('failure') } }
+    // cleanup chạy sau success/failure; dọn image local nếu có build
+    cleanup {
+      sh 'docker rmi "$BACKEND_REF" "$ENGINE_REF" || true'
+      cleanWs()
+    }
+  }
+}
+
+// Discord embed. Lặp lại từ Jenkinsfile gốc (2 file độc lập, không dùng shared library).
+def notifyDiscord(String status) {
+  def ok = status == 'success'
+  withCredentials([string(credentialsId: 'discord-webhook-token', variable: 'DISCORD_HOOK')]) {
+    withEnv([
+      "D_TITLE=${ok ? 'IELTS Grader RELEASE: thành công' : 'IELTS Grader RELEASE: thất bại'}",
+      "D_COLOR=${ok ? 3066993 : 15158332}",
+      "D_DESC=Tag `${params.IMAGE_TAG}` (${env.MODE ?: 'chưa xác định'}${params.DEPLOY ? ', deploy' : ''}) - build #${env.BUILD_NUMBER} - [Xem log](${env.BUILD_URL})"
+    ]) {
+      sh '''
+        set +x
+        case "$DISCORD_HOOK" in
+          changeme|"") echo "Chưa cấu hình DISCORD_WEBHOOK, bỏ qua"; exit 0 ;;
+          http*) url="$DISCORD_HOOK" ;;
+          *) url="https://discord.com/api/webhooks/$DISCORD_HOOK" ;;
+        esac
+        jq -n --arg t "$D_TITLE" --arg d "$D_DESC" --argjson c "$D_COLOR" \
+          '{embeds: [{title: $t, description: $d, color: $c}]}' \
+          | curl -sS -H "Content-Type: application/json" -X POST -d @- "$url" >/dev/null || echo "Gửi Discord lỗi (bỏ qua)"
+      '''
+    }
+  }
+}

@@ -1,0 +1,54 @@
+# Jenkins Configuration as Code (JCasC): cấu hình Jenkins bằng file, nạp mỗi lần khởi động.
+# Giá trị nhạy cảm đọc từ biến môi trường (compose lấy từ jenkins/.env, đã bị .gitignore).
+jenkins:
+  systemMessage: "Lab Jenkins - IELTS Grader (dựng bằng code, xem jenkins/README.md)"
+  numExecutors: 2
+  # Không có setup wizard (đã tắt bằng -Djenkins.install.runSetupWizard=false); tài khoản tạo ở đây.
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID:-admin}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  globalNodeProperties:
+    # Cấu hình chung cho Jenkinsfile (đọc bằng env.X). Công ty hay hardcode trong Jenkinsfile;
+    # tách ra đây để cùng một Jenkinsfile chạy được trên laptop lẫn Droplet (J2) chỉ bằng đổi .env.
+    - envVars:
+        env:
+          - key: "DOCKERHUB_USER"
+            value: "${DOCKERHUB_USER:-changeme}"
+          - key: "PORTAINER_URL"
+            value: "${PORTAINER_URL:-http://portainer:9000}"
+          - key: "PORTAINER_STACK"
+            value: "${PORTAINER_STACK:-ielts-lab}"
+          - key: "PORTAINER_ENDPOINT_ID"
+            value: "${PORTAINER_ENDPOINT_ID:-1}"
+
+unclassified:
+  location:
+    url: "http://127.0.0.1:8080/"
+
+# Credentials: ID khớp đúng tên Jenkinsfile dùng. Giá trị mặc định là PLACEHOLDER; điền giá trị thật vào jenkins/.env.
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "docker-hub-creds"
+              description: "Docker Hub (username + access token)"
+              username: "${DOCKERHUB_USER:-changeme}"
+              password: "${DOCKERHUB_TOKEN:-changeme}"
+          - string:
+              scope: GLOBAL
+              id: "portainer-api-key"
+              description: "Portainer API key (X-API-Key)"
+              secret: "${PORTAINER_API_KEY:-changeme}"
+          - string:
+              scope: GLOBAL
+              id: "discord-webhook-token"
+              description: "Discord webhook URL (hoặc phần id/token)"
+              secret: "${DISCORD_WEBHOOK:-changeme}"
