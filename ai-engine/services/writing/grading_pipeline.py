@@ -4,7 +4,7 @@ Grading pipeline orchestration for IELTS Writing Task 1 and Task 2.
 Phases:
   A  preprocess (sentences / paragraphs / word count)
   B  NLP tools — Task 2: task-type classifier; Task 1: vision chart describer;
-     both: LanguageTool grammar + spaCy lexical stats
+     both: spaCy lexical stats
   C  Langfuse criterion prompts
   D  four criterion agents in parallel (TA/CC/LR/GRA)
   E/F synthesis, inline annotations, upgraded essay
@@ -32,7 +32,6 @@ from services.writing.task2_reference_pipeline import run_task2_reference_pipeli
 from services.writing.reference_corpus import ReferenceCorpusError
 from services.writing.task1_type_knowledge import get_task1_type
 from services.writing.task_type_classifier import classify_task_type
-from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from utils.preprocessor import preprocess
 
@@ -49,9 +48,8 @@ def normalize_task(task_type: str | None) -> WritingTask:
 
 
 def warm_up_nlp_tools() -> None:
-    """Load LanguageTool (Java server) and spaCy once at startup instead of on the first request."""
+    """Load spaCy once at startup instead of on the first request."""
     sample = preprocess(EssayInput(title="warm up", essay="This is a short warm up sentence."))
-    check_grammar(sample)
     compute_lexical(sample)
 
 
@@ -85,28 +83,21 @@ async def run_grading_pipeline(
     visual = None
     key = parse_key_or_none(answer_key) if task == "task1" else None
     if key:   # approved answer key: no image reading (spec 006, ADR-30)
-        grammar_findings, lex_result = await asyncio.gather(
-            asyncio.to_thread(check_grammar, processed),
-            asyncio.to_thread(compute_lexical, processed),
-        )
+        lex_result = await asyncio.to_thread(compute_lexical, processed)
         task_type_result: TaskTypeResult = get_task1_type(key.visual_type)
     elif task == "task1":
         visual_job = describe_chart(title, image_url, get_prompt_manager())
-        visual, grammar_findings, lex_result = await asyncio.gather(
+        visual, lex_result = await asyncio.gather(
             visual_job,
-            asyncio.to_thread(check_grammar, processed),
             asyncio.to_thread(compute_lexical, processed),
         )
         task_type_result = get_task1_type(visual.chart_type)
     else:
-        task_type_result, grammar_findings, lex_result = await asyncio.gather(
+        task_type_result, lex_result = await asyncio.gather(
             asyncio.to_thread(classify_task_type, processed.title),
-            asyncio.to_thread(check_grammar, processed),
             asyncio.to_thread(compute_lexical, processed),
         )
-    logger.info(
-        "[Phase B] ✓ type=%s | grammar issues=%d", task_type_result.task_type, len(grammar_findings)
-    )
+    logger.info("[Phase B] ✓ type=%s", task_type_result.task_type)
 
     visual_text = key.to_prompt_text() if key else (visual.to_prompt_text() if visual else "")
 
@@ -115,7 +106,6 @@ async def run_grading_pipeline(
         build_criterion_prompts,
         processed=processed,
         task_type=task_type_result,
-        grammar_findings=grammar_findings,
         lex_result=lex_result,
         task=task,
         visual_description=visual_text,

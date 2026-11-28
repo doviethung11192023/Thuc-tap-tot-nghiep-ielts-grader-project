@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
         else:
             logger.error("AI_ENGINE_SECRET is not set: /grade, /grade-speaking, /draft-material will return 503")
     try:
-        logger.info("Warming up LanguageTool + spaCy...")
+        logger.info("Warming up spaCy...")
         await asyncio.to_thread(warm_up_nlp_tools)
         logger.info("NLP tools ready")
     except Exception as e:  # first request will retry the lazy initialisation

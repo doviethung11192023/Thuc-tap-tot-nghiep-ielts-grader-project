@@ -29,7 +29,7 @@ def test_engine_down_marks_dependent_rows_unknown(client, fake_engine):
     rows = _by_name(response)
     assert rows["ai_engine"]["status"] == "error"
     assert {r["status"] for n, r in rows.items() if n != "ai_engine"} == {"unknown"}
-    assert len(rows) == 8 and not fake_engine.by_path("/admin/services/health")
+    assert len(rows) == 7 and not fake_engine.by_path("/admin/services/health")
 
 
 def test_engine_timeout_is_reported_as_timeout(client, fake_engine):

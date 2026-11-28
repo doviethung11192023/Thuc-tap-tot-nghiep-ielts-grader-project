@@ -2,7 +2,7 @@
 Intermediate data models produced by the pre-processing stage.
 
 These types are the single source of truth for character offsets used by
-every downstream tool (Grammar checker, Dependency parser, Lexical stats,
+every downstream tool (Dependency parser, Lexical stats,
 Collocation lookup).  All span tuples are (char_start, char_end) into the
 original ``essay_raw`` string — half-open interval, i.e. ``essay_raw[start:end]``.
 """
@@ -84,36 +84,6 @@ class ProcessedEssay:
     paragraphs: list[Paragraph]
     word_count: int
 
-
-# ── GrammarFinding ───────────────────────────────────────────────────────────────────
-
-@dataclass
-class GrammarFinding:
-    """
-    One grammar or spelling issue detected by LanguageTool (D1).
-
-    All span offsets reference ``ProcessedEssay.essay_raw``.
-
-    Attributes
-    ----------
-    span        : (char_start, char_end) — half-open interval into essay_raw.
-    error_type  : ``"GRAMMAR"`` | ``"SPELLING"``.
-                  Phase 5 uses this to route findings to the correct criterion
-                  prompt: GRAMMAR → GRA, SPELLING → LR, STYLE → discarded.
-    rule_id     : LanguageTool rule identifier (e.g. ``"MORFOLOGIK_RULE_EN_US"``
-                  for spelling, ``"THIS_NNS"`` for subject–verb agreement).
-    message     : Human-readable explanation of the issue.
-    suggestions : Up to 3 suggested replacements (may be empty).
-    context     : ~40-char excerpt around the error, provided by LanguageTool.
-    sentence    : Full sentence containing the error.
-    """
-    span: tuple[int, int]
-    error_type: str          # "GRAMMAR" | "SPELLING"
-    rule_id: str
-    message: str
-    suggestions: list[str]
-    context: str
-    sentence: str
 
 # ── D3: Lexical Stats Engine ───────────────────────────────────────────────────
 

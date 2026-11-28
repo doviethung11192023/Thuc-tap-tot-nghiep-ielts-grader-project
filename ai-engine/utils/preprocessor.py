@@ -4,7 +4,7 @@ Pre-processing stage: paragraph split, sentence split, word count.
 Pipeline position:
     EssayInput
         └─► preprocess(input) → ProcessedEssay
-                └─► [D1 Grammar, D2 DepParse, D3 Lexical, D4 Colloc, Retrieval]  (parallel)
+                └─► [D2 DepParse, D3 Lexical, D4 Colloc, Retrieval]  (parallel)
 
 Dependencies
 ------------

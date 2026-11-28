@@ -55,7 +55,7 @@ Cả 4 tiêu chí ra 4,0, kèm lý do và lời nhắc thu lại. Trước khi c
 
 | | PREP (suy luận) | Hệ thống của nhóm |
 |---|---|---|
-| Lỗi GRA/LR | GEC đánh dấu từng chỗ sửa, giải thích bằng template | LLM chấm từ bằng chứng (grammar checker, thống kê từ vựng) |
+| Lỗi GRA/LR | GEC đánh dấu từng chỗ sửa, giải thích bằng template | LLM chấm từ bằng chứng (thống kê từ vựng; tự tìm lỗi ngữ pháp, chính tả) |
 | Band | Model huấn luyện trên dữ liệu lớn | LLM cho FC/LR/GRA, code tính P (ADR-21) |
 | Phát âm | Từng từ và trọng âm | Độ tin cậy nhận dạng và ngữ điệu, gắn nhãn ước lượng |
 | Lạc đề | Không thấy bằng chứng trong bài mẫu | FC nhận câu hỏi để xét lạc đề, có trần điểm |
@@ -231,7 +231,7 @@ Nhóm tải audio demo công khai của PREP (WAV 16 kHz, 73 s) và chạy qua p
 - **Mỗi lượt chấm một trace**, nhóm theo attempt; mỗi lần gọi LLM trong trace mang tên prompt (`writing/common/cc`...) và nối với phiên bản prompt. Đo trên một bài Task 2 thật: 1 span + 5 lần gọi, **tổng token trong trace khớp đúng** số engine trả về để tính chi phí (11 451 vào / 5 626 ra).
 - **Admin đổi model, tham số, API key trong app, không khởi động lại gì**; **bắt gọi thử trước khi lưu**: thử với model không tồn tại → DashScope trả `model_not_found`, key sai → `invalid_api_key`, cả hai đều không được lưu. Có hiệu lực ≤ 60 s; lượt đang chạy giữ cấu hình đã lấy.
 - **Key không bao giờ ra khỏi server dạng rõ**: mã hoá Fernet trong bảng không có policy RLS, audit chỉ ghi 4 ký tự cuối; quét log Core và log engine sau các lần gọi thử: 0 lần xuất hiện; test tự động quét response và audit của luồng thay key (SC-011).
-- **Sức khoẻ 7 service** (LLM, Jev, Langfuse, Whisper, wav2vec2, LanguageTool, đồng bộ cấu hình) trong 1,5 s, không nạp model vài GB chỉ để kiểm.
+- **Sức khoẻ 6 service** (LLM, Jev, Langfuse, Whisper, wav2vec2, đồng bộ cấu hình) trong 1,5 s, không nạp model vài GB chỉ để kiểm.
 - **Chạy lại chấm** 1 hoặc ≤ 50 bài, luôn tạo evaluation mới (không ghi đè, constitution II); test SQL 30/30 trên Supabase thật, gồm "bấm chạy lại hai lần liên tiếp thì lần sau bị bỏ qua".
 - **Tìm nguyên nhân AI lệch Expert**: chênh lệch chia theo phiên bản prompt, model, dạng đề, khoảng band; trang so sánh hai cột trên cùng bài (63/63 vị trí lỗi khớp văn bản); độ lệch gửi lên trace dạng score để lọc ngay trên Langfuse.
 - **Lỗi tìm ra khi kiểm với dịch vụ thật** (nên kể, cho thấy quy trình): API cấp thấp của Langfuse SDK không mã hoá `/` trong tên prompt (danh sách prompt rỗng, test mock không bắt được); Langfuse Cloud gỡ API đọc trace v1 ngày 2026-11-16; route Admin gọi DB đồng bộ trong `async def` chặn cả API (chạy lại 50 bài ≈ 15 s đứng) → sau sửa, route nhẹ vẫn 1–4 ms khi route Admin chậm nhất đang chạy.
