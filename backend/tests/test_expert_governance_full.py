@@ -207,6 +207,16 @@ def test_b2_availability_lock_and_tier_cap(monkeypatch):
 
 def test_b1_b5_progressive_penalties_pool_guard_reminders_and_waive(monkeypatch):
     now = datetime.now(TZ_VN)
+    # Nhắc SLA tính theo giờ làm việc: cố định "bây giờ" vào sáng thứ Tư để 5 giờ thật = 5 giờ làm việc
+    # (dùng giờ thật thì chạy ban đêm/cuối tuần ra 0 giờ làm việc và không gửi nhắc nào).
+    sla_now = datetime(2026, 3, 4, 8, 30, tzinfo=TZ_VN)
+
+    class _FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return sla_now if tz is None else sla_now.astimezone(tz)
+
+    monkeypatch.setattr(sla_cron_service, "datetime", _FrozenDatetime)
     fake = FakeSupabase(
         system_settings=[{"key": "expert_cooldown_min_active_pool", "value": {"value": 3}}],
         profiles=[
@@ -223,7 +233,7 @@ def test_b1_b5_progressive_penalties_pool_guard_reminders_and_waive(monkeypatch)
             {"user_id": "e4", "is_available": True, "max_active_reviews": 5, "tier": "standard"},
         ],
         review_assignments=[
-            {"id": "rem1", "attempt_id": "at1", "expert_id": "e2", "due_at": (now + timedelta(hours=5)).isoformat(), "ended_at": None, "reminder_stage": 0},
+            {"id": "rem1", "attempt_id": "at1", "expert_id": "e2", "due_at": (sla_now + timedelta(hours=5)).isoformat(), "ended_at": None, "reminder_stage": 0},
         ],
         expert_penalties=[],
         expert_helpfulness_ratings=[],
