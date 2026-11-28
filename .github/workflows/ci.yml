@@ -37,7 +37,8 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
-      - run: pytest tests -q
+      # python -m để thư mục backend/ nằm trong sys.path (import app)
+      - run: python -m pytest tests -q
 
   ai-engine:
     name: AI engine (pytest)
@@ -52,6 +53,8 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: ai-engine/uv.lock
+          # Khớp image production (python:3.11-slim); runner mặc định 3.14 thì spacy không có wheel
+          python-version: "3.11"
       # Test KHÔNG cần torch: code import torch/transformers bên trong hàm (lazy) và
       # test speaking mock tầng này. Đo cục bộ: bỏ torch + triton + toàn bộ cuda/nvidia
       # (lock kéo ~43 gói CUDA, hàng GB) thì sync còn ~1,1 GB / 33 s lần đầu,
