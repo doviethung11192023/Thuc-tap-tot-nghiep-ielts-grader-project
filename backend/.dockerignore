@@ -1,0 +1,17 @@
+# Only requirements.txt and app/ are copied by the Dockerfile; this keeps the build context small and secret-free.
+.env
+.env.*
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+tests/
+integration_tests/
+uploads/
+scripts/
+*.log
+Dockerfile
+.dockerignore

@@ -38,8 +38,24 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-WRITING_CONCURRENCY = 4
-SPEAKING_CONCURRENCY = 1
+
+def read_concurrency(env_name: str, default: int) -> int:
+    """Số job chạy song song của worker, đọc từ biến môi trường; không phải số nguyên >= 1 thì dùng mặc định."""
+    raw = os.getenv(env_name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 0
+    if value < 1:
+        logger.warning("%s=%r không hợp lệ (cần số nguyên >= 1), dùng mặc định %d", env_name, raw, default)
+        return default
+    return value
+
+
+WRITING_CONCURRENCY = read_concurrency("WRITING_CONCURRENCY", 4)
+SPEAKING_CONCURRENCY = read_concurrency("SPEAKING_CONCURRENCY", 1)
 _redis_settings = RedisSettings.from_dsn(os.getenv("REDIS_URL", "redis://localhost:6379"))
 
 

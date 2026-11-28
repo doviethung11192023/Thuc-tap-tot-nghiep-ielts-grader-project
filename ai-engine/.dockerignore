@@ -11,10 +11,11 @@ __pycache__/
 venv/
 env/
 
-# Environment secrets
+# Secrets (keep .env.example out too: nothing needs it at runtime)
 .env
+.env.*
 
-# Test/debug outputs (không cần thiết trên server)
+# Test/debug outputs
 test_final_output.json
 4_llms_feedback.json
 raw_llm.json
@@ -22,13 +23,15 @@ result.html
 test_visualization.html
 *.ipynb
 
-# Data files & logs
+# Data (reference corpus is mounted at runtime) and logs
 data/
-logs/*.log
+logs/
 *.log
 
-# Dev scripts & tests
+# Dev scripts, tests, caches
 scripts/
 tests/
 .pytest_cache/
 .ruff_cache/
+Dockerfile
+.dockerignore
