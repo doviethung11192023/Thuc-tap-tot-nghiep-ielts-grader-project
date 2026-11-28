@@ -1,0 +1,179 @@
+# CI: chạy mỗi PR và mỗi push lên main / feat/**. 5 job song song, không cần secret thật.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, "feat/**"]
+  workflow_dispatch:
+
+# Lượt mới trên cùng ref huỷ lượt cũ đang chạy
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    # Giá trị giả, chỉ để Settings() khởi tạo được. Không có .env trong repo sạch.
+    env:
+      SUPABASE_URL: https://ci-dummy.supabase.invalid
+      SUPABASE_KEY: ci-dummy-supabase-key
+      SUPABASE_JWT_SECRET: ci-dummy-jwt-secret-0123456789abcdef
+      AI_ENGINE_SECRET: ci-dummy-engine-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pytest tests -q
+
+  ai-engine:
+    name: AI engine (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ai-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: ai-engine/uv.lock
+      # Test KHÔNG cần torch: code import torch/transformers bên trong hàm (lazy) và
+      # test speaking mock tầng này. Đo cục bộ: bỏ torch + triton + toàn bộ cuda/nvidia
+      # (lock kéo ~43 gói CUDA, hàng GB) thì sync còn ~1,1 GB / 33 s lần đầu,
+      # 318 test chạy 7 s. Bản đầy đủ có torch CPU/CUDA chỉ cần ở job docker-build.
+      # Nếu lock đổi tên gói nvidia-*, gói thừa chỉ làm sync nặng hơn chứ không làm hỏng.
+      - name: Cài phụ thuộc (không torch/CUDA)
+        run: |
+          uv sync --frozen \
+            --no-install-package torch --no-install-package triton \
+            --no-install-package cuda-bindings --no-install-package cuda-pathfinder \
+            --no-install-package cuda-toolkit \
+            --no-install-package nvidia-cublas --no-install-package nvidia-cuda-cccl \
+            --no-install-package nvidia-cuda-cupti --no-install-package nvidia-cuda-nvrtc \
+            --no-install-package nvidia-cuda-runtime --no-install-package nvidia-cudnn-cu13 \
+            --no-install-package nvidia-cufft --no-install-package nvidia-cufile \
+            --no-install-package nvidia-cusolver --no-install-package nvidia-cusparse \
+            --no-install-package nvidia-cusparselt-cu13 --no-install-package nvidia-nccl-cu13 \
+            --no-install-package nvidia-nvjitlink --no-install-package nvidia-nvshmem-cu13 \
+            --no-install-package nvidia-nvtx
+      - run: uv run --frozen --no-sync pytest tests -q
+
+  frontend:
+    name: Frontend (lint, tsc, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    # Biến NEXT_PUBLIC_* đọc lúc build (grep trong src và next.config.ts); giá trị giả
+    env:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-dummy.supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-dummy-anon-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run check:structure
+      - run: npm run build
+
+  security:
+    name: Security (secret scan, audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITLEAKS_VERSION: "8.24.0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # quét cả lịch sử commit
+      # Chạy CLI tải về (kiểm sha256) thay vì gitleaks-action vì action đòi license với org
+      - name: Quét secret (gitleaks)
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$tarball" "$base/$tarball"
+          curl -sSfL -o "$RUNNER_TEMP/checksums.txt" "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          (cd "$RUNNER_TEMP" && grep " $tarball\$" checksums.txt | sha256sum -c -)
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$RUNNER_TEMP" gitleaks
+          # Dương tính giả đã duyệt (khoá giả trong test, hằng số cache key); không thêm file vào repo
+          printf '%s\n' \
+            '445771feac68f0ffcdc38c77b1d49ba5560e25ca:backend/tests/test_ai_services_engine_client.py:generic-api-key:46' \
+            '445771feac68f0ffcdc38c77b1d49ba5560e25ca:backend/tests/test_ai_services_keys.py:generic-api-key:12' \
+            'e46982251d5fb9b1c2ee4d0de34d3f95b052edae:frontend/src/hooks/useStudentPublishedTests.ts:generic-api-key:16' \
+            > "$RUNNER_TEMP/ignore-fingerprints"
+          "$RUNNER_TEMP/gitleaks" detect --source . --no-banner --redact \
+            --gitleaks-ignore-path "$RUNNER_TEMP/ignore-fingerprints"
+      - uses: actions/setup-python@v5
+        if: ${{ !cancelled() }}
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v6
+        if: ${{ !cancelled() }}
+      # requirements.txt không ghim phiên bản: pip-audit tự resolve rồi kiểm
+      - name: pip-audit backend
+        if: ${{ !cancelled() }}
+        run: |
+          pip install pip-audit
+          pip-audit -r backend/requirements.txt
+      # ai-engine: xuất từ uv.lock (đã ghim); bỏ en-core-web-sm (URL, không phải gói PyPI)
+      - name: pip-audit ai-engine
+        if: ${{ !cancelled() }}
+        working-directory: ai-engine
+        run: |
+          uv export --frozen --no-dev --no-emit-project --no-hashes -o "$RUNNER_TEMP/ai-req.txt"
+          grep -v '^en-core-web-sm' "$RUNNER_TEMP/ai-req.txt" > "$RUNNER_TEMP/ai-req-audit.txt"
+          pip-audit -r "$RUNNER_TEMP/ai-req-audit.txt" --no-deps --disable-pip
+      - uses: actions/setup-node@v4
+        if: ${{ !cancelled() }}
+        with:
+          node-version: 22
+      - name: npm audit frontend
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: npm audit --audit-level=critical --omit=dev
+
+  docker-build:
+    name: Docker build (không push)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: false
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+      - name: Build ai-engine (torch CPU)
+        uses: docker/build-push-action@v6
+        with:
+          context: ai-engine
+          push: false
+          build-args: |
+            TORCH_VARIANT=cpu
+          cache-from: type=gha,scope=ai-engine
+          cache-to: type=gha,mode=max,scope=ai-engine
