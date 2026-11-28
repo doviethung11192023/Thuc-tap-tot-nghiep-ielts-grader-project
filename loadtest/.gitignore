@@ -1,0 +1,6 @@
+# Token đăng nhập của tài khoản test và kết quả đo: không bao giờ commit
+.tokens.json
+results/
+*.env
+__pycache__/
+.pytest_cache/
