@@ -7,7 +7,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 import main
-from handlers import grammar_checker
 from services.service_admin import effective_config as ec
 from services.service_admin import service_health as sh
 from services.service_admin.service_test_call import ServiceTestRequest
@@ -39,27 +38,18 @@ def test_local_checks_only_read_module_variables(monkeypatch, settings):
         monkeypatch.setattr(module, "load_model", forbidden)
     monkeypatch.setattr(speech_transcriber, "_get_model", forbidden)
     monkeypatch.setattr(phoneme_recognizer, "_load", forbidden)
-    monkeypatch.setattr(grammar_checker, "_get_tool", forbidden)
 
     monkeypatch.setattr(speech_transcriber, "_model", None)
     monkeypatch.setattr(phoneme_recognizer, "_model", SimpleNamespace(device="cuda"))
-    monkeypatch.setattr(grammar_checker, "_tool", None)
-    monkeypatch.setattr(grammar_checker, "_tool_failed", False)
     monkeypatch.setattr(sh, "_load_failures", {})
     assert sh._check_whisper()["status"] == "not_loaded"
     assert sh._check_phoneme()["status"] == "loaded" and "cuda" in sh._check_phoneme()["detail"]
-    assert sh._check_languagetool()["status"] == "not_initialized"
 
     sh.record_load_failure("whisper", RuntimeError("no gpu"))
     assert sh._check_whisper()["status"] == "error" and "no gpu" in sh._check_whisper()["error"]
     monkeypatch.setattr(speech_transcriber, "_model", SimpleNamespace(model=SimpleNamespace(device="cpu",
                                                                                              compute_type="int8")))
     assert sh._check_whisper()["detail"] == f"{settings.speech_stt_model} · cpu · int8"
-    monkeypatch.setattr(grammar_checker, "_tool_failed", True)
-    assert sh._check_languagetool()["status"] == "unavailable"
-    monkeypatch.setattr(grammar_checker, "_tool_failed", False)
-    monkeypatch.setattr(grammar_checker, "_tool", object())
-    assert sh._check_languagetool()["status"] == "ready"
 
 
 def test_network_checks_run_in_parallel_and_time_out(monkeypatch, settings):

@@ -91,21 +91,6 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     return Settings()
 
-# ── Grammar Checker (D1) ──────────────────────────────────────────────────────
-# LanguageTool rule IDs to suppress — formatting/style rules that generate
-# false positives in IELTS academic writing and must not be fed to the LLM.
-DISABLED_GRAMMAR_RULES: frozenset[str] = frozenset({
-    "WHITESPACE_RULE",
-    "COMMA_PARENTHESIS_WHITESPACE",
-    "EN_QUOTES",
-    "DASH_RULE",
-    "WORD_CONTAINS_UNDERSCORE",
-    "UPPERCASE_SENTENCE_START",
-    "DOUBLE_PUNCTUATION",
-    "ARROWS",
-    "UNLIKELY_OPENING_PUNCTUATION",
-})
-
 # ── IELTS Linking Words (For D2 Dependency Parser) ────────────────────────────
 IELTS_LINKING_WORDS: dict[str, list[str]] = {
     "Addition": ["and", "also", "furthermore", "moreover", "in addition", "additionally", "besides"],

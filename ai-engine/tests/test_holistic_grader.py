@@ -1,13 +1,10 @@
 """One-call grading: parsing, prompt building and flow routing."""
 import asyncio
 import json
-import time
-from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 
 import pytest
 
-from handlers import grammar_checker
 from schemas.llm_output import AgentCriterionOutput, AllAgentOutputs
 from services.writing import grading_pipeline as gp, holistic_grader
 from services.llm import llm_evaluator, prompt_builder
@@ -133,17 +130,3 @@ def test_output_cut_off_by_max_tokens_retries_from_the_original_prompt(monkeypat
     assert asyncio.run(holistic_grader.grade_all_criteria(compiled)).ta.band == 6.0
     assert seen == [1, 1]
 
-
-def test_concurrent_first_calls_start_one_language_tool(monkeypatch):
-    started = []
-
-    def fake_tool(language):
-        started.append(language)
-        time.sleep(0.05)
-        return object()
-
-    monkeypatch.setattr(grammar_checker, "_tool", None)
-    monkeypatch.setattr(grammar_checker.language_tool_python, "LanguageTool", fake_tool)
-    with ThreadPoolExecutor(8) as pool:
-        tools = list(pool.map(lambda _: grammar_checker._get_tool(), range(8)))
-    assert len(started) == 1 and len(set(map(id, tools))) == 1

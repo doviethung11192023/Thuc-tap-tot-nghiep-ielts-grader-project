@@ -32,7 +32,6 @@ def stubbed(monkeypatch):
     seen = {}
     out = AgentCriterionOutput(band=6.0, summary="s")
 
-    monkeypatch.setattr(gp, "check_grammar", lambda processed: [])
     monkeypatch.setattr(gp, "compute_lexical", lambda processed: object())
     monkeypatch.setattr(gp, "get_prompt_manager", lambda: object())
 

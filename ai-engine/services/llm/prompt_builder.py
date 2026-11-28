@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from itertools import groupby
 
 from schemas.tool_output import (
-    ProcessedEssay, GrammarFinding,
+    ProcessedEssay,
     LexicalStatsResult,
 )
 from schemas.task_type import TaskTypeResult
@@ -57,18 +57,9 @@ def _build_lexical_stats(lex: LexicalStatsResult) -> dict:
     }
 
 
-def _build_grammar(findings: list[GrammarFinding]) -> dict:
-    """Serialize GRA tool findings into a JSON-serializable dict."""
-    grammar_errors = [f for f in findings if f.error_type == "GRAMMAR"]
-    spelling_errors = [f for f in findings if f.error_type == "SPELLING"]
-    return {
-        "grammar_signal": {
-            "total_errors": len(grammar_errors)
-        },
-        "spelling_signal": {
-            "total_errors": len(spelling_errors)
-        }
-    }
+# Grammar findings no longer come from a tool (LanguageTool removed 2026-11-29). The deployed prompts still
+# compile a `grammar` variable, so it keeps a neutral value until the owner drops it in a new Langfuse version.
+GRAMMAR_NOT_AVAILABLE = "Not available — assess grammar and spelling directly from the essay."
 
 
 # Prepended to the title for the shared CC / LR / GRA prompts (written for Task 2)
@@ -97,7 +88,6 @@ def task1_title(title: str) -> str:
 def build_criterion_prompts(
     processed: ProcessedEssay,
     task_type: TaskTypeResult,
-    grammar_findings: list[GrammarFinding],
     lex_result: LexicalStatsResult,
     task: WritingTask = "task2",
     visual_description: str = "",
@@ -143,7 +133,7 @@ def build_criterion_prompts(
             "gra",
             title=title,
             essay=indexed_essay,
-            grammar=_build_grammar(grammar_findings),
+            grammar=GRAMMAR_NOT_AVAILABLE,
             **shared,
         ),
     )
@@ -168,11 +158,10 @@ def build_grade_prompt(
     processed: ProcessedEssay,
     essay_type: str,
     ladder: "BandLadder",
-    grammar_findings: list[GrammarFinding],
     lex_result: LexicalStatsResult,
 ) -> CompiledPrompt:
     """One prompt for all four Task 2 criteria; tool metrics are information only."""
-    signals = {"grammar": _build_grammar(grammar_findings), "lexical": _build_lexical_stats(lex_result)}
+    signals = {"grammar": GRAMMAR_NOT_AVAILABLE, "lexical": _build_lexical_stats(lex_result)}
     return get_prompt_manager().get_grade_prompt(
         essay_type=essay_type,
         references=format_references(ladder),

@@ -71,7 +71,6 @@ def stubs(monkeypatch):
     monkeypatch.setattr(pipeline, "get_prompt_manager", lambda: Manager())
     monkeypatch.setattr(pipeline, "generate_part_feedback", fake_parts)
     monkeypatch.setattr(pipeline, "generate_overall", fake_overall)
-    monkeypatch.setattr(pipeline, "check_grammar", lambda processed: [])
     monkeypatch.setattr(pipeline, "compute_lexical", lambda processed: {"ttr": 0.5})
     monkeypatch.setattr(pipeline, "preprocess", lambda essay: essay)
     # the stub answers are short; length ceilings have their own tests

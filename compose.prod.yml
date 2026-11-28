@@ -133,7 +133,7 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    # read_only chưa bật: language-tool-python / spaCy có thể ghi vào ~/.cache. Bật sau khi thử trên image thật.
+    # read_only chưa bật: spaCy có thể ghi vào ~/.cache. Bật sau khi thử trên image thật.
     tmpfs:
       - /tmp
     restart: unless-stopped

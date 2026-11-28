@@ -10,7 +10,7 @@ from app.services.ai_services.secret_redaction import redact_secrets
 LABELS = {
     "ai_engine": "AI engine (chấm bài)", "llm": "LLM (DashScope)", "jev": "Phân loại đề (Jev)",
     "langfuse": "Langfuse (prompt, trace)", "whisper": "Nhận dạng giọng nói (Whisper)",
-    "phoneme": "Nhận dạng âm vị", "languagetool": "Kiểm tra ngữ pháp (LanguageTool)",
+    "phoneme": "Nhận dạng âm vị",
     "config_sync": "Đồng bộ cấu hình từ Core",
 }
 DEPENDENT = [name for name in LABELS if name != "ai_engine"]

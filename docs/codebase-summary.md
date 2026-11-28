@@ -55,7 +55,7 @@ main.py                         app factory: env, logging, lifespan (nạp NLP/s
 serve.py                        chạy uvicorn khi dev
 api/                            grading_routes (/grade, /grade-speaking, /draft-material, /health…), admin_routes (/admin/*, luôn đòi secret), auth (kiểm secret)
 services/                       🔴 chỉ có package, không file rời ở gốc
-├── writing/                    pipeline chấm Writing Task 1/2: phân loại, bài mẫu theo band, key point, tổng hợp, Jev, soạn tài liệu
+├── writing/                    pipeline chấm Writing Task 1/2: phân loại, bài mẫu theo band, key point, tổng hợp, Jev, soạn tài liệu. Bỏ LanguageTool và Java 2026-11-29: LLM tự bắt lỗi chính tả, ngữ pháp
 ├── speaking/                   ASR, phát âm, trần band, phản hồi Speaking
 ├── llm/                        llm_client, prompt_builder, llm_evaluator (dùng chung Writing/Speaking/tutor)
 ├── tutor/                      AI tutor: prompt, chống lộ đáp án, streaming, đo token

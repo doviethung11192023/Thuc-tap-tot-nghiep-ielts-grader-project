@@ -13,7 +13,6 @@ from utils.preprocessor import preprocess
 
 # Real Handlers & Services
 from services.writing.task_type_classifier import classify_task_type
-from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 
 from services.llm.prompt_builder import build_criterion_prompts
@@ -63,10 +62,6 @@ async def main():
     task_type_result = classify_task_type(processed.title)
     print(f"     Task Type: {task_type_result.task_type}")
 
-    print("  -> Running D1 (Grammar/Spell Checker)...")
-    grammar_findings = check_grammar(processed)
-    print(f"     Found {len(grammar_findings)} grammar/spelling issues.")
-
     print("  -> Running D3 (Lexical Stats Engine)...")
     lex_result = compute_lexical(processed)
     print(f"     Lexical density: {lex_result.lexical_density:.3f}, TTR: {lex_result.type_token_ratio:.3f}")
@@ -76,7 +71,6 @@ async def main():
         prompts = build_criterion_prompts(
             processed=processed,
             task_type=task_type_result,
-            grammar_findings=grammar_findings,
             lex_result=lex_result,
         )
     except Exception as e:

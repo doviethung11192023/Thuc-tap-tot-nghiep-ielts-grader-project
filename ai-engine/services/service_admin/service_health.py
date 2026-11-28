@@ -2,7 +2,7 @@
 Health of every service the engine depends on (spec 008 R13, US11).
 
 Network checks (LLM, Jev, Langfuse, Core config) run in parallel with an 8 s timeout each. Local components
-(Whisper, wav2vec2, LanguageTool) are only inspected through their module variables: this module NEVER
+(Whisper, wav2vec2) are only inspected through their module variables: this module NEVER
 loads a model, so a health check can neither be slow nor take GPU memory.
 """
 from __future__ import annotations
@@ -12,7 +12,6 @@ import time
 from datetime import datetime, timezone
 from typing import Awaitable, Callable
 
-from handlers import grammar_checker
 from services.writing import jev_client
 from services.langfuse.client import get_langfuse_client
 from services.llm.llm_client import effective_llm_api_key
@@ -23,7 +22,7 @@ from services.speaking import phoneme_recognizer, speech_transcriber
 from settings.config import get_settings
 
 CHECK_TIMEOUT_SECONDS = 8.0
-SERVICES = ("llm", "jev", "langfuse", "whisper", "phoneme", "languagetool", "config_sync")
+SERVICES = ("llm", "jev", "langfuse", "whisper", "phoneme", "config_sync")
 
 # Startup load failures of local models (main.lifespan records them; a later successful load clears them)
 _load_failures: dict[str, str] = {}
@@ -120,12 +119,6 @@ def _check_phoneme() -> dict:
                    error=failure)
 
 
-def _check_languagetool() -> dict:
-    if grammar_checker._tool_failed:
-        return _result("languagetool", "unavailable")
-    return _result("languagetool", "ready" if grammar_checker._tool is not None else "not_initialized")
-
-
 async def _timed(service: str, check: Callable[[], Awaitable[dict]]) -> dict:
     try:
         return await asyncio.wait_for(check(), CHECK_TIMEOUT_SECONDS)
@@ -143,7 +136,6 @@ async def check_health(service: str = "all") -> dict:
     checks: dict[str, Callable[[], Awaitable[dict]]] = {
         "llm": _check_llm, "jev": _check_jev, "langfuse": _check_langfuse, "config_sync": _check_config_sync,
         "whisper": lambda: _local(_check_whisper), "phoneme": lambda: _local(_check_phoneme),
-        "languagetool": lambda: _local(_check_languagetool),
     }
     wanted = SERVICES if service == "all" else (service,)
     results = await asyncio.gather(*(_timed(name, checks[name]) for name in wanted))

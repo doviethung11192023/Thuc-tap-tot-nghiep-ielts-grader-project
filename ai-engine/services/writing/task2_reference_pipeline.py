@@ -11,7 +11,6 @@ import json
 import logging
 import time
 
-from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from schemas.input import EssayInput
 from services.writing.holistic_grader import grade_all_criteria
@@ -28,14 +27,13 @@ logger = logging.getLogger(__name__)
 async def run_task2_reference_pipeline(title: str, essay: str) -> dict:
     started = time.perf_counter()
     processed = await asyncio.to_thread(preprocess, EssayInput(title=title, essay=essay))
-    task_type, grammar_findings, lex_result = await asyncio.gather(
+    task_type, lex_result = await asyncio.gather(
         asyncio.to_thread(classify_task_type, processed.title),
-        asyncio.to_thread(check_grammar, processed),
         asyncio.to_thread(compute_lexical, processed),
     )
     ladder = await asyncio.to_thread(select_ladder, task_type.task_type, essay)
     compiled = await asyncio.to_thread(
-        build_grade_prompt, processed, task_type.task_type, ladder, grammar_findings, lex_result
+        build_grade_prompt, processed, task_type.task_type, ladder, lex_result
     )
 
     results = await grade_all_criteria(compiled)

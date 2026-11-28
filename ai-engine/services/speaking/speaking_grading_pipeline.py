@@ -13,12 +13,11 @@ import logging
 import time
 from dataclasses import dataclass
 
-from handlers.grammar_checker import check as check_grammar
 from handlers.lexical_stats import compute as compute_lexical
 from schemas.llm_output import AgentCriterionOutput
 from schemas.input import EssayInput
 from services.llm.llm_evaluator import evaluate_criterion
-from services.llm.prompt_builder import get_prompt_manager
+from services.llm.prompt_builder import GRAMMAR_NOT_AVAILABLE, get_prompt_manager
 from services.speaking.answer_analysis import (
     AnswerAnalysis, analyze_answer, combine_comparison, combine_metrics, combine_quality, mean_word_confidence,
 )
@@ -71,7 +70,7 @@ def _question_and_answer_transcript(answers: list[AnswerAnalysis],
 
 
 def _text_without_fillers(answers: list[AnswerAnalysis]) -> str:
-    """Grammar and lexical tools read language; fillers are fluency evidence and already counted."""
+    """The lexical tool reads language; fillers are fluency evidence and already counted."""
     sentences = []
     for answer in answers:
         words = [w.text for w in answer.transcript.words if w.text.strip(" ,.?!").lower() not in _FILLER_WORDS]
@@ -155,8 +154,7 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
 
     plain_text = _text_without_fillers(spoken)
     processed = await asyncio.to_thread(preprocess, EssayInput(title=title, essay=plain_text))
-    grammar, lexical = await asyncio.gather(asyncio.to_thread(check_grammar, processed),
-                                            asyncio.to_thread(compute_lexical, processed))
+    lexical = await asyncio.to_thread(compute_lexical, processed)
     pronunciation_evidence = {**assessment.as_dict(), "words_possibly_mispronounced": weak_words}
     # Part reports read only the answers, so they run beside the criteria instead of after them
     parts_task = asyncio.create_task(generate_part_feedback(title, [
@@ -167,7 +165,7 @@ async def run_speaking_pipeline(title: str, inputs: list[SpeakingAnswerInput],
         (fc_full, fc_v), (lr_full, lr_v), (gra_full, gra_v), (pr, pr_v) = await asyncio.gather(
             _criterion_with_evidence("fc", title, qa_transcript, word_count, speech_metrics=json.dumps(metrics)),
             _criterion_with_evidence("lr", title, transcript, word_count, lexical_stats=str(lexical)),
-            _criterion_with_evidence("gra", title, transcript, word_count, grammar=str(grammar)),
+            _criterion_with_evidence("gra", title, transcript, word_count, grammar=GRAMMAR_NOT_AVAILABLE),
             _criterion("pr", title, transcript, word_count,
                        pronunciation_assessment=json.dumps(_evidence_for_llm(pronunciation_evidence),
                                                            ensure_ascii=False),
