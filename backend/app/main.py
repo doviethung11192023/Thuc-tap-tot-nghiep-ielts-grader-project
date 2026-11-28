@@ -6,6 +6,7 @@ from arq import create_pool
 from arq.connections import RedisSettings
 from app.core.config import settings
 from app.core.domain_errors import DomainError
+from app.core.internal_path_guard import BlockInternalFromInternetMiddleware
 from postgrest.exceptions import APIError
 
 import logging
@@ -75,6 +76,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Đăng ký sau cùng nên là lớp ngoài cùng: request internal từ Internet bị chặn trước mọi xử lý khác
+app.add_middleware(BlockInternalFromInternetMiddleware)
 
 @app.get("/health")
 async def health_check():
